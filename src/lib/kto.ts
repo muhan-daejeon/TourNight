@@ -36,7 +36,7 @@ const MOCK_NIGHT_SPOTS: NightSpot[] = [
     addr: "대전광역시 유성구 도룡동",
     mapX: 127.3888,
     mapY: 36.3691,
-    imageUrl: null,
+    imageUrl: "/spots/expo-bridge.jpg", // Wikimedia Commons CC0
     category: "city",
   },
   {

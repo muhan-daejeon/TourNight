@@ -20,7 +20,7 @@ export default async function HomePage({
     <div>
       {/* 히어로 — 밤하늘 (사진 로드 전에는 night-hero 그라데이션이 폴백) */}
       <section className="night-hero relative overflow-hidden">
-        {/* 출처: Unsplash (무료 상업적 사용) — 추후 대전 실제 야경(공공누리)으로 교체 검토 */}
+        {/* 대전 갑천 야경 — Wikimedia Commons "Night in Daejeon 01" (CC0, 퍼블릭 도메인) */}
         <Image
           src="/hero-night.jpg"
           alt=""
