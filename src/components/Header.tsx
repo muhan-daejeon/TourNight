@@ -6,22 +6,26 @@ export default function Header() {
   const t = useTranslations();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-        <Link href="/" className="text-lg font-bold tracking-tight">
-          🌙 {t("site.title")}
+    <header className="sticky top-0 z-50 border-b border-slate-800/70 bg-slate-950/80 backdrop-blur">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+        <Link href="/" className="flex shrink-0 items-center gap-1.5 text-lg font-bold tracking-tight">
+          <span className="text-amber-300">🌙</span>
+          <span>{t("site.title")}</span>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm text-slate-300 sm:flex">
-          <Link href="/" className="hover:text-white">
+        <nav className="flex items-center gap-4 overflow-x-auto text-sm text-slate-300 sm:gap-6">
+          <Link href="/" className="shrink-0 transition hover:text-amber-300">
             {t("nav.spots")}
           </Link>
-          <span className="cursor-not-allowed text-slate-600">
-            {t("nav.courses")}
-          </span>
-          <Link href="/etiquette" className="hover:text-white">
+          <Link
+            href="/etiquette"
+            className="shrink-0 transition hover:text-amber-300"
+          >
             {t("nav.etiquette")}
           </Link>
-          <span className="cursor-not-allowed text-slate-600">
+          <span className="shrink-0 cursor-not-allowed text-slate-600">
+            {t("nav.courses")}
+          </span>
+          <span className="hidden shrink-0 cursor-not-allowed text-slate-600 sm:inline">
             {t("nav.community")}
           </span>
         </nav>

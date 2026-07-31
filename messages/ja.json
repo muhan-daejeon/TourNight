@@ -15,7 +15,16 @@
     "heroSubtitle": "科学都市・大田の夜景、星空、祭りをひとつの場所で",
     "spotsSection": "今夜行きたい場所",
     "viewDetail": "詳しく見る",
-    "mapSection": "夜の名所マップ"
+    "mapSection": "夜の名所マップ",
+    "categories": {
+      "all": "すべて",
+      "science": "科学",
+      "nature": "自然",
+      "festival": "祭り",
+      "city": "都心"
+    },
+    "ctaSpots": "夜の名所を見る",
+    "ctaGuide": "文化ガイド"
   },
   "footer": {
     "notice": "本サービスは2026観光データ活用コンテストの出品作です。"

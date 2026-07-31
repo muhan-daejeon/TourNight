@@ -15,7 +15,16 @@
     "heroSubtitle": "과학도시 대전의 야경, 별빛, 축제를 한곳에서",
     "spotsSection": "오늘 밤 가볼 만한 곳",
     "viewDetail": "자세히 보기",
-    "mapSection": "야간 명소 지도"
+    "mapSection": "야간 명소 지도",
+    "categories": {
+      "all": "전체",
+      "science": "과학",
+      "nature": "자연",
+      "festival": "축제",
+      "city": "도심"
+    },
+    "ctaSpots": "야간 명소 보기",
+    "ctaGuide": "문화 가이드"
   },
   "footer": {
     "notice": "본 서비스는 2026 관광데이터 활용 공모전 출품작입니다."

@@ -15,7 +15,16 @@
     "heroSubtitle": "科学之城大田的夜景、星空与庆典，尽在一处",
     "spotsSection": "今晚值得一去的地方",
     "viewDetail": "查看详情",
-    "mapSection": "夜间景点地图"
+    "mapSection": "夜间景点地图",
+    "categories": {
+      "all": "全部",
+      "science": "科学",
+      "nature": "自然",
+      "festival": "庆典",
+      "city": "市区"
+    },
+    "ctaSpots": "探索夜间景点",
+    "ctaGuide": "文化指南"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。"
