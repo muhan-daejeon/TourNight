@@ -4,7 +4,7 @@ export default function Footer() {
   const t = useTranslations();
 
   return (
-    <footer className="border-t border-slate-800/70 py-8 text-center">
+    <footer className="border-t border-white/[0.06] py-8 text-center">
       <p className="text-sm font-semibold text-slate-400">
         🌙 {t("site.title")} — {t("site.tagline")}
       </p>

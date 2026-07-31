@@ -43,10 +43,10 @@ export default function EtiquetteTopics() {
           <button
             key={id}
             onClick={() => loadTopic(id)}
-            className={`rounded-xl border p-4 text-center text-sm transition ${
+            className={`rounded-2xl border p-4 text-center text-sm backdrop-blur transition ${
               selected === id
-                ? "border-amber-400 bg-slate-800 text-white"
-                : "border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-600"
+                ? "border-amber-400/60 bg-amber-400/10 text-white shadow-[0_0_20px_rgba(251,191,36,0.15)]"
+                : "border-white/10 bg-white/5 text-slate-300 hover:-translate-y-0.5 hover:border-white/25 hover:text-white"
             }`}
           >
             <div className="mb-2 text-2xl">{TOPIC_ICONS[id]}</div>
@@ -55,7 +55,7 @@ export default function EtiquetteTopics() {
         ))}
       </div>
 
-      <div className="mt-6 min-h-32 rounded-xl border border-slate-800 bg-slate-900 p-6">
+      <div className="mt-6 min-h-32 rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
         {status === "loading" && (
           <p className="animate-pulse text-slate-400">{t("loading")}</p>
         )}

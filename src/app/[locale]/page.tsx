@@ -12,31 +12,37 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("home");
+  const site = await getTranslations("site");
   const spots = await fetchNightSpots();
 
   return (
     <div>
       {/* 히어로 — 밤하늘 */}
       <section className="night-hero relative overflow-hidden">
-        <div className="mx-auto max-w-5xl px-4 py-24 text-center sm:py-32">
-          <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl">
-            <span className="bg-gradient-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+        <div className="moon-glow" />
+        <div className="relative mx-auto max-w-5xl px-4 py-28 text-center sm:py-40">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-wide text-slate-300 backdrop-blur">
+            <span className="text-amber-300">🌙</span>
+            {site("description")}
+          </span>
+          <h1 className="mt-8 text-4xl font-extrabold leading-[1.15] tracking-tight sm:text-6xl">
+            <span className="bg-gradient-to-b from-white via-slate-100 to-slate-500 bg-clip-text text-transparent">
               {t("heroTitle")}
             </span>
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base text-slate-400 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">
             {t("heroSubtitle")}
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <a
               href="#spots"
-              className="rounded-full bg-amber-400 px-6 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
+              className="rounded-full bg-amber-400 px-7 py-3 text-sm font-bold text-slate-950 shadow-[0_0_24px_rgba(251,191,36,0.35)] transition hover:bg-amber-300 hover:shadow-[0_0_36px_rgba(251,191,36,0.5)]"
             >
               {t("ctaSpots")}
             </a>
             <Link
               href="/etiquette"
-              className="rounded-full border border-slate-600 px-6 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-slate-400 hover:text-white"
+              className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-sm font-semibold text-slate-200 backdrop-blur transition hover:border-white/30 hover:text-white"
             >
               {t("ctaGuide")}
             </Link>
@@ -46,14 +52,20 @@ export default async function HomePage({
 
       <div className="mx-auto max-w-5xl px-4">
         {/* 지도 */}
-        <section className="pt-4 pb-12">
-          <h2 className="mb-5 text-xl font-bold">{t("mapSection")}</h2>
+        <section className="pt-16 pb-14">
+          <p className="overline-label">Map</p>
+          <h2 className="mt-2 mb-6 text-2xl font-bold tracking-tight">
+            {t("mapSection")}
+          </h2>
           <NightMap spots={spots} />
         </section>
 
         {/* 야간 명소 목록 */}
-        <section id="spots" className="scroll-mt-20 pb-20">
-          <h2 className="mb-5 text-xl font-bold">{t("spotsSection")}</h2>
+        <section id="spots" className="scroll-mt-20 pb-24">
+          <p className="overline-label">Tonight</p>
+          <h2 className="mt-2 mb-6 text-2xl font-bold tracking-tight">
+            {t("spotsSection")}
+          </h2>
           <SpotList spots={spots} />
         </section>
       </div>

@@ -38,8 +38,8 @@ export default function SpotList({ spots }: { spots: NightSpot[] }) {
             onClick={() => setCategory(c)}
             className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition ${
               category === c
-                ? "border-amber-400 bg-amber-400 text-slate-950"
-                : "border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500"
+                ? "border-amber-400 bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.3)]"
+                : "border-white/10 bg-white/5 text-slate-300 backdrop-blur hover:border-white/25 hover:text-white"
             }`}
           >
             {c !== "all" && (
@@ -55,9 +55,9 @@ export default function SpotList({ spots }: { spots: NightSpot[] }) {
         {filtered.map((spot) => (
           <article
             key={spot.contentId}
-            className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 transition duration-200 hover:-translate-y-1 hover:border-slate-600 hover:shadow-lg hover:shadow-slate-950/50"
+            className="glass-card group overflow-hidden rounded-2xl"
           >
-            <div className="relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-b from-slate-800 to-slate-900">
+            <div className="relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-b from-slate-800/60 to-slate-900/80">
               {spot.imageUrl ? (
                 <Image
                   src={spot.imageUrl}
