@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import Image from "next/image";
 import { MoonStar } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { fetchNightSpots } from "@/lib/kto";
@@ -17,9 +18,19 @@ export default async function HomePage({
 
   return (
     <div>
-      {/* 히어로 — 밤하늘 */}
+      {/* 히어로 — 밤하늘 (사진 로드 전에는 night-hero 그라데이션이 폴백) */}
       <section className="night-hero relative overflow-hidden">
-        <div className="moon-glow" />
+        {/* 출처: Unsplash (무료 상업적 사용) — 추후 대전 실제 야경(공공누리)으로 교체 검토 */}
+        <Image
+          src="/hero-night.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        {/* 텍스트 대비 확보 + 아래 섹션과 자연스러운 연결 */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/35 to-slate-950" />
         <div className="relative mx-auto max-w-5xl px-4 pt-20 pb-16 text-center sm:pt-28 sm:pb-24">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-wide text-slate-300 backdrop-blur">
             <MoonStar size={13} className="text-amber-300" />
