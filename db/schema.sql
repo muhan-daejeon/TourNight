@@ -16,3 +16,15 @@ create table if not exists night_spots (
 );
 
 create index if not exists night_spots_geom_idx on night_spots using gist (geom);
+
+-- 야간 운영 검증 플래그 (TourAPI usetime이 비정형이라 자동 판별 불가 → LLM 1차 분류 + 수동 검수)
+alter table night_spots add column if not exists night_verified boolean not null default false;
+
+-- 에티켓 가이드 사전생성 캐시 (심사/데모 때 Gemini 실시간 의존 제거)
+create table if not exists etiquette_cache (
+  topic_id text not null,
+  locale text not null,
+  content text not null,
+  updated_at timestamptz not null default now(),
+  primary key (topic_id, locale)
+);

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start -p 3100",
     "lint": "eslint",
-    "db:setup": "node --env-file=.env.local db/setup.mjs"
+    "db:setup": "node --env-file=.env.local db/setup.mjs",
+    "etiquette:pregen": "node --env-file=.env.local db/pregen-etiquette.mjs"
   },
   "dependencies": {
     "next": "16.2.12",

@@ -8,3 +8,6 @@ insert into night_spots (content_id, title, addr, category, geom) values
   ('mock-5', '식장산 전망대', '대전광역시 동구 세천동', 'nature', st_setsrid(st_makepoint(127.4967, 36.3149), 4326)),
   ('mock-6', '대전0시축제 (중앙로 일원)', '대전광역시 중구 중앙로', 'festival', st_setsrid(st_makepoint(127.4255, 36.3282), 4326))
 on conflict (content_id) do nothing;
+
+-- 시드 명소는 야간 검증 완료 처리
+update night_spots set night_verified = true where content_id like 'mock-%';

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateEtiquette, ETIQUETTE_TOPICS } from "@/lib/gemini";
+import { sql } from "@/lib/db";
 import { routing } from "@/i18n/routing";
-
-// 같은 주제·언어 재요청 시 Gemini 호출을 아끼기 위한 서버 캐시 (1시간)
-const cache = new Map<string, { text: string; expires: number }>();
 
 export async function GET(request: NextRequest) {
   const topicId = request.nextUrl.searchParams.get("topic") ?? "";
@@ -13,15 +11,24 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "invalid params" }, { status: 400 });
   }
 
-  const key = `${topicId}:${locale}`;
-  const cached = cache.get(key);
-  if (cached && cached.expires > Date.now()) {
-    return NextResponse.json({ text: cached.text });
+  // 1) 사전생성된 DB 캐시 우선 (심사/데모 안정성 — Gemini 실시간 의존 제거)
+  const cached = await sql<{ content: string }[]>`
+    select content from etiquette_cache
+    where topic_id = ${topicId} and locale = ${locale}
+  `;
+  if (cached.length > 0) {
+    return NextResponse.json({ text: cached[0].content });
   }
 
+  // 2) 캐시 미스일 때만 실시간 생성 후 저장
   try {
     const text = await generateEtiquette(topicId, locale);
-    cache.set(key, { text, expires: Date.now() + 60 * 60 * 1000 });
+    await sql`
+      insert into etiquette_cache (topic_id, locale, content)
+      values (${topicId}, ${locale}, ${text})
+      on conflict (topic_id, locale)
+      do update set content = excluded.content, updated_at = now()
+    `;
     return NextResponse.json({ text });
   } catch {
     return NextResponse.json({ error: "generation failed" }, { status: 502 });

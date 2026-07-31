@@ -79,9 +79,10 @@ export default function NightMap({ spots }: { spots: MapSpot[] }) {
   }, [spots]);
 
   return (
-    <div
-      ref={containerRef}
-      className="h-80 w-full rounded-xl border border-slate-800 bg-slate-900 sm:h-96"
-    />
+    <div className="relative overflow-hidden rounded-xl border border-slate-800">
+      <div ref={containerRef} className="h-80 w-full bg-slate-900 sm:h-96" />
+      {/* 야간 테마 톤 유지용 다크 오버레이 (지도 조작은 그대로 가능) */}
+      <div className="pointer-events-none absolute inset-0 z-10 bg-slate-950/20" />
+    </div>
   );
 }
