@@ -18,9 +18,9 @@ export default function Header() {
           <span className="cursor-not-allowed text-slate-600">
             {t("nav.courses")}
           </span>
-          <span className="cursor-not-allowed text-slate-600">
+          <Link href="/etiquette" className="hover:text-white">
             {t("nav.etiquette")}
-          </span>
+          </Link>
           <span className="cursor-not-allowed text-slate-600">
             {t("nav.community")}
           </span>

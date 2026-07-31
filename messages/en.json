@@ -14,9 +14,22 @@
     "heroTitle": "Daejeon Shines Brighter at Night",
     "heroSubtitle": "Night views, starlight, and festivals of Korea's science city — all in one place",
     "spotsSection": "Where to Go Tonight",
-    "viewDetail": "View details"
+    "viewDetail": "View details",
+    "mapSection": "Night Spots Map"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest."
+  },
+  "etiquette": {
+    "title": "Culture Guide",
+    "subtitle": "Good things to know before enjoying Daejeon at night",
+    "loading": "Generating…",
+    "error": "Please try again later.",
+    "topics": {
+      "pojangmacha": "How to enjoy pojangmacha (street bars)",
+      "festival": "Enjoying Daejeon 0 O'Clock Festival",
+      "transport": "Late-night transportation tips",
+      "dining": "Restaurant & bar etiquette"
+    }
   }
 }

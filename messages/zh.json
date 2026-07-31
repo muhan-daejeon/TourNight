@@ -14,9 +14,22 @@
     "heroTitle": "大田的夜晚比白天更璀璨",
     "heroSubtitle": "科学之城大田的夜景、星空与庆典，尽在一处",
     "spotsSection": "今晚值得一去的地方",
-    "viewDetail": "查看详情"
+    "viewDetail": "查看详情",
+    "mapSection": "夜间景点地图"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。"
+  },
+  "etiquette": {
+    "title": "文化指南",
+    "subtitle": "畅游大田之夜前值得了解的事",
+    "loading": "生成中…",
+    "error": "请稍后再试。",
+    "topics": {
+      "pojangmacha": "路边摊（布帐马车）使用指南",
+      "festival": "大田0时庆典游玩攻略",
+      "transport": "深夜出行小贴士",
+      "dining": "餐厅酒馆礼仪"
+    }
   }
 }

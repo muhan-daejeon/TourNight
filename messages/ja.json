@@ -14,9 +14,22 @@
     "heroTitle": "大田の夜は昼より輝く",
     "heroSubtitle": "科学都市・大田の夜景、星空、祭りをひとつの場所で",
     "spotsSection": "今夜行きたい場所",
-    "viewDetail": "詳しく見る"
+    "viewDetail": "詳しく見る",
+    "mapSection": "夜の名所マップ"
   },
   "footer": {
     "notice": "本サービスは2026観光データ活用コンテストの出品作です。"
+  },
+  "etiquette": {
+    "title": "文化ガイド",
+    "subtitle": "大田の夜を楽しむ前に知っておきたいこと",
+    "loading": "生成中…",
+    "error": "しばらくしてからもう一度お試しください。",
+    "topics": {
+      "pojangmacha": "屋台（ポジャンマチャ）の楽しみ方",
+      "festival": "大田0時祭りの楽しみ方",
+      "transport": "深夜の移動のコツ",
+      "dining": "飲食店でのマナー"
+    }
   }
 }

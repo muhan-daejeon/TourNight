@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { fetchNightSpots } from "@/lib/kto";
+import NightMap from "@/components/NightMap";
 
 const CATEGORY_ICON: Record<string, string> = {
   science: "🔭",
@@ -27,6 +28,12 @@ export default async function HomePage({
           {t("heroTitle")}
         </h1>
         <p className="mt-4 text-slate-400">{t("heroSubtitle")}</p>
+      </section>
+
+      {/* 지도 */}
+      <section className="pb-12">
+        <h2 className="mb-6 text-xl font-bold">{t("mapSection")}</h2>
+        <NightMap spots={spots} />
       </section>
 
       {/* 야간 명소 목록 */}
