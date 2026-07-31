@@ -2,14 +2,21 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import {
+  Soup,
+  Sparkles,
+  CarTaxiFront,
+  Beer,
+  type LucideIcon,
+} from "lucide-react";
 
 const TOPIC_IDS = ["pojangmacha", "festival", "transport", "dining"] as const;
 
-const TOPIC_ICONS: Record<string, string> = {
-  pojangmacha: "🍢",
-  festival: "🎆",
-  transport: "🚕",
-  dining: "🍻",
+const TOPIC_ICONS: Record<string, LucideIcon> = {
+  pojangmacha: Soup,
+  festival: Sparkles,
+  transport: CarTaxiFront,
+  dining: Beer,
 };
 
 export default function EtiquetteTopics() {
@@ -39,20 +46,27 @@ export default function EtiquetteTopics() {
   return (
     <div className="mt-8">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {TOPIC_IDS.map((id) => (
-          <button
-            key={id}
-            onClick={() => loadTopic(id)}
-            className={`rounded-2xl border p-4 text-center text-sm backdrop-blur transition ${
-              selected === id
-                ? "border-amber-400/60 bg-amber-400/10 text-white shadow-[0_0_20px_rgba(251,191,36,0.15)]"
-                : "border-white/10 bg-white/5 text-slate-300 hover:-translate-y-0.5 hover:border-white/25 hover:text-white"
-            }`}
-          >
-            <div className="mb-2 text-2xl">{TOPIC_ICONS[id]}</div>
-            {t(`topics.${id}`)}
-          </button>
-        ))}
+        {TOPIC_IDS.map((id) => {
+          const Icon = TOPIC_ICONS[id];
+          return (
+            <button
+              key={id}
+              onClick={() => loadTopic(id)}
+              className={`rounded-2xl border p-4 text-center text-sm backdrop-blur transition ${
+                selected === id
+                  ? "border-amber-400/60 bg-amber-400/10 text-white shadow-[0_0_20px_rgba(251,191,36,0.15)]"
+                  : "border-white/10 bg-white/5 text-slate-300 hover:-translate-y-0.5 hover:border-white/25 hover:text-white"
+              }`}
+            >
+              <Icon
+                size={22}
+                strokeWidth={1.8}
+                className={`mx-auto mb-2 ${selected === id ? "text-amber-300" : "text-slate-400"}`}
+              />
+              {t(`topics.${id}`)}
+            </button>
+          );
+        })}
       </div>
 
       <div className="mt-6 min-h-32 rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">

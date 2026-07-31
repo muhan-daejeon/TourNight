@@ -58,10 +58,20 @@ async function generateWithRetry(topic, language) {
 }
 
 const sql = postgres(process.env.DATABASE_URL, { prepare: false });
+const force = process.argv.includes("--force"); // --force면 기존 것도 재생성
 let ok = 0;
 try {
+  const existing = new Set(
+    (await sql`select topic_id, locale from etiquette_cache`).map(
+      (r) => `${r.topic_id}:${r.locale}`,
+    ),
+  );
   for (const [topicId, topic] of Object.entries(TOPICS)) {
     for (const [locale, language] of Object.entries(LOCALES)) {
+      if (!force && existing.has(`${topicId}:${locale}`)) {
+        ok += 1;
+        continue;
+      }
       const content = await generateWithRetry(topic, language);
       await sleep(7000);
       await sql`

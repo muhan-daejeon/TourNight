@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { MoonStar } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { fetchNightSpots } from "@/lib/kto";
-import NightMap from "@/components/NightMap";
-import SpotList from "@/components/SpotList";
+import SpotExplorer from "@/components/SpotExplorer";
 
 export default async function HomePage({
   params,
@@ -20,20 +20,20 @@ export default async function HomePage({
       {/* 히어로 — 밤하늘 */}
       <section className="night-hero relative overflow-hidden">
         <div className="moon-glow" />
-        <div className="relative mx-auto max-w-5xl px-4 py-28 text-center sm:py-40">
+        <div className="relative mx-auto max-w-5xl px-4 pt-20 pb-16 text-center sm:pt-28 sm:pb-24">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-wide text-slate-300 backdrop-blur">
-            <span className="text-amber-300">🌙</span>
+            <MoonStar size={13} className="text-amber-300" />
             {site("description")}
           </span>
-          <h1 className="mt-8 text-4xl font-extrabold leading-[1.15] tracking-tight sm:text-6xl">
+          <h1 className="mx-auto mt-7 max-w-3xl text-4xl font-extrabold leading-[1.2] tracking-tight sm:text-5xl">
             <span className="bg-gradient-to-b from-white via-slate-100 to-slate-500 bg-clip-text text-transparent">
               {t("heroTitle")}
             </span>
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">
+          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">
             {t("heroSubtitle")}
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
               href="#spots"
               className="rounded-full bg-amber-400 px-7 py-3 text-sm font-bold text-slate-950 shadow-[0_0_24px_rgba(251,191,36,0.35)] transition hover:bg-amber-300 hover:shadow-[0_0_36px_rgba(251,191,36,0.5)]"
@@ -50,23 +50,14 @@ export default async function HomePage({
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-4">
-        {/* 지도 */}
-        <section className="pt-16 pb-14">
-          <p className="overline-label">Map</p>
-          <h2 className="mt-2 mb-6 text-2xl font-bold tracking-tight">
-            {t("mapSection")}
-          </h2>
-          <NightMap spots={spots} />
-        </section>
-
-        {/* 야간 명소 목록 */}
-        <section id="spots" className="scroll-mt-20 pb-24">
+      {/* 야간 명소 탐색 — 리스트 + 지도 */}
+      <div className="mx-auto max-w-6xl px-4">
+        <section id="spots" className="scroll-mt-20 pt-14 pb-24">
           <p className="overline-label">Tonight</p>
           <h2 className="mt-2 mb-6 text-2xl font-bold tracking-tight">
             {t("spotsSection")}
           </h2>
-          <SpotList spots={spots} />
+          <SpotExplorer spots={spots} />
         </section>
       </div>
     </div>
