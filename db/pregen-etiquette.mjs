@@ -2,7 +2,7 @@
 // 사용법: npm run etiquette:pregen  (프롬프트나 주제 수정 시 재실행하면 덮어씀)
 import postgres from "postgres";
 
-const MODEL = "gemini-flash-latest";
+const MODEL = process.env.GEMINI_MODEL || "gemini-flash-latest";
 const BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 
 const TOPICS = {

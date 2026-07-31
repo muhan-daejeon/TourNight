@@ -69,46 +69,47 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
       </div>
 
       {/* 리스트 + 고정 지도 분할 뷰 */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_440px]">
-        <div className="order-2 flex flex-col gap-3 lg:order-1">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_560px]">
+        <div className="order-2 flex flex-col gap-2.5 lg:order-1">
           {filtered.map((spot) => {
             const Icon = CATEGORY_ICON[spot.category];
             return (
               <article
                 key={spot.contentId}
-                className="glass-card group flex cursor-pointer items-center gap-4 rounded-2xl p-3"
+                className="glass-card group flex cursor-pointer items-center gap-3 rounded-xl p-2.5"
               >
                 <div
-                  className={`relative flex size-[84px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${CATEGORY_SCENE[spot.category]}`}
+                  className={`relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br ${CATEGORY_SCENE[spot.category]}`}
                 >
                   {spot.imageUrl ? (
                     <Image
                       src={spot.imageUrl}
                       alt={spot.title}
                       fill
-                      sizes="84px"
+                      sizes="56px"
                       className="object-cover"
                     />
                   ) : (
                     <Icon
-                      size={28}
+                      size={22}
                       strokeWidth={1.5}
                       className="text-white/30"
                     />
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p
-                    className={`flex items-center gap-1 text-xs font-semibold ${CATEGORY_TEXT[spot.category]}`}
-                  >
-                    <Icon size={12} strokeWidth={2.2} />
-                    {t(`categories.${spot.category}`)}
-                  </p>
-                  <h3 className="mt-1 truncate font-semibold text-slate-100 group-hover:text-amber-300">
+                  <h3 className="truncate text-[15px] font-semibold text-slate-100 group-hover:text-amber-300">
                     {spot.title}
                   </h3>
-                  <p className="mt-0.5 truncate text-sm text-slate-500">
-                    {spot.addr}
+                  <p className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-slate-500">
+                    <span
+                      className={`flex items-center gap-1 font-medium ${CATEGORY_TEXT[spot.category]}`}
+                    >
+                      <Icon size={11} strokeWidth={2.2} />
+                      {t(`categories.${spot.category}`)}
+                    </span>
+                    <span className="text-slate-700">·</span>
+                    <span className="truncate">{spot.addr}</span>
                   </p>
                 </div>
                 <ChevronRight
@@ -120,7 +121,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
           })}
         </div>
 
-        <div className="order-1 h-72 lg:order-2 lg:sticky lg:top-20 lg:h-[540px]">
+        <div className="order-1 h-80 lg:order-2 lg:sticky lg:top-20 lg:h-[620px]">
           <NightMap spots={spots} activeCategory={category} />
         </div>
       </div>
