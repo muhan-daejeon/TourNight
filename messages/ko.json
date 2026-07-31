@@ -1,0 +1,22 @@
+{
+  "site": {
+    "title": "투어나잇",
+    "tagline": "대전의 밤을 여행하다",
+    "description": "과학, 자연, 그리고 밤 — 대전 야간관광 통합 안내"
+  },
+  "nav": {
+    "spots": "야간 명소",
+    "courses": "추천 코스",
+    "etiquette": "문화 가이드",
+    "community": "커뮤니티"
+  },
+  "home": {
+    "heroTitle": "대전의 밤은 낮보다 빛난다",
+    "heroSubtitle": "과학도시 대전의 야경, 별빛, 축제를 한곳에서",
+    "spotsSection": "오늘 밤 가볼 만한 곳",
+    "viewDetail": "자세히 보기"
+  },
+  "footer": {
+    "notice": "본 서비스는 2026 관광데이터 활용 공모전 출품작입니다."
+  }
+}

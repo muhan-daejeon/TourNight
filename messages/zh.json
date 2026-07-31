@@ -1,0 +1,22 @@
+{
+  "site": {
+    "title": "夜游大田",
+    "tagline": "畅游大田之夜",
+    "description": "科学、自然与夜晚 — 大田夜间观光综合指南"
+  },
+  "nav": {
+    "spots": "夜间景点",
+    "courses": "推荐路线",
+    "etiquette": "文化指南",
+    "community": "社区"
+  },
+  "home": {
+    "heroTitle": "大田的夜晚比白天更璀璨",
+    "heroSubtitle": "科学之城大田的夜景、星空与庆典，尽在一处",
+    "spotsSection": "今晚值得一去的地方",
+    "viewDetail": "查看详情"
+  },
+  "footer": {
+    "notice": "本服务为2026观光数据应用大赛参赛作品。"
+  }
+}

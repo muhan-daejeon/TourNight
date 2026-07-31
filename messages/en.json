@@ -1,0 +1,22 @@
+{
+  "site": {
+    "title": "TourNight",
+    "tagline": "Travel the Night of Daejeon",
+    "description": "Science, nature, and night — your guide to Daejeon after dark"
+  },
+  "nav": {
+    "spots": "Night Spots",
+    "courses": "Courses",
+    "etiquette": "Culture Guide",
+    "community": "Community"
+  },
+  "home": {
+    "heroTitle": "Daejeon Shines Brighter at Night",
+    "heroSubtitle": "Night views, starlight, and festivals of Korea's science city — all in one place",
+    "spotsSection": "Where to Go Tonight",
+    "viewDetail": "View details"
+  },
+  "footer": {
+    "notice": "This service is an entry for the 2026 Tourism Data Contest."
+  }
+}

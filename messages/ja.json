@@ -1,0 +1,22 @@
+{
+  "site": {
+    "title": "ツアーナイト",
+    "tagline": "大田の夜を旅する",
+    "description": "科学と自然、そして夜 — 大田ナイトツアー総合ガイド"
+  },
+  "nav": {
+    "spots": "夜の名所",
+    "courses": "おすすめコース",
+    "etiquette": "文化ガイド",
+    "community": "コミュニティ"
+  },
+  "home": {
+    "heroTitle": "大田の夜は昼より輝く",
+    "heroSubtitle": "科学都市・大田の夜景、星空、祭りをひとつの場所で",
+    "spotsSection": "今夜行きたい場所",
+    "viewDetail": "詳しく見る"
+  },
+  "footer": {
+    "notice": "本サービスは2026観光データ活用コンテストの出品作です。"
+  }
+}
