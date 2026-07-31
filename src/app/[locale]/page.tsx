@@ -30,18 +30,18 @@ export default async function HomePage({
           className="object-cover object-center"
         />
         {/* 텍스트 대비 확보 + 아래 섹션과 자연스러운 연결 */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/35 to-slate-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-slate-950/55 to-slate-950" />
+        {/* 문구 뒤 라디얼 음영 — 밝은 건물 위에서도 제목이 묻히지 않게 */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_50%_45%,rgba(2,6,23,0.65),transparent_75%)]" />
         <div className="relative mx-auto max-w-5xl px-4 pt-20 pb-16 text-center sm:pt-28 sm:pb-24">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-wide text-slate-300 backdrop-blur">
             <MoonStar size={13} className="text-amber-300" />
             {site("description")}
           </span>
-          <h1 className="mx-auto mt-7 max-w-3xl text-4xl font-extrabold leading-[1.2] tracking-tight sm:text-5xl">
-            <span className="bg-gradient-to-b from-white via-slate-100 to-slate-500 bg-clip-text text-transparent">
-              {t("heroTitle")}
-            </span>
+          <h1 className="mx-auto mt-7 max-w-3xl text-4xl font-extrabold leading-[1.2] tracking-tight text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] sm:text-5xl">
+            {t("heroTitle")}
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">
+          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-200 drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)] sm:text-lg">
             {t("heroSubtitle")}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

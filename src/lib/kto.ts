@@ -27,7 +27,7 @@ const MOCK_NIGHT_SPOTS: NightSpot[] = [
     addr: "대전광역시 유성구 대덕대로 480",
     mapX: 127.3897,
     mapY: 36.3757,
-    imageUrl: null,
+    imageUrl: "/spots/hanbit-tower.jpg", // Wikimedia Commons CC0
     category: "science",
   },
   {
@@ -63,7 +63,7 @@ const MOCK_NIGHT_SPOTS: NightSpot[] = [
     addr: "대전광역시 동구 세천동",
     mapX: 127.4967,
     mapY: 36.3149,
-    imageUrl: null,
+    imageUrl: "/spots/sikjangsan.jpg", // 대전광역시, 공공누리 제1유형 (푸터 출처표시)
     category: "nature",
   },
   {
