@@ -42,3 +42,6 @@ next-env.d.ts
 
 # .env.example은 커밋 대상 (키 없는 템플릿)
 !.env.example
+
+# 로컬 작업 문서 (커밋 금지)
+야간스팟_검수목록.md
