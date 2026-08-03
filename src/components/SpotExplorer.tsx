@@ -41,6 +41,7 @@ const CATEGORY_SCENE: Record<string, string> = {
 export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
   const t = useTranslations("home");
   const [category, setCategory] = useState<string>("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filtered =
     category === "all" ? spots : spots.filter((s) => s.category === category);
@@ -76,7 +77,12 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             return (
               <article
                 key={spot.contentId}
-                className="glass-card group flex cursor-pointer items-center gap-3 rounded-xl p-2.5"
+                onClick={() => setSelectedId(spot.contentId)}
+                className={`glass-card group flex cursor-pointer items-center gap-3 rounded-xl p-2.5 ${
+                  selectedId === spot.contentId
+                    ? "!border-amber-400/60 !bg-amber-400/5"
+                    : ""
+                }`}
               >
                 <div
                   className={`relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br ${CATEGORY_SCENE[spot.category]}`}
@@ -122,7 +128,12 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
         </div>
 
         <div className="order-1 h-80 lg:order-2 lg:sticky lg:top-20 lg:h-[620px]">
-          <NightMap spots={spots} activeCategory={category} />
+          <NightMap
+            spots={spots}
+            activeCategory={category}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
         </div>
       </div>
     </div>
