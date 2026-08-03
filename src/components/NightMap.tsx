@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import type { NightSpot } from "@/lib/kto";
 
 // 대전 중심 좌표
@@ -39,8 +40,9 @@ export default function NightMap({
   spots: NightSpot[];
   activeCategory?: string;
   selectedId?: string | null;
-  onSelect?: (contentId: string) => void;
+  onSelect?: (contentId: string | null) => void;
 }) {
+  const t = useTranslations("home");
   const containerRef = useRef<HTMLDivElement>(null);
   const kakaoRef = useRef<KakaoNS>(null);
   const mapRef = useRef<KakaoNS>(null);
@@ -77,6 +79,10 @@ export default function NightMap({
         map.addControl(
           new kakao.maps.ZoomControl(),
           kakao.maps.ControlPosition.RIGHT,
+        );
+        // 빈 지도 클릭 시 선택 해제
+        kakao.maps.event.addListener(map, "click", () =>
+          onSelectRef.current?.(null),
         );
         mapRef.current = map;
 
@@ -143,11 +149,24 @@ export default function NightMap({
     entry.marker.setImage(markerImage(entry.category, true));
     entry.marker.setZIndex(10);
 
-    const pos = new kakao.maps.LatLng(entry.spot.mapY, entry.spot.mapX);
+    const { spot } = entry;
+    const pos = new kakao.maps.LatLng(spot.mapY, spot.mapX);
+    const color = PIN_COLOR[spot.category] ?? "#fbbf24";
+    const img = spot.imageUrl
+      ? `<div style="height:108px;background:url('${spot.imageUrl}') center/cover"></div>`
+      : "";
     const overlay = new kakao.maps.CustomOverlay({
       position: pos,
-      yAnchor: 2.1,
-      content: `<div style="background:#0f172a;color:#fff;border:1px solid rgba(251,191,36,.5);border-radius:10px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.5)">${entry.spot.title}</div>`,
+      yAnchor: 1.12,
+      content: `
+        <div style="width:230px;transform:translateY(-58px);background:#0f172a;border:1px solid rgba(255,255,255,.15);border-radius:14px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.55)">
+          ${img}
+          <div style="padding:10px 12px 12px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.02em;color:${color}">${t(`categories.${spot.category}`)}</div>
+            <div style="margin-top:2px;font-size:14px;font-weight:700;color:#fff;line-height:1.35">${spot.title}</div>
+            <div style="margin-top:3px;font-size:12px;color:#94a3b8;line-height:1.4">${spot.addr}</div>
+          </div>
+        </div>`,
     });
     overlay.setMap(map);
     overlayRef.current = overlay;
