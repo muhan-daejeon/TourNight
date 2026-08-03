@@ -14,6 +14,8 @@
     "heroTitle": "Daejeon Shines Brighter at Night",
     "heroSubtitle": "Night views, starlight, and festivals of Korea's science city — all in one place",
     "spotsSection": "Where to Go Tonight",
+    "searchPlaceholder": "Search by name or area",
+    "noResults": "No spots found",
     "viewDetail": "View details",
     "mapSection": "Night Spots Map",
     "categories": {

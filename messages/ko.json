@@ -14,6 +14,8 @@
     "heroTitle": "대전의 밤은 낮보다 빛난다",
     "heroSubtitle": "과학도시 대전의 야경, 별빛, 축제를 한곳에서",
     "spotsSection": "오늘 밤 가볼 만한 곳",
+    "searchPlaceholder": "명소 이름·지역으로 검색",
+    "noResults": "검색 결과가 없습니다",
     "viewDetail": "자세히 보기",
     "mapSection": "야간 명소 지도",
     "categories": {

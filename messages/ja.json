@@ -14,6 +14,8 @@
     "heroTitle": "大田の夜は昼より輝く",
     "heroSubtitle": "科学都市・大田の夜景、星空、祭りをひとつの場所で",
     "spotsSection": "今夜行きたい場所",
+    "searchPlaceholder": "名前・エリアで検索",
+    "noResults": "該当する名所がありません",
     "viewDetail": "詳しく見る",
     "mapSection": "夜の名所マップ",
     "categories": {

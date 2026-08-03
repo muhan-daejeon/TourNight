@@ -20,7 +20,7 @@ export interface NightSpot {
 }
 
 /** 키 발급 전 개발용 목 데이터 (대전 대표 야간 명소) */
-const MOCK_NIGHT_SPOTS: NightSpot[] = [
+export const MOCK_NIGHT_SPOTS: NightSpot[] = [
   {
     contentId: "mock-1",
     title: "한빛탑",
