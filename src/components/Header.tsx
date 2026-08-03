@@ -1,10 +1,18 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { MoonStar } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import LocaleSwitcher from "./LocaleSwitcher";
 
 export default function Header() {
   const t = useTranslations();
+  const pathname = usePathname();
+
+  const linkClass = (active: boolean) =>
+    `shrink-0 transition ${
+      active ? "font-semibold text-amber-300" : "hover:text-amber-300"
+    }`;
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-slate-950/70 backdrop-blur-md">
@@ -14,12 +22,15 @@ export default function Header() {
           <span>{t("site.title")}</span>
         </Link>
         <nav className="flex items-center gap-4 overflow-x-auto text-sm text-slate-300 sm:gap-6">
-          <Link href="/" className="shrink-0 transition hover:text-amber-300">
+          <Link
+            href="/"
+            className={linkClass(pathname === "/" || pathname.startsWith("/spots"))}
+          >
             {t("nav.spots")}
           </Link>
           <Link
             href="/etiquette"
-            className="shrink-0 transition hover:text-amber-300"
+            className={linkClass(pathname.startsWith("/etiquette"))}
           >
             {t("nav.etiquette")}
           </Link>

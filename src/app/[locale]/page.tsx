@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { MoonStar } from "lucide-react";
-import { Link } from "@/i18n/navigation";
 import { getVerifiedNightSpots } from "@/lib/spots";
 import SpotExplorer from "@/components/SpotExplorer";
 
@@ -47,19 +46,13 @@ export default async function HomePage({
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-200 drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)] sm:text-lg">
             {t("heroSubtitle")}
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-8 flex items-center justify-center">
             <a
               href="#spots"
               className="rounded-full bg-amber-400 px-7 py-3 text-sm font-bold text-slate-950 shadow-[0_0_24px_rgba(251,191,36,0.35)] transition hover:bg-amber-300 hover:shadow-[0_0_36px_rgba(251,191,36,0.5)]"
             >
               {t("ctaSpots")}
             </a>
-            <Link
-              href="/etiquette"
-              className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-sm font-semibold text-slate-200 backdrop-blur transition hover:border-white/30 hover:text-white"
-            >
-              {t("ctaGuide")}
-            </Link>
           </div>
         </div>
       </section>
