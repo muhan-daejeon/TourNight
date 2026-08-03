@@ -36,9 +36,27 @@
     "error": "잠시 후 다시 시도해주세요.",
     "topics": {
       "pojangmacha": "포장마차 이용법",
+      "latefood": "야식·심야식당",
+      "convenience": "편의점 200% 활용",
+      "dining": "식당·주점 예절",
+      "noraebang": "노래방 즐기기",
       "festival": "대전0시축제 즐기기",
       "transport": "심야 이동 팁",
-      "dining": "식당·주점 예절"
+      "safety": "야간 안전 가이드",
+      "oncheon": "유성온천·족욕"
+    },
+    "groups": {
+      "food": "먹거리",
+      "nightlife": "밤 문화",
+      "practical": "이동·실용"
+    },
+    "phrasesTitle": "서바이벌 한국어",
+    "phrasesSubtitle": "밤에 바로 쓰는 필수 표현",
+    "emergency": {
+      "title": "긴급 연락처",
+      "police": "경찰",
+      "fire": "구급·소방",
+      "hotline": "관광통역 핫라인 (24시간)"
     }
   },
   "spot": {

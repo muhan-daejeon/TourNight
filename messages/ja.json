@@ -35,10 +35,28 @@
     "loading": "生成中…",
     "error": "しばらくしてからもう一度お試しください。",
     "topics": {
-      "pojangmacha": "屋台（ポジャンマチャ）の楽しみ方",
-      "festival": "大田0時祭りの楽しみ方",
+      "pojangmacha": "屋台（ポジャンマチャ）",
+      "latefood": "夜食・深夜営業の店",
+      "convenience": "24時間コンビニ活用",
+      "dining": "飲食店でのマナー",
+      "noraebang": "ノレバン（カラオケ）",
+      "festival": "大田0時祭り",
       "transport": "深夜の移動のコツ",
-      "dining": "飲食店でのマナー"
+      "safety": "夜間安全ガイド",
+      "oncheon": "儒城温泉・足湯"
+    },
+    "groups": {
+      "food": "食べる・飲む",
+      "nightlife": "夜の文化",
+      "practical": "移動・実用"
+    },
+    "phrasesTitle": "サバイバル韓国語",
+    "phrasesSubtitle": "夜にすぐ使える必須フレーズ",
+    "emergency": {
+      "title": "緊急連絡先",
+      "police": "警察",
+      "fire": "救急・消防",
+      "hotline": "観光通訳ホットライン（24時間）"
     }
   },
   "spot": {

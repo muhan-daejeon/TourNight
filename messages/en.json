@@ -35,10 +35,28 @@
     "loading": "Generating…",
     "error": "Please try again later.",
     "topics": {
-      "pojangmacha": "How to enjoy pojangmacha (street bars)",
-      "festival": "Enjoying Daejeon 0 O'Clock Festival",
-      "transport": "Late-night transportation tips",
-      "dining": "Restaurant & bar etiquette"
+      "pojangmacha": "Pojangmacha (street bars)",
+      "latefood": "Late-night eats & delivery",
+      "convenience": "24h convenience stores",
+      "dining": "Restaurant & bar etiquette",
+      "noraebang": "Noraebang (karaoke)",
+      "festival": "Daejeon 0 O'Clock Festival",
+      "transport": "Late-night transportation",
+      "safety": "Night safety guide",
+      "oncheon": "Yuseong hot springs & foot bath"
+    },
+    "groups": {
+      "food": "Eat & Drink",
+      "nightlife": "Night Culture",
+      "practical": "Getting Around"
+    },
+    "phrasesTitle": "Survival Korean",
+    "phrasesSubtitle": "Essential phrases for the night, ready to use",
+    "emergency": {
+      "title": "Emergency",
+      "police": "Police",
+      "fire": "Ambulance & Fire",
+      "hotline": "Travel Hotline w/ interpretation (24h)"
     }
   },
   "spot": {

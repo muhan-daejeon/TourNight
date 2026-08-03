@@ -170,7 +170,7 @@ export default function NightMap({
             <div style="font-size:11px;font-weight:700;letter-spacing:.02em;color:${color}">${t(`categories.${spot.category}`)}</div>
             <div style="margin-top:2px;font-size:14px;font-weight:700;color:#fff;line-height:1.35">${spot.title}</div>
             <div style="margin-top:3px;font-size:12px;color:#94a3b8;line-height:1.4">${spot.addr}</div>
-            ${spots.length > 1 ? `<a href="/${locale}/spots/${encodeURIComponent(spot.contentId)}" style="display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:#fbbf24;text-decoration:none">${t("viewDetail")} →</a>` : ""}
+            ${spots.length > 1 ? `<a href="/${locale}/spots/${encodeURIComponent(spot.contentId)}" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="event.stopPropagation();window.location.href=this.href;return false" style="display:inline-block;margin-top:8px;padding:4px 2px;font-size:12px;font-weight:700;color:#fbbf24;text-decoration:none;cursor:pointer">${t("viewDetail")} →</a>` : ""}
           </div>
         </div>`,
     });

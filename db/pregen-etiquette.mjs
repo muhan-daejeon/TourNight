@@ -8,12 +8,22 @@ const BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 const TOPICS = {
   pojangmacha:
     "How to order and enjoy food at a Korean pojangmacha (street food tent bar) at night",
+  latefood:
+    "Late-night eating in Daejeon, Korea: 24-hour gukbap restaurants, chicken & beer (chimaek) culture, and how food delivery works for foreigners",
+  convenience:
+    "How foreigners can make the most of Korean 24-hour convenience stores at night (heating meals, eating-in tables, buying transit cards)",
+  dining:
+    "Basic etiquette at Korean restaurants and bars at night (table manners, drinking culture with elders, paying the bill)",
+  noraebang:
+    "How to enjoy noraebang (Korean karaoke rooms) at night as a foreigner: renting a room, using the machine, singing etiquette",
   festival:
     "How to enjoy the Daejeon 0 O'Clock Festival (대전0시축제), a big summer night festival on Jungang-ro street in Daejeon",
   transport:
-    "Late-night transportation tips in Daejeon, Korea (subway/bus operating hours, taxis, designated driver services)",
-  dining:
-    "Basic etiquette at Korean restaurants and bars at night (table manners, drinking culture, paying the bill)",
+    "Late-night transportation tips in Daejeon, Korea (subway/bus operating hours, taxis and Kakao T app, designated driver services)",
+  safety:
+    "Night safety guide for foreign tourists in Daejeon, Korea: emergency numbers 112/119, the 1330 Korea Travel Hotline with interpretation, safe areas at night",
+  oncheon:
+    "How to enjoy Yuseong hot springs area at night: the free public foot bath etiquette, jjimjilbang (Korean sauna) basics for foreigners",
 };
 
 const LOCALES = { ko: "Korean", en: "English", ja: "Japanese", zh: "Simplified Chinese" };
@@ -81,8 +91,55 @@ try {
         do update set content = excluded.content, updated_at = now()
       `;
       ok += 1;
-      console.log(`${topicId}/${locale} 저장 (${ok}/16)`);
+      console.log(`${topicId}/${locale} 저장 (${ok}/${Object.keys(TOPICS).length * 4})`);
     }
+  }
+
+  // 서바이벌 한국어 표현 사전생성 (en/ja/zh)
+  const phraseLocales = { en: "English", ja: "Japanese", zh: "Simplified Chinese" };
+  const existingPhrases = new Set(
+    (await sql`select locale from phrase_cache`).map((r) => r.locale),
+  );
+  for (const [locale, language] of Object.entries(phraseLocales)) {
+    if (!force && existingPhrases.has(locale)) continue;
+    const prompt = [
+      `Create 8 essential Korean survival phrases for a foreign tourist enjoying NIGHTLIFE in Daejeon, Korea`,
+      `(street food tents, taxis, bars, asking for help at night).`,
+      `Return JSON array of {"korean": string, "roman": string (romanization), "meaning": string (translation in ${language})}.`,
+      `Keep phrases short, natural, and polite. Respond with ONLY the JSON array.`,
+    ].join("\n");
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        const res = await fetch(
+          `${BASE_URL}/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { responseMimeType: "application/json" },
+            }),
+          },
+        );
+        if (!res.ok) throw new Error(`Gemini ${res.status}`);
+        const data = await res.json();
+        const phrases = JSON.parse(
+          data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "[]",
+        );
+        await sql`
+          insert into phrase_cache (locale, phrases)
+          values (${locale}, ${JSON.stringify(phrases)})
+          on conflict (locale) do update set phrases = excluded.phrases, updated_at = now()
+        `;
+        console.log(`phrases/${locale} 저장 (${phrases.length}개)`);
+        break;
+      } catch (e) {
+        if (attempt >= 5) throw e;
+        console.log(`  phrases/${locale} 오류(${e.message}) — ${attempt * 30}초 대기`);
+        await sleep(attempt * 30_000);
+      }
+    }
+    await sleep(7000);
   }
 } finally {
   await sql.end();

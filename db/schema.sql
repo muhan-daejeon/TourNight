@@ -40,6 +40,13 @@ create table if not exists spot_guide (
   primary key (content_id, locale)
 );
 
+-- 서바이벌 한국어 표현 캐시 (언어당 1회 생성)
+create table if not exists phrase_cache (
+  locale text primary key,
+  phrases jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
 -- 에티켓 가이드 사전생성 캐시 (심사/데모 때 Gemini 실시간 의존 제거)
 create table if not exists etiquette_cache (
   topic_id text not null,

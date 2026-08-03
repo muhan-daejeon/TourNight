@@ -35,10 +35,28 @@
     "loading": "生成中…",
     "error": "请稍后再试。",
     "topics": {
-      "pojangmacha": "路边摊（布帐马车）使用指南",
-      "festival": "大田0时庆典游玩攻略",
+      "pojangmacha": "路边摊（布帐马车）",
+      "latefood": "夜宵与深夜食堂",
+      "convenience": "24小时便利店攻略",
+      "dining": "餐厅酒馆礼仪",
+      "noraebang": "练歌房（KTV）",
+      "festival": "大田0时庆典",
       "transport": "深夜出行小贴士",
-      "dining": "餐厅酒馆礼仪"
+      "safety": "夜间安全指南",
+      "oncheon": "儒城温泉·足浴"
+    },
+    "groups": {
+      "food": "美食夜宵",
+      "nightlife": "夜间文化",
+      "practical": "出行实用"
+    },
+    "phrasesTitle": "生存韩语",
+    "phrasesSubtitle": "夜间立刻能用的必备表达",
+    "emergency": {
+      "title": "紧急电话",
+      "police": "警察",
+      "fire": "急救·消防",
+      "hotline": "旅游翻译热线（24小时）"
     }
   },
   "spot": {
