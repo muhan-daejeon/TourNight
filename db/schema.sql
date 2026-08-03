@@ -25,6 +25,11 @@ alter table night_spots add column if not exists content_type_id text;
 alter table night_spots add column if not exists cat1 text;
 alter table night_spots add column if not exists cat3 text;
 
+-- 야간 분류 파이프라인: 운영시간 원문, Gemini 1차 후보 판정·사유
+alter table night_spots add column if not exists use_time text;
+alter table night_spots add column if not exists night_candidate boolean;
+alter table night_spots add column if not exists night_reason text;
+
 -- 에티켓 가이드 사전생성 캐시 (심사/데모 때 Gemini 실시간 의존 제거)
 create table if not exists etiquette_cache (
   topic_id text not null,
