@@ -34,6 +34,8 @@ function mapCategory(item) {
   if (item.contenttypeid === "15") return "festival";
   if (item.cat1 === "A01") return "nature";
   if (["A02060100", "A02060200", "A02060300"].includes(item.cat3)) return "science"; // 과학관·기념관·전시관
+  // 대전 정체성: 엑스포·과학·천문 계열은 이름 기준으로 과학 분류
+  if (/과학|엑스포|천문|우주/.test(item.title)) return "science";
   return "city";
 }
 

@@ -49,9 +49,11 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
 
   return (
     <div>
-      {/* 카테고리 필터 칩 */}
+      {/* 카테고리 필터 칩 (스팟이 있는 카테고리만 노출) */}
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {CATEGORIES.map((c) => {
+        {CATEGORIES.filter(
+          (c) => c === "all" || spots.some((s) => s.category === c),
+        ).map((c) => {
           const Icon = c === "all" ? null : CATEGORY_ICON[c];
           return (
             <button
