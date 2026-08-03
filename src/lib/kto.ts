@@ -77,6 +77,61 @@ export const MOCK_NIGHT_SPOTS: NightSpot[] = [
   },
 ];
 
+export interface NearbyStay {
+  contentId: string;
+  title: string;
+  addr: string;
+  imageUrl: string;
+  distM: number;
+  mapX: number;
+  mapY: number;
+}
+
+/** 좌표 반경 내 숙소 조회 (locationBasedList2, contentTypeId 32) — 사진 있는 곳만, 거리순 */
+export async function fetchNearbyStays(
+  mapX: number,
+  mapY: number,
+  { radius = 3000, limit = 4 }: { radius?: number; limit?: number } = {},
+): Promise<NearbyStay[]> {
+  const apiKey = process.env.KTO_API_KEY;
+  if (!apiKey) return [];
+
+  const params = new URLSearchParams({
+    serviceKey: apiKey,
+    MobileOS: "ETC",
+    MobileApp: SERVICE_NAME,
+    _type: "json",
+    numOfRows: "20",
+    pageNo: "1",
+    mapX: String(mapX),
+    mapY: String(mapY),
+    radius: String(radius),
+    contentTypeId: "32", // 숙박
+  });
+  const res = await fetch(`${BASE_URL}/locationBasedList2?${params}`, {
+    next: { revalidate: 3600 },
+  });
+  if (!res.ok) return [];
+
+  const data = await res.json();
+  const items: (KtoListItem & { dist: string })[] =
+    data?.response?.body?.items?.item ?? [];
+
+  return items
+    .filter((it) => it.firstimage) // 사진 있는 곳만 (팀 방침)
+    .map((it) => ({
+      contentId: it.contentid,
+      title: it.title,
+      addr: it.addr1 || "",
+      imageUrl: it.firstimage,
+      distM: Math.round(Number(it.dist)),
+      mapX: Number(it.mapx),
+      mapY: Number(it.mapy),
+    }))
+    .sort((a, b) => a.distM - b.distM)
+    .slice(0, limit);
+}
+
 /** 관광지 국문 개요 조회 (detailCommon2) — 수동 큐레이션 스팟(mock-)은 개요 없음 */
 export async function fetchOverviewKo(contentId: string): Promise<string> {
   const apiKey = process.env.KTO_API_KEY;

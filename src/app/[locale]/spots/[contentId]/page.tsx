@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import {
   ArrowLeft,
+  BedDouble,
   MapPin,
   Navigation,
   Telescope,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getSpot, getNearbySpots, type NearbySpot } from "@/lib/spots";
+import { fetchNearbyStays } from "@/lib/kto";
 import NightMap from "@/components/NightMap";
 import SpotGuide from "@/components/SpotGuide";
 
@@ -95,11 +97,12 @@ export default async function SpotPage({
   const home = await getTranslations("home");
   const Icon = CATEGORY_ICON[spot.category];
 
-  const [natureNearby, nearby] = await Promise.all([
+  const [natureNearby, nearby, stays] = await Promise.all([
     spot.category === "nature"
       ? Promise.resolve([])
       : getNearbySpots(contentId, { natureOnly: true, limit: 3 }),
     getNearbySpots(contentId, { limit: 4 }),
+    fetchNearbyStays(spot.mapX, spot.mapY),
   ]);
 
   const kakaoDirections = `https://map.kakao.com/link/to/${encodeURIComponent(spot.title)},${spot.mapY},${spot.mapX}`;
@@ -189,6 +192,49 @@ export default async function SpotPage({
                 ))}
               </div>
             </section>
+
+            {/* 주변 숙소 — 야간 소비→숙박 연계 (계획서 기능 4) */}
+            {stays.length > 0 && (
+              <section>
+                <h2 className="mb-3 flex items-center gap-2 text-lg font-bold">
+                  <BedDouble size={17} className="text-amber-300" />
+                  {t("nearbyStay")}
+                </h2>
+                <div className="flex flex-col gap-2.5">
+                  {stays.map((stay) => (
+                    <a
+                      key={stay.contentId}
+                      href={`https://map.kakao.com/link/map/${encodeURIComponent(stay.title)},${stay.mapY},${stay.mapX}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="glass-card group flex items-center gap-3 rounded-xl p-2.5"
+                    >
+                      <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-slate-800">
+                        <Image
+                          src={stay.imageUrl}
+                          alt={stay.title}
+                          fill
+                          sizes="56px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-[15px] font-semibold text-slate-100 group-hover:text-amber-300">
+                          {stay.title}
+                        </h3>
+                        <p className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-slate-500">
+                          <span className="font-semibold text-amber-300/90">
+                            {formatDistance(stay.distM)}
+                          </span>
+                          <span className="text-slate-700">·</span>
+                          <span className="truncate">{stay.addr}</span>
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* 위치 지도 */}

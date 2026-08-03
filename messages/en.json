@@ -51,6 +51,7 @@
     "map": "Location",
     "nearbyNature": "Nature Night Views Nearby",
     "nearby": "More Spots Nearby",
-    "guideTitle": "TourNight Guide"
+    "guideTitle": "TourNight Guide",
+    "nearbyStay": "Stays Nearby"
   }
 }
