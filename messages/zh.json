@@ -40,5 +40,13 @@
       "transport": "深夜出行小贴士",
       "dining": "餐厅酒馆礼仪"
     }
+  },
+  "spot": {
+    "back": "返回列表",
+    "directions": "KakaoMap 路线导航",
+    "map": "位置",
+    "nearbyNature": "附近的自然夜景",
+    "nearby": "周边夜间景点",
+    "guideTitle": "夜游指南"
   }
 }

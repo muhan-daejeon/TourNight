@@ -40,5 +40,13 @@
       "transport": "深夜の移動のコツ",
       "dining": "飲食店でのマナー"
     }
+  },
+  "spot": {
+    "back": "一覧へ戻る",
+    "directions": "カカオマップで経路案内",
+    "map": "位置",
+    "nearbyNature": "近くの自然夜景",
+    "nearby": "周辺のナイトスポット",
+    "guideTitle": "ツアーナイトガイド"
   }
 }

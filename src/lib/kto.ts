@@ -77,6 +77,26 @@ const MOCK_NIGHT_SPOTS: NightSpot[] = [
   },
 ];
 
+/** 관광지 국문 개요 조회 (detailCommon2) — 수동 큐레이션 스팟(mock-)은 개요 없음 */
+export async function fetchOverviewKo(contentId: string): Promise<string> {
+  const apiKey = process.env.KTO_API_KEY;
+  if (!apiKey || contentId.startsWith("mock-")) return "";
+
+  const params = new URLSearchParams({
+    serviceKey: apiKey,
+    MobileOS: "ETC",
+    MobileApp: SERVICE_NAME,
+    _type: "json",
+    contentId,
+  });
+  const res = await fetch(`${BASE_URL}/detailCommon2?${params}`, {
+    next: { revalidate: 86400 },
+  });
+  if (!res.ok) return "";
+  const data = await res.json();
+  return data?.response?.body?.items?.item?.[0]?.overview ?? "";
+}
+
 interface KtoListItem {
   contentid: string;
   title: string;

@@ -1,0 +1,205 @@
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import {
+  ArrowLeft,
+  MapPin,
+  Navigation,
+  Telescope,
+  Trees,
+  Sparkles,
+  Building2,
+  type LucideIcon,
+} from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { getSpot, getNearbySpots, type NearbySpot } from "@/lib/spots";
+import NightMap from "@/components/NightMap";
+import SpotGuide from "@/components/SpotGuide";
+
+const CATEGORY_ICON: Record<string, LucideIcon> = {
+  science: Telescope,
+  nature: Trees,
+  festival: Sparkles,
+  city: Building2,
+};
+
+const CATEGORY_TEXT: Record<string, string> = {
+  science: "text-sky-300",
+  nature: "text-emerald-300",
+  festival: "text-pink-300",
+  city: "text-amber-300",
+};
+
+const CATEGORY_SCENE: Record<string, string> = {
+  science: "from-sky-950 via-slate-900 to-cyan-950",
+  nature: "from-emerald-950 via-slate-900 to-teal-950",
+  festival: "from-fuchsia-950 via-slate-900 to-rose-950",
+  city: "from-amber-950 via-slate-900 to-orange-950",
+};
+
+function formatDistance(m: number) {
+  return m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`;
+}
+
+function NearbyCard({ spot }: { spot: NearbySpot }) {
+  const Icon = CATEGORY_ICON[spot.category];
+  return (
+    <Link
+      href={`/spots/${spot.contentId}`}
+      className="glass-card group flex items-center gap-3 rounded-xl p-2.5"
+    >
+      <div
+        className={`relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br ${CATEGORY_SCENE[spot.category]}`}
+      >
+        {spot.imageUrl ? (
+          <Image
+            src={spot.imageUrl}
+            alt={spot.title}
+            fill
+            sizes="56px"
+            className="object-cover"
+          />
+        ) : (
+          <Icon size={22} strokeWidth={1.5} className="text-white/30" />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate text-[15px] font-semibold text-slate-100 group-hover:text-amber-300">
+          {spot.title}
+        </h3>
+        <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-slate-500">
+          <span className="font-semibold text-amber-300/90">
+            {formatDistance(spot.distanceM)}
+          </span>
+          <span className="text-slate-700">·</span>
+          <span className="truncate">{spot.addr}</span>
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+export default async function SpotPage({
+  params,
+}: {
+  params: Promise<{ locale: string; contentId: string }>;
+}) {
+  const { locale, contentId: rawId } = await params;
+  setRequestLocale(locale);
+  const contentId = decodeURIComponent(rawId);
+
+  const spot = await getSpot(contentId);
+  if (!spot) notFound();
+
+  const t = await getTranslations("spot");
+  const home = await getTranslations("home");
+  const Icon = CATEGORY_ICON[spot.category];
+
+  const [natureNearby, nearby] = await Promise.all([
+    spot.category === "nature"
+      ? Promise.resolve([])
+      : getNearbySpots(contentId, { natureOnly: true, limit: 3 }),
+    getNearbySpots(contentId, { limit: 4 }),
+  ]);
+
+  const kakaoDirections = `https://map.kakao.com/link/to/${encodeURIComponent(spot.title)},${spot.mapY},${spot.mapX}`;
+
+  return (
+    <div>
+      {/* 히어로 이미지 */}
+      <div className="relative h-64 overflow-hidden sm:h-80">
+        {spot.imageUrl ? (
+          <Image
+            src={spot.imageUrl}
+            alt={spot.title}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        ) : (
+          <div
+            className={`h-full w-full bg-gradient-to-br ${CATEGORY_SCENE[spot.category]}`}
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/20 to-slate-950" />
+        <div className="absolute inset-x-0 bottom-0">
+          <div className="mx-auto max-w-4xl px-4 pb-6">
+            <p
+              className={`flex items-center gap-1.5 text-sm font-semibold ${CATEGORY_TEXT[spot.category]}`}
+            >
+              <Icon size={14} strokeWidth={2.2} />
+              {home(`categories.${spot.category}`)}
+            </p>
+            <h1 className="mt-1 text-3xl font-extrabold tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:text-4xl">
+              {spot.title}
+            </h1>
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-300">
+              <MapPin size={14} className="shrink-0 text-slate-400" />
+              {spot.addr}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-4xl px-4 pb-20">
+        {/* 상단 액션 */}
+        <div className="flex items-center justify-between py-5">
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 text-sm text-slate-400 transition hover:text-white"
+          >
+            <ArrowLeft size={15} />
+            {t("back")}
+          </Link>
+          <a
+            href={kakaoDirections}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-[0_0_20px_rgba(251,191,36,0.3)] transition hover:bg-amber-300"
+          >
+            <Navigation size={15} />
+            {t("directions")}
+          </a>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="space-y-6">
+            {/* AI 야간 가이드 */}
+            <SpotGuide contentId={spot.contentId} />
+
+            {/* 근처 자연 야경 (대전 차별점: 도심 → 자연 연계) */}
+            {natureNearby.length > 0 && (
+              <section>
+                <h2 className="mb-3 text-lg font-bold">{t("nearbyNature")}</h2>
+                <div className="flex flex-col gap-2.5">
+                  {natureNearby.map((s) => (
+                    <NearbyCard key={s.contentId} spot={s} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* 주변 스팟 */}
+            <section>
+              <h2 className="mb-3 text-lg font-bold">{t("nearby")}</h2>
+              <div className="flex flex-col gap-2.5">
+                {nearby.map((s) => (
+                  <NearbyCard key={s.contentId} spot={s} />
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {/* 위치 지도 */}
+          <div>
+            <h2 className="mb-3 text-lg font-bold lg:sr-only">{t("map")}</h2>
+            <div className="h-72 lg:sticky lg:top-20 lg:h-96">
+              <NightMap spots={[spot]} selectedId={spot.contentId} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

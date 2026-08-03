@@ -40,5 +40,13 @@
       "transport": "Late-night transportation tips",
       "dining": "Restaurant & bar etiquette"
     }
+  },
+  "spot": {
+    "back": "Back to list",
+    "directions": "Directions (Kakao Map)",
+    "map": "Location",
+    "nearbyNature": "Nature Night Views Nearby",
+    "nearby": "More Spots Nearby",
+    "guideTitle": "TourNight Guide"
   }
 }

@@ -40,5 +40,13 @@
       "transport": "심야 이동 팁",
       "dining": "식당·주점 예절"
     }
+  },
+  "spot": {
+    "back": "목록으로",
+    "directions": "카카오맵 길찾기",
+    "map": "위치",
+    "nearbyNature": "근처 자연 야경",
+    "nearby": "주변 야간 스팟",
+    "guideTitle": "투어나잇 야간 가이드"
   }
 }

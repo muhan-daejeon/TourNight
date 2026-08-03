@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { NightSpot } from "@/lib/kto";
 
 // 대전 중심 좌표
@@ -43,6 +43,7 @@ export default function NightMap({
   onSelect?: (contentId: string | null) => void;
 }) {
   const t = useTranslations("home");
+  const locale = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const kakaoRef = useRef<KakaoNS>(null);
   const mapRef = useRef<KakaoNS>(null);
@@ -72,9 +73,13 @@ export default function NightMap({
       const { kakao } = window as KakaoNS;
       kakao.maps.load(() => {
         kakaoRef.current = kakao;
+        // 단일 스팟(상세 페이지)이면 해당 위치에 바로 포커스
+        const single = spots.length === 1 ? spots[0] : null;
         const map = new kakao.maps.Map(container, {
-          center: new kakao.maps.LatLng(DAEJEON_CENTER.lat, DAEJEON_CENTER.lng),
-          level: 8,
+          center: single
+            ? new kakao.maps.LatLng(single.mapY, single.mapX)
+            : new kakao.maps.LatLng(DAEJEON_CENTER.lat, DAEJEON_CENTER.lng),
+          level: single ? 5 : 8,
         });
         map.addControl(
           new kakao.maps.ZoomControl(),
@@ -165,6 +170,7 @@ export default function NightMap({
             <div style="font-size:11px;font-weight:700;letter-spacing:.02em;color:${color}">${t(`categories.${spot.category}`)}</div>
             <div style="margin-top:2px;font-size:14px;font-weight:700;color:#fff;line-height:1.35">${spot.title}</div>
             <div style="margin-top:3px;font-size:12px;color:#94a3b8;line-height:1.4">${spot.addr}</div>
+            ${spots.length > 1 ? `<a href="/${locale}/spots/${encodeURIComponent(spot.contentId)}" style="display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:#fbbf24;text-decoration:none">${t("viewDetail")} →</a>` : ""}
           </div>
         </div>`,
     });

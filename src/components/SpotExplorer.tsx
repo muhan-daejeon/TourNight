@@ -11,6 +11,7 @@ import {
   ChevronRight,
   type LucideIcon,
 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import type { NightSpot } from "@/lib/kto";
 import NightMap from "./NightMap";
 
@@ -118,10 +119,14 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                     <span className="truncate">{spot.addr}</span>
                   </p>
                 </div>
-                <ChevronRight
-                  size={18}
-                  className="shrink-0 text-slate-600 transition group-hover:translate-x-0.5 group-hover:text-amber-300"
-                />
+                <Link
+                  href={`/spots/${spot.contentId}`}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={spot.title}
+                  className="shrink-0 rounded-full p-2 text-slate-600 transition hover:bg-white/10 hover:text-amber-300"
+                >
+                  <ChevronRight size={18} />
+                </Link>
               </article>
             );
           })}

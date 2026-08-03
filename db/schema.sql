@@ -30,6 +30,16 @@ alter table night_spots add column if not exists use_time text;
 alter table night_spots add column if not exists night_candidate boolean;
 alter table night_spots add column if not exists night_reason text;
 
+-- 스팟별 현지화 가이드 캐시 (KTO 개요 → Gemini 번역·요약 + 야간 팁, 스팟·언어당 1회 생성)
+create table if not exists spot_guide (
+  content_id text not null,
+  locale text not null,
+  intro text not null,
+  tips jsonb not null default '[]',
+  updated_at timestamptz not null default now(),
+  primary key (content_id, locale)
+);
+
 -- 에티켓 가이드 사전생성 캐시 (심사/데모 때 Gemini 실시간 의존 제거)
 create table if not exists etiquette_cache (
   topic_id text not null,
