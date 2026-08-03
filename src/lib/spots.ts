@@ -18,6 +18,7 @@ export async function getVerifiedNightSpots(): Promise<NightSpot[]> {
            st_x(geom) as map_x, st_y(geom) as map_y
     from night_spots
     where night_verified = true
+      and image_url is not null -- 사진 있는 스팟만 노출 (팀 방침)
     order by category, title
   `;
 
