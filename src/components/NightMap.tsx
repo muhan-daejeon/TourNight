@@ -51,7 +51,9 @@ export default function NightMap({
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
   const prevSelectedRef = useRef<string | null>(null);
   const onSelectRef = useRef(onSelect);
-  onSelectRef.current = onSelect;
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
 
   const markerImage = (category: string, selected: boolean) => {
     const kakao = kakaoRef.current;
@@ -119,7 +121,6 @@ export default function NightMap({
     script.async = true;
     script.onload = init;
     document.head.appendChild(script);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spots]);
 
   // 현재 필터(카테고리+검색)를 통과한 스팟만 마커 표시
