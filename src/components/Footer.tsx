@@ -6,6 +6,13 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-white/[0.06] py-8 text-center">
+      {/* 긴급 연락처 — 전 페이지 상시 노출 (외국인 야간 안전) */}
+      <p className="mb-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-500">
+        <span className="font-bold text-amber-300/80">{t("etiquette.emergency.title")}</span>
+        <span><b className="text-slate-300">112</b> {t("etiquette.emergency.police")}</span>
+        <span><b className="text-slate-300">119</b> {t("etiquette.emergency.fire")}</span>
+        <span><b className="text-slate-300">1330</b> {t("etiquette.emergency.hotline")}</span>
+      </p>
       <p className="flex items-center justify-center gap-1.5 text-sm font-semibold text-slate-400">
         <MoonStar size={14} className="text-amber-300/70" />
         {t("site.title")} — {t("site.tagline")}

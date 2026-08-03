@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { MessageCircle } from "lucide-react";
+import { useLocale } from "next-intl";
 
 interface Phrase {
   korean: string;
@@ -10,17 +9,16 @@ interface Phrase {
   meaning: string;
 }
 
-/** 밤 상황 서바이벌 한국어 — 한국어 사용자에게는 표시하지 않음 */
+/** 밤 상황 서바이벌 한국어 — 한국어 사용자에게는 영어판 미리보기로 표시 */
 export default function SurvivalPhrases() {
-  const t = useTranslations("etiquette");
   const locale = useLocale();
+  const effectiveLocale = locale === "ko" ? "en" : locale;
   const [phrases, setPhrases] = useState<Phrase[]>([]);
   const [status, setStatus] = useState<"loading" | "error" | "done">("loading");
 
   useEffect(() => {
-    if (locale === "ko") return;
     let cancelled = false;
-    fetch(`/api/phrases?locale=${locale}`)
+    fetch(`/api/phrases?locale=${effectiveLocale}`)
       .then((res) => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -36,18 +34,13 @@ export default function SurvivalPhrases() {
     return () => {
       cancelled = true;
     };
-  }, [locale]);
+  }, [effectiveLocale]);
 
-  if (locale === "ko" || status === "error") return null;
+  if (status === "error") return null;
 
   return (
-    <section className="mt-10">
-      <h2 className="flex items-center gap-2 text-lg font-bold">
-        <MessageCircle size={17} className="text-amber-300" />
-        {t("phrasesTitle")}
-      </h2>
-      <p className="mt-1 text-sm text-slate-400">{t("phrasesSubtitle")}</p>
-      <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
+    <section className="mt-8">
+      <div className="overflow-hidden rounded-2xl border border-white/10">
         {status === "loading" ? (
           <div className="space-y-2 p-5">
             {[0, 1, 2, 3].map((i) => (

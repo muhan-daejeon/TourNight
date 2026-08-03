@@ -7,7 +7,7 @@
   "nav": {
     "spots": "夜间景点",
     "courses": "推荐路线",
-    "etiquette": "文化指南",
+    "etiquette": "生存韩语",
     "community": "社区"
   },
   "home": {
@@ -26,32 +26,15 @@
       "city": "市区"
     },
     "ctaSpots": "探索夜间景点",
-    "ctaGuide": "文化指南"
+    "ctaGuide": "生存韩语"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。"
   },
   "etiquette": {
-    "title": "文化指南",
-    "subtitle": "畅游大田之夜前值得了解的事",
-    "loading": "生成中…",
+    "title": "生存韩语",
+    "subtitle": "大田之夜立刻能用的必备表达 — 直接出示屏幕即可",
     "error": "请稍后再试。",
-    "topics": {
-      "pojangmacha": "路边摊（布帐马车）",
-      "latefood": "夜宵与深夜食堂",
-      "convenience": "24小时便利店攻略",
-      "dining": "餐厅酒馆礼仪",
-      "noraebang": "练歌房（KTV）",
-      "festival": "大田0时庆典",
-      "transport": "深夜出行小贴士",
-      "safety": "夜间安全指南",
-      "oncheon": "儒城温泉·足浴"
-    },
-    "groups": {
-      "food": "美食夜宵",
-      "nightlife": "夜间文化",
-      "practical": "出行实用"
-    },
     "phrasesTitle": "生存韩语",
     "phrasesSubtitle": "夜间立刻能用的必备表达",
     "emergency": {
@@ -59,7 +42,8 @@
       "police": "警察",
       "fire": "急救·消防",
       "hotline": "旅游翻译热线（24小时）"
-    }
+    },
+    "koNote": ""
   },
   "spot": {
     "back": "返回列表",

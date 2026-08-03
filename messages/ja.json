@@ -7,7 +7,7 @@
   "nav": {
     "spots": "夜の名所",
     "courses": "おすすめコース",
-    "etiquette": "文化ガイド",
+    "etiquette": "サバイバル韓国語",
     "community": "コミュニティ"
   },
   "home": {
@@ -26,32 +26,15 @@
       "city": "都心"
     },
     "ctaSpots": "夜の名所を見る",
-    "ctaGuide": "文化ガイド"
+    "ctaGuide": "サバイバル韓国語"
   },
   "footer": {
     "notice": "本サービスは2026観光データ活用コンテストの出品作です。"
   },
   "etiquette": {
-    "title": "文化ガイド",
-    "subtitle": "大田の夜を楽しむ前に知っておきたいこと",
-    "loading": "生成中…",
+    "title": "サバイバル韓国語",
+    "subtitle": "大田の夜ですぐ使える必須フレーズ — 画面をそのまま見せるだけ",
     "error": "しばらくしてからもう一度お試しください。",
-    "topics": {
-      "pojangmacha": "屋台（ポジャンマチャ）",
-      "latefood": "夜食・深夜営業の店",
-      "convenience": "24時間コンビニ活用",
-      "dining": "飲食店でのマナー",
-      "noraebang": "ノレバン（カラオケ）",
-      "festival": "大田0時祭り",
-      "transport": "深夜の移動のコツ",
-      "safety": "夜間安全ガイド",
-      "oncheon": "儒城温泉・足湯"
-    },
-    "groups": {
-      "food": "食べる・飲む",
-      "nightlife": "夜の文化",
-      "practical": "移動・実用"
-    },
     "phrasesTitle": "サバイバル韓国語",
     "phrasesSubtitle": "夜にすぐ使える必須フレーズ",
     "emergency": {
@@ -59,7 +42,8 @@
       "police": "警察",
       "fire": "救急・消防",
       "hotline": "観光通訳ホットライン（24時間）"
-    }
+    },
+    "koNote": ""
   },
   "spot": {
     "back": "一覧へ戻る",

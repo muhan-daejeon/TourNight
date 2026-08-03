@@ -7,7 +7,7 @@
   "nav": {
     "spots": "Night Spots",
     "courses": "Courses",
-    "etiquette": "Culture Guide",
+    "etiquette": "Survival Korean",
     "community": "Community"
   },
   "home": {
@@ -26,32 +26,15 @@
       "city": "City"
     },
     "ctaSpots": "Explore Night Spots",
-    "ctaGuide": "Culture Guide"
+    "ctaGuide": "Survival Korean"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest."
   },
   "etiquette": {
-    "title": "Culture Guide",
-    "subtitle": "Good things to know before enjoying Daejeon at night",
-    "loading": "Generating…",
+    "title": "Survival Korean",
+    "subtitle": "Essential phrases for the night — just show your screen",
     "error": "Please try again later.",
-    "topics": {
-      "pojangmacha": "Pojangmacha (street bars)",
-      "latefood": "Late-night eats & delivery",
-      "convenience": "24h convenience stores",
-      "dining": "Restaurant & bar etiquette",
-      "noraebang": "Noraebang (karaoke)",
-      "festival": "Daejeon 0 O'Clock Festival",
-      "transport": "Late-night transportation",
-      "safety": "Night safety guide",
-      "oncheon": "Yuseong hot springs & foot bath"
-    },
-    "groups": {
-      "food": "Eat & Drink",
-      "nightlife": "Night Culture",
-      "practical": "Getting Around"
-    },
     "phrasesTitle": "Survival Korean",
     "phrasesSubtitle": "Essential phrases for the night, ready to use",
     "emergency": {
@@ -59,7 +42,8 @@
       "police": "Police",
       "fire": "Ambulance & Fire",
       "hotline": "Travel Hotline w/ interpretation (24h)"
-    }
+    },
+    "koNote": ""
   },
   "spot": {
     "back": "Back to list",
