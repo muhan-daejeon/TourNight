@@ -128,7 +128,7 @@ try {
         );
         await sql`
           insert into phrase_cache (locale, phrases)
-          values (${locale}, ${JSON.stringify(phrases)})
+          values (${locale}, ${sql.json(phrases)})
           on conflict (locale) do update set phrases = excluded.phrases, updated_at = now()
         `;
         console.log(`phrases/${locale} 저장 (${phrases.length}개)`);

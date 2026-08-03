@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     const guide = await generateSpotGuide(spot, overviewKo, locale);
     await sql`
       insert into spot_guide (content_id, locale, intro, tips)
-      values (${contentId}, ${locale}, ${guide.intro}, ${JSON.stringify(guide.tips)})
+      values (${contentId}, ${locale}, ${guide.intro}, ${sql.json(guide.tips)})
       on conflict (content_id, locale)
       do update set intro = excluded.intro, tips = excluded.tips, updated_at = now()
     `;
