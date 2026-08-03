@@ -14,6 +14,8 @@
     "heroTitle": "大田的夜晚比白天更璀璨",
     "heroSubtitle": "科学之城大田的夜景、星空与庆典，尽在一处",
     "spotsSection": "今晚值得一去的地方",
+    "searchPlaceholder": "按名称或地区搜索",
+    "noResults": "未找到相关景点",
     "viewDetail": "查看详情",
     "mapSection": "夜间景点地图",
     "categories": {

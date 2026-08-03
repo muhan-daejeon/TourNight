@@ -33,12 +33,12 @@ interface MarkerEntry {
 
 export default function NightMap({
   spots,
-  activeCategory = "all",
+  visibleIds,
   selectedId = null,
   onSelect,
 }: {
   spots: NightSpot[];
-  activeCategory?: string;
+  visibleIds?: Set<string>;
   selectedId?: string | null;
   onSelect?: (contentId: string | null) => void;
 }) {
@@ -122,16 +122,14 @@ export default function NightMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spots]);
 
-  // 카테고리 필터에 따라 마커 표시/숨김
+  // 현재 필터(카테고리+검색)를 통과한 스팟만 마커 표시
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    markersRef.current.forEach(({ marker, category }) => {
-      marker.setMap(
-        activeCategory === "all" || category === activeCategory ? map : null,
-      );
+    markersRef.current.forEach(({ marker }, id) => {
+      marker.setMap(!visibleIds || visibleIds.has(id) ? map : null);
     });
-  }, [activeCategory]);
+  }, [visibleIds]);
 
   // 선택된 스팟: 핀 강조 + 확대 이동 + 이름 오버레이
   useEffect(() => {

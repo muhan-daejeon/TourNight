@@ -1,28 +1,37 @@
 import { sql } from "./db";
-import type { NightSpot } from "./kto";
+import { MOCK_NIGHT_SPOTS, type NightSpot } from "./kto";
 
 /** 야간 검증(night_verified) 완료된 스팟만 조회 — 홈 화면 데이터 소스 */
 export async function getVerifiedNightSpots(): Promise<NightSpot[]> {
-  const rows = await sql<
-    {
-      content_id: string;
-      title: string;
-      addr: string;
-      category: string;
-      image_url: string | null;
-      map_x: number;
-      map_y: number;
-    }[]
-  >`
-    select content_id, title, addr, category, image_url,
-           st_x(geom) as map_x, st_y(geom) as map_y
-    from night_spots
-    where night_verified = true
-      and image_url is not null -- 사진 있는 스팟만 노출 (팀 방침)
-    order by category, title
-  `;
-
-  return rows.map(toSpot);
+  try {
+    const rows = await sql<
+      {
+        content_id: string;
+        title: string;
+        addr: string;
+        category: string;
+        image_url: string | null;
+        map_x: number;
+        map_y: number;
+      }[]
+    >`
+      select content_id, title, addr, category, image_url,
+             st_x(geom) as map_x, st_y(geom) as map_y
+      from night_spots
+      where night_verified = true
+        and image_url is not null -- 사진 있는 스팟만 노출 (팀 방침)
+      order by category, title
+    `;
+    return rows.map(toSpot);
+  } catch (err) {
+    // DB 미설정/연결 실패 시 큐레이션 목 데이터로 폴백 (로컬 개발·UI 테스트용).
+    // 실서버에선 DB가 정상이므로 발동하지 않으며, 발동 시 경고 로그를 남긴다.
+    console.warn(
+      "[spots] DB 조회 실패 — 목 데이터로 폴백합니다:",
+      err instanceof Error ? err.message : err,
+    );
+    return MOCK_NIGHT_SPOTS;
+  }
 }
 
 interface SpotRow {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
@@ -9,6 +9,7 @@ import {
   Sparkles,
   Building2,
   ChevronRight,
+  Search,
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -42,13 +43,49 @@ const CATEGORY_SCENE: Record<string, string> = {
 export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
   const t = useTranslations("home");
   const [category, setCategory] = useState<string>("all");
+  const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const filtered =
-    category === "all" ? spots : spots.filter((s) => s.category === category);
+  // 카테고리 + 텍스트(이름·주소) 동시 필터
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return spots.filter((s) => {
+      if (category !== "all" && s.category !== category) return false;
+      if (!q) return true;
+      return (
+        s.title.toLowerCase().includes(q) ||
+        (s.addr ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [spots, category, query]);
+
+  // 지도 마커 표시 여부 판단용 — 현재 필터를 통과한 스팟 ID 집합
+  const visibleIds = useMemo(
+    () => new Set(filtered.map((s) => s.contentId)),
+    [filtered],
+  );
+
+  // 선택된 스팟이 필터에서 빠지면 지도에 전달하지 않음 (오버레이 잔상 방지)
+  const activeSelectedId =
+    selectedId && visibleIds.has(selectedId) ? selectedId : null;
 
   return (
     <div>
+      {/* 검색창 */}
+      <div className="relative mb-3">
+        <Search
+          size={16}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
+        />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("searchPlaceholder")}
+          className="w-full rounded-full border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 backdrop-blur transition focus:border-amber-400/60 focus:bg-white/[0.07] focus:outline-none"
+        />
+      </div>
+
       {/* 카테고리 필터 칩 (스팟이 있는 카테고리만 노출) */}
       <div className="flex gap-2 overflow-x-auto pb-1">
         {CATEGORIES.filter(
@@ -75,6 +112,11 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
       {/* 리스트 + 고정 지도 분할 뷰 */}
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_560px]">
         <div className="order-2 flex flex-col gap-2.5 lg:order-1">
+          {filtered.length === 0 && (
+            <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-slate-500">
+              {t("noResults")}
+            </p>
+          )}
           {filtered.map((spot) => {
             const Icon = CATEGORY_ICON[spot.category];
             return (
@@ -137,8 +179,8 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
         <div className="order-1 h-80 lg:order-2 lg:sticky lg:top-20 lg:h-[620px]">
           <NightMap
             spots={spots}
-            activeCategory={category}
-            selectedId={selectedId}
+            visibleIds={visibleIds}
+            selectedId={activeSelectedId}
             onSelect={setSelectedId}
           />
         </div>
