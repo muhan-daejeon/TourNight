@@ -11,3 +11,8 @@ on conflict (content_id) do nothing;
 
 -- 시드 명소는 야간 검증 완료 처리
 update night_spots set night_verified = true where content_id like 'mock-%';
+
+-- 큐레이션 스팟 사진 (위키미디어 CC0·공공누리 1유형, public/spots/)
+update night_spots set image_url = '/spots/hanbit-tower.jpg' where content_id = 'mock-1';
+update night_spots set image_url = '/spots/expo-bridge.jpg' where content_id = 'mock-2';
+update night_spots set image_url = '/spots/sikjangsan.jpg' where content_id = 'mock-5';
