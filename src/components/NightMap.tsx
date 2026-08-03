@@ -99,8 +99,6 @@ export default function NightMap({
       <div ref={containerRef} className="h-full w-full bg-slate-900" />
       {/* 야간 테마 톤 유지용 다크 오버레이 (지도 조작은 그대로 가능) */}
       <div className="pointer-events-none absolute inset-0 z-10 bg-slate-950/20" />
-      {/* 가장자리 비네트 — 페이지 다크 톤과 자연스럽게 이어붙임 */}
-      <div className="pointer-events-none absolute inset-0 z-10 shadow-[inset_0_0_60px_rgba(2,6,23,0.55)]" />
     </div>
   );
 }

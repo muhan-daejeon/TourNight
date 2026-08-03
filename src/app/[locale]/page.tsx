@@ -2,8 +2,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { MoonStar } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { fetchNightSpots } from "@/lib/kto";
+import { getVerifiedNightSpots } from "@/lib/spots";
 import SpotExplorer from "@/components/SpotExplorer";
+
+// DB의 야간 검증 스팟 기준, 1시간 주기로 재생성
+export const revalidate = 3600;
 
 export default async function HomePage({
   params,
@@ -14,7 +17,7 @@ export default async function HomePage({
   setRequestLocale(locale);
   const t = await getTranslations("home");
   const site = await getTranslations("site");
-  const spots = await fetchNightSpots();
+  const spots = await getVerifiedNightSpots();
 
   return (
     <div>
