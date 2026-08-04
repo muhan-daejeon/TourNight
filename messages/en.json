@@ -88,5 +88,35 @@
       "source": "7-day forecast based on mobile carrier data"
     },
     "generating": "AI is writing a night guide for this spot…"
+  },
+  "auth": {
+    "login": "Log in",
+    "signup": "Sign up",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "nickname": "Nickname",
+    "country": "Country",
+    "countryPlaceholder": "Select country (optional)",
+    "loginTitle": "Log in",
+    "loginSubtitle": "Sign in with your email",
+    "signupTitle": "Sign up",
+    "signupSubtitle": "Create your TourNight account",
+    "submitLogin": "Log in",
+    "submitSignup": "Sign up",
+    "passwordHint": "At least 8 characters",
+    "haveAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "goLogin": "Log in",
+    "goSignup": "Sign up",
+    "errors": {
+      "invalid_email": "Please enter a valid email.",
+      "invalid_password": "Password must be at least 8 characters.",
+      "invalid_nickname": "Please enter a nickname.",
+      "invalid_country": "Invalid country selection.",
+      "email_taken": "This email is already registered.",
+      "invalid_credentials": "Incorrect email or password.",
+      "generic": "Please try again later."
+    }
   }
 }

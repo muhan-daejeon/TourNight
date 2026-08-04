@@ -88,5 +88,35 @@
       "source": "基于移动通信数据的7天预测"
     },
     "generating": "AI 正在为该景点生成夜间指南…"
+  },
+  "auth": {
+    "login": "登录",
+    "signup": "注册",
+    "logout": "退出登录",
+    "email": "邮箱",
+    "password": "密码",
+    "nickname": "昵称",
+    "country": "国家",
+    "countryPlaceholder": "选择国家（可选）",
+    "loginTitle": "登录",
+    "loginSubtitle": "使用邮箱登录",
+    "signupTitle": "注册",
+    "signupSubtitle": "创建你的夜游大田账号",
+    "submitLogin": "登录",
+    "submitSignup": "注册",
+    "passwordHint": "至少8个字符",
+    "haveAccount": "已有账号？",
+    "noAccount": "还没有账号？",
+    "goLogin": "登录",
+    "goSignup": "注册",
+    "errors": {
+      "invalid_email": "请输入有效的邮箱。",
+      "invalid_password": "密码至少需要8个字符。",
+      "invalid_nickname": "请输入昵称。",
+      "invalid_country": "国家选择无效。",
+      "email_taken": "该邮箱已注册。",
+      "invalid_credentials": "邮箱或密码不正确。",
+      "generic": "请稍后再试。"
+    }
   }
 }

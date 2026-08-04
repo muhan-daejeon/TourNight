@@ -88,5 +88,35 @@
       "source": "이동통신 데이터 기반 향후 7일 예측"
     },
     "generating": "AI가 이 장소의 야간 가이드를 생성하고 있어요…"
+  },
+  "auth": {
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃",
+    "email": "이메일",
+    "password": "비밀번호",
+    "nickname": "닉네임",
+    "country": "국가",
+    "countryPlaceholder": "국가 선택 (선택 사항)",
+    "loginTitle": "로그인",
+    "loginSubtitle": "이메일로 로그인하세요",
+    "signupTitle": "회원가입",
+    "signupSubtitle": "투어나잇 계정을 만들어보세요",
+    "submitLogin": "로그인",
+    "submitSignup": "가입하기",
+    "passwordHint": "8자 이상 입력해주세요",
+    "haveAccount": "이미 계정이 있으신가요?",
+    "noAccount": "아직 계정이 없으신가요?",
+    "goLogin": "로그인",
+    "goSignup": "회원가입",
+    "errors": {
+      "invalid_email": "올바른 이메일을 입력해주세요.",
+      "invalid_password": "비밀번호는 8자 이상이어야 합니다.",
+      "invalid_nickname": "닉네임을 입력해주세요.",
+      "invalid_country": "국가 선택이 올바르지 않습니다.",
+      "email_taken": "이미 가입된 이메일입니다.",
+      "invalid_credentials": "이메일 또는 비밀번호가 올바르지 않습니다.",
+      "generic": "잠시 후 다시 시도해주세요."
+    }
   }
 }
