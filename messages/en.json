@@ -7,8 +7,9 @@
   "nav": {
     "spots": "Night Spots",
     "courses": "Courses",
-    "etiquette": "Survival Korean",
-    "community": "Community"
+    "etiquette": "Night Etiquette",
+    "community": "Community",
+    "phrases": "Survival Korean"
   },
   "home": {
     "heroTitle": "Daejeon Shines Brighter at Night",
@@ -26,14 +27,14 @@
       "city": "City"
     },
     "ctaSpots": "Explore Night Spots",
-    "ctaGuide": "Survival Korean"
+    "ctaGuide": "Night Etiquette"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest."
   },
   "etiquette": {
-    "title": "Survival Korean",
-    "subtitle": "Essential phrases for the night — just show your screen",
+    "title": "Night Etiquette",
+    "subtitle": "How to enjoy Daejeon nights the right way — pick a situation",
     "error": "Please try again later.",
     "phrasesTitle": "Survival Korean",
     "phrasesSubtitle": "Essential phrases for the night, ready to use",
@@ -43,7 +44,16 @@
       "fire": "Ambulance & Fire",
       "hotline": "Travel Hotline w/ interpretation (24h)"
     },
-    "koNote": ""
+    "koNote": "",
+    "topics": {
+      "pojangmacha": "Street bar (pojangmacha)",
+      "dining": "Restaurants & bars",
+      "noraebang": "Noraebang (karaoke)",
+      "festival": "Festival crowds",
+      "oncheon": "Hot springs & foot bath",
+      "nature": "Nature night spots"
+    },
+    "generating": "AI is writing this etiquette guide…"
   },
   "spot": {
     "back": "Back to list",
