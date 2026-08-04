@@ -1,0 +1,24 @@
+# PR·main 푸시마다 린트 + 빌드 검사
+# 키 없이도 빌드 가능 (DB 미연결 시 목 데이터 폴백) → 시크릿 불필요
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: 의존성 설치
+        run: npm ci
+      - name: 린트
+        run: npm run lint
+      - name: 빌드
+        run: npm run build

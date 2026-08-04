@@ -1,0 +1,27 @@
+# main 머지 시 Vercel 프로덕션 자동 배포
+# 필요 시크릿: VERCEL_TOKEN (vercel.com/account/settings/tokens 에서 발급
+#             → 레포 Settings > Secrets and variables > Actions 에 등록)
+# 시크릿이 없으면 배포를 건너뛰고 경고만 남긴다 (CI는 영향 없음)
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: team_6RN9A8QbTzV3N9yy9vFM7v2k
+      VERCEL_PROJECT_ID: prj_YqgLAeUr34EH3dTWLhiNW4jGRzmf
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vercel 프로덕션 배포
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::warning::VERCEL_TOKEN 시크릿이 없어 자동 배포를 건너뜁니다 (수동 배포: npx vercel --prod)"
+            exit 0
+          fi
+          npx vercel deploy --prod --yes --token="$VERCEL_TOKEN"
