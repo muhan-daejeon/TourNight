@@ -69,7 +69,10 @@
     "commentAdd": "添加评论",
     "commentEmpty": "还没有评论",
     "commentPlaceholder": "输入评论",
-    "commentSubmit": "发布"
+    "commentSubmit": "发布",
+    "postingAs": "发布者",
+    "loginToPost": "登录后分享点评",
+    "loginToComment": "登录后发表评论"
   },
   "spot": {
     "back": "返回列表",

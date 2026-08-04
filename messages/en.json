@@ -69,7 +69,10 @@
     "commentAdd": "Add a comment",
     "commentEmpty": "No comments yet",
     "commentPlaceholder": "Write a comment",
-    "commentSubmit": "Post"
+    "commentSubmit": "Post",
+    "postingAs": "Posting as",
+    "loginToPost": "Log in to share a review",
+    "loginToComment": "Log in to leave a comment"
   },
   "spot": {
     "back": "Back to list",

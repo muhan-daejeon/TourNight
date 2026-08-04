@@ -69,7 +69,10 @@
     "commentAdd": "コメントする",
     "commentEmpty": "まだコメントがありません",
     "commentPlaceholder": "コメントを入力",
-    "commentSubmit": "投稿"
+    "commentSubmit": "投稿",
+    "postingAs": "投稿者",
+    "loginToPost": "ログインしてレビューを投稿しましょう",
+    "loginToComment": "ログインしてコメントしましょう"
   },
   "spot": {
     "back": "一覧へ戻る",

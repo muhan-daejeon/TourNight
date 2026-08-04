@@ -69,7 +69,10 @@
     "commentAdd": "댓글 달기",
     "commentEmpty": "아직 댓글이 없어요",
     "commentPlaceholder": "댓글을 입력하세요",
-    "commentSubmit": "등록"
+    "commentSubmit": "등록",
+    "postingAs": "게시자",
+    "loginToPost": "로그인하고 후기를 남겨보세요",
+    "loginToComment": "로그인하고 댓글을 남겨보세요"
   },
   "spot": {
     "back": "목록으로",

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Send, MessageSquare, MessageCircle } from "lucide-react";
+import { Send, MessageSquare, MessageCircle, LogIn } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 
 interface Post {
   id: number;
@@ -19,9 +20,7 @@ interface Comment {
   createdAt: string;
 }
 
-const AUTHOR_MAX = 20;
 const BODY_MAX = 200;
-const NAME_KEY = "tournight.community.name";
 
 /**
  * 상대 시간 표기 (방금 전 / N분 전 / … / 7일 넘으면 날짜) — 접속 언어로.
@@ -51,8 +50,31 @@ function formatRelative(iso: string, locale: string, justNow: string): string {
 const inputClass =
   "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 text-xs text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
 
-/** 글 하나 + 댓글(펼쳐서 지연 로드) */
-function PostItem({ post }: { post: Post }) {
+/** 비로그인 상태에서 작성 자리에 노출하는 로그인 유도 */
+function LoginPrompt({ text }: { text: string }) {
+  const tAuth = useTranslations("auth");
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+      <span className="text-sm text-slate-400">{text}</span>
+      <Link
+        href="/login"
+        className="flex shrink-0 items-center gap-1.5 rounded-full bg-amber-400 px-4 py-1.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
+      >
+        <LogIn size={14} />
+        {tAuth("login")}
+      </Link>
+    </div>
+  );
+}
+
+/** 글 하나 + 댓글(펼쳐서 지연 로드). nickname이 없으면 비로그인 */
+function PostItem({
+  post,
+  nickname,
+}: {
+  post: Post;
+  nickname: string | null | undefined;
+}) {
   const t = useTranslations("community");
   const locale = useLocale();
 
@@ -64,7 +86,6 @@ function PostItem({ post }: { post: Post }) {
   const [count, setCount] = useState(post.commentCount);
   const [replyBody, setReplyBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const nameRef = useRef<HTMLInputElement>(null);
 
   function toggle() {
     const next = !expanded;
@@ -84,33 +105,20 @@ function PostItem({ post }: { post: Post }) {
     }
   }
 
-  // 답글 폼이 열릴 때 저장된 이름을 채운다 (DOM 직접 갱신 — 상태 아님)
-  useEffect(() => {
-    if (!expanded || !nameRef.current || nameRef.current.value) return;
-    const saved = localStorage.getItem(NAME_KEY);
-    if (saved) nameRef.current.value = saved;
-  }, [expanded]);
-
   async function submitReply(e: React.FormEvent) {
     e.preventDefault();
-    const name = (nameRef.current?.value ?? "").trim();
     const body = replyBody.trim();
     if (!body || submitting) return;
-    if (!name) {
-      nameRef.current?.focus();
-      return;
-    }
 
     setSubmitting(true);
     try {
       const res = await fetch(`/api/community/${post.id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ author: name, body }),
+        body: JSON.stringify({ body }),
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
-      localStorage.setItem(NAME_KEY, name);
       setComments((prev) => [...(prev ?? []), data.comment]);
       setCount((c) => c + 1);
       setReplyBody("");
@@ -172,16 +180,9 @@ function PostItem({ post }: { post: Post }) {
             <p className="text-xs text-slate-500">{t("commentEmpty")}</p>
           )}
 
-          {/* 답글 폼 */}
-          <form onSubmit={submitReply} className="flex flex-col gap-2">
-            <input
-              ref={nameRef}
-              type="text"
-              maxLength={AUTHOR_MAX}
-              placeholder={t("namePlaceholder")}
-              className={inputClass}
-            />
-            <div className="flex gap-2">
+          {/* 답글 폼 — 로그인 시에만 */}
+          {nickname ? (
+            <form onSubmit={submitReply} className="flex gap-2">
               <input
                 value={replyBody}
                 onChange={(e) => setReplyBody(e.target.value)}
@@ -196,8 +197,10 @@ function PostItem({ post }: { post: Post }) {
               >
                 {t("commentSubmit")}
               </button>
-            </div>
-          </form>
+            </form>
+          ) : (
+            <LoginPrompt text={t("loginToComment")} />
+          )}
         </div>
       )}
     </li>
@@ -211,14 +214,14 @@ export default function CommunityBoard() {
   const [status, setStatus] = useState<"loading" | "error" | "done">("loading");
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  // 이름은 비제어 입력 + ref로 관리 — localStorage는 마운트 후에만 읽을 수 있어
-  // 상태 대신 DOM에 직접 채운다(SSR 하이드레이션 불일치·불필요한 리렌더 방지).
-  const nameRef = useRef<HTMLInputElement>(null);
+  // undefined = 로딩, null = 비로그인, string = 로그인 닉네임
+  const [nickname, setNickname] = useState<string | null | undefined>(undefined);
 
-  // 저장된 이름 복원 (로그인 대체)
   useEffect(() => {
-    const saved = localStorage.getItem(NAME_KEY);
-    if (saved && nameRef.current) nameRef.current.value = saved;
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => setNickname(data.user?.nickname ?? null))
+      .catch(() => setNickname(null));
   }, []);
 
   useEffect(() => {
@@ -243,24 +246,22 @@ export default function CommunityBoard() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const trimmedName = (nameRef.current?.value ?? "").trim();
     const trimmedBody = body.trim();
     if (!trimmedBody || submitting) return;
-    if (!trimmedName) {
-      nameRef.current?.focus();
-      return;
-    }
 
     setSubmitting(true);
     try {
       const res = await fetch("/api/community", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ author: trimmedName, body: trimmedBody }),
+        body: JSON.stringify({ body: trimmedBody }),
       });
+      if (res.status === 401) {
+        setNickname(null); // 세션 만료 → 로그인 유도로 전환
+        return;
+      }
       if (!res.ok) throw new Error();
       const data = await res.json();
-      localStorage.setItem(NAME_KEY, trimmedName);
       setPosts((prev) => [data.post, ...prev]);
       setBody("");
     } catch {
@@ -270,44 +271,44 @@ export default function CommunityBoard() {
     }
   }
 
-  const canSubmit = !!body.trim() && !submitting;
-
   return (
     <div className="space-y-8">
-      {/* 작성 폼 */}
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur"
-      >
-        <input
-          ref={nameRef}
-          type="text"
-          maxLength={AUTHOR_MAX}
-          placeholder={t("namePlaceholder")}
-          className="w-full rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60"
-        />
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          maxLength={BODY_MAX}
-          rows={2}
-          placeholder={t("bodyPlaceholder")}
-          className="mt-3 w-full resize-none rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60"
-        />
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs text-slate-500">
-            {body.length}/{BODY_MAX}
-          </span>
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Send size={14} />
-            {t("submit")}
-          </button>
-        </div>
-      </form>
+      {/* 작성 영역 — 로그인 시 폼, 아니면 로그인 유도 */}
+      {nickname === undefined ? (
+        <div className="h-28 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
+      ) : nickname ? (
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur"
+        >
+          <p className="mb-2 text-xs text-slate-500">
+            {t("postingAs")} · <span className="text-amber-300/90">{nickname}</span>
+          </p>
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            maxLength={BODY_MAX}
+            rows={2}
+            placeholder={t("bodyPlaceholder")}
+            className="w-full resize-none rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60"
+          />
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-xs text-slate-500">
+              {body.length}/{BODY_MAX}
+            </span>
+            <button
+              type="submit"
+              disabled={!body.trim() || submitting}
+              className="flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Send size={14} />
+              {t("submit")}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <LoginPrompt text={t("loginToPost")} />
+      )}
 
       {/* 목록 */}
       {status === "loading" ? (
@@ -329,7 +330,7 @@ export default function CommunityBoard() {
       ) : (
         <ul className="space-y-3">
           {posts.map((post) => (
-            <PostItem key={post.id} post={post} />
+            <PostItem key={post.id} post={post} nickname={nickname} />
           ))}
         </ul>
       )}
