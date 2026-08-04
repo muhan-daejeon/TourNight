@@ -110,6 +110,8 @@
     "submitLogin": "로그인",
     "submitSignup": "가입하기",
     "passwordHint": "8자 이상 입력해주세요",
+    "continueWithGoogle": "Google로 계속하기",
+    "or": "또는",
     "haveAccount": "이미 계정이 있으신가요?",
     "noAccount": "아직 계정이 없으신가요?",
     "goLogin": "로그인",
@@ -126,6 +128,7 @@
       "invalid_country": "국가 선택이 올바르지 않습니다.",
       "email_taken": "이미 가입된 이메일입니다.",
       "invalid_credentials": "이메일 또는 비밀번호가 올바르지 않습니다.",
+      "oauth": "Google 로그인에 실패했어요. 다시 시도해주세요.",
       "generic": "잠시 후 다시 시도해주세요."
     }
   }

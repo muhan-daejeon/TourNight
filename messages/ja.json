@@ -110,6 +110,8 @@
     "submitLogin": "ログイン",
     "submitSignup": "登録する",
     "passwordHint": "8文字以上で入力してください",
+    "continueWithGoogle": "Googleで続ける",
+    "or": "または",
     "haveAccount": "すでにアカウントをお持ちですか？",
     "noAccount": "アカウントをお持ちでないですか？",
     "goLogin": "ログイン",
@@ -126,6 +128,7 @@
       "invalid_country": "国の選択が正しくありません。",
       "email_taken": "このメールアドレスは既に登録されています。",
       "invalid_credentials": "メールアドレスまたはパスワードが正しくありません。",
+      "oauth": "Googleログインに失敗しました。もう一度お試しください。",
       "generic": "しばらくしてからもう一度お試しください。"
     }
   }

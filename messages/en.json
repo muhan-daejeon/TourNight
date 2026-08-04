@@ -110,6 +110,8 @@
     "submitLogin": "Log in",
     "submitSignup": "Sign up",
     "passwordHint": "At least 8 characters",
+    "continueWithGoogle": "Continue with Google",
+    "or": "or",
     "haveAccount": "Already have an account?",
     "noAccount": "Don't have an account?",
     "goLogin": "Log in",
@@ -126,6 +128,7 @@
       "invalid_country": "Invalid country selection.",
       "email_taken": "This email is already registered.",
       "invalid_credentials": "Incorrect email or password.",
+      "oauth": "Google sign-in failed. Please try again.",
       "generic": "Please try again later."
     }
   }

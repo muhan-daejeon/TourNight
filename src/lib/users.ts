@@ -99,3 +99,44 @@ export async function updateProfile(
   `;
   return rows[0] ? toUser(rows[0]) : null;
 }
+
+/**
+ * Google 로그인: oauth_id → email 순으로 기존 계정을 찾고, 없으면 새로 만든다.
+ * 이메일이 같은 기존 계정이 있으면 구글을 연결(비어있을 때만)해 로그인시킨다
+ * (Google이 이메일 소유를 검증하므로 email 매칭 연결은 안전).
+ */
+export async function findOrCreateGoogleUser(input: {
+  googleId: string;
+  email: string;
+  name: string;
+}): Promise<User> {
+  const email = input.email.trim().toLowerCase();
+
+  const byOauth = await sql<UserRow[]>`
+    select id, email, nickname, country from users
+    where oauth_provider = 'google' and oauth_id = ${input.googleId}
+  `;
+  if (byOauth[0]) return toUser(byOauth[0]);
+
+  const byEmail = await sql<UserRow[]>`
+    select id, email, nickname, country from users where email = ${email}
+  `;
+  if (byEmail[0]) {
+    await sql`
+      update users set oauth_provider = 'google', oauth_id = ${input.googleId}
+      where id = ${byEmail[0].id} and oauth_provider is null
+    `;
+    return toUser(byEmail[0]);
+  }
+
+  const nickname =
+    (input.name || email.split("@")[0] || "user")
+      .trim()
+      .slice(0, NICKNAME_MAX) || "user";
+  const created = await sql<UserRow[]>`
+    insert into users (email, nickname, oauth_provider, oauth_id)
+    values (${email}, ${nickname}, 'google', ${input.googleId})
+    returning id, email, nickname, country
+  `;
+  return toUser(created[0]);
+}
