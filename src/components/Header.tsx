@@ -43,9 +43,12 @@ export default function Header() {
           <span className="shrink-0 cursor-not-allowed text-slate-600">
             {t("nav.courses")}
           </span>
-          <span className="hidden shrink-0 cursor-not-allowed text-slate-600 sm:inline">
+          <Link
+            href="/community"
+            className={linkClass(pathname.startsWith("/community"))}
+          >
             {t("nav.community")}
-          </span>
+          </Link>
         </nav>
         <LocaleSwitcher />
       </div>

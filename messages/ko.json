@@ -55,6 +55,22 @@
     },
     "generating": "AI가 예절 가이드를 생성하고 있어요…"
   },
+  "community": {
+    "title": "야간 커뮤니티",
+    "subtitle": "대전의 밤을 다녀온 여행자들의 한줄 후기와 질문",
+    "namePlaceholder": "이름",
+    "bodyPlaceholder": "밤에 가본 곳의 후기나 궁금한 점을 남겨보세요",
+    "submit": "남기기",
+    "justNow": "방금 전",
+    "empty": "아직 글이 없어요. 첫 후기를 남겨보세요!",
+    "error": "글을 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
+    "submitError": "등록에 실패했어요. 잠시 후 다시 시도해주세요.",
+    "comments": "댓글",
+    "commentAdd": "댓글 달기",
+    "commentEmpty": "아직 댓글이 없어요",
+    "commentPlaceholder": "댓글을 입력하세요",
+    "commentSubmit": "등록"
+  },
   "spot": {
     "back": "목록으로",
     "directions": "카카오맵 길찾기",

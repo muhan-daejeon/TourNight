@@ -55,6 +55,22 @@
     },
     "generating": "AIがマナーガイドを作成中…"
   },
+  "community": {
+    "title": "ナイトコミュニティ",
+    "subtitle": "大田の夜を巡った旅行者の一言レビューと質問",
+    "namePlaceholder": "名前",
+    "bodyPlaceholder": "夜に訪れた場所のレビューや気になることを書いてみましょう",
+    "submit": "投稿",
+    "justNow": "たった今",
+    "empty": "まだ投稿がありません。最初のレビューを残してみましょう！",
+    "error": "投稿を読み込めませんでした。しばらくしてからお試しください。",
+    "submitError": "投稿に失敗しました。しばらくしてからお試しください。",
+    "comments": "コメント",
+    "commentAdd": "コメントする",
+    "commentEmpty": "まだコメントがありません",
+    "commentPlaceholder": "コメントを入力",
+    "commentSubmit": "投稿"
+  },
   "spot": {
     "back": "一覧へ戻る",
     "directions": "カカオマップで経路案内",
