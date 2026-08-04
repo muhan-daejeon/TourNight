@@ -7,8 +7,9 @@
   "nav": {
     "spots": "夜の名所",
     "courses": "おすすめコース",
-    "etiquette": "サバイバル韓国語",
-    "community": "コミュニティ"
+    "etiquette": "ナイトエチケット",
+    "community": "コミュニティ",
+    "phrases": "サバイバル韓国語"
   },
   "home": {
     "heroTitle": "大田の夜は昼より輝く",
@@ -26,14 +27,14 @@
       "city": "都心"
     },
     "ctaSpots": "夜の名所を見る",
-    "ctaGuide": "サバイバル韓国語"
+    "ctaGuide": "ナイトエチケット"
   },
   "footer": {
     "notice": "本サービスは2026観光データ活用コンテストの出品作です。"
   },
   "etiquette": {
-    "title": "サバイバル韓国語",
-    "subtitle": "大田の夜ですぐ使える必須フレーズ — 画面をそのまま見せるだけ",
+    "title": "ナイトエチケット",
+    "subtitle": "大田の夜を楽しむためのマナー — シーンを選んでください",
     "error": "しばらくしてからもう一度お試しください。",
     "phrasesTitle": "サバイバル韓国語",
     "phrasesSubtitle": "夜にすぐ使える必須フレーズ",
@@ -43,7 +44,16 @@
       "fire": "救急・消防",
       "hotline": "観光通訳ホットライン（24時間）"
     },
-    "koNote": ""
+    "koNote": "",
+    "topics": {
+      "pojangmacha": "屋台のマナー",
+      "dining": "飲食店・居酒屋のマナー",
+      "noraebang": "ノレバンのマナー",
+      "festival": "祭り・人混みのマナー",
+      "oncheon": "温泉・足湯のマナー",
+      "nature": "自然夜景のマナー"
+    },
+    "generating": "AIがマナーガイドを作成中…"
   },
   "spot": {
     "back": "一覧へ戻る",
@@ -60,6 +70,7 @@
       "high": "混雑",
       "best": "最も空いている日",
       "source": "携帯通信データに基づく7日間予測"
-    }
+    },
+    "generating": "AIがこの場所のナイトガイドを作成中…"
   }
 }

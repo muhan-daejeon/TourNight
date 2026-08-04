@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { MoonStar } from "lucide-react";
+import { MoonStar, Sparkles } from "lucide-react";
 
 interface Guide {
   intro: string;
@@ -44,14 +44,20 @@ export default function SpotGuide({ contentId }: { contentId: string }) {
         {t("guideTitle")}
       </h2>
       {status === "loading" ? (
-        <div className="mt-4 space-y-2">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-4 animate-pulse rounded bg-white/5"
-              style={{ width: `${90 - i * 15}%` }}
-            />
-          ))}
+        <div className="mt-4">
+          <p className="flex items-center gap-2 text-sm text-amber-300/90">
+            <Sparkles size={14} className="animate-pulse" />
+            {t("generating")}
+          </p>
+          <div className="mt-3 space-y-2">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-4 animate-pulse rounded bg-white/5"
+                style={{ width: `${90 - i * 15}%` }}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <>

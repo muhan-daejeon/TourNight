@@ -34,6 +34,8 @@ export const ETIQUETTE_TOPICS: Record<string, string> = {
     "Night safety guide for foreign tourists in Daejeon, Korea: emergency numbers 112/119, the 1330 Korea Travel Hotline with interpretation, safe areas at night",
   oncheon:
     "How to enjoy Yuseong hot springs area at night: the free public foot bath etiquette, jjimjilbang (Korean sauna) basics for foreigners",
+  nature:
+    "Etiquette for enjoying nature night spots in Daejeon (stargazing, night parks, lakeside trails): keeping quiet, flashlight manners, no littering, staying on paths, safety at night",
 };
 
 /** 밤 상황 서바이벌 한국어 표현 생성 (비한국어 사용자용) */

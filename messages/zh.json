@@ -7,8 +7,9 @@
   "nav": {
     "spots": "夜间景点",
     "courses": "推荐路线",
-    "etiquette": "生存韩语",
-    "community": "社区"
+    "etiquette": "夜间礼仪",
+    "community": "社区",
+    "phrases": "生存韩语"
   },
   "home": {
     "heroTitle": "大田的夜晚比白天更璀璨",
@@ -26,14 +27,14 @@
       "city": "市区"
     },
     "ctaSpots": "探索夜间景点",
-    "ctaGuide": "生存韩语"
+    "ctaGuide": "夜间礼仪"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。"
   },
   "etiquette": {
-    "title": "生存韩语",
-    "subtitle": "大田之夜立刻能用的必备表达 — 直接出示屏幕即可",
+    "title": "夜间礼仪",
+    "subtitle": "正确畅享大田之夜 — 请选择场景",
     "error": "请稍后再试。",
     "phrasesTitle": "生存韩语",
     "phrasesSubtitle": "夜间立刻能用的必备表达",
@@ -43,7 +44,16 @@
       "fire": "急救·消防",
       "hotline": "旅游翻译热线（24小时）"
     },
-    "koNote": ""
+    "koNote": "",
+    "topics": {
+      "pojangmacha": "路边摊礼仪",
+      "dining": "餐厅酒馆礼仪",
+      "noraebang": "练歌房礼仪",
+      "festival": "庆典人流礼仪",
+      "oncheon": "温泉足浴礼仪",
+      "nature": "自然夜景礼仪"
+    },
+    "generating": "AI 正在生成礼仪指南…"
   },
   "spot": {
     "back": "返回列表",
@@ -60,6 +70,7 @@
       "high": "拥挤",
       "best": "最空闲的一天",
       "source": "基于移动通信数据的7天预测"
-    }
+    },
+    "generating": "AI 正在为该景点生成夜间指南…"
   }
 }
