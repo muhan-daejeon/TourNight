@@ -12,7 +12,8 @@
     "db:sync": "node --env-file=.env.local db/sync-kto.mjs",
     "db:classify": "node --env-file=.env.local db/classify-night.mjs",
     "db:i18n": "node --env-file=.env.local db/sync-i18n.mjs",
-    "db:congestion": "node --env-file=.env.local db/sync-congestion.mjs"
+    "db:congestion": "node --env-file=.env.local db/sync-congestion.mjs",
+    "db:related": "node --env-file=.env.local db/sync-related.mjs"
   },
   "dependencies": {
     "jose": "^6.2.8",

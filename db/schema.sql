@@ -110,6 +110,16 @@ create table if not exists etiquette_cache (
   primary key (topic_id, locale)
 );
 
+-- KTO 연관 관광지(차량 이동 기반) 중 우리 야간명소끼리의 연결 — 코스 '함께 방문' 배지용.
+-- db/sync-related.mjs가 TarRlteTarService1에서 수집해 좌표 있는 우리 스팟쌍만 저장한다.
+create table if not exists spot_related (
+  content_id text not null,          -- 기준 스팟(night_spots.content_id)
+  related_content_id text not null,  -- 연관 스팟(우리 스팟)
+  rank int,                          -- KTO 연관 순위
+  base_ym text,                      -- 수집 기준월 (YYYYMM)
+  primary key (content_id, related_content_id)
+);
+
 -- 커뮤니티 글/댓글 작성자 계정 연결 (본인 글 삭제 판별용) — users 정의 후에 추가.
 -- 계정 삭제 시 글은 남기되 소유만 해제(set null). 기존 글은 null(삭제 버튼 없음).
 alter table community_posts add column if not exists user_id bigint references users(id) on delete set null;

@@ -41,9 +41,12 @@ export default function Header() {
           >
             {t("nav.phrases")}
           </Link>
-          <span className="shrink-0 cursor-not-allowed text-slate-600">
+          <Link
+            href="/courses"
+            className={linkClass(pathname.startsWith("/courses"))}
+          >
             {t("nav.courses")}
-          </span>
+          </Link>
           <Link
             href="/community"
             className={linkClass(pathname.startsWith("/community"))}

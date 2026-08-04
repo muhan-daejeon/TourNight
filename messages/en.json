@@ -32,6 +32,16 @@
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest."
   },
+  "courses": {
+    "title": "Recommended Courses",
+    "subtitle": "Night-drive routes linking Daejeon's after-dark spots. Legs where visitors actually travel together (KTO vehicle-movement data) are marked 'Visited together'.",
+    "courseTitle": "{name} Course",
+    "stopsCount": "{count} stops",
+    "together": "Visited together",
+    "directions": "Directions to start (Kakao Map)",
+    "dataNote": "Based on vehicle-movement stats (KTO related destinations)",
+    "empty": "Couldn't load courses. Please try again later."
+  },
   "etiquette": {
     "title": "Night Etiquette",
     "subtitle": "How to enjoy Daejeon nights the right way — pick a situation",

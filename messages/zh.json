@@ -32,6 +32,16 @@
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。"
   },
+  "courses": {
+    "title": "推荐路线",
+    "subtitle": "串联大田夜景景点的自驾路线。根据车辆移动统计（KTO 关联景点），实际常一起前往的路段标注为“常一起去”。",
+    "courseTitle": "{name} 路线",
+    "stopsCount": "{count}个地点",
+    "together": "常一起去",
+    "directions": "到出发地的 KakaoMap 导航",
+    "dataNote": "基于车辆移动统计（KTO 关联景点）",
+    "empty": "加载路线失败，请稍后再试。"
+  },
   "etiquette": {
     "title": "夜间礼仪",
     "subtitle": "正确畅享大田之夜 — 请选择场景",
