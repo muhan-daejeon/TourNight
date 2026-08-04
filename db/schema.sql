@@ -51,6 +51,14 @@ create table if not exists spot_guide (
   primary key (content_id, locale)
 );
 
+-- 관광지 집중률 예측 (KT 통신데이터 기반, TatsCnctrRateService — db/sync-congestion.mjs)
+create table if not exists spot_congestion (
+  content_id text not null,
+  base_ymd date not null,
+  rate numeric not null,  -- 0~100 상대 집중률 (가장 붐비는 시기 = 100)
+  primary key (content_id, base_ymd)
+);
+
 -- 서바이벌 한국어 표현 캐시 (언어당 1회 생성)
 create table if not exists phrase_cache (
   locale text primary key,

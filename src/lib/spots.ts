@@ -76,6 +76,23 @@ export async function getSpot(
   return { ...toSpot(rows[0]), officialOverview: rows[0].official_overview ?? null };
 }
 
+export interface CongestionDay {
+  date: string; // YYYY-MM-DD
+  rate: number; // 0~100 상대 집중률
+}
+
+/** 향후 7일 혼잡도 예측 (KT 통신데이터 기반, 데이터 없는 스팟은 빈 배열) */
+export async function getCongestion(contentId: string): Promise<CongestionDay[]> {
+  const rows = await sql<{ date: string; rate: string }[]>`
+    select to_char(base_ymd, 'YYYY-MM-DD') as date, rate
+    from spot_congestion
+    where content_id = ${contentId}
+      and base_ymd >= current_date and base_ymd < current_date + 7
+    order by base_ymd
+  `;
+  return rows.map((r) => ({ date: r.date, rate: Number(r.rate) }));
+}
+
 export interface NearbySpot extends NightSpot {
   distanceM: number;
 }

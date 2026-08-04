@@ -52,6 +52,14 @@
     "nearbyNature": "Nature Night Views Nearby",
     "nearby": "More Spots Nearby",
     "guideTitle": "TourNight Guide",
-    "nearbyStay": "Stays Nearby"
+    "nearbyStay": "Stays Nearby",
+    "congestion": {
+      "title": "Crowd Forecast",
+      "low": "Quiet",
+      "mid": "Moderate",
+      "high": "Busy",
+      "best": "Quietest day",
+      "source": "7-day forecast based on mobile carrier data"
+    }
   }
 }

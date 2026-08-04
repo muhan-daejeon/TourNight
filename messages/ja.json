@@ -52,6 +52,14 @@
     "nearbyNature": "近くの自然夜景",
     "nearby": "周辺のナイトスポット",
     "guideTitle": "ツアーナイトガイド",
-    "nearbyStay": "周辺の宿"
+    "nearbyStay": "周辺の宿",
+    "congestion": {
+      "title": "混雑予測",
+      "low": "空き",
+      "mid": "普通",
+      "high": "混雑",
+      "best": "最も空いている日",
+      "source": "携帯通信データに基づく7日間予測"
+    }
   }
 }

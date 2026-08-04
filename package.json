@@ -11,7 +11,8 @@
     "etiquette:pregen": "node --env-file=.env.local db/pregen-etiquette.mjs",
     "db:sync": "node --env-file=.env.local db/sync-kto.mjs",
     "db:classify": "node --env-file=.env.local db/classify-night.mjs",
-    "db:i18n": "node --env-file=.env.local db/sync-i18n.mjs"
+    "db:i18n": "node --env-file=.env.local db/sync-i18n.mjs",
+    "db:congestion": "node --env-file=.env.local db/sync-congestion.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.28.0",
