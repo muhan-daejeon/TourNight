@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  listComments,
-  createComment,
-  AUTHOR_MAX,
-  BODY_MAX,
-} from "@/lib/community";
+import { listComments, createComment, BODY_MAX } from "@/lib/community";
+import { getSessionUser } from "@/lib/session";
 
-/** 특정 글의 댓글 목록 */
+/** 특정 글의 댓글 목록 (읽기는 로그인 불필요) */
 export async function GET(
   _request: NextRequest,
   ctx: { params: Promise<{ postId: string }> },
@@ -19,7 +15,7 @@ export async function GET(
   return NextResponse.json({ comments });
 }
 
-/** 댓글 작성 */
+/** 댓글 작성 — 로그인 필요, 작성자는 세션 닉네임으로 강제 */
 export async function POST(
   request: NextRequest,
   ctx: { params: Promise<{ postId: string }> },
@@ -29,27 +25,32 @@ export async function POST(
     return NextResponse.json({ error: "invalid post id" }, { status: 400 });
   }
 
-  let payload: { author?: unknown; body?: unknown };
+  const session = await getSessionUser();
+  if (!session) {
+    return NextResponse.json({ error: "login_required" }, { status: 401 });
+  }
+
+  let payload: { body?: unknown };
   try {
     payload = await request.json();
   } catch {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
 
-  const author = typeof payload.author === "string" ? payload.author : "";
   const body = typeof payload.body === "string" ? payload.body : "";
-  if (!author.trim() || !body.trim()) {
-    return NextResponse.json(
-      { error: "author and body are required" },
-      { status: 400 },
-    );
+  if (!body.trim()) {
+    return NextResponse.json({ error: "body is required" }, { status: 400 });
   }
-  if (author.length > AUTHOR_MAX * 2 || body.length > BODY_MAX * 2) {
+  if (body.length > BODY_MAX * 2) {
     return NextResponse.json({ error: "too long" }, { status: 400 });
   }
 
   try {
-    const comment = await createComment(postId, { author, body });
+    // 작성자는 세션 닉네임으로 강제 (위조 방지)
+    const comment = await createComment(postId, {
+      author: session.nickname,
+      body,
+    });
     if (comment === "not-found") {
       return NextResponse.json({ error: "post not found" }, { status: 404 });
     }

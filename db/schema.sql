@@ -81,6 +81,19 @@ create table if not exists community_comments (
 
 create index if not exists community_comments_post_idx on community_comments (post_id, created_at);
 
+-- 회원 (이메일 로그인 + 표시용 닉네임 + 국가). 비번은 scrypt 해시(salt:hash)로만 저장.
+-- oauth_* 컬럼은 이후 소셜 로그인 확장 대비 예약 (지금은 미사용)
+create table if not exists users (
+  id bigint generated always as identity primary key,
+  email text unique not null,
+  password_hash text,               -- 소셜 전용 계정은 null 가능
+  nickname text not null,
+  country text,                     -- ISO 3166-1 alpha-2 (예: KR, JP)
+  oauth_provider text,              -- 예: 'google' (예약)
+  oauth_id text,                    -- 제공자 측 사용자 id (예약)
+  created_at timestamptz not null default now()
+);
+
 -- 서바이벌 한국어 표현 캐시 (언어당 1회 생성)
 create table if not exists phrase_cache (
   locale text primary key,

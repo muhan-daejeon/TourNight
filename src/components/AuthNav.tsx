@@ -1,0 +1,84 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { LogOut } from "lucide-react";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+
+interface Me {
+  nickname: string;
+}
+
+export default function AuthNav() {
+  const t = useTranslations("auth");
+  const pathname = usePathname();
+  const router = useRouter();
+  // undefined = 로딩(아직 모름), null = 비로그인, Me = 로그인
+  const [user, setUser] = useState<Me | null | undefined>(undefined);
+
+  // 경로 변경 시마다 세션 재확인 — 로그인/로그아웃 후 헤더 즉시 갱신
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setUser(data.user ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null);
+    router.push("/");
+    router.refresh();
+  }
+
+  if (user === undefined) {
+    return <div className="h-5 w-16" aria-hidden />; // 로딩 자리(레이아웃 흔들림 방지)
+  }
+
+  if (user) {
+    return (
+      <div className="flex shrink-0 items-center gap-2 text-sm">
+        <span className="max-w-24 truncate font-semibold text-amber-300">
+          {user.nickname}
+        </span>
+        <button
+          type="button"
+          onClick={logout}
+          className="flex items-center gap-1 text-slate-400 transition hover:text-white"
+          aria-label={t("logout")}
+        >
+          <LogOut size={15} />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex shrink-0 items-center gap-3 text-sm text-slate-300">
+      <Link
+        href="/login"
+        className={
+          pathname.startsWith("/login")
+            ? "font-semibold text-amber-300"
+            : "transition hover:text-amber-300"
+        }
+      >
+        {t("login")}
+      </Link>
+      <Link
+        href="/signup"
+        className="rounded-full bg-amber-400 px-3 py-1.5 font-bold text-slate-950 transition hover:bg-amber-300"
+      >
+        {t("signup")}
+      </Link>
+    </div>
+  );
+}

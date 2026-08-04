@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { MoonStar } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import LocaleSwitcher from "./LocaleSwitcher";
+import AuthNav from "./AuthNav";
 
 export default function Header() {
   const t = useTranslations();
@@ -50,7 +51,10 @@ export default function Header() {
             {t("nav.community")}
           </Link>
         </nav>
-        <LocaleSwitcher />
+        <div className="flex shrink-0 items-center gap-3">
+          <AuthNav />
+          <LocaleSwitcher />
+        </div>
       </div>
     </header>
   );

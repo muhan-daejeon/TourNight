@@ -69,7 +69,10 @@
     "commentAdd": "コメントする",
     "commentEmpty": "まだコメントがありません",
     "commentPlaceholder": "コメントを入力",
-    "commentSubmit": "投稿"
+    "commentSubmit": "投稿",
+    "postingAs": "投稿者",
+    "loginToPost": "ログインしてレビューを投稿しましょう",
+    "loginToComment": "ログインしてコメントしましょう"
   },
   "spot": {
     "back": "一覧へ戻る",
@@ -88,5 +91,35 @@
       "source": "携帯通信データに基づく7日間予測"
     },
     "generating": "AIがこの場所のナイトガイドを作成中…"
+  },
+  "auth": {
+    "login": "ログイン",
+    "signup": "会員登録",
+    "logout": "ログアウト",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "nickname": "ニックネーム",
+    "country": "国",
+    "countryPlaceholder": "国を選択（任意）",
+    "loginTitle": "ログイン",
+    "loginSubtitle": "メールアドレスでログイン",
+    "signupTitle": "会員登録",
+    "signupSubtitle": "ツアーナイトのアカウントを作成",
+    "submitLogin": "ログイン",
+    "submitSignup": "登録する",
+    "passwordHint": "8文字以上で入力してください",
+    "haveAccount": "すでにアカウントをお持ちですか？",
+    "noAccount": "アカウントをお持ちでないですか？",
+    "goLogin": "ログイン",
+    "goSignup": "会員登録",
+    "errors": {
+      "invalid_email": "有効なメールアドレスを入力してください。",
+      "invalid_password": "パスワードは8文字以上で入力してください。",
+      "invalid_nickname": "ニックネームを入力してください。",
+      "invalid_country": "国の選択が正しくありません。",
+      "email_taken": "このメールアドレスは既に登録されています。",
+      "invalid_credentials": "メールアドレスまたはパスワードが正しくありません。",
+      "generic": "しばらくしてからもう一度お試しください。"
+    }
   }
 }
