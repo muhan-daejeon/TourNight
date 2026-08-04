@@ -90,7 +90,7 @@ export default async function SpotPage({
   setRequestLocale(locale);
   const contentId = decodeURIComponent(rawId);
 
-  const spot = await getSpot(contentId);
+  const spot = await getSpot(contentId, locale);
   if (!spot) notFound();
 
   const t = await getTranslations("spot");
@@ -100,8 +100,8 @@ export default async function SpotPage({
   const [natureNearby, nearby, stays] = await Promise.all([
     spot.category === "nature"
       ? Promise.resolve([])
-      : getNearbySpots(contentId, { natureOnly: true, limit: 3 }),
-    getNearbySpots(contentId, { limit: 4 }),
+      : getNearbySpots(contentId, { natureOnly: true, limit: 3, locale }),
+    getNearbySpots(contentId, { limit: 4, locale }),
     fetchNearbyStays(spot.mapX, spot.mapY),
   ]);
 

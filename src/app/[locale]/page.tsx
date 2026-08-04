@@ -16,7 +16,7 @@ export default async function HomePage({
   setRequestLocale(locale);
   const t = await getTranslations("home");
   const site = await getTranslations("site");
-  const spots = await getVerifiedNightSpots();
+  const spots = await getVerifiedNightSpots(locale);
 
   return (
     <div>

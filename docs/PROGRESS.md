@@ -13,7 +13,7 @@
 | 야간 명소 탐색 | 검증된 스팟 46곳, 카테고리 필터 + 텍스트 검색, 리스트↔지도 연동(커스텀 핀·정보카드) |
 | 스팟 상세 | 공식 사진, AI 야간 가이드(KTO 개요→Gemini 현지화+팁, DB 캐시), 인근 자연 야경·주변 스팟(PostGIS 거리순), 카카오맵 길찾기 딥링크 |
 | 서바이벌 한국어 | 밤 상황 필수 표현 8개(발음+뜻), 언어별 캐시. 긴급연락처(112·119·1330)는 전 페이지 푸터 |
-| 다국어 | ko/en/ja/zh 자동 감지, 미지원 언어는 영어 폴백 |
+| 다국어 | ko/en/ja/zh 자동 감지, 미지원 언어는 영어 폴백. 명소 이름·소개문은 KTO 다국어 관광정보 서비스(영/일/중 GW)의 공식 번역 사용(좌표 매칭), 없으면 Gemini 폴백 |
 | 데이터 파이프라인 | KTO 실데이터 142건 수집·야간 분류·수동 검수 완료 |
 
 ## 🔧 데이터 파이프라인 (스팟 추가/갱신 시)
@@ -23,6 +23,7 @@ npm run db:setup          # 스키마+시드 (최초 1회 또는 스키마 변�
 npm run db:sync           # KTO areaBasedList2 → night_spots 적재/갱신
 npm run db:classify       # 운영시간 수집(detailIntro2) + Gemini 야간 후보 분류
 # → 후보를 사람이 검수한 뒤 night_verified=true 처리 (SQL)
+npm run db:i18n           # 다국어 공식 번역 수집 (영/일/중 GW, 좌표 매칭)
 npm run etiquette:pregen  # 가이드·표현 사전생성 (한도 걸리면 GEMINI_MODEL=gemini-flash-lite-latest로)
 ```
 

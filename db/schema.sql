@@ -30,6 +30,17 @@ alter table night_spots add column if not exists use_time text;
 alter table night_spots add column if not exists night_candidate boolean;
 alter table night_spots add column if not exists night_reason text;
 
+-- KTO 다국어 관광정보 서비스(영/일/중 GW) 공식 번역 — 좌표 매칭으로 수집 (db/sync-i18n.mjs)
+create table if not exists spot_translations (
+  content_id text not null,        -- 우리 night_spots의 content_id (국문 기준)
+  locale text not null,            -- en / ja / zh / ko
+  lang_content_id text,            -- 해당 언어 서비스의 contentid
+  title text,                      -- 공식 번역 명칭
+  overview text,                   -- 공식 번역 소개문
+  updated_at timestamptz not null default now(),
+  primary key (content_id, locale)
+);
+
 -- 스팟별 현지화 가이드 캐시 (KTO 개요 → Gemini 번역·요약 + 야간 팁, 스팟·언어당 1회 생성)
 create table if not exists spot_guide (
   content_id text not null,
