@@ -13,10 +13,16 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { getSpot, getNearbySpots, type NearbySpot } from "@/lib/spots";
+import {
+  getSpot,
+  getNearbySpots,
+  getCongestion,
+  type NearbySpot,
+} from "@/lib/spots";
 import { fetchNearbyStays } from "@/lib/kto";
 import NightMap from "@/components/NightMap";
 import SpotGuide from "@/components/SpotGuide";
+import CongestionForecast from "@/components/CongestionForecast";
 
 const CATEGORY_ICON: Record<string, LucideIcon> = {
   science: Telescope,
@@ -97,12 +103,13 @@ export default async function SpotPage({
   const home = await getTranslations("home");
   const Icon = CATEGORY_ICON[spot.category];
 
-  const [natureNearby, nearby, stays] = await Promise.all([
+  const [natureNearby, nearby, stays, congestion] = await Promise.all([
     spot.category === "nature"
       ? Promise.resolve([])
       : getNearbySpots(contentId, { natureOnly: true, limit: 3, locale }),
     getNearbySpots(contentId, { limit: 4, locale }),
     fetchNearbyStays(spot.mapX, spot.mapY),
+    getCongestion(contentId),
   ]);
 
   const kakaoDirections = `https://map.kakao.com/link/to/${encodeURIComponent(spot.title)},${spot.mapY},${spot.mapX}`;
@@ -170,6 +177,9 @@ export default async function SpotPage({
           <div className="space-y-6">
             {/* AI 야간 가이드 */}
             <SpotGuide contentId={spot.contentId} />
+
+            {/* 혼잡도 예측 — KT 이동통신 데이터 기반 (데이터 있는 스팟만) */}
+            <CongestionForecast days={congestion} locale={locale} />
 
             {/* 근처 자연 야경 (대전 차별점: 도심 → 자연 연계) */}
             {natureNearby.length > 0 && (

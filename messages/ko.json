@@ -52,6 +52,14 @@
     "nearbyNature": "근처 자연 야경",
     "nearby": "주변 야간 스팟",
     "guideTitle": "투어나잇 야간 가이드",
-    "nearbyStay": "주변 숙소"
+    "nearbyStay": "주변 숙소",
+    "congestion": {
+      "title": "혼잡도 예측",
+      "low": "여유",
+      "mid": "보통",
+      "high": "붐빔",
+      "best": "가장 한산한 날",
+      "source": "이동통신 데이터 기반 향후 7일 예측"
+    }
   }
 }
