@@ -51,9 +51,15 @@
     "namePlaceholder": "Name",
     "bodyPlaceholder": "Share a review of a night spot or ask a question",
     "submit": "Post",
+    "justNow": "just now",
     "empty": "No posts yet. Be the first to share!",
     "error": "Couldn't load posts. Please try again later.",
-    "submitError": "Failed to post. Please try again later."
+    "submitError": "Failed to post. Please try again later.",
+    "comments": "Comments",
+    "commentAdd": "Add a comment",
+    "commentEmpty": "No comments yet",
+    "commentPlaceholder": "Write a comment",
+    "commentSubmit": "Post"
   },
   "spot": {
     "back": "Back to list",

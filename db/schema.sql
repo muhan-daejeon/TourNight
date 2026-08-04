@@ -70,6 +70,17 @@ create table if not exists community_posts (
 
 create index if not exists community_posts_created_idx on community_posts (created_at desc);
 
+-- 커뮤니티 댓글 (글에 달리는 답글, 글과 함께 삭제)
+create table if not exists community_comments (
+  id bigint generated always as identity primary key,
+  post_id bigint not null references community_posts(id) on delete cascade,
+  author text not null,
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists community_comments_post_idx on community_comments (post_id, created_at);
+
 -- 서바이벌 한국어 표현 캐시 (언어당 1회 생성)
 create table if not exists phrase_cache (
   locale text primary key,

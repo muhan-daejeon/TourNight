@@ -39,3 +39,13 @@ from (values
   ('Sarah', 'Daecheongho lake trail was so peaceful at night. Bring a flashlight!')
 ) as v(author, body)
 where not exists (select 1 from community_posts);
+
+-- 커뮤니티 시드 댓글 (시드 글에 달림, 비었을 때만 삽입)
+insert into community_comments (post_id, author, body)
+select p.id, v.author, v.body
+from (values
+  ('Mina', 'Yuki', '저도 한빛탑 야경 보러 갈래요! 정보 감사합니다 😊'),
+  ('Kenji', 'Somin', '대전시민천문대는 보통 밤 10시까지 운영해요 (월요일 휴관)')
+) as v(post_author, author, body)
+join community_posts p on p.author = v.post_author
+where not exists (select 1 from community_comments);

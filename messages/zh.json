@@ -51,9 +51,15 @@
     "namePlaceholder": "昵称",
     "bodyPlaceholder": "分享你夜游的点评，或提出你的疑问",
     "submit": "发布",
+    "justNow": "刚刚",
     "empty": "还没有帖子，来发第一条吧！",
     "error": "加载帖子失败，请稍后再试。",
-    "submitError": "发布失败，请稍后再试。"
+    "submitError": "发布失败，请稍后再试。",
+    "comments": "评论",
+    "commentAdd": "添加评论",
+    "commentEmpty": "还没有评论",
+    "commentPlaceholder": "输入评论",
+    "commentSubmit": "发布"
   },
   "spot": {
     "back": "返回列表",
