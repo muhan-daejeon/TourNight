@@ -12,6 +12,16 @@ on conflict (content_id) do nothing;
 -- 시드 명소는 야간 검증 완료 처리
 update night_spots set night_verified = true where content_id like 'mock-%';
 
+-- 큐레이션 스팟 수동 번역 (KTO 다국어 서비스에 없는 곳들)
+insert into spot_translations (content_id, locale, title) values
+  ('mock-1', 'en', 'Hanbit Tower'), ('mock-1', 'ja', 'ハンビット塔'), ('mock-1', 'zh', '韩光塔'),
+  ('mock-2', 'en', 'Expo Bridge'), ('mock-2', 'ja', 'エキスポ橋'), ('mock-2', 'zh', '世博桥'),
+  ('mock-3', 'en', 'Daejeon Observatory'), ('mock-3', 'ja', '大田市民天文台'), ('mock-3', 'zh', '大田市民天文台'),
+  ('mock-4', 'en', 'Daecheongho Lake Trail'), ('mock-4', 'ja', '大清湖五百里道'), ('mock-4', 'zh', '大清湖五百里路'),
+  ('mock-5', 'en', 'Sikjangsan Observatory'), ('mock-5', 'ja', '食蔵山展望台'), ('mock-5', 'zh', '食藏山观景台'),
+  ('mock-6', 'en', 'Daejeon 0 O''Clock Festival'), ('mock-6', 'ja', '大田0時祭り'), ('mock-6', 'zh', '大田0时庆典')
+on conflict (content_id, locale) do nothing;
+
 -- 큐레이션 스팟 사진 (위키미디어 CC0·공공누리 1유형, public/spots/)
 update night_spots set image_url = '/spots/hanbit-tower.jpg' where content_id = 'mock-1';
 update night_spots set image_url = '/spots/expo-bridge.jpg' where content_id = 'mock-2';

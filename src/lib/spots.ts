@@ -1,26 +1,21 @@
 import { sql } from "./db";
 import { MOCK_NIGHT_SPOTS, type NightSpot } from "./kto";
 
-/** 야간 검증(night_verified) 완료된 스팟만 조회 — 홈 화면 데이터 소스 */
-export async function getVerifiedNightSpots(): Promise<NightSpot[]> {
+/**
+ * 야간 검증(night_verified) 완료된 스팟만 조회 — 홈 화면 데이터 소스
+ * locale을 주면 KTO 다국어 관광정보 서비스의 공식 번역 명칭으로 표시한다.
+ */
+export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]> {
   try {
-    const rows = await sql<
-      {
-        content_id: string;
-        title: string;
-        addr: string;
-        category: string;
-        image_url: string | null;
-        map_x: number;
-        map_y: number;
-      }[]
-    >`
-      select content_id, title, addr, category, image_url,
-             st_x(geom) as map_x, st_y(geom) as map_y
-      from night_spots
-      where night_verified = true
-        and image_url is not null -- 사진 있는 스팟만 노출 (팀 방침)
-      order by category, title
+    const rows = await sql<SpotRow[]>`
+      select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
+             st_x(s.geom) as map_x, st_y(s.geom) as map_y
+      from night_spots s
+      left join spot_translations tr
+        on tr.content_id = s.content_id and tr.locale = ${locale}
+      where s.night_verified = true
+        and s.image_url is not null -- 사진 있는 스팟만 노출 (팀 방침)
+      order by s.category, s.title
     `;
     return rows.map(toSpot);
   } catch (err) {
@@ -43,6 +38,7 @@ interface SpotRow {
   map_x: number;
   map_y: number;
   dist_m?: number;
+  official_overview?: string | null;
 }
 
 function toSpot(r: SpotRow): NightSpot {
@@ -57,15 +53,27 @@ function toSpot(r: SpotRow): NightSpot {
   };
 }
 
-/** 상세 페이지용 단건 조회 (검증 여부 무관 — 직링크 대응은 검증된 것만) */
-export async function getSpot(contentId: string): Promise<NightSpot | null> {
+export interface SpotDetail extends NightSpot {
+  /** KTO 다국어 서비스의 공식 소개문 (없으면 null → Gemini 가이드가 대신함) */
+  officialOverview: string | null;
+}
+
+/** 상세 페이지용 단건 조회 — 공식 번역 명칭·소개문 포함 */
+export async function getSpot(
+  contentId: string,
+  locale = "ko",
+): Promise<SpotDetail | null> {
   const rows = await sql<SpotRow[]>`
-    select content_id, title, addr, category, image_url,
-           st_x(geom) as map_x, st_y(geom) as map_y
-    from night_spots
-    where content_id = ${contentId} and night_verified = true
+    select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
+           st_x(s.geom) as map_x, st_y(s.geom) as map_y,
+           nullif(trim(tr.overview), '') as official_overview
+    from night_spots s
+    left join spot_translations tr
+      on tr.content_id = s.content_id and tr.locale = ${locale}
+    where s.content_id = ${contentId} and s.night_verified = true
   `;
-  return rows.length ? toSpot(rows[0]) : null;
+  if (!rows.length) return null;
+  return { ...toSpot(rows[0]), officialOverview: rows[0].official_overview ?? null };
 }
 
 export interface NearbySpot extends NightSpot {
@@ -75,14 +83,20 @@ export interface NearbySpot extends NightSpot {
 /** 인근 검증 스팟 (거리순). natureOnly면 자연 카테고리만 */
 export async function getNearbySpots(
   contentId: string,
-  { natureOnly = false, limit = 4 }: { natureOnly?: boolean; limit?: number } = {},
+  {
+    natureOnly = false,
+    limit = 4,
+    locale = "ko",
+  }: { natureOnly?: boolean; limit?: number; locale?: string } = {},
 ): Promise<NearbySpot[]> {
   const rows = await sql<SpotRow[]>`
-    select s.content_id, s.title, s.addr, s.category, s.image_url,
+    select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
            st_x(s.geom) as map_x, st_y(s.geom) as map_y,
            round(st_distance(s.geom::geography, base.geom::geography)) as dist_m
-    from night_spots s,
-         (select geom from night_spots where content_id = ${contentId}) base
+    from night_spots s
+    cross join (select geom from night_spots where content_id = ${contentId}) base
+    left join spot_translations tr
+      on tr.content_id = s.content_id and tr.locale = ${locale}
     where s.night_verified = true
       and s.image_url is not null
       and s.content_id != ${contentId}
