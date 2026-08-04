@@ -7,12 +7,19 @@ import { Link, useRouter } from "@/i18n/navigation";
 const fieldClass =
   "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
 
-export default function LoginForm() {
+export default function LoginForm({
+  oauthError = false,
+}: {
+  oauthError?: boolean;
+}) {
   const t = useTranslations("auth");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  // OAuth 콜백 실패로 넘어온 경우 초기 에러 표시
+  const [error, setError] = useState<string | null>(
+    oauthError ? (t.raw("errors") as Record<string, string>).oauth : null,
+  );
   const [pending, setPending] = useState(false);
 
   function errorText(code: string) {

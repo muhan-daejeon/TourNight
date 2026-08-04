@@ -110,6 +110,8 @@
     "submitLogin": "登录",
     "submitSignup": "注册",
     "passwordHint": "至少8个字符",
+    "continueWithGoogle": "使用 Google 继续",
+    "or": "或",
     "haveAccount": "已有账号？",
     "noAccount": "还没有账号？",
     "goLogin": "登录",
@@ -126,6 +128,7 @@
       "invalid_country": "国家选择无效。",
       "email_taken": "该邮箱已注册。",
       "invalid_credentials": "邮箱或密码不正确。",
+      "oauth": "Google 登录失败，请重试。",
       "generic": "请稍后再试。"
     }
   }
