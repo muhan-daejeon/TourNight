@@ -83,3 +83,19 @@ export async function createUser(input: {
   `;
   return toUser(rows[0]);
 }
+
+/** 프로필(닉네임·국가) 수정. 닉네임이 비면 null 반환(호출부 400) */
+export async function updateProfile(
+  userId: number,
+  input: { nickname: string; country: string | null },
+): Promise<User | null> {
+  const nickname = input.nickname?.trim().slice(0, NICKNAME_MAX) ?? "";
+  if (!nickname) return null;
+  const rows = await sql<UserRow[]>`
+    update users
+    set nickname = ${nickname}, country = ${input.country}
+    where id = ${userId}
+    returning id, email, nickname, country
+  `;
+  return rows[0] ? toUser(rows[0]) : null;
+}

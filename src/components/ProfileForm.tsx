@@ -1,0 +1,156 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { LogIn } from "lucide-react";
+import { COUNTRIES } from "@/lib/countries";
+import { Link, useRouter } from "@/i18n/navigation";
+
+interface User {
+  id: number;
+  email: string;
+  nickname: string;
+  country: string | null;
+}
+
+const fieldClass =
+  "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
+
+export default function ProfileForm() {
+  const t = useTranslations("auth");
+  const router = useRouter();
+  const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [nickname, setNickname] = useState("");
+  const [country, setCountry] = useState("");
+  const [pending, setPending] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        setUser(data.user ?? null);
+        if (data.user) {
+          setNickname(data.user.nickname);
+          setCountry(data.user.country ?? "");
+        }
+      })
+      .catch(() => setUser(null));
+  }, []);
+
+  function errorText(code: string) {
+    const messages = t.raw("errors") as Record<string, string>;
+    return messages[code] ?? messages.generic;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (pending || !nickname.trim()) return;
+    setPending(true);
+    setError(null);
+    setSaved(false);
+    try {
+      const res = await fetch("/api/auth/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nickname, country: country || null }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(errorText(data.error ?? "generic"));
+        return;
+      }
+      setUser(data.user);
+      setSaved(true);
+      router.refresh(); // 헤더 닉네임 갱신
+    } catch {
+      setError(errorText("generic"));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  if (user === undefined) {
+    return (
+      <div className="h-56 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
+    );
+  }
+
+  if (user === null) {
+    return (
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+        <span className="text-sm text-slate-400">{t("loginRequired")}</span>
+        <Link
+          href="/login"
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-amber-400 px-4 py-1.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
+        >
+          <LogIn size={14} />
+          {t("login")}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="mb-1.5 block text-sm text-slate-300">
+          {t("email")}
+        </label>
+        <input
+          type="email"
+          value={user.email}
+          disabled
+          className={`${fieldClass} cursor-not-allowed opacity-60`}
+        />
+      </div>
+      <div>
+        <label className="mb-1.5 block text-sm text-slate-300">
+          {t("nickname")}
+        </label>
+        <input
+          type="text"
+          maxLength={20}
+          value={nickname}
+          onChange={(e) => {
+            setNickname(e.target.value);
+            setSaved(false);
+          }}
+          className={fieldClass}
+        />
+      </div>
+      <div>
+        <label className="mb-1.5 block text-sm text-slate-300">
+          {t("country")}
+        </label>
+        <select
+          value={country}
+          onChange={(e) => {
+            setCountry(e.target.value);
+            setSaved(false);
+          }}
+          className={`${fieldClass} appearance-none`}
+        >
+          <option value="">{t("countryPlaceholder")}</option>
+          {COUNTRIES.map((c) => (
+            <option key={c.code} value={c.code}>
+              {c.flag} {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {error && <p className="text-sm text-rose-400">{error}</p>}
+      {saved && <p className="text-sm text-emerald-400">{t("saved")}</p>}
+
+      <button
+        type="submit"
+        disabled={pending || !nickname.trim()}
+        className="w-full rounded-full bg-amber-400 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {t("save")}
+      </button>
+    </form>
+  );
+}

@@ -15,7 +15,7 @@ export async function GET(
   return NextResponse.json({ comments });
 }
 
-/** 댓글 작성 — 로그인 필요, 작성자는 세션 닉네임으로 강제 */
+/** 댓글 작성 — 로그인 필요, 작성자·소유자는 세션 계정으로 강제 */
 export async function POST(
   request: NextRequest,
   ctx: { params: Promise<{ postId: string }> },
@@ -46,8 +46,8 @@ export async function POST(
   }
 
   try {
-    // 작성자는 세션 닉네임으로 강제 (위조 방지)
     const comment = await createComment(postId, {
+      userId: session.userId,
       author: session.nickname,
       body,
     });

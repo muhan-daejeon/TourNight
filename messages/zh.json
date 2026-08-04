@@ -72,7 +72,9 @@
     "commentSubmit": "发布",
     "postingAs": "发布者",
     "loginToPost": "登录后分享点评",
-    "loginToComment": "登录后发表评论"
+    "loginToComment": "登录后发表评论",
+    "delete": "删除",
+    "deleteConfirm": "确定删除？"
   },
   "spot": {
     "back": "返回列表",
@@ -112,6 +114,11 @@
     "noAccount": "还没有账号？",
     "goLogin": "登录",
     "goSignup": "注册",
+    "profileTitle": "个人资料",
+    "profileSubtitle": "管理你的昵称和国家",
+    "save": "保存",
+    "saved": "已保存",
+    "loginRequired": "需要登录",
     "errors": {
       "invalid_email": "请输入有效的邮箱。",
       "invalid_password": "密码至少需要8个字符。",

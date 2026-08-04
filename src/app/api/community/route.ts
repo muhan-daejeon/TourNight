@@ -8,7 +8,7 @@ export async function GET() {
   return NextResponse.json({ posts });
 }
 
-/** 한줄 후기/질문 작성 — 로그인 필요, 작성자는 세션 닉네임으로 강제 */
+/** 한줄 후기/질문 작성 — 로그인 필요, 작성자·소유자는 세션 계정으로 강제 */
 export async function POST(request: NextRequest) {
   const session = await getSessionUser();
   if (!session) {
@@ -31,8 +31,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // 작성자는 세션 닉네임으로 강제 — 클라이언트 입력을 신뢰하지 않음(위조 방지)
-    const post = await createPost({ author: session.nickname, body });
+    const post = await createPost({
+      userId: session.userId,
+      author: session.nickname,
+      body,
+    });
     if (!post) {
       return NextResponse.json({ error: "invalid input" }, { status: 400 });
     }

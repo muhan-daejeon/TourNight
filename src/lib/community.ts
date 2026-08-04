@@ -2,6 +2,7 @@ import { sql } from "./db";
 
 export interface CommunityPost {
   id: number;
+  userId: number | null; // 작성 계정 (기존/시드 글은 null)
   author: string;
   body: string;
   createdAt: string; // ISO 8601
@@ -10,17 +11,19 @@ export interface CommunityPost {
 
 export interface CommunityComment {
   id: number;
+  userId: number | null;
   author: string;
   body: string;
   createdAt: string; // ISO 8601
 }
 
-/** 입력 제한 — 로그인 없이 열려 있으므로 길이만 가볍게 제한 */
+/** 입력 제한 */
 export const AUTHOR_MAX = 20;
 export const BODY_MAX = 200;
 
 interface PostRow {
   id: string;
+  user_id: string | null;
   author: string;
   body: string;
   created_at: string;
@@ -29,6 +32,7 @@ interface PostRow {
 
 interface CommentRow {
   id: string;
+  user_id: string | null;
   author: string;
   body: string;
   created_at: string;
@@ -37,6 +41,7 @@ interface CommentRow {
 function toPost(r: PostRow): CommunityPost {
   return {
     id: Number(r.id),
+    userId: r.user_id != null ? Number(r.user_id) : null,
     author: r.author,
     body: r.body,
     createdAt: new Date(r.created_at).toISOString(),
@@ -47,6 +52,7 @@ function toPost(r: PostRow): CommunityPost {
 function toComment(r: CommentRow): CommunityComment {
   return {
     id: Number(r.id),
+    userId: r.user_id != null ? Number(r.user_id) : null,
     author: r.author,
     body: r.body,
     createdAt: new Date(r.created_at).toISOString(),
@@ -54,13 +60,12 @@ function toComment(r: CommentRow): CommunityComment {
 }
 
 /**
- * 최신 글 목록 (기본 100개). DB 미설정/연결 실패 시 빈 배열로 폴백해
- * 로컬 개발·UI 테스트에서 페이지가 깨지지 않게 한다.
+ * 최신 글 목록 (기본 100개). DB 미설정/연결 실패 시 빈 배열로 폴백.
  */
 export async function listPosts(limit = 100): Promise<CommunityPost[]> {
   try {
     const rows = await sql<PostRow[]>`
-      select p.id, p.author, p.body, p.created_at,
+      select p.id, p.user_id, p.author, p.body, p.created_at,
              (select count(*) from community_comments c where c.post_id = p.id) as comment_count
       from community_posts p
       order by p.created_at desc
@@ -76,8 +81,9 @@ export async function listPosts(limit = 100): Promise<CommunityPost[]> {
   }
 }
 
-/** 작성자·본문 정규화 후 저장. 유효하지 않으면 null 반환(호출부에서 400 처리) */
+/** 작성자·본문 정규화 후 저장. 유효하지 않으면 null */
 export async function createPost(input: {
+  userId: number;
   author: string;
   body: string;
 }): Promise<CommunityPost | null> {
@@ -86,9 +92,9 @@ export async function createPost(input: {
   if (!author || !body) return null;
 
   const rows = await sql<PostRow[]>`
-    insert into community_posts (author, body)
-    values (${author}, ${body})
-    returning id, author, body, created_at
+    insert into community_posts (user_id, author, body)
+    values (${input.userId}, ${author}, ${body})
+    returning id, user_id, author, body, created_at
   `;
   return toPost(rows[0]);
 }
@@ -97,7 +103,7 @@ export async function createPost(input: {
 export async function listComments(postId: number): Promise<CommunityComment[]> {
   try {
     const rows = await sql<CommentRow[]>`
-      select id, author, body, created_at
+      select id, user_id, author, body, created_at
       from community_comments
       where post_id = ${postId}
       order by created_at asc
@@ -113,12 +119,11 @@ export async function listComments(postId: number): Promise<CommunityComment[]> 
 }
 
 /**
- * 댓글 저장. 입력이 유효하지 않으면 null, 대상 글이 없으면 FK 위반(23503)을
- * "not-found"로 구분해 호출부에서 404 처리한다.
+ * 댓글 저장. 대상 글이 없으면 FK 위반(23503)을 "not-found"로 구분.
  */
 export async function createComment(
   postId: number,
-  input: { author: string; body: string },
+  input: { userId: number; author: string; body: string },
 ): Promise<CommunityComment | null | "not-found"> {
   const author = input.author?.trim().slice(0, AUTHOR_MAX) ?? "";
   const body = input.body?.trim().slice(0, BODY_MAX) ?? "";
@@ -126,15 +131,49 @@ export async function createComment(
 
   try {
     const rows = await sql<CommentRow[]>`
-      insert into community_comments (post_id, author, body)
-      values (${postId}, ${author}, ${body})
-      returning id, author, body, created_at
+      insert into community_comments (post_id, user_id, author, body)
+      values (${postId}, ${input.userId}, ${author}, ${body})
+      returning id, user_id, author, body, created_at
     `;
     return toComment(rows[0]);
   } catch (err) {
     if (err && typeof err === "object" && "code" in err && err.code === "23503") {
-      return "not-found"; // 없는 글에 댓글 시도 (foreign_key_violation)
+      return "not-found";
     }
     throw err;
   }
+}
+
+type DeleteResult = "ok" | "not-found" | "forbidden";
+
+/** 본인(userId 일치) 글만 삭제. 댓글은 FK cascade로 함께 삭제 */
+export async function deletePost(
+  postId: number,
+  userId: number,
+): Promise<DeleteResult> {
+  const rows = await sql<{ user_id: string | null }[]>`
+    select user_id from community_posts where id = ${postId}
+  `;
+  if (!rows.length) return "not-found";
+  if (rows[0].user_id == null || Number(rows[0].user_id) !== userId) {
+    return "forbidden";
+  }
+  await sql`delete from community_posts where id = ${postId}`;
+  return "ok";
+}
+
+/** 본인 댓글만 삭제 */
+export async function deleteComment(
+  commentId: number,
+  userId: number,
+): Promise<DeleteResult> {
+  const rows = await sql<{ user_id: string | null }[]>`
+    select user_id from community_comments where id = ${commentId}
+  `;
+  if (!rows.length) return "not-found";
+  if (rows[0].user_id == null || Number(rows[0].user_id) !== userId) {
+    return "forbidden";
+  }
+  await sql`delete from community_comments where id = ${commentId}`;
+  return "ok";
 }

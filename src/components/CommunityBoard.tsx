@@ -2,11 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Send, MessageSquare, MessageCircle, LogIn } from "lucide-react";
+import {
+  Send,
+  MessageSquare,
+  MessageCircle,
+  LogIn,
+  Trash2,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 interface Post {
   id: number;
+  userId: number | null;
   author: string;
   body: string;
   createdAt: string;
@@ -15,17 +22,21 @@ interface Post {
 
 interface Comment {
   id: number;
+  userId: number | null;
   author: string;
   body: string;
   createdAt: string;
+}
+
+interface Me {
+  id: number;
+  nickname: string;
 }
 
 const BODY_MAX = 200;
 
 /**
  * 상대 시간 표기 (방금 전 / N분 전 / … / 7일 넘으면 날짜) — 접속 언어로.
- * 글은 항상 과거이므로 경과 초를 양수로 계산하고, 시계 오차로 미래로 나와도
- * 60초 미만은 "방금 전"으로 처리해 "1분 후" 같은 표기를 막는다.
  */
 function formatRelative(iso: string, locale: string, justNow: string): string {
   const past = new Date(iso).getTime();
@@ -50,7 +61,6 @@ function formatRelative(iso: string, locale: string, justNow: string): string {
 const inputClass =
   "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 text-xs text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
 
-/** 비로그인 상태에서 작성 자리에 노출하는 로그인 유도 */
 function LoginPrompt({ text }: { text: string }) {
   const tAuth = useTranslations("auth");
   return (
@@ -67,13 +77,15 @@ function LoginPrompt({ text }: { text: string }) {
   );
 }
 
-/** 글 하나 + 댓글(펼쳐서 지연 로드). nickname이 없으면 비로그인 */
+/** 글 하나 + 댓글(펼쳐서 지연 로드). me가 없으면 비로그인 */
 function PostItem({
   post,
-  nickname,
+  me,
+  onDeleted,
 }: {
   post: Post;
-  nickname: string | null | undefined;
+  me: Me | null | undefined;
+  onDeleted: () => void;
 }) {
   const t = useTranslations("community");
   const locale = useLocale();
@@ -86,6 +98,9 @@ function PostItem({
   const [count, setCount] = useState(post.commentCount);
   const [replyBody, setReplyBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const ownsPost = post.userId != null && post.userId === me?.id;
 
   function toggle() {
     const next = !expanded;
@@ -129,15 +144,56 @@ function PostItem({
     }
   }
 
+  async function deletePost() {
+    if (deleting || !confirm(t("deleteConfirm"))) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/community/${post.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      onDeleted(); // 부모 목록에서 제거 → 이 컴포넌트 언마운트
+    } catch {
+      alert(t("submitError"));
+      setDeleting(false);
+    }
+  }
+
+  async function deleteComment(commentId: number) {
+    if (!confirm(t("deleteConfirm"))) return;
+    try {
+      const res = await fetch(
+        `/api/community/${post.id}/comments/${commentId}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) throw new Error();
+      setComments((prev) => (prev ?? []).filter((c) => c.id !== commentId));
+      setCount((c) => Math.max(0, c - 1));
+    } catch {
+      alert(t("submitError"));
+    }
+  }
+
   return (
     <li className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-semibold text-amber-300/90">
           {post.author}
         </span>
-        <span className="shrink-0 text-xs text-slate-500">
-          {formatRelative(post.createdAt, locale, t("justNow"))}
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="text-xs text-slate-500">
+            {formatRelative(post.createdAt, locale, t("justNow"))}
+          </span>
+          {ownsPost && (
+            <button
+              type="button"
+              onClick={deletePost}
+              disabled={deleting}
+              aria-label={t("delete")}
+              className="text-slate-500 transition hover:text-rose-400 disabled:opacity-40"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
       </div>
       <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-200">
         {post.body}
@@ -166,9 +222,21 @@ function PostItem({
                     <span className="text-xs font-semibold text-slate-300">
                       {c.author}
                     </span>
-                    <span className="shrink-0 text-[11px] text-slate-500">
-                      {formatRelative(c.createdAt, locale, t("justNow"))}
-                    </span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <span className="text-[11px] text-slate-500">
+                        {formatRelative(c.createdAt, locale, t("justNow"))}
+                      </span>
+                      {c.userId != null && c.userId === me?.id && (
+                        <button
+                          type="button"
+                          onClick={() => deleteComment(c.id)}
+                          aria-label={t("delete")}
+                          className="text-slate-500 transition hover:text-rose-400"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-slate-300">
                     {c.body}
@@ -181,7 +249,7 @@ function PostItem({
           )}
 
           {/* 답글 폼 — 로그인 시에만 */}
-          {nickname ? (
+          {me ? (
             <form onSubmit={submitReply} className="flex gap-2">
               <input
                 value={replyBody}
@@ -214,14 +282,18 @@ export default function CommunityBoard() {
   const [status, setStatus] = useState<"loading" | "error" | "done">("loading");
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  // undefined = 로딩, null = 비로그인, string = 로그인 닉네임
-  const [nickname, setNickname] = useState<string | null | undefined>(undefined);
+  // undefined = 로딩, null = 비로그인, Me = 로그인
+  const [me, setMe] = useState<Me | null | undefined>(undefined);
 
   useEffect(() => {
     fetch("/api/auth/me")
       .then((res) => res.json())
-      .then((data) => setNickname(data.user?.nickname ?? null))
-      .catch(() => setNickname(null));
+      .then((data) =>
+        setMe(
+          data.user ? { id: data.user.id, nickname: data.user.nickname } : null,
+        ),
+      )
+      .catch(() => setMe(null));
   }, []);
 
   useEffect(() => {
@@ -257,7 +329,7 @@ export default function CommunityBoard() {
         body: JSON.stringify({ body: trimmedBody }),
       });
       if (res.status === 401) {
-        setNickname(null); // 세션 만료 → 로그인 유도로 전환
+        setMe(null); // 세션 만료 → 로그인 유도로 전환
         return;
       }
       if (!res.ok) throw new Error();
@@ -274,15 +346,16 @@ export default function CommunityBoard() {
   return (
     <div className="space-y-8">
       {/* 작성 영역 — 로그인 시 폼, 아니면 로그인 유도 */}
-      {nickname === undefined ? (
+      {me === undefined ? (
         <div className="h-28 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
-      ) : nickname ? (
+      ) : me ? (
         <form
           onSubmit={handleSubmit}
           className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur"
         >
           <p className="mb-2 text-xs text-slate-500">
-            {t("postingAs")} · <span className="text-amber-300/90">{nickname}</span>
+            {t("postingAs")} ·{" "}
+            <span className="text-amber-300/90">{me.nickname}</span>
           </p>
           <textarea
             value={body}
@@ -330,7 +403,14 @@ export default function CommunityBoard() {
       ) : (
         <ul className="space-y-3">
           {posts.map((post) => (
-            <PostItem key={post.id} post={post} nickname={nickname} />
+            <PostItem
+              key={post.id}
+              post={post}
+              me={me}
+              onDeleted={() =>
+                setPosts((prev) => prev.filter((p) => p.id !== post.id))
+              }
+            />
           ))}
         </ul>
       )}

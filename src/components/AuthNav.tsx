@@ -46,9 +46,12 @@ export default function AuthNav() {
   if (user) {
     return (
       <div className="flex shrink-0 items-center gap-2 text-sm">
-        <span className="max-w-24 truncate font-semibold text-amber-300">
+        <Link
+          href="/profile"
+          className="max-w-24 truncate font-semibold text-amber-300 transition hover:text-amber-200"
+        >
           {user.nickname}
-        </span>
+        </Link>
         <button
           type="button"
           onClick={logout}
