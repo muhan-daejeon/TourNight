@@ -72,7 +72,9 @@
     "commentSubmit": "Post",
     "postingAs": "Posting as",
     "loginToPost": "Log in to share a review",
-    "loginToComment": "Log in to leave a comment"
+    "loginToComment": "Log in to leave a comment",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this?"
   },
   "spot": {
     "back": "Back to list",
@@ -112,6 +114,11 @@
     "noAccount": "Don't have an account?",
     "goLogin": "Log in",
     "goSignup": "Sign up",
+    "profileTitle": "Profile",
+    "profileSubtitle": "Manage your nickname and country",
+    "save": "Save",
+    "saved": "Saved",
+    "loginRequired": "You need to log in",
     "errors": {
       "invalid_email": "Please enter a valid email.",
       "invalid_password": "Password must be at least 8 characters.",

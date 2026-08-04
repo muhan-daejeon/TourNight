@@ -72,7 +72,9 @@
     "commentSubmit": "등록",
     "postingAs": "게시자",
     "loginToPost": "로그인하고 후기를 남겨보세요",
-    "loginToComment": "로그인하고 댓글을 남겨보세요"
+    "loginToComment": "로그인하고 댓글을 남겨보세요",
+    "delete": "삭제",
+    "deleteConfirm": "삭제할까요?"
   },
   "spot": {
     "back": "목록으로",
@@ -112,6 +114,11 @@
     "noAccount": "아직 계정이 없으신가요?",
     "goLogin": "로그인",
     "goSignup": "회원가입",
+    "profileTitle": "프로필",
+    "profileSubtitle": "닉네임과 국가를 관리하세요",
+    "save": "저장",
+    "saved": "저장되었습니다",
+    "loginRequired": "로그인이 필요합니다",
     "errors": {
       "invalid_email": "올바른 이메일을 입력해주세요.",
       "invalid_password": "비밀번호는 8자 이상이어야 합니다.",

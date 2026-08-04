@@ -72,7 +72,9 @@
     "commentSubmit": "投稿",
     "postingAs": "投稿者",
     "loginToPost": "ログインしてレビューを投稿しましょう",
-    "loginToComment": "ログインしてコメントしましょう"
+    "loginToComment": "ログインしてコメントしましょう",
+    "delete": "削除",
+    "deleteConfirm": "削除しますか？"
   },
   "spot": {
     "back": "一覧へ戻る",
@@ -112,6 +114,11 @@
     "noAccount": "アカウントをお持ちでないですか？",
     "goLogin": "ログイン",
     "goSignup": "会員登録",
+    "profileTitle": "プロフィール",
+    "profileSubtitle": "ニックネームと国を管理",
+    "save": "保存",
+    "saved": "保存しました",
+    "loginRequired": "ログインが必要です",
     "errors": {
       "invalid_email": "有効なメールアドレスを入力してください。",
       "invalid_password": "パスワードは8文字以上で入力してください。",
