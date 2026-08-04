@@ -26,3 +26,4 @@ on conflict (content_id, locale) do nothing;
 update night_spots set image_url = '/spots/hanbit-tower.jpg' where content_id = 'mock-1';
 update night_spots set image_url = '/spots/expo-bridge.jpg' where content_id = 'mock-2';
 update night_spots set image_url = '/spots/sikjangsan.jpg' where content_id = 'mock-5';
+update night_spots set image_url = '/spots/jungangro-night.jpg' where content_id = 'mock-6'; -- 중앙로 야경, Wikimedia CC BY-SA 4.0 (Minseong Kim) — 푸터 출처표시
