@@ -45,6 +45,16 @@
     },
     "koNote": ""
   },
+  "community": {
+    "title": "Night Community",
+    "subtitle": "Quick reviews and questions from travelers who explored Daejeon after dark",
+    "namePlaceholder": "Name",
+    "bodyPlaceholder": "Share a review of a night spot or ask a question",
+    "submit": "Post",
+    "empty": "No posts yet. Be the first to share!",
+    "error": "Couldn't load posts. Please try again later.",
+    "submitError": "Failed to post. Please try again later."
+  },
   "spot": {
     "back": "Back to list",
     "directions": "Directions (Kakao Map)",

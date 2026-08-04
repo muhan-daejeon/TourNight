@@ -59,6 +59,17 @@ create table if not exists spot_congestion (
   primary key (content_id, base_ymd)
 );
 
+-- 커뮤니티 한줄 후기/질문 (로그인 없이 이름만 입력, 스팟 연동은 content_id로 선택)
+create table if not exists community_posts (
+  id bigint generated always as identity primary key,
+  content_id text,                      -- 연관 스팟(night_spots.content_id) — null이면 자유글
+  author text not null,                 -- 작성자 표시 이름 (로그인 대체)
+  body text not null,                   -- 본문 (한줄 후기/질문)
+  created_at timestamptz not null default now()
+);
+
+create index if not exists community_posts_created_idx on community_posts (created_at desc);
+
 -- 서바이벌 한국어 표현 캐시 (언어당 1회 생성)
 create table if not exists phrase_cache (
   locale text primary key,

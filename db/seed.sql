@@ -27,3 +27,11 @@ update night_spots set image_url = '/spots/hanbit-tower.jpg' where content_id = 
 update night_spots set image_url = '/spots/expo-bridge.jpg' where content_id = 'mock-2';
 update night_spots set image_url = '/spots/sikjangsan.jpg' where content_id = 'mock-5';
 update night_spots set image_url = '/spots/jungangro-night.jpg' where content_id = 'mock-6'; -- 중앙로 야경, Wikimedia CC BY-SA 4.0 (Minseong Kim) — 푸터 출처표시
+
+-- 커뮤니티 시드 글 (오픈 시 빈 게시판 방지 — 심사 전 팀이 실제 후기로 보강)
+insert into community_posts (author, body) values
+  ('Mina', '한빛탑 야경 진짜 예뻐요! 엑스포다리까지 걸어서 산책 추천합니다 🌙'),
+  ('Kenji', '대전시민천문대는 몇 시까지 여나요? 별 보러 가고 싶어요'),
+  ('Wei', '식장산 전망대에서 본 대전 야경 최고였어요. 차 없으면 가기 좀 힘들어요'),
+  ('Sarah', 'Daecheongho lake trail was so peaceful at night. Bring a flashlight!')
+on conflict do nothing;
