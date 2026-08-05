@@ -63,7 +63,17 @@
       "oncheon": "温泉・足湯のマナー",
       "nature": "自然夜景のマナー"
     },
-    "generating": "AIがマナーガイドを作成中…"
+    "generating": "AIがマナーガイドを作成中…",
+    "searchPlaceholder": "言いたいことを検索（例：辛さ控えめで）",
+    "searchButton": "翻訳",
+    "searching": "AIが表現を探しています…",
+    "phraseCats": {
+      "food": "食堂・注文",
+      "bar": "居酒屋・屋台",
+      "taxi": "タクシー・移動",
+      "help": "緊急・助けを求める",
+      "store": "コンビニ・買い物"
+    }
   },
   "community": {
     "title": "ナイトコミュニティ",

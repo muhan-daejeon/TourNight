@@ -63,7 +63,17 @@
       "oncheon": "温泉足浴礼仪",
       "nature": "自然夜景礼仪"
     },
-    "generating": "AI 正在生成礼仪指南…"
+    "generating": "AI 正在生成礼仪指南…",
+    "searchPlaceholder": "搜索你想说的话（例：请少放辣）",
+    "searchButton": "翻译",
+    "searching": "AI 正在查找表达…",
+    "phraseCats": {
+      "food": "餐厅·点餐",
+      "bar": "酒馆·路边摊",
+      "taxi": "打车·出行",
+      "help": "紧急·求助",
+      "store": "便利店·购物"
+    }
   },
   "community": {
     "title": "夜间社区",

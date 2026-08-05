@@ -38,6 +38,102 @@ export const ETIQUETTE_TOPICS: Record<string, string> = {
     "Etiquette for enjoying nature night spots in Daejeon (stargazing, night parks, lakeside trails): keeping quiet, flashlight manners, no littering, staying on paths, safety at night",
 };
 
+/** 서바이벌 한국어 상황 카테고리 (프롬프트 주입 방지 — 서버 정의만 허용) */
+export const PHRASE_CATEGORIES: Record<string, string> = {
+  food: "ordering food at Korean restaurants and street food stalls at night (ordering, recommendations, spiciness, takeout)",
+  bar: "drinking at Korean bars and pojangmacha (ordering drinks, anju side dishes, toasting, asking for the bill)",
+  taxi: "taking taxis and getting around at night (telling the destination, asking to stop, paying by card, how long it takes)",
+  help: "asking for help or handling emergencies at night (I'm lost, please call the police, do you speak English, where is the hospital)",
+  store: "using 24-hour convenience stores and shopping at night (how much is this, heating food, asking for a bag, paying by card)",
+};
+
+export interface Phrase {
+  korean: string;
+  roman: string;
+  meaning: string;
+}
+
+/** 카테고리별 서바이벌 표현 6개 생성 */
+export async function generatePhraseCategory(
+  categoryId: string,
+  locale: string,
+): Promise<Phrase[]> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY가 설정되지 않았습니다");
+  const situation = PHRASE_CATEGORIES[categoryId];
+  if (!situation) throw new Error(`알 수 없는 카테고리: ${categoryId}`);
+
+  const language = LOCALE_LANGUAGE[locale] ?? "English";
+  const prompt = [
+    `Create 6 essential Korean survival phrases for a foreign tourist in this situation:`,
+    situation,
+    `Return JSON array of {"korean": string, "roman": string (romanization), "meaning": string (translation in ${language})}.`,
+    `Short, natural, polite (해요체). Respond with ONLY the JSON array.`,
+  ].join("\n");
+
+  const res = await fetch(`${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json" },
+    }),
+  });
+  if (!res.ok) throw new Error(`Gemini API 오류: ${res.status}`);
+  const data = await res.json();
+  const parsed = JSON.parse(
+    data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "[]",
+  );
+  if (!Array.isArray(parsed)) throw new Error("표현 목록 형식 오류");
+  return parsed.slice(0, 6).map((p) => ({
+    korean: String(p.korean ?? ""),
+    roman: String(p.roman ?? ""),
+    meaning: String(p.meaning ?? ""),
+  }));
+}
+
+/** 자유 검색: 하고 싶은 말 → 한국어 번역 + 관련 표현 2개 */
+export async function translatePhrase(
+  query: string,
+  locale: string,
+): Promise<{ main: Phrase; related: Phrase[] }> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY가 설정되지 않았습니다");
+
+  const language = LOCALE_LANGUAGE[locale] ?? "English";
+  const prompt = [
+    `A foreign tourist in Korea wants to say something. Their request (any language): "${query.slice(0, 80)}"`,
+    `Give the natural polite Korean phrase for it, plus 2 closely related useful phrases for the same situation.`,
+    `Return JSON: {"main": {"korean","roman","meaning"}, "related": [{"korean","roman","meaning"} x2]}.`,
+    `"meaning" must be in ${language}. Short, natural, polite (해요체). Respond with ONLY the JSON.`,
+  ].join("\n");
+
+  const res = await fetch(`${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json" },
+    }),
+  });
+  if (!res.ok) throw new Error(`Gemini API 오류: ${res.status}`);
+  const data = await res.json();
+  const parsed = JSON.parse(
+    data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}",
+  );
+  const toPhrase = (p: Record<string, unknown>): Phrase => ({
+    korean: String(p?.korean ?? ""),
+    roman: String(p?.roman ?? ""),
+    meaning: String(p?.meaning ?? ""),
+  });
+  return {
+    main: toPhrase(parsed.main ?? {}),
+    related: Array.isArray(parsed.related)
+      ? parsed.related.slice(0, 2).map(toPhrase)
+      : [],
+  };
+}
+
 /** 밤 상황 서바이벌 한국어 표현 생성 (비한국어 사용자용) */
 export async function generatePhrases(
   locale: string,

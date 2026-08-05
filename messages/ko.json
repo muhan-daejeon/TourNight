@@ -63,7 +63,17 @@
       "oncheon": "온천·족욕 예절",
       "nature": "자연 야경 예절"
     },
-    "generating": "AI가 예절 가이드를 생성하고 있어요…"
+    "generating": "AI가 예절 가이드를 생성하고 있어요…",
+    "searchPlaceholder": "하고 싶은 말을 검색해보세요 (예: 덜 맵게 해주세요)",
+    "searchButton": "번역",
+    "searching": "AI가 표현을 찾고 있어요…",
+    "phraseCats": {
+      "food": "식당·주문",
+      "bar": "술집·포장마차",
+      "taxi": "택시·이동",
+      "help": "긴급·도움 요청",
+      "store": "편의점·쇼핑"
+    }
   },
   "community": {
     "title": "야간 커뮤니티",
