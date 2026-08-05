@@ -8,6 +8,11 @@ on:
   push:
     branches: [main]
 
+# 연속 머지 시 이전 배포를 취소하고 최신 커밋만 배포 (동시 배포 경합 방지)
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
 jobs:
   production:
     runs-on: ubuntu-latest
