@@ -8,14 +8,18 @@ import { sql } from "@/lib/db";
 import { routing } from "@/i18n/routing";
 
 /** 주제별 관련 야간 명소 — 에티켓에서 명소 탐색으로 이어지는 동선 */
-const TOPIC_SPOT_FILTER: Record<string, { categories?: string[]; titles?: string[] }> = {
-  festival: { categories: ["festival"] },
+const TOPIC_SPOT_FILTER: Record<
+  string,
+  { categories?: string[]; titles?: string[]; patterns?: string[] }
+> = {
+  // 명소 유형별 주제에만 관련 명소를 붙인다 (문화·실용 주제는 억지 연결 대신 콘텐츠로)
+  streets: {
+    titles: ["으능정이문화의거리", "스카이로드", "도마큰시장", "소제동", "대흥동 문화예술의거리"],
+  },
+  parks: { patterns: ["%공원%", "%광장%"] },
+  views: { titles: ["한빛탑", "식장산 전망대", "대전엑스포과학공원", "엑스포다리"] },
   nature: { categories: ["nature"] },
   oncheon: { titles: ["유성온천지구", "유성 족욕체험장", "유성 관광특구"] },
-  pojangmacha: { titles: ["으능정이문화의거리", "스카이로드", "도마큰시장"] },
-  dining: { titles: ["대흥동 문화예술의거리", "소제동", "으능정이문화의거리"] },
-  noraebang: { titles: ["으능정이문화의거리", "유성온천지구"] },
-  latefood: { titles: ["도마큰시장", "소제동", "으능정이문화의거리"] },
 };
 
 interface RelatedSpot {
@@ -39,6 +43,7 @@ async function relatedSpots(topicId: string, locale: string): Promise<RelatedSpo
       and (
         ${filter.categories ? sql`s.category = any(${filter.categories})` : sql`false`}
         or ${filter.titles ? sql`s.title = any(${filter.titles})` : sql`false`}
+        or ${filter.patterns ? sql`s.title ilike any(${filter.patterns})` : sql`false`}
       )
     limit 3
   `;

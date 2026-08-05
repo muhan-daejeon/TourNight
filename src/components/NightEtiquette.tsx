@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import {
+  Footprints,
+  TreeDeciduous,
+  Eye,
   Soup,
   Beer,
   MicVocal,
@@ -23,15 +26,24 @@ import {
 import { Link } from "@/i18n/navigation";
 
 // 그룹 구성: 예절 6 + 실용 정보 4 (서버 ETIQUETTE_TOPICS와 일치)
-const GROUPS: { key: "manners" | "practical"; topics: string[] }[] = [
+const GROUPS: { key: "places" | "culture"; topics: string[] }[] = [
   {
-    key: "manners",
-    topics: ["pojangmacha", "dining", "noraebang", "festival", "oncheon", "nature"],
+    key: "places",
+    topics: ["streets", "parks", "views", "nature", "oncheon"],
   },
-  { key: "practical", topics: ["latefood", "convenience", "transport", "safety"] },
+  {
+    key: "culture",
+    topics: [
+      "pojangmacha", "dining", "noraebang", "festival",
+      "latefood", "convenience", "transport", "safety",
+    ],
+  },
 ];
 
 const TOPIC_ICONS: Record<string, LucideIcon> = {
+  streets: Footprints,
+  parks: TreeDeciduous,
+  views: Eye,
   pojangmacha: Soup,
   dining: Beer,
   noraebang: MicVocal,

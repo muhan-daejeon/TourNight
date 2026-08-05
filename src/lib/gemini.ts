@@ -36,6 +36,12 @@ export const ETIQUETTE_TOPICS: Record<string, string> = {
     "How to enjoy Yuseong hot springs area at night: the free public foot bath etiquette, jjimjilbang (Korean sauna) basics for foreigners",
   nature:
     "Etiquette for enjoying nature night spots in Daejeon (stargazing, night parks, lakeside trails): keeping quiet, flashlight manners, no littering, staying on paths, safety at night",
+  streets:
+    "Etiquette for enjoying Daejeon's downtown night streets and markets (Euneungjeongi culture street, Sky Road, night markets): walking in crowds, trying street food, taking photos of shops, noise late at night",
+  parks:
+    "Etiquette at Korean city parks and plazas at night (many are in residential areas): keeping noise down, cleaning up after picnics, respecting closing hours, bicycle/scooter paths, pets",
+  views:
+    "Etiquette and tips at night-view spots in Daejeon (observation towers, decks, bridges): photo courtesy without blocking others, tripod manners, keeping quiet, checking opening hours, staying safe near railings",
 };
 
 /** 서바이벌 한국어 상황 카테고리 (프롬프트 주입 방지 — 서버 정의만 허용) */
@@ -247,7 +253,7 @@ export async function generateEtiquette(
     `{"intro": string (1-2 sentence overview),`,
     ` "dos": string[] (exactly 4 short practical DO tips),`,
     ` "donts": string[] (exactly 2 short DON'T cautions),`,
-    ` "phrases": [{"korean","roman","meaning"} x2] (useful Korean phrases for this situation, meaning in ${language})}`,
+    ` "phrases": [{"korean","roman","meaning"} x4] (useful Korean phrases for this situation, meaning in ${language})}`,
     `Keep each item under 20 words. Respond with ONLY the JSON.`,
   ].join("\n");
 
@@ -282,7 +288,7 @@ export async function generateEtiquette(
     dos: Array.isArray(parsed.dos) ? parsed.dos.map(String).slice(0, 4) : [],
     donts: Array.isArray(parsed.donts) ? parsed.donts.map(String).slice(0, 2) : [],
     phrases: Array.isArray(parsed.phrases)
-      ? parsed.phrases.slice(0, 2).map(toPhrase)
+      ? parsed.phrases.slice(0, 4).map(toPhrase)
       : [],
   };
 }

@@ -65,7 +65,10 @@
       "latefood": "야식·심야식당",
       "convenience": "편의점 활용",
       "transport": "심야 이동",
-      "safety": "야간 안전"
+      "safety": "야간 안전",
+      "streets": "밤거리·야시장",
+      "parks": "야간 공원·광장",
+      "views": "전망·타워"
     },
     "generating": "AI가 예절 가이드를 생성하고 있어요…",
     "searchPlaceholder": "하고 싶은 말을 검색해보세요 (예: 덜 맵게 해주세요)",
@@ -79,8 +82,8 @@
       "store": "편의점·쇼핑"
     },
     "groups": {
-      "manners": "상황별 예절",
-      "practical": "실용 정보"
+      "places": "명소 유형별 가이드",
+      "culture": "문화·실용"
     },
     "dos": "이렇게 하세요",
     "donts": "피하세요",

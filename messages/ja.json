@@ -65,7 +65,10 @@
       "latefood": "夜食・深夜営業",
       "convenience": "コンビニ活用",
       "transport": "深夜の移動",
-      "safety": "夜間の安全"
+      "safety": "夜間の安全",
+      "streets": "夜の街・夜市",
+      "parks": "夜の公園・広場",
+      "views": "展望・タワー"
     },
     "generating": "AIがマナーガイドを作成中…",
     "searchPlaceholder": "言いたいことを検索（例：辛さ控えめで）",
@@ -79,8 +82,8 @@
       "store": "コンビニ・買い物"
     },
     "groups": {
-      "manners": "シーン別マナー",
-      "practical": "実用情報"
+      "places": "スポット別ガイド",
+      "culture": "文化・実用"
     },
     "dos": "こうしましょう",
     "donts": "避けましょう",

@@ -65,7 +65,10 @@
       "latefood": "Late-night eats",
       "convenience": "Convenience stores",
       "transport": "Late-night transport",
-      "safety": "Night safety"
+      "safety": "Night safety",
+      "streets": "Night streets & markets",
+      "parks": "Night parks & plazas",
+      "views": "Night views & towers"
     },
     "generating": "AI is writing this etiquette guide…",
     "searchPlaceholder": "Search what you want to say (e.g., less spicy please)",
@@ -79,8 +82,8 @@
       "store": "Convenience store & shopping"
     },
     "groups": {
-      "manners": "Manners by Situation",
-      "practical": "Practical Info"
+      "places": "Guides by Place Type",
+      "culture": "Culture & Practical"
     },
     "dos": "Do",
     "donts": "Don't",
