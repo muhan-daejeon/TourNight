@@ -16,6 +16,7 @@ concurrency:
 jobs:
   production:
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # 행 방지 — Actions 무료 시간 보호
     env:
       VERCEL_ORG_ID: team_6RN9A8QbTzV3N9yy9vFM7v2k
       VERCEL_PROJECT_ID: prj_YqgLAeUr34EH3dTWLhiNW4jGRzmf

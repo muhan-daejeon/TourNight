@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # 행 방지 — Actions 무료 시간 보호
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
