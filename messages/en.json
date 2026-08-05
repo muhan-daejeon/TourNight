@@ -63,7 +63,17 @@
       "oncheon": "Hot springs & foot bath",
       "nature": "Nature night spots"
     },
-    "generating": "AI is writing this etiquette guide…"
+    "generating": "AI is writing this etiquette guide…",
+    "searchPlaceholder": "Search what you want to say (e.g., less spicy please)",
+    "searchButton": "Translate",
+    "searching": "Finding the right phrase…",
+    "phraseCats": {
+      "food": "Restaurants & ordering",
+      "bar": "Bars & pojangmacha",
+      "taxi": "Taxi & getting around",
+      "help": "Emergency & help",
+      "store": "Convenience store & shopping"
+    }
   },
   "community": {
     "title": "Night Community",

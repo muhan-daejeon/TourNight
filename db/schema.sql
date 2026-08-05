@@ -94,11 +94,29 @@ create table if not exists users (
   created_at timestamptz not null default now()
 );
 
--- 서바이벌 한국어 표현 캐시 (언어당 1회 생성)
+-- 서바이벌 한국어 표현 캐시 (언어당 1회 생성) — v2(phrase_book)로 대체, 호환용 유지
 create table if not exists phrase_cache (
   locale text primary key,
   phrases jsonb not null,
   updated_at timestamptz not null default now()
+);
+
+-- 서바이벌 한국어 v2: 상황별 표현집 (언어·카테고리당 1회 생성)
+create table if not exists phrase_book (
+  locale text not null,
+  category text not null,   -- food / bar / taxi / help / store
+  phrases jsonb not null,   -- [{korean, roman, meaning}]
+  updated_at timestamptz not null default now(),
+  primary key (locale, category)
+);
+
+-- 서바이벌 한국어 검색·번역 캐시 (같은 질문 재요청 시 Gemini 호출 절약)
+create table if not exists phrase_search_cache (
+  locale text not null,
+  query_norm text not null,
+  result jsonb not null,    -- {main:{korean,roman,meaning}, related:[...]}
+  updated_at timestamptz not null default now(),
+  primary key (locale, query_norm)
 );
 
 -- 에티켓 가이드 사전생성 캐시 (심사/데모 때 Gemini 실시간 의존 제거)
