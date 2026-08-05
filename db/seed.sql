@@ -10,6 +10,26 @@ insert into night_spots (content_id, title, addr, category, geom) values
 on conflict (content_id) do nothing;
 
 -- 시드 명소는 야간 검증 완료 처리
+-- 2026 개최 확정 가을 축제 수동 큐레이션 (개최지 좌표·사진 재사용)
+insert into night_spots (content_id, title, addr, category, geom, image_url, night_verified)
+select 'mock-7', '대전사이언스페스티벌', '대전광역시 유성구 대덕대로 480 (엑스포과학공원 일원)', 'festival',
+       st_setsrid(st_makepoint(127.3803, 36.3760), 4326), image_url, true
+from night_spots where title = '대전엑스포과학공원'
+on conflict (content_id) do nothing;
+
+insert into night_spots (content_id, title, addr, category, geom, image_url, night_verified)
+select 'mock-8', '대전효문화뿌리축제', '대전광역시 중구 뿌리공원로 79 (뿌리공원 일원)', 'festival',
+       st_setsrid(st_makepoint(127.3864, 36.2845), 4326), image_url, true
+from night_spots where title = '뿌리공원'
+on conflict (content_id) do nothing;
+
+-- 연례 가을 축제 재검증 (2026 개최 확인: 유성국화축제 야간 경관조명)
+update night_spots set night_verified = true where title = '유성국화축제';
+-- 보문산 둘레길: 보운대 야경 명소, 상시 개방 (팀 로컬 확인)
+update night_spots set night_verified = true where title = '보문산 행복 숲 둘레길';
+-- 시민천문대 사진 확보(위키미디어 CC BY-SA 4.0, Rickinasia — 푸터 출처표시)
+update night_spots set image_url = '/spots/observatory.jpg' where content_id = 'mock-3';
+
 -- mock-6(0시축제)은 2026년 축제 폐지로 노출 제외
 update night_spots set night_verified = true where content_id like 'mock-%' and content_id != 'mock-6';
 update night_spots set night_verified = false where content_id = 'mock-6';
@@ -21,7 +41,9 @@ insert into spot_translations (content_id, locale, title) values
   ('mock-3', 'en', 'Daejeon Observatory'), ('mock-3', 'ja', '大田市民天文台'), ('mock-3', 'zh', '大田市民天文台'),
   ('mock-4', 'en', 'Daecheongho Lake Trail'), ('mock-4', 'ja', '大清湖五百里道'), ('mock-4', 'zh', '大清湖五百里路'),
   ('mock-5', 'en', 'Sikjangsan Observatory'), ('mock-5', 'ja', '食蔵山展望台'), ('mock-5', 'zh', '食藏山观景台'),
-  ('mock-6', 'en', 'Daejeon 0 O''Clock Festival'), ('mock-6', 'ja', '大田0時祭り'), ('mock-6', 'zh', '大田0时庆典')
+  ('mock-6', 'en', 'Daejeon 0 O''Clock Festival'), ('mock-6', 'ja', '大田0時祭り'), ('mock-6', 'zh', '大田0时庆典'),
+  ('mock-7', 'en', 'Daejeon Science Festival'), ('mock-7', 'ja', '大田サイエンスフェスティバル'), ('mock-7', 'zh', '大田科学节'),
+  ('mock-8', 'en', 'Daejeon Ppuri (Roots) Festival'), ('mock-8', 'ja', '大田孝文化ルーツ祭り'), ('mock-8', 'zh', '大田孝文化寻根庆典')
 on conflict (content_id, locale) do nothing;
 
 -- 큐레이션 스팟 사진 (위키미디어 CC0·공공누리 1유형, public/spots/)
