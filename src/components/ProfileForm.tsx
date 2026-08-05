@@ -16,7 +16,7 @@ interface User {
 const fieldClass =
   "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
 
-export default function ProfileForm() {
+export default function ProfileForm({ welcome = false }: { welcome?: boolean }) {
   const t = useTranslations("auth");
   const router = useRouter();
   const [user, setUser] = useState<User | null | undefined>(undefined);
@@ -94,6 +94,11 @@ export default function ProfileForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {welcome && !user.country && (
+        <p className="rounded-xl border border-amber-300/25 bg-amber-300/10 px-4 py-3 text-sm text-amber-200">
+          {t("welcomeCountryPrompt")}
+        </p>
+      )}
       <div>
         <label className="mb-1.5 block text-sm text-slate-300">
           {t("email")}

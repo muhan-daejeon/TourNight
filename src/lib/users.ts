@@ -109,14 +109,14 @@ export async function findOrCreateGoogleUser(input: {
   googleId: string;
   email: string;
   name: string;
-}): Promise<User> {
+}): Promise<{ user: User; isNew: boolean }> {
   const email = input.email.trim().toLowerCase();
 
   const byOauth = await sql<UserRow[]>`
     select id, email, nickname, country from users
     where oauth_provider = 'google' and oauth_id = ${input.googleId}
   `;
-  if (byOauth[0]) return toUser(byOauth[0]);
+  if (byOauth[0]) return { user: toUser(byOauth[0]), isNew: false };
 
   const byEmail = await sql<UserRow[]>`
     select id, email, nickname, country from users where email = ${email}
@@ -126,7 +126,7 @@ export async function findOrCreateGoogleUser(input: {
       update users set oauth_provider = 'google', oauth_id = ${input.googleId}
       where id = ${byEmail[0].id} and oauth_provider is null
     `;
-    return toUser(byEmail[0]);
+    return { user: toUser(byEmail[0]), isNew: false };
   }
 
   const nickname =
@@ -138,5 +138,5 @@ export async function findOrCreateGoogleUser(input: {
     values (${email}, ${nickname}, 'google', ${input.googleId})
     returning id, email, nickname, country
   `;
-  return toUser(created[0]);
+  return { user: toUser(created[0]), isNew: true };
 }

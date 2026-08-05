@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const profile = await fetchGoogleProfile(code, redirectUri);
     if (!profile || !profile.emailVerified) return fail();
 
-    const user = await findOrCreateGoogleUser({
+    const { user, isNew } = await findOrCreateGoogleUser({
       googleId: profile.sub,
       email: profile.email,
       name: profile.name,
@@ -51,7 +51,9 @@ export async function GET(request: NextRequest) {
       email: user.email,
       nickname: user.nickname,
     });
-    const res = NextResponse.redirect(new URL(`/${locale}`, origin));
+    // 신규 가입자는 프로필로 보내 국가 입력을 유도(?welcome=1). 기존 유저는 홈으로.
+    const dest = isNew ? `/${locale}/profile?welcome=1` : `/${locale}`;
+    const res = NextResponse.redirect(new URL(dest, origin));
     res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
     res.cookies.delete(STATE_COOKIE);
     res.cookies.delete(LOCALE_COOKIE);
