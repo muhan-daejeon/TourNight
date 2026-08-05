@@ -61,7 +61,11 @@
       "noraebang": "Noraebang (karaoke)",
       "festival": "Festival crowds",
       "oncheon": "Hot springs & foot bath",
-      "nature": "Nature night spots"
+      "nature": "Nature night spots",
+      "latefood": "Late-night eats",
+      "convenience": "Convenience stores",
+      "transport": "Late-night transport",
+      "safety": "Night safety"
     },
     "generating": "AI is writing this etiquette guide…",
     "searchPlaceholder": "Search what you want to say (e.g., less spicy please)",
@@ -73,7 +77,15 @@
       "taxi": "Taxi & getting around",
       "help": "Emergency & help",
       "store": "Convenience store & shopping"
-    }
+    },
+    "groups": {
+      "manners": "Manners by Situation",
+      "practical": "Practical Info"
+    },
+    "dos": "Do",
+    "donts": "Don't",
+    "saySection": "What to say",
+    "relatedSpots": "Related night spots"
   },
   "community": {
     "title": "Night Community",

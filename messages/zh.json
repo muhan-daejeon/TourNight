@@ -61,7 +61,11 @@
       "noraebang": "练歌房礼仪",
       "festival": "庆典人流礼仪",
       "oncheon": "温泉足浴礼仪",
-      "nature": "自然夜景礼仪"
+      "nature": "自然夜景礼仪",
+      "latefood": "夜宵·深夜食堂",
+      "convenience": "便利店攻略",
+      "transport": "深夜出行",
+      "safety": "夜间安全"
     },
     "generating": "AI 正在生成礼仪指南…",
     "searchPlaceholder": "搜索你想说的话（例：请少放辣）",
@@ -73,7 +77,15 @@
       "taxi": "打车·出行",
       "help": "紧急·求助",
       "store": "便利店·购物"
-    }
+    },
+    "groups": {
+      "manners": "分场景礼仪",
+      "practical": "实用信息"
+    },
+    "dos": "建议这样做",
+    "donts": "请避免",
+    "saySection": "这时可以这样说",
+    "relatedSpots": "相关夜间景点"
   },
   "community": {
     "title": "夜间社区",

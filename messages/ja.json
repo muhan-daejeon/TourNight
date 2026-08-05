@@ -61,7 +61,11 @@
       "noraebang": "ノレバンのマナー",
       "festival": "祭り・人混みのマナー",
       "oncheon": "温泉・足湯のマナー",
-      "nature": "自然夜景のマナー"
+      "nature": "自然夜景のマナー",
+      "latefood": "夜食・深夜営業",
+      "convenience": "コンビニ活用",
+      "transport": "深夜の移動",
+      "safety": "夜間の安全"
     },
     "generating": "AIがマナーガイドを作成中…",
     "searchPlaceholder": "言いたいことを検索（例：辛さ控えめで）",
@@ -73,7 +77,15 @@
       "taxi": "タクシー・移動",
       "help": "緊急・助けを求める",
       "store": "コンビニ・買い物"
-    }
+    },
+    "groups": {
+      "manners": "シーン別マナー",
+      "practical": "実用情報"
+    },
+    "dos": "こうしましょう",
+    "donts": "避けましょう",
+    "saySection": "こんな時はこう言おう",
+    "relatedSpots": "関連ナイトスポット"
   },
   "community": {
     "title": "ナイトコミュニティ",
