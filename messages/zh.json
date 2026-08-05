@@ -65,7 +65,10 @@
       "latefood": "夜宵·深夜食堂",
       "convenience": "便利店攻略",
       "transport": "深夜出行",
-      "safety": "夜间安全"
+      "safety": "夜间安全",
+      "streets": "夜街·夜市",
+      "parks": "夜间公园·广场",
+      "views": "观景·塔台"
     },
     "generating": "AI 正在生成礼仪指南…",
     "searchPlaceholder": "搜索你想说的话（例：请少放辣）",
@@ -79,8 +82,8 @@
       "store": "便利店·购物"
     },
     "groups": {
-      "manners": "分场景礼仪",
-      "practical": "实用信息"
+      "places": "按景点类型的指南",
+      "culture": "文化·实用"
     },
     "dos": "建议这样做",
     "donts": "请避免",
