@@ -24,17 +24,23 @@ const TOPICS = {
     "Night safety guide for foreign tourists in Daejeon, Korea: emergency numbers 112/119, the 1330 Korea Travel Hotline with interpretation, safe areas at night",
   oncheon:
     "How to enjoy Yuseong hot springs area at night: the free public foot bath etiquette, jjimjilbang (Korean sauna) basics for foreigners",
+  nature:
+    "Etiquette for enjoying nature night spots in Daejeon (stargazing, night parks, lakeside trails): keeping quiet, flashlight manners, no littering, staying on paths, safety at night",
 };
 
 const LOCALES = { ko: "Korean", en: "English", ja: "Japanese", zh: "Simplified Chinese" };
 
 async function generate(topic, language) {
+  // 구조화 가이드(JSON): intro + Do 4 + Don't 2 + 상황 표현 2 — 앱 라우트와 동일 포맷
   const prompt = [
     `You are a friendly local culture guide for foreign tourists enjoying nightlife in Daejeon, South Korea.`,
     `Topic: ${topic}`,
-    `Write a practical guide in ${language}, under 250 words.`,
-    `Structure: a one-sentence intro, then 3-5 practical tips as a bulleted list, then one "do not" caution.`,
-    `Plain text with simple bullets only. No markdown headers.`,
+    `Write in ${language}. Return JSON:`,
+    `{"intro": string (1-2 sentence overview),`,
+    ` "dos": string[] (exactly 4 short practical DO tips),`,
+    ` "donts": string[] (exactly 2 short DON'T cautions),`,
+    ` "phrases": [{"korean","roman","meaning"} x2] (useful Korean phrases, meaning in ${language})}`,
+    `Keep each item under 20 words. Respond with ONLY the JSON.`,
   ].join("\n");
 
   const res = await fetch(
@@ -42,13 +48,17 @@ async function generate(topic, language) {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      }),
     },
   );
   if (!res.ok) throw new Error(`Gemini ${res.status}`);
   const data = await res.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error("빈 응답");
+  JSON.parse(text); // 형식 검증
   return text;
 }
 

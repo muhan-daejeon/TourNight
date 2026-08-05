@@ -217,10 +217,18 @@ export async function generateSpotGuide(
   };
 }
 
+export interface EtiquetteGuide {
+  intro: string;
+  dos: string[];
+  donts: string[];
+  phrases: Phrase[];
+}
+
+/** 구조화된 에티켓 가이드 생성 (Do/Don't + 상황 표현) */
 export async function generateEtiquette(
   topicId: string,
   locale: string,
-): Promise<string> {
+): Promise<EtiquetteGuide> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY가 설정되지 않았습니다");
@@ -235,9 +243,12 @@ export async function generateEtiquette(
   const prompt = [
     `You are a friendly local culture guide for foreign tourists enjoying nightlife in Daejeon, South Korea.`,
     `Topic: ${topic}`,
-    `Write a practical guide in ${language}, under 250 words.`,
-    `Structure: a one-sentence intro, then 3-5 practical tips as a bulleted list, then one "do not" caution.`,
-    `Plain text with simple bullets only. No markdown headers.`,
+    `Write in ${language}. Return JSON:`,
+    `{"intro": string (1-2 sentence overview),`,
+    ` "dos": string[] (exactly 4 short practical DO tips),`,
+    ` "donts": string[] (exactly 2 short DON'T cautions),`,
+    ` "phrases": [{"korean","roman","meaning"} x2] (useful Korean phrases for this situation, meaning in ${language})}`,
+    `Keep each item under 20 words. Respond with ONLY the JSON.`,
   ].join("\n");
 
   const res = await fetch(
@@ -247,6 +258,7 @@ export async function generateEtiquette(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
       }),
     },
   );
@@ -259,5 +271,18 @@ export async function generateEtiquette(
   if (!text) {
     throw new Error("Gemini 응답이 비어 있습니다");
   }
-  return text;
+  const parsed = JSON.parse(text);
+  const toPhrase = (p: Record<string, unknown>): Phrase => ({
+    korean: String(p?.korean ?? ""),
+    roman: String(p?.roman ?? ""),
+    meaning: String(p?.meaning ?? ""),
+  });
+  return {
+    intro: String(parsed.intro ?? ""),
+    dos: Array.isArray(parsed.dos) ? parsed.dos.map(String).slice(0, 4) : [],
+    donts: Array.isArray(parsed.donts) ? parsed.donts.map(String).slice(0, 2) : [],
+    phrases: Array.isArray(parsed.phrases)
+      ? parsed.phrases.slice(0, 2).map(toPhrase)
+      : [],
+  };
 }
