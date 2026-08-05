@@ -17,7 +17,7 @@ const TOPICS = {
   noraebang:
     "How to enjoy noraebang (Korean karaoke rooms) at night as a foreigner: renting a room, using the machine, singing etiquette",
   festival:
-    "How to enjoy the Daejeon 0 O'Clock Festival (대전0시축제), a big summer night festival on Jungang-ro street in Daejeon",
+    "Etiquette at Korean night festivals and crowded night events (fireworks, night markets, light festivals): crowd manners, queuing, walking on the right, keeping streets clean",
   transport:
     "Late-night transportation tips in Daejeon, Korea (subway/bus operating hours, taxis and Kakao T app, designated driver services)",
   safety:

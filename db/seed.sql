@@ -10,7 +10,9 @@ insert into night_spots (content_id, title, addr, category, geom) values
 on conflict (content_id) do nothing;
 
 -- 시드 명소는 야간 검증 완료 처리
-update night_spots set night_verified = true where content_id like 'mock-%';
+-- mock-6(0시축제)은 2026년 축제 폐지로 노출 제외
+update night_spots set night_verified = true where content_id like 'mock-%' and content_id != 'mock-6';
+update night_spots set night_verified = false where content_id = 'mock-6';
 
 -- 큐레이션 스팟 수동 번역 (KTO 다국어 서비스에 없는 곳들)
 insert into spot_translations (content_id, locale, title) values
