@@ -15,6 +15,7 @@ const TOPIC_SPOT_FILTER: Record<string, { categories?: string[]; titles?: string
   pojangmacha: { titles: ["으능정이문화의거리", "스카이로드", "도마큰시장"] },
   dining: { titles: ["대흥동 문화예술의거리", "소제동", "으능정이문화의거리"] },
   noraebang: { titles: ["으능정이문화의거리", "유성온천지구"] },
+  latefood: { titles: ["도마큰시장", "소제동", "으능정이문화의거리"] },
 };
 
 interface RelatedSpot {
