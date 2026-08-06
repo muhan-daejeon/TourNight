@@ -6,8 +6,22 @@ insert into night_spots (content_id, title, addr, category, geom) values
   ('mock-3', '대전시민천문대', '대전광역시 유성구 과학로 213-48', 'science', st_setsrid(st_makepoint(127.3762, 36.3908), 4326)),
   ('mock-4', '대청호 오백리길', '대전광역시 대덕구 대청호수로', 'nature', st_setsrid(st_makepoint(127.4842, 36.4767), 4326)),
   ('mock-5', '식장산 전망대', '대전광역시 동구 세천동', 'nature', st_setsrid(st_makepoint(127.4967, 36.3149), 4326)),
-  ('mock-6', '대전0시축제 (중앙로 일원)', '대전광역시 중구 중앙로', 'festival', st_setsrid(st_makepoint(127.4255, 36.3282), 4326))
+  ('mock-6', '대전0시축제 (중앙로 일원)', '대전광역시 중구 중앙로', 'festival', st_setsrid(st_makepoint(127.4255, 36.3282), 4326)),
+  -- 2026 가을 개최 확인된 축제 (대전관광 공식) — 야간 콘텐츠 보유
+  ('mock-7', '대전사이언스페스티벌', '대전광역시 유성구 대덕대로 480 일원', 'festival', st_setsrid(st_makepoint(127.3803, 36.3760), 4326)),
+  ('mock-8', '대전효문화뿌리축제', '대전광역시 중구 뿌리공원로 79', 'festival', st_setsrid(st_makepoint(127.3864, 36.2845), 4326))
 on conflict (content_id) do nothing;
+
+-- 축제 대표 이미지: 개최 장소의 KTO 공식 사진 재사용
+update night_spots set image_url = (select image_url from night_spots where title = '대전엑스포과학공원')
+  where content_id = 'mock-7' and image_url is null;
+update night_spots set image_url = (select image_url from night_spots where title = '뿌리공원')
+  where content_id = 'mock-8' and image_url is null;
+
+-- 2026 개최 확인된 연례 축제 재검증 (야간 경관조명 운영)
+update night_spots set night_verified = true where title = '유성국화축제';
+-- 보운대 야경 명소 승격
+update night_spots set night_verified = true where title = '보문산 행복 숲 둘레길';
 
 -- 시드 명소는 야간 검증 완료 처리
 -- 2026 개최 확정 가을 축제 수동 큐레이션 (개최지 좌표·사진 재사용)
@@ -50,6 +64,7 @@ on conflict (content_id, locale) do nothing;
 update night_spots set image_url = '/spots/hanbit-tower.jpg' where content_id = 'mock-1';
 update night_spots set image_url = '/spots/expo-bridge.jpg' where content_id = 'mock-2';
 update night_spots set image_url = '/spots/sikjangsan.jpg' where content_id = 'mock-5';
+update night_spots set image_url = '/spots/observatory.jpg' where content_id = 'mock-3'; -- Wikimedia CC BY-SA 4.0 (Rickinasia) — 푸터 출처표시
 update night_spots set image_url = '/spots/jungangro-night.jpg' where content_id = 'mock-6'; -- 중앙로 야경, Wikimedia CC BY-SA 4.0 (Minseong Kim) — 푸터 출처표시
 
 -- 커뮤니티 시드 글 (오픈 시 빈 게시판 방지 — 심사 전 팀이 실제 후기로 보강)
