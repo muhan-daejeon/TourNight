@@ -23,6 +23,7 @@ import { fetchNearbyStays } from "@/lib/kto";
 import NightMap from "@/components/NightMap";
 import SpotGuide from "@/components/SpotGuide";
 import CongestionForecast from "@/components/CongestionForecast";
+import AreaVisitors from "@/components/AreaVisitors";
 
 const CATEGORY_ICON: Record<string, LucideIcon> = {
   science: Telescope,
@@ -180,6 +181,9 @@ export default async function SpotPage({
 
             {/* 혼잡도 예측 — KT 이동통신 데이터 기반 (데이터 있는 스팟만) */}
             <CongestionForecast days={congestion} locale={locale} />
+
+            {/* 지역 방문객 규모 — KTO 빅데이터 (구 단위 실측) */}
+            <AreaVisitors addr={spot.addr} />
 
             {/* 근처 자연 야경 (대전 차별점: 도심 → 자연 연계) */}
             {natureNearby.length > 0 && (

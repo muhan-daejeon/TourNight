@@ -127,7 +127,11 @@
       "best": "Quietest day",
       "source": "7-day forecast from mobile carrier data · % is crowding vs. peak season (=100)"
     },
-    "generating": "AI is writing a night guide for this spot…"
+    "generating": "AI is writing a night guide for this spot…",
+    "areaVisitors": {
+      "line": "≈{count} out-of-town visitors/day in {gu}",
+      "basis": "(as of {month} · mobile big data)"
+    }
   },
   "auth": {
     "login": "Log in",
