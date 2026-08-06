@@ -9,7 +9,11 @@ insert into night_spots (content_id, title, addr, category, geom) values
   ('mock-6', '대전0시축제 (중앙로 일원)', '대전광역시 중구 중앙로', 'festival', st_setsrid(st_makepoint(127.4255, 36.3282), 4326)),
   -- 2026 가을 개최 확인된 축제 (대전관광 공식) — 야간 콘텐츠 보유
   ('mock-7', '대전사이언스페스티벌', '대전광역시 유성구 대덕대로 480 일원', 'festival', st_setsrid(st_makepoint(127.3803, 36.3760), 4326)),
-  ('mock-8', '대전효문화뿌리축제', '대전광역시 중구 뿌리공원로 79', 'festival', st_setsrid(st_makepoint(127.3864, 36.2845), 4326))
+  ('mock-8', '대전효문화뿌리축제', '대전광역시 중구 뿌리공원로 79', 'festival', st_setsrid(st_makepoint(127.3864, 36.2845), 4326)),
+  ('mock-9', '대전빵축제', '대전광역시 동구 소제동 일원', 'festival', st_setsrid(st_makepoint(127.4393, 36.3342), 4326)),
+  -- KTO 미등재 대형 야간 명소 수동 큐레이션 (과학관: 금·토 야간 천체관측 '별바라기' / 수목원: 하절기 21시 개방)
+  ('mock-10', '국립중앙과학관', '대전광역시 유성구 대덕대로 481', 'science', st_setsrid(st_makepoint(127.3810, 36.3759), 4326)),
+  ('mock-11', '한밭수목원', '대전광역시 서구 둔산대로 169', 'nature', st_setsrid(st_makepoint(127.3881, 36.3672), 4326))
 on conflict (content_id) do nothing;
 
 -- 축제 대표 이미지: 개최 장소의 KTO 공식 사진 재사용
@@ -17,11 +21,17 @@ update night_spots set image_url = (select image_url from night_spots where titl
   where content_id = 'mock-7' and image_url is null;
 update night_spots set image_url = (select image_url from night_spots where title = '뿌리공원')
   where content_id = 'mock-8' and image_url is null;
+update night_spots set image_url = (select image_url from night_spots where title = '소제동')
+  where content_id = 'mock-9' and image_url is null;
+update night_spots set image_url = '/spots/science-museum.jpg' where content_id = 'mock-10'; -- CC BY-SA 4.0 (Twotwo2019)
+update night_spots set image_url = '/spots/hanbat-arboretum.jpg' where content_id = 'mock-11'; -- CC BY-SA 4.0 (Ryuch)
 
 -- 2026 개최 확인된 연례 축제 재검증 (야간 경관조명 운영)
 update night_spots set night_verified = true where title = '유성국화축제';
 -- 보운대 야경 명소 승격
 update night_spots set night_verified = true where title = '보문산 행복 숲 둘레길';
+-- 호수 수변공원 재분류·노출 (상시 개방 야간 산책지)
+update night_spots set category = 'nature', night_verified = true where title = '대청호자연수변공원';
 
 -- 시드 명소는 야간 검증 완료 처리
 -- 2026 개최 확정 가을 축제 수동 큐레이션 (개최지 좌표·사진 재사용)
@@ -57,7 +67,10 @@ insert into spot_translations (content_id, locale, title) values
   ('mock-5', 'en', 'Sikjangsan Observatory'), ('mock-5', 'ja', '食蔵山展望台'), ('mock-5', 'zh', '食藏山观景台'),
   ('mock-6', 'en', 'Daejeon 0 O''Clock Festival'), ('mock-6', 'ja', '大田0時祭り'), ('mock-6', 'zh', '大田0时庆典'),
   ('mock-7', 'en', 'Daejeon Science Festival'), ('mock-7', 'ja', '大田サイエンスフェスティバル'), ('mock-7', 'zh', '大田科学节'),
-  ('mock-8', 'en', 'Daejeon Ppuri (Roots) Festival'), ('mock-8', 'ja', '大田孝文化ルーツ祭り'), ('mock-8', 'zh', '大田孝文化寻根庆典')
+  ('mock-8', 'en', 'Daejeon Ppuri (Roots) Festival'), ('mock-8', 'ja', '大田孝文化ルーツ祭り'), ('mock-8', 'zh', '大田孝文化寻根庆典'),
+  ('mock-9', 'en', 'Daejeon Bread Festival'), ('mock-9', 'ja', '大田パン祭り'), ('mock-9', 'zh', '大田面包节'),
+  ('mock-10', 'en', 'National Science Museum'), ('mock-10', 'ja', '国立中央科学館'), ('mock-10', 'zh', '国立中央科学馆'),
+  ('mock-11', 'en', 'Hanbat Arboretum'), ('mock-11', 'ja', 'ハンバッ樹木園'), ('mock-11', 'zh', '韩湾树木园')
 on conflict (content_id, locale) do nothing;
 
 -- 큐레이션 스팟 사진 (위키미디어 CC0·공공누리 1유형, public/spots/)
