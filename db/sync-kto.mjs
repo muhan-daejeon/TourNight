@@ -36,8 +36,8 @@ function mapCategory(item) {
   if (["A02060100", "A02060200", "A02060300"].includes(item.cat3)) return "science"; // 과학관·기념관·전시관
   // 대전 정체성: 엑스포·과학·천문 계열은 이름 기준으로 과학 분류
   if (/과학|엑스포|천문|우주/.test(item.title)) return "science";
-  // 호수·수변 공원은 자연으로 (상시 개방 야간 산책지 계열)
-  if (/대청호|수변공원/.test(item.title)) return "nature";
+  // 공원·유원지·수변·산림은 자연으로 (KTO는 도시공원을 인문관광지로 분류하지만 체감상 자연)
+  if (/공원|유원지|수변|산림|숲|대청호/.test(item.title) && !/광장/.test(item.title)) return "nature";
   return "city";
 }
 

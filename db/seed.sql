@@ -30,6 +30,11 @@ update night_spots set image_url = '/spots/hanbat-arboretum.jpg' where content_i
 update night_spots set night_verified = true where title = '유성국화축제';
 -- 보운대 야경 명소 승격
 update night_spots set night_verified = true where title = '보문산 행복 숲 둘레길';
+-- 야간 관광 가치가 낮은 곳 노출 제외 (전수 감사 8/6: 무조명 문화재·비관광 시설)
+update night_spots set night_verified = false where title in
+  ('박팽년선생유허비','법동 석장승','이시직공정려각','초연물외암각','봉소루','사교루','삼매당',
+   '옥류각','옥오재','제월당','취백정','대전 가수원도서관','롯데백화점 (대전점)');
+
 -- 호수 수변공원 재분류·노출 (상시 개방 야간 산책지)
 update night_spots set category = 'nature', night_verified = true where title = '대청호자연수변공원';
 
