@@ -56,6 +56,7 @@ export default async function CongestionForecast({
                 {fmt.format(date)}
               </div>
               <div className="mt-0.5 text-[11px] font-bold">{t(lv)}</div>
+              <div className="text-[10px] opacity-70">{Math.round(d.rate)}%</div>
             </div>
           );
         })}
