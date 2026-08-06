@@ -94,6 +94,15 @@ create table if not exists users (
   created_at timestamptz not null default now()
 );
 
+-- 대전 구별 일별 방문자 수 (KTO 빅데이터 지역별 방문자수 — db/sync-visitors.mjs, 집계 지연 있어 최근 가용 7일 저장)
+create table if not exists area_visitors (
+  signgu_cd text not null,   -- 30110 동구 / 30140 중구 / 30170 서구 / 30200 유성구 / 30230 대덕구
+  base_ymd date not null,
+  tou_div text not null,     -- 1 현지인 / 2 외지인 / 3 외국인
+  num numeric not null,
+  primary key (signgu_cd, base_ymd, tou_div)
+);
+
 -- 서바이벌 한국어 표현 캐시 (언어당 1회 생성) — v2(phrase_book)로 대체, 호환용 유지
 create table if not exists phrase_cache (
   locale text primary key,

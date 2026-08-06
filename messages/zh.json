@@ -127,7 +127,11 @@
       "best": "最空闲的一天",
       "source": "基于移动通信数据的7天预测 · %为相对最旺季(100)的集中率"
     },
-    "generating": "AI 正在为该景点生成夜间指南…"
+    "generating": "AI 正在为该景点生成夜间指南…",
+    "areaVisitors": {
+      "line": "{gu}日均外地访客约{count}人",
+      "basis": "（{month}基准·通信大数据）"
+    }
   },
   "auth": {
     "login": "登录",
