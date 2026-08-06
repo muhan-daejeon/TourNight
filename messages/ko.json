@@ -169,5 +169,11 @@
       "oauth": "Google 로그인에 실패했어요. 다시 시도해주세요.",
       "generic": "잠시 후 다시 시도해주세요."
     }
+  },
+  "nightInfo": {
+    "sunset": "오늘 일몰",
+    "moonAge": "월령 {age}일",
+    "starNight": "별 보기 좋은 밤",
+    "fullMoon": "달맞이 좋은 밤"
   }
 }

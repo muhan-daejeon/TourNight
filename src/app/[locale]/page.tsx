@@ -3,6 +3,7 @@ import Image from "next/image";
 import { MoonStar } from "lucide-react";
 import { getVerifiedNightSpots } from "@/lib/spots";
 import SpotExplorer from "@/components/SpotExplorer";
+import NightInfo from "@/components/NightInfo";
 
 // DB의 야간 검증 스팟 기준, 1시간 주기로 재생성
 export const revalidate = 3600;
@@ -59,7 +60,11 @@ export default async function HomePage({
 
       {/* 야간 명소 탐색 — 리스트 + 지도 */}
       <div className="mx-auto max-w-6xl px-4">
-        <section id="spots" className="scroll-mt-20 pt-14 pb-24">
+        {/* 오늘 밤 정보 — 천문연구원 일몰·월령 */}
+        <div className="pt-8">
+          <NightInfo />
+        </div>
+        <section id="spots" className="scroll-mt-20 pt-10 pb-24">
           <p className="overline-label">Tonight</p>
           <h2 className="mt-2 mb-6 text-2xl font-bold tracking-tight">
             {t("spotsSection")}
