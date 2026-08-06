@@ -169,5 +169,11 @@
       "oauth": "Google sign-in failed. Please try again.",
       "generic": "Please try again later."
     }
+  },
+  "nightInfo": {
+    "sunset": "Sunset today",
+    "moonAge": "Moon age {age}",
+    "starNight": "Great night for stargazing",
+    "fullMoon": "Full-moon night"
   }
 }

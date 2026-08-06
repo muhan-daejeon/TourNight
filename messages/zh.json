@@ -169,5 +169,11 @@
       "oauth": "Google 登录失败，请重试。",
       "generic": "请稍后再试。"
     }
+  },
+  "nightInfo": {
+    "sunset": "今日日落",
+    "moonAge": "月龄{age}",
+    "starNight": "适合观星的夜晚",
+    "fullMoon": "适合赏月的夜晚"
   }
 }
