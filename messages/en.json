@@ -18,6 +18,7 @@
     "searchPlaceholder": "Search by name or area",
     "noResults": "No spots found",
     "viewDetail": "View details",
+    "planCourse": "Plan a course",
     "mapSection": "Night Spots Map",
     "categories": {
       "all": "All",
@@ -40,7 +41,14 @@
     "together": "Visited together",
     "directions": "Directions to start (Kakao Map)",
     "dataNote": "Based on vehicle-movement stats (KTO related destinations)",
-    "empty": "Couldn't load courses. Please try again later."
+    "empty": "Couldn't load courses. Please try again later.",
+    "aiBadge": "AI course",
+    "aiLoading": "Planning a course through that spot…",
+    "aiError": "Couldn't plan a course. Please try again later.",
+    "aiAnchor": "includes {name}",
+    "aiNote": "Planned by Gemini from your spot and nearby night spots",
+    "aiFallbackNote": "AI was unavailable, so stops are ordered by distance",
+    "presetHeading": "Other recommended courses"
   },
   "etiquette": {
     "title": "Night Etiquette",

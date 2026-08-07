@@ -18,6 +18,7 @@
     "searchPlaceholder": "명소 이름·지역으로 검색",
     "noResults": "검색 결과가 없습니다",
     "viewDetail": "자세히 보기",
+    "planCourse": "코스 짜기",
     "mapSection": "야간 명소 지도",
     "categories": {
       "all": "전체",
@@ -40,7 +41,14 @@
     "together": "함께 방문",
     "directions": "출발지 카카오맵 길찾기",
     "dataNote": "차량 이동 통계(KTO 연관 관광지) 기반",
-    "empty": "코스를 불러오지 못했어요. 잠시 후 다시 시도해주세요."
+    "empty": "코스를 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
+    "aiBadge": "AI 코스",
+    "aiLoading": "AI가 그 명소를 거치는 코스를 짜고 있어요…",
+    "aiError": "코스를 짜지 못했어요. 잠시 후 다시 시도해주세요.",
+    "aiAnchor": "{name} 포함",
+    "aiNote": "선택한 명소와 인근 야간 명소로 Gemini가 구성한 코스",
+    "aiFallbackNote": "AI 응답을 받지 못해 가까운 명소 순서로 구성했어요",
+    "presetHeading": "다른 추천 코스"
   },
   "etiquette": {
     "title": "나이트 에티켓",

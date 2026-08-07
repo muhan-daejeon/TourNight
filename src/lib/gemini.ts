@@ -223,6 +223,94 @@ export async function generateSpotGuide(
   };
 }
 
+/** AI 코스 짜기: 기준 스팟을 반드시 거치는 야간 코스 설계 결과 */
+export interface CoursePlan {
+  title: string;
+  summary: string;
+  tip: string;
+  /** 방문 순서대로. contentId는 반드시 후보 목록 안의 값 */
+  stops: { contentId: string; note: string }[];
+}
+
+export interface CourseCandidate {
+  contentId: string;
+  title: string;
+  category: string;
+  addr: string;
+  /** 기준 스팟으로부터의 직선거리(m) — 기준 스팟 자신은 0 */
+  distanceM: number;
+}
+
+/**
+ * 지도에서 고른 스팟(anchor)을 반드시 포함하는 야간 코스를 Gemini가 설계한다.
+ * 후보는 서버가 뽑은 인근 검증 스팟으로 한정하고(환각·주입 방지),
+ * 호출부에서 반환된 contentId가 후보에 있는지 다시 검증한다.
+ */
+export async function generateCoursePlan(
+  anchor: CourseCandidate,
+  candidates: CourseCandidate[],
+  locale: string,
+): Promise<CoursePlan> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY가 설정되지 않았습니다");
+
+  const language = LOCALE_LANGUAGE[locale] ?? "English";
+  const list = [anchor, ...candidates]
+    .map(
+      (c) =>
+        `- id=${c.contentId} | ${c.title} | category=${c.category} | ${c.addr} | ${c.distanceM}m from the anchor`,
+    )
+    .join("\n");
+
+  const prompt = [
+    `You are a night tourism course planner for Daejeon, South Korea.`,
+    `Design ONE night course (evening to late night) that MUST include this anchor place:`,
+    `anchor id=${anchor.contentId} (${anchor.title})`,
+    `Choose 2 or 3 more places from this candidate list ONLY (never invent ids or places):`,
+    list,
+    `Rules:`,
+    `- Total 3 to 4 stops including the anchor.`,
+    `- Order them so travel is efficient (prefer nearby places, avoid zig-zag) and the mood builds through the night.`,
+    `- Mix categories when it makes sense (e.g. city view -> nature walk -> science spot).`,
+    `- Write in ${language}. Do not mention ids in the text.`,
+    `Return JSON: {"title": string, "summary": string, "tip": string,`,
+    ` "stops": [{"contentId": string, "note": string}]}`,
+    `- title: short course name (under 6 words).`,
+    `- summary: 1-2 sentences on what makes this route worth doing at night.`,
+    `- note: one short sentence per stop — why visit it at this point of the night.`,
+    `- tip: one practical tip for a foreign visitor doing this route at night.`,
+    `Respond with ONLY the JSON.`,
+  ].join("\n");
+
+  const res = await fetch(
+    `${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      }),
+    },
+  );
+  if (!res.ok) throw new Error(`Gemini API 오류: ${res.status}`);
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error("Gemini 응답이 비어 있습니다");
+  const parsed = JSON.parse(text);
+  return {
+    title: String(parsed.title ?? ""),
+    summary: String(parsed.summary ?? ""),
+    tip: String(parsed.tip ?? ""),
+    stops: Array.isArray(parsed.stops)
+      ? parsed.stops.slice(0, 4).map((s: Record<string, unknown>) => ({
+          contentId: String(s?.contentId ?? ""),
+          note: String(s?.note ?? ""),
+        }))
+      : [],
+  };
+}
+
 export interface EtiquetteGuide {
   intro: string;
   dos: string[];

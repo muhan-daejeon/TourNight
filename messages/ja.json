@@ -18,6 +18,7 @@
     "searchPlaceholder": "名前・エリアで検索",
     "noResults": "該当する名所がありません",
     "viewDetail": "詳しく見る",
+    "planCourse": "コースを作る",
     "mapSection": "夜の名所マップ",
     "categories": {
       "all": "すべて",
@@ -40,7 +41,14 @@
     "together": "一緒に訪問",
     "directions": "出発地までカカオマップ経路案内",
     "dataNote": "車両移動統計（KTO 関連観光地）に基づく",
-    "empty": "コースを読み込めませんでした。しばらくしてからお試しください。"
+    "empty": "コースを読み込めませんでした。しばらくしてからお試しください。",
+    "aiBadge": "AI コース",
+    "aiLoading": "そのスポットを通るコースを AI が作成中です…",
+    "aiError": "コースを作成できませんでした。しばらくしてからお試しください。",
+    "aiAnchor": "{name}を含む",
+    "aiNote": "選んだスポットと周辺の夜スポットから Gemini が構成したコース",
+    "aiFallbackNote": "AI の応答が得られず、近い順で構成しました",
+    "presetHeading": "その他のおすすめコース"
   },
   "etiquette": {
     "title": "ナイトエチケット",
