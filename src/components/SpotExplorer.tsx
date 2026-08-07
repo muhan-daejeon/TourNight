@@ -183,9 +183,13 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             visibleIds={visibleIds}
             selectedId={activeSelectedId}
             onSelect={setSelectedId}
-            // 코스 페이지에서 이 스팟을 거치는 AI 코스를 만들어 추천 코스와 함께 보여준다
+            // 코스 페이지에서 이 스팟을 거치는 AI 코스를 만들어 추천 코스와 함께 보여준다.
+            // 켜둔 카테고리 필터도 넘겨 같은 계열 명소를 우선하게 한다 (강제는 아님)
             onPlanCourse={(contentId) =>
-              router.push(`/courses?from=${encodeURIComponent(contentId)}`)
+              router.push(
+                `/courses?from=${encodeURIComponent(contentId)}` +
+                  (category === "all" ? "" : `&category=${category}`),
+              )
             }
           />
         </div>

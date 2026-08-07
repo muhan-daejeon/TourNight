@@ -252,6 +252,8 @@ export async function generateCoursePlan(
   anchor: CourseCandidate,
   candidates: CourseCandidate[],
   locale: string,
+  /** 사용자가 홈에서 켜둔 카테고리 필터 — 강제가 아닌 소프트 선호 */
+  preferredCategory?: string,
 ): Promise<CoursePlan> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY가 설정되지 않았습니다");
@@ -262,7 +264,11 @@ export async function generateCoursePlan(
   const list = [anchor, ...candidates]
     .map(
       (c) =>
-        `- id=${c.contentId} | ${c.title} | category=${c.category} | ${c.addr} | ${c.distanceM}m from the anchor | ${busTime(c.lastBus)}`,
+        `- id=${c.contentId} | ${c.title} | category=${c.category}` +
+        (preferredCategory && c.category === preferredCategory
+          ? ` [${preferredCategory}]`
+          : "") +
+        ` | ${c.addr} | ${c.distanceM}m from the anchor | ${busTime(c.lastBus)}`,
     )
     .join("\n");
 
@@ -275,7 +281,17 @@ export async function generateCoursePlan(
     `Rules:`,
     `- Total 3 to 4 stops including the anchor.`,
     `- Order them so travel is efficient (prefer nearby places, avoid zig-zag) and the mood builds through the night.`,
-    `- Mix categories when it makes sense (e.g. city view -> nature walk -> science spot).`,
+    ...(preferredCategory
+      ? [
+          `- The visitor is browsing "${preferredCategory}" spots, so this course should feel`,
+          `  like a "${preferredCategory}" course. Candidates marked [${preferredCategory}] below are preferred.`,
+          `  At least half of the stops must be "${preferredCategory}" whenever that many are listed,`,
+          `  even if they are a few km farther than other candidates — do not pick by distance alone.`,
+          `  It is NOT exclusive: fill the remaining stops with other categories that fit the route.`,
+        ]
+      : [
+          `- Mix categories when it makes sense (e.g. city view -> nature walk -> science spot).`,
+        ]),
     `- Buses in Daejeon stop running around 22:30. Use the last bus times above:`,
     `  visit places with an EARLIER last bus first, and places reachable on foot or`,
     `  with no bus stop LAST, so the visitor is not stranded.`,

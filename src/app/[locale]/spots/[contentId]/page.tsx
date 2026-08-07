@@ -109,7 +109,7 @@ export default async function SpotPage({
   const [natureNearby, nearby, stays, congestion, transit] = await Promise.all([
     spot.category === "nature"
       ? Promise.resolve([])
-      : getNearbySpots(contentId, { natureOnly: true, limit: 3, locale }),
+      : getNearbySpots(contentId, { category: "nature", limit: 3, locale }),
     getNearbySpots(contentId, { limit: 4, locale }),
     fetchNearbyStays(spot.mapX, spot.mapY),
     getCongestion(contentId),

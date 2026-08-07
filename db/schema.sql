@@ -157,6 +157,12 @@ create table if not exists ai_course_cache (
   primary key (content_id, locale)
 );
 
+-- 홈 카테고리 필터를 코스 설계에 반영하면서 캐시 키에 선호 카테고리가 추가됐다
+-- (필터 없음 = ''). 기존 (content_id, locale) PK를 재구성한다.
+alter table ai_course_cache add column if not exists pref_category text not null default '';
+alter table ai_course_cache drop constraint if exists ai_course_cache_pkey;
+alter table ai_course_cache add primary key (content_id, locale, pref_category);
+
 -- 스팟별 인근 버스 정류장·막차 정보 (TAGO 버스정류소정보/버스노선정보 — db/sync-transit.mjs).
 -- 야간 명소는 막차가 22시대라 "보다가 막차 놓침"이 실제 위험이라 미리 적재해 둔다.
 -- 정류장이 없는 스팟도 node_id = null로 행을 남겨 '정류장 없음(택시 권장)'을 구분한다.

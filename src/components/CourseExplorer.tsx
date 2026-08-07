@@ -52,11 +52,22 @@ function StopChain({
   );
 }
 
+/** 카테고리 배지 색 — 홈 리스트·지도 핀과 같은 계열 */
+const CATEGORY_TEXT: Record<string, string> = {
+  science: "text-sky-300",
+  nature: "text-emerald-300",
+  festival: "text-pink-300",
+  city: "text-amber-300",
+};
+
 export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const t = useTranslations("courses");
+  const home = useTranslations("home");
   const locale = useLocale();
-  // 지도의 '코스 짜기'로 넘어오면 ?from=<contentId>가 붙는다
-  const fromContentId = useSearchParams().get("from");
+  // 지도의 '코스 짜기'로 넘어오면 ?from=<contentId>(+켜둔 카테고리 필터)가 붙는다
+  const searchParams = useSearchParams();
+  const fromContentId = searchParams.get("from");
+  const fromCategory = searchParams.get("category");
 
   const [aiCourse, setAiCourse] = useState<AiCourse | null>(null);
   const [aiState, setAiState] = useState<"idle" | "loading" | "error">(
@@ -65,10 +76,11 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   // 선택 코스 id — null이면 첫 번째 코스
   const [selId, setSelId] = useState<string | null>(null);
 
-  // 클라이언트 이동으로 from이 바뀌면 렌더 중에 초기화 (effect 안 setState 회피)
-  const [lastFrom, setLastFrom] = useState(fromContentId);
-  if (lastFrom !== fromContentId) {
-    setLastFrom(fromContentId);
+  // 클라이언트 이동으로 from·카테고리가 바뀌면 렌더 중에 초기화 (effect 안 setState 회피)
+  const reqKey = `${fromContentId}|${fromCategory}`;
+  const [lastKey, setLastKey] = useState(reqKey);
+  if (lastKey !== reqKey) {
+    setLastKey(reqKey);
     setAiCourse(null);
     setAiState(fromContentId ? "loading" : "idle");
   }
@@ -77,7 +89,8 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
     if (!fromContentId) return;
     const controller = new AbortController();
     fetch(
-      `/api/ai-course?contentId=${encodeURIComponent(fromContentId)}&locale=${locale}`,
+      `/api/ai-course?contentId=${encodeURIComponent(fromContentId)}&locale=${locale}` +
+        (fromCategory ? `&category=${encodeURIComponent(fromCategory)}` : ""),
       { signal: controller.signal },
     )
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
@@ -92,7 +105,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
         setAiState("error");
       });
     return () => controller.abort();
-  }, [fromContentId, locale]);
+  }, [fromContentId, fromCategory, locale]);
 
   if (!courses.length && !fromContentId) {
     return (
@@ -138,9 +151,19 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             className={cardClass(course?.id === aiCourse.id)}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-1.5 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-slate-950">
-                <Sparkles size={11} />
-                {t("aiBadge")}
+              <span className="flex flex-wrap items-center gap-1.5">
+                <span className="flex items-center gap-1.5 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-slate-950">
+                  <Sparkles size={11} />
+                  {t("aiBadge")}
+                </span>
+                {/* 홈에서 켜둔 카테고리 필터를 우선했음을 알림 */}
+                {aiCourse.prefCategory && (
+                  <span className="rounded-full border border-white/15 px-2 py-0.5 text-[11px] font-semibold text-slate-300">
+                    {t("aiCategoryPref", {
+                      category: home(`categories.${aiCourse.prefCategory}`),
+                    })}
+                  </span>
+                )}
               </span>
               <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-300/90">
                 <Route size={13} />
@@ -173,6 +196,11 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                     <div className="min-w-0">
                       <p className="flex flex-wrap items-center gap-1.5 text-[13px] font-semibold text-slate-100">
                         {s.title}
+                        <span
+                          className={`text-[11px] font-medium ${CATEGORY_TEXT[s.category]}`}
+                        >
+                          {home(`categories.${s.category}`)}
+                        </span>
                         {i > 0 && aiCourse.legs[i - 1] && (
                           <span className="text-[11px] font-medium text-slate-500">
                             {formatDistance(aiCourse.legs[i - 1].distanceM)}
