@@ -33,6 +33,16 @@
   "footer": {
     "notice": "본 서비스는 2026 관광데이터 활용 공모전 출품작입니다."
   },
+  "transit": {
+    "title": "가는 길·막차",
+    "nearestStop": "가장 가까운 정류장 {stop} ({distance}m)",
+    "lastBus": "막차 {time}",
+    "interval": "배차 {min}분",
+    "stopAndLast": "{stop} · 막차 {time}",
+    "noStop": "정류장 없음 · 택시 권장",
+    "noStopDetail": "반경 500m 안에 시내버스 정류장이 없어요. 택시나 차량으로 이동하시고, 돌아갈 교통편을 미리 정해두세요.",
+    "dataNote": "국토교통부 대중교통 정보 기준"
+  },
   "courses": {
     "title": "추천 코스",
     "subtitle": "대전 야경 명소를 잇는 드라이브 코스. 차량 이동 통계(KTO 연관 관광지)로 실제 함께 방문되는 구간은 '함께 방문'으로 이었습니다.",

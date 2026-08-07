@@ -13,6 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import CourseMap from "./CourseMap";
+import { TransitLine } from "./TransitInfo";
 import type { AiCourse, Course } from "@/lib/courses";
 
 function formatDistance(m: number) {
@@ -189,6 +190,9 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                           {aiCourse.notes[i]}
                         </p>
                       )}
+                      <span className="mt-1 flex">
+                        <TransitLine transit={aiCourse.transit?.[i] ?? null} />
+                      </span>
                     </div>
                   </li>
                 ))}

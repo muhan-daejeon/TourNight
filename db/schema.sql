@@ -157,6 +157,19 @@ create table if not exists ai_course_cache (
   primary key (content_id, locale)
 );
 
+-- 스팟별 인근 버스 정류장·막차 정보 (TAGO 버스정류소정보/버스노선정보 — db/sync-transit.mjs).
+-- 야간 명소는 막차가 22시대라 "보다가 막차 놓침"이 실제 위험이라 미리 적재해 둔다.
+-- 정류장이 없는 스팟도 node_id = null로 행을 남겨 '정류장 없음(택시 권장)'을 구분한다.
+create table if not exists spot_transit (
+  content_id text primary key,
+  node_id text,             -- TAGO 정류소 ID (대전 citycode 25만)
+  node_name text,
+  distance_m int,           -- 스팟 ↔ 정류장 직선거리
+  routes jsonb not null default '[]',  -- [{routeNo, firstTime, lastTime, intervalMin, endNode}]
+  last_bus text,            -- 경유노선 중 가장 늦은 막차 (HHMM)
+  updated_at timestamptz not null default now()
+);
+
 -- 커뮤니티 글/댓글 작성자 계정 연결 (본인 글 삭제 판별용) — users 정의 후에 추가.
 -- 계정 삭제 시 글은 남기되 소유만 해제(set null). 기존 글은 null(삭제 버튼 없음).
 alter table community_posts add column if not exists user_id bigint references users(id) on delete set null;

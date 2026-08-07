@@ -33,6 +33,16 @@
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。"
   },
+  "transit": {
+    "title": "交通与末班车",
+    "nearestStop": "最近的公交站 {stop}（{distance}米）",
+    "lastBus": "末班车 {time}",
+    "interval": "发车间隔 {min} 分钟",
+    "stopAndLast": "{stop} · 末班车 {time}",
+    "noStop": "无公交站 · 建议打车",
+    "noStopDetail": "半径 500 米内没有市内公交站。建议乘出租车或自驾前往，并提前安排返程交通。",
+    "dataNote": "基于韩国国土交通部公共交通信息"
+  },
   "courses": {
     "title": "推荐路线",
     "subtitle": "串联大田夜景景点的自驾路线。根据车辆移动统计（KTO 关联景点），实际常一起前往的路段标注为“常一起去”。",

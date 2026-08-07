@@ -33,6 +33,16 @@
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest."
   },
+  "transit": {
+    "title": "Getting there & last bus",
+    "nearestStop": "Nearest stop: {stop} ({distance}m)",
+    "lastBus": "last bus {time}",
+    "interval": "every {min} min",
+    "stopAndLast": "{stop} · last bus {time}",
+    "noStop": "No bus stop · taxi recommended",
+    "noStopDetail": "There is no city bus stop within 500m. Come by taxi or car, and arrange your ride back in advance.",
+    "dataNote": "Based on Ministry of Land, Infrastructure and Transport transit data"
+  },
   "courses": {
     "title": "Recommended Courses",
     "subtitle": "Night-drive routes linking Daejeon's after-dark spots. Legs where visitors actually travel together (KTO vehicle-movement data) are marked 'Visited together'.",

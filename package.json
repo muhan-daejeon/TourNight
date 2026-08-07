@@ -14,7 +14,8 @@
     "db:i18n": "node --env-file=.env.local db/sync-i18n.mjs",
     "db:congestion": "node --env-file=.env.local db/sync-congestion.mjs",
     "db:related": "node --env-file=.env.local db/sync-related.mjs",
-    "db:visitors": "node --env-file=.env.local db/sync-visitors.mjs"
+    "db:visitors": "node --env-file=.env.local db/sync-visitors.mjs",
+    "db:transit": "node --env-file=.env.local db/sync-transit.mjs"
   },
   "dependencies": {
     "jose": "^6.2.8",

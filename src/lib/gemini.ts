@@ -239,6 +239,8 @@ export interface CourseCandidate {
   addr: string;
   /** 기준 스팟으로부터의 직선거리(m) — 기준 스팟 자신은 0 */
   distanceM: number;
+  /** 인근 정류장 막차 시간 HHMM (정류장 없거나 정보 없으면 null) */
+  lastBus?: string | null;
 }
 
 /**
@@ -255,10 +257,12 @@ export async function generateCoursePlan(
   if (!apiKey) throw new Error("GEMINI_API_KEY가 설정되지 않았습니다");
 
   const language = LOCALE_LANGUAGE[locale] ?? "English";
+  const busTime = (t?: string | null) =>
+    t ? `last bus ${t.slice(0, 2)}:${t.slice(2)}` : "no bus stop within 500m";
   const list = [anchor, ...candidates]
     .map(
       (c) =>
-        `- id=${c.contentId} | ${c.title} | category=${c.category} | ${c.addr} | ${c.distanceM}m from the anchor`,
+        `- id=${c.contentId} | ${c.title} | category=${c.category} | ${c.addr} | ${c.distanceM}m from the anchor | ${busTime(c.lastBus)}`,
     )
     .join("\n");
 
@@ -272,13 +276,17 @@ export async function generateCoursePlan(
     `- Total 3 to 4 stops including the anchor.`,
     `- Order them so travel is efficient (prefer nearby places, avoid zig-zag) and the mood builds through the night.`,
     `- Mix categories when it makes sense (e.g. city view -> nature walk -> science spot).`,
+    `- Buses in Daejeon stop running around 22:30. Use the last bus times above:`,
+    `  visit places with an EARLIER last bus first, and places reachable on foot or`,
+    `  with no bus stop LAST, so the visitor is not stranded.`,
     `- Write in ${language}. Do not mention ids in the text.`,
     `Return JSON: {"title": string, "summary": string, "tip": string,`,
     ` "stops": [{"contentId": string, "note": string}]}`,
     `- title: short course name (under 6 words).`,
     `- summary: 1-2 sentences on what makes this route worth doing at night.`,
     `- note: one short sentence per stop — why visit it at this point of the night.`,
-    `- tip: one practical tip for a foreign visitor doing this route at night.`,
+    `- tip: one practical tip about getting back at night, referring to the actual`,
+    `  last bus times above (or taxi if a stop has no bus stop).`,
     `Respond with ONLY the JSON.`,
   ].join("\n");
 
