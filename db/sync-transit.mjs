@@ -159,6 +159,15 @@ try {
     `\n완료 — 정류장 ${withStop}/${spots.length}곳, 막차 ${withLast}/${spots.length}곳` +
       (failed ? `, 실패 ${failed}곳(기존 값 유지)` : ""),
   );
+
+  // 월 1회 무인 실행이라 전량 실패가 조용히 넘어가면 안 된다.
+  // 절반 넘게 실패하면(키 만료·API 장애 등) 종료 코드로 알린다.
+  if (failed > spots.length / 2) {
+    console.error(
+      `실패가 과반(${failed}/${spots.length})입니다 — 인증키 만료나 TAGO 장애를 확인하세요.`,
+    );
+    process.exitCode = 1;
+  }
 } finally {
   await sql.end();
 }
