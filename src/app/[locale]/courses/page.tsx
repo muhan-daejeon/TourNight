@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getCourses } from "@/lib/courses";
 import CourseExplorer from "@/components/CourseExplorer";
@@ -20,7 +21,10 @@ export default async function CoursesPage({
       <p className="overline-label">Night Drive</p>
       <h1 className="mt-2 text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-3 mb-8 max-w-2xl text-slate-400">{t("subtitle")}</p>
-      <CourseExplorer courses={courses} />
+      {/* CourseExplorer가 ?from=<contentId>(코스 짜기 진입)를 읽으므로 Suspense로 감싼다 */}
+      <Suspense fallback={<div className="h-96" />}>
+        <CourseExplorer courses={courses} />
+      </Suspense>
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
   Search,
   type LucideIcon,
 } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import type { NightSpot } from "@/lib/kto";
 import NightMap from "./NightMap";
 
@@ -42,6 +42,7 @@ const CATEGORY_SCENE: Record<string, string> = {
 
 export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
   const t = useTranslations("home");
+  const router = useRouter();
   const [category, setCategory] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -182,6 +183,10 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             visibleIds={visibleIds}
             selectedId={activeSelectedId}
             onSelect={setSelectedId}
+            // 코스 페이지에서 이 스팟을 거치는 AI 코스를 만들어 추천 코스와 함께 보여준다
+            onPlanCourse={(contentId) =>
+              router.push(`/courses?from=${encodeURIComponent(contentId)}`)
+            }
           />
         </div>
       </div>

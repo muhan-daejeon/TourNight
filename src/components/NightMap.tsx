@@ -15,6 +15,21 @@ const PIN_COLOR: Record<string, string> = {
   city: "#fbbf24",
 };
 
+/** 오버레이는 문자열 HTML로 만들어지므로 스팟 텍스트는 이스케이프해서 넣는다 */
+function esc(s: string) {
+  return s.replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[c]!,
+  );
+}
+
 function pinSvg(color: string, selected: boolean) {
   const stroke = selected ? 'stroke="#ffffff" stroke-width="2"' : "";
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38"><path d="M14 1C6.8 1 1 6.8 1 14c0 9.8 13 23 13 23s13-13.2 13-23C27 6.8 21.2 1 14 1z" fill="${color}" ${stroke}/><circle cx="14" cy="14" r="5" fill="#0f172a"/></svg>`;
@@ -36,11 +51,14 @@ export default function NightMap({
   visibleIds,
   selectedId = null,
   onSelect,
+  onPlanCourse,
 }: {
   spots: NightSpot[];
   visibleIds?: Set<string>;
   selectedId?: string | null;
   onSelect?: (contentId: string | null) => void;
+  /** 주면 선택 오버레이에 '코스 짜기' 버튼이 붙는다 */
+  onPlanCourse?: (contentId: string) => void;
 }) {
   const t = useTranslations("home");
   const locale = useLocale();
@@ -51,9 +69,11 @@ export default function NightMap({
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
   const prevSelectedRef = useRef<string | null>(null);
   const onSelectRef = useRef(onSelect);
+  const onPlanCourseRef = useRef(onPlanCourse);
   useEffect(() => {
     onSelectRef.current = onSelect;
-  }, [onSelect]);
+    onPlanCourseRef.current = onPlanCourse;
+  }, [onSelect, onPlanCourse]);
 
   const markerImage = (category: string, selected: boolean) => {
     const kakao = kakaoRef.current;
@@ -157,21 +177,39 @@ export default function NightMap({
     const pos = new kakao.maps.LatLng(spot.mapY, spot.mapX);
     const color = PIN_COLOR[spot.category] ?? "#fbbf24";
     const img = spot.imageUrl
-      ? `<div style="height:108px;background:url('${spot.imageUrl}') center/cover"></div>`
+      ? `<div style="height:108px;background:url('${encodeURI(spot.imageUrl).replace(/'/g, "%27")}') center/cover"></div>`
       : "";
+    // 목록형 지도(홈)에서만 상세·코스 액션을 노출 (상세 페이지의 단일 스팟 지도는 제외)
+    const showActions = spots.length > 1;
+    const detailBtn = `<a data-detail href="/${locale}/spots/${encodeURIComponent(spot.contentId)}" style="flex:1;padding:6px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:700;color:#e2e8f0;text-align:center;text-decoration:none;cursor:pointer">${t("viewDetail")}</a>`;
+    const planBtn = onPlanCourseRef.current
+      ? `<button data-plan type="button" style="flex:1;padding:6px 8px;border-radius:999px;border:0;background:#fbbf24;font-size:12px;font-weight:800;color:#0f172a;cursor:pointer">${t("planCourse")}</button>`
+      : "";
+
+    const el = document.createElement("div");
+    el.innerHTML = `
+      <div style="width:230px;transform:translateY(-58px);background:#0f172a;border:1px solid rgba(255,255,255,.15);border-radius:14px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.55)">
+        ${img}
+        <div style="padding:10px 12px 12px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.02em;color:${color}">${t(`categories.${spot.category}`)}</div>
+          <div style="margin-top:2px;font-size:14px;font-weight:700;color:#fff;line-height:1.35">${esc(spot.title)}</div>
+          <div style="margin-top:3px;font-size:12px;color:#94a3b8;line-height:1.4">${esc(spot.addr)}</div>
+          ${showActions ? `<div style="display:flex;gap:6px;margin-top:9px">${detailBtn}${planBtn}</div>` : ""}
+        </div>
+      </div>`;
+
+    // 오버레이 클릭이 지도로 전파되면 선택이 해제된다 → 여기서 끊는다
+    ["mousedown", "touchstart", "click"].forEach((type) =>
+      el.addEventListener(type, (e) => e.stopPropagation()),
+    );
+    el.querySelector("[data-plan]")?.addEventListener("click", () =>
+      onPlanCourseRef.current?.(spot.contentId),
+    );
+
     const overlay = new kakao.maps.CustomOverlay({
       position: pos,
       yAnchor: 1.12,
-      content: `
-        <div style="width:230px;transform:translateY(-58px);background:#0f172a;border:1px solid rgba(255,255,255,.15);border-radius:14px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.55)">
-          ${img}
-          <div style="padding:10px 12px 12px">
-            <div style="font-size:11px;font-weight:700;letter-spacing:.02em;color:${color}">${t(`categories.${spot.category}`)}</div>
-            <div style="margin-top:2px;font-size:14px;font-weight:700;color:#fff;line-height:1.35">${spot.title}</div>
-            <div style="margin-top:3px;font-size:12px;color:#94a3b8;line-height:1.4">${spot.addr}</div>
-            ${spots.length > 1 ? `<a href="/${locale}/spots/${encodeURIComponent(spot.contentId)}" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="event.stopPropagation();window.location.href=this.href;return false" style="display:inline-block;margin-top:8px;padding:4px 2px;font-size:12px;font-weight:700;color:#fbbf24;text-decoration:none;cursor:pointer">${t("viewDetail")} →</a>` : ""}
-          </div>
-        </div>`,
+      content: el,
     });
     overlay.setMap(map);
     overlayRef.current = overlay;

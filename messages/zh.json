@@ -18,6 +18,7 @@
     "searchPlaceholder": "按名称或地区搜索",
     "noResults": "未找到相关景点",
     "viewDetail": "查看详情",
+    "planCourse": "规划路线",
     "mapSection": "夜间景点地图",
     "categories": {
       "all": "全部",
@@ -40,7 +41,14 @@
     "together": "常一起去",
     "directions": "到出发地的 KakaoMap 导航",
     "dataNote": "基于车辆移动统计（KTO 关联景点）",
-    "empty": "加载路线失败，请稍后再试。"
+    "empty": "加载路线失败，请稍后再试。",
+    "aiBadge": "AI 路线",
+    "aiLoading": "AI 正在规划经过该景点的路线…",
+    "aiError": "路线规划失败，请稍后再试。",
+    "aiAnchor": "包含{name}",
+    "aiNote": "由 Gemini 依据所选景点及周边夜间景点规划",
+    "aiFallbackNote": "未能获取 AI 结果，已按距离由近到远排列",
+    "presetHeading": "其他推荐路线"
   },
   "etiquette": {
     "title": "夜间礼仪",

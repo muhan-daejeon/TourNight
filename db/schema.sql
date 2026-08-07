@@ -147,6 +147,16 @@ create table if not exists spot_related (
   primary key (content_id, related_content_id)
 );
 
+-- AI 코스 짜기 캐시 (지도에서 스팟 선택 → Gemini가 그 스팟을 거치는 코스 생성).
+-- 스팟·언어당 1건만 두고 재요청 시 재사용한다 (심사/데모 때 실시간 Gemini 의존 축소).
+create table if not exists ai_course_cache (
+  content_id text not null,
+  locale text not null,
+  course jsonb not null,   -- 생성된 코스 전체 (AiCourse: title/summary/tip/notes/stops/legs)
+  updated_at timestamptz not null default now(),
+  primary key (content_id, locale)
+);
+
 -- 커뮤니티 글/댓글 작성자 계정 연결 (본인 글 삭제 판별용) — users 정의 후에 추가.
 -- 계정 삭제 시 글은 남기되 소유만 해제(set null). 기존 글은 null(삭제 버튼 없음).
 alter table community_posts add column if not exists user_id bigint references users(id) on delete set null;
