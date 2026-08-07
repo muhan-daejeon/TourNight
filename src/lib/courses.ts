@@ -1,6 +1,7 @@
 import { sql } from "./db";
 import { generateCoursePlan, type CourseCandidate } from "./gemini";
 import { getNearbySpots, getSpot } from "./spots";
+import { getTransitForSpots, type SpotTransit } from "./transit";
 import type { NightSpot } from "./kto";
 
 export interface CourseStop {
@@ -34,6 +35,8 @@ export interface AiCourse extends Course {
   tip: string;
   /** stops와 같은 순서의 방문 이유 (없으면 빈 문자열) */
   notes: string[];
+  /** stops와 같은 순서의 인근 정류장·막차 (정보 없으면 null) */
+  transit: (SpotTransit | null)[];
   /** ai = Gemini 설계, distance = Gemini 실패 시 최근접 폴백 */
   source: "ai" | "distance";
 }
@@ -227,12 +230,17 @@ export async function getAiCourse(
   byId.set(anchor.contentId, toStop(anchor));
   nearby.forEach((s) => byId.set(s.contentId, toStop(s)));
 
+  // 후보 전체의 막차 정보 — 프롬프트에 넣어 "막차 전에 돌 수 있는 순서"를 짜게 한다
+  const transitMap = await getTransitForSpots([...byId.keys()]);
+  const lastBusOf = (id: string) => transitMap.get(id)?.lastBus ?? null;
+
   const anchorCandidate: CourseCandidate = {
     contentId: anchor.contentId,
     title: anchor.title,
     category: anchor.category,
     addr: anchor.addr,
     distanceM: 0,
+    lastBus: lastBusOf(anchor.contentId),
   };
   const candidates: CourseCandidate[] = nearby.map((s) => ({
     contentId: s.contentId,
@@ -240,6 +248,7 @@ export async function getAiCourse(
     category: s.category,
     addr: s.addr,
     distanceM: s.distanceM,
+    lastBus: lastBusOf(s.contentId),
   }));
 
   // 거리 기반 폴백 — anchor에서 가까운 3곳을 최단이웃 순서로
@@ -256,6 +265,7 @@ export async function getAiCourse(
       summary: "",
       tip: "",
       notes: stops.map(() => ""),
+      transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
       source: "distance",
       ...(await toCourse(stops)),
     };
@@ -284,6 +294,7 @@ export async function getAiCourse(
       summary: plan.summary,
       tip: plan.tip,
       notes: picked.map((p) => p.note),
+      transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
       source: "ai",
       ...(await toCourse(stops)),
     };

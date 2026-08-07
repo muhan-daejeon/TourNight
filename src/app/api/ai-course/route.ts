@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
       select course from ai_course_cache
       where content_id = ${contentId} and locale = ${locale}
     `;
-    if (cached.length > 0) {
+    // transit이 없는 캐시는 교통 정보 도입 전에 만들어진 것 → 무시하고 재생성
+    if (cached.length > 0 && Array.isArray(cached[0].course?.transit)) {
       return NextResponse.json({ course: cached[0].course });
     }
   } catch (err) {

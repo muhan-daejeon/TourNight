@@ -24,6 +24,8 @@ import NightMap from "@/components/NightMap";
 import SpotGuide from "@/components/SpotGuide";
 import CongestionForecast from "@/components/CongestionForecast";
 import AreaVisitors from "@/components/AreaVisitors";
+import { TransitCard } from "@/components/TransitInfo";
+import { getSpotTransit } from "@/lib/transit";
 
 const CATEGORY_ICON: Record<string, LucideIcon> = {
   science: Telescope,
@@ -104,13 +106,14 @@ export default async function SpotPage({
   const home = await getTranslations("home");
   const Icon = CATEGORY_ICON[spot.category];
 
-  const [natureNearby, nearby, stays, congestion] = await Promise.all([
+  const [natureNearby, nearby, stays, congestion, transit] = await Promise.all([
     spot.category === "nature"
       ? Promise.resolve([])
       : getNearbySpots(contentId, { natureOnly: true, limit: 3, locale }),
     getNearbySpots(contentId, { limit: 4, locale }),
     fetchNearbyStays(spot.mapX, spot.mapY),
     getCongestion(contentId),
+    getSpotTransit(contentId),
   ]);
 
   const kakaoDirections = `https://map.kakao.com/link/to/${encodeURIComponent(spot.title)},${spot.mapY},${spot.mapX}`;
@@ -178,6 +181,9 @@ export default async function SpotPage({
           <div className="space-y-6">
             {/* AI 야간 가이드 */}
             <SpotGuide contentId={spot.contentId} />
+
+            {/* 인근 정류장·막차 — 야간 명소는 막차가 22시대라 먼저 보여준다 */}
+            <TransitCard transit={transit} />
 
             {/* 혼잡도 예측 — KT 이동통신 데이터 기반 (데이터 있는 스팟만) */}
             <CongestionForecast days={congestion} locale={locale} />
