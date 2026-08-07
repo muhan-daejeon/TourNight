@@ -56,6 +56,7 @@
     "aiLoading": "AI 正在规划经过该景点的路线…",
     "aiError": "路线规划失败，请稍后再试。",
     "aiAnchor": "包含{name}",
+    "aiCategoryPref": "以{category}为主",
     "aiNote": "由 Gemini 依据所选景点及周边夜间景点规划",
     "aiFallbackNote": "未能获取 AI 结果，已按距离由近到远排列",
     "presetHeading": "其他推荐路线"

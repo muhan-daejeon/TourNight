@@ -37,6 +37,8 @@ export interface AiCourse extends Course {
   notes: string[];
   /** stops와 같은 순서의 인근 정류장·막차 (정보 없으면 null) */
   transit: (SpotTransit | null)[];
+  /** 코스를 짤 때 우선한 카테고리 (홈 필터 기준, 없으면 null) */
+  prefCategory: NightSpot["category"] | null;
   /** ai = Gemini 설계, distance = Gemini 실패 시 최근접 폴백 */
   source: "ai" | "distance";
 }
@@ -206,15 +208,28 @@ async function toCourse(stops: CourseStop[]): Promise<Omit<Course, "id">> {
  * 후보는 인근 검증 스팟으로 한정하고, Gemini가 그중 2~3곳을 골라 순서를 정한다.
  * 반환된 contentId는 후보 목록으로 다시 검증하며(환각 방지), anchor가 빠지면 앞에 끼워 넣는다.
  * Gemini 실패·키 미설정 시에는 최근접 스팟 3곳으로 거리 기반 코스를 폴백 생성한다.
+ *
+ * prefCategory(홈에서 켜둔 카테고리 필터)를 주면 같은 카테고리를 우선하되 강제하지는 않는다.
+ * 거리순 후보만으로는 해당 카테고리가 한 곳도 안 뽑힐 수 있어, 같은 카테고리 후보를
+ * 따로 조회해 합친다.
  */
 export async function getAiCourse(
   contentId: string,
   locale = "ko",
+  prefCategory?: NightSpot["category"],
 ): Promise<AiCourse | null> {
   const anchor = await getSpot(contentId, locale);
   if (!anchor) return null;
 
-  const nearby = await getNearbySpots(contentId, { limit: 8, locale });
+  const [near, sameCat] = await Promise.all([
+    getNearbySpots(contentId, { limit: 8, locale }),
+    prefCategory
+      ? getNearbySpots(contentId, { limit: 5, locale, category: prefCategory })
+      : Promise.resolve([]),
+  ]);
+  // 거리순 후보 + 선호 카테고리 후보 (중복 제거, 가까운 순)
+  const nearby = [...new Map([...near, ...sameCat].map((s) => [s.contentId, s])).values()]
+    .sort((a, b) => a.distanceM - b.distanceM);
   if (!nearby.length) return null;
 
   const toStop = (s: NightSpot): CourseStop => ({
@@ -266,13 +281,19 @@ export async function getAiCourse(
       tip: "",
       notes: stops.map(() => ""),
       transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
+      prefCategory: prefCategory ?? null,
       source: "distance",
       ...(await toCourse(stops)),
     };
   };
 
   try {
-    const plan = await generateCoursePlan(anchorCandidate, candidates, locale);
+    const plan = await generateCoursePlan(
+      anchorCandidate,
+      candidates,
+      locale,
+      prefCategory,
+    );
 
     // 후보에 없는 id·중복 제거 → 그래도 anchor는 반드시 포함
     const seen = new Set<string>();
@@ -295,6 +316,7 @@ export async function getAiCourse(
       tip: plan.tip,
       notes: picked.map((p) => p.note),
       transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
+      prefCategory: prefCategory ?? null,
       source: "ai",
       ...(await toCourse(stops)),
     };

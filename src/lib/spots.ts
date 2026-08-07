@@ -97,14 +97,18 @@ export interface NearbySpot extends NightSpot {
   distanceM: number;
 }
 
-/** 인근 검증 스팟 (거리순). natureOnly면 자연 카테고리만 */
+/** 인근 검증 스팟 (거리순). category를 주면 해당 카테고리만 */
 export async function getNearbySpots(
   contentId: string,
   {
-    natureOnly = false,
+    category,
     limit = 4,
     locale = "ko",
-  }: { natureOnly?: boolean; limit?: number; locale?: string } = {},
+  }: {
+    category?: NightSpot["category"];
+    limit?: number;
+    locale?: string;
+  } = {},
 ): Promise<NearbySpot[]> {
   const rows = await sql<SpotRow[]>`
     select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
@@ -117,7 +121,7 @@ export async function getNearbySpots(
     where s.night_verified = true
       and s.image_url is not null
       and s.content_id != ${contentId}
-      ${natureOnly ? sql`and s.category = 'nature'` : sql``}
+      ${category ? sql`and s.category = ${category}` : sql``}
     order by dist_m
     limit ${limit}
   `;

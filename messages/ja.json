@@ -56,6 +56,7 @@
     "aiLoading": "そのスポットを通るコースを AI が作成中です…",
     "aiError": "コースを作成できませんでした。しばらくしてからお試しください。",
     "aiAnchor": "{name}を含む",
+    "aiCategoryPref": "{category}中心",
     "aiNote": "選んだスポットと周辺の夜スポットから Gemini が構成したコース",
     "aiFallbackNote": "AI の応答が得られず、近い順で構成しました",
     "presetHeading": "その他のおすすめコース"
