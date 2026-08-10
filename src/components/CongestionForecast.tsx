@@ -21,7 +21,7 @@ const LEVEL_STYLE: Record<string, string> = {
   high: "border-rose-400/30 bg-rose-400/10 text-rose-300",
 };
 
-/** 향후 7일 혼잡도 예측 (KT 이동통신 데이터 기반) — 데이터 있는 스팟에만 렌더 */
+/** 향후 7일 혼잡도 예측 (KT 이동통신 데이터 기반) — 데이터 없는 스팟은 미제공 안내 */
 export default async function CongestionForecast({
   days,
   locale,
@@ -29,8 +29,19 @@ export default async function CongestionForecast({
   days: CongestionDay[];
   locale: string;
 }) {
-  if (days.length === 0) return null;
   const t = await getTranslations("spot.congestion");
+
+  if (days.length === 0) {
+    return (
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
+        <h2 className="flex items-center gap-2 text-lg font-bold">
+          <Users size={17} className="text-amber-300" />
+          {t("title")}
+        </h2>
+        <p className="mt-3 text-sm text-slate-500">{t("unavailable")}</p>
+      </section>
+    );
+  }
 
   const fmt = new Intl.DateTimeFormat(INTL_LOCALE[locale] ?? "en-US", {
     weekday: "short",
