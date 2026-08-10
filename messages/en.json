@@ -144,7 +144,8 @@
       "mid": "Moderate",
       "high": "Busy",
       "best": "Quietest day",
-      "source": "7-day forecast from mobile carrier data · % is crowding vs. peak season (=100)"
+      "source": "7-day forecast from mobile carrier data · % is crowding vs. peak season (=100)",
+      "unavailable": "Crowd forecast is not available for this place."
     },
     "generating": "AI is writing a night guide for this spot…",
     "areaVisitors": {
