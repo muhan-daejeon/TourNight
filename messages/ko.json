@@ -128,6 +128,12 @@
     "loginToPost": "로그인하고 후기를 남겨보세요",
     "loginToComment": "로그인하고 댓글을 남겨보세요",
     "delete": "삭제",
+"photoAdd": "사진 추가",
+    "photoRemove": "사진 빼기",
+    "photoClose": "닫기",
+    "photoTooLarge": "사진이 너무 커요. 5MB 이하로 올려주세요.",
+    "photoUnsupported": "지원하지 않는 형식이에요. JPG·PNG·WebP만 올릴 수 있어요.",
+    "photoRejected": "올릴 수 없는 사진이에요. 다른 사진을 선택해주세요.",
     "deleteConfirm": "삭제할까요?"
   },
   "spot": {

@@ -128,6 +128,12 @@
     "loginToPost": "Log in to share a review",
     "loginToComment": "Log in to leave a comment",
     "delete": "Delete",
+"photoAdd": "Add photo",
+    "photoRemove": "Remove photo",
+    "photoClose": "Close",
+    "photoTooLarge": "That photo is too large. Please keep it under 5MB.",
+    "photoUnsupported": "Unsupported format. Only JPG, PNG and WebP can be uploaded.",
+    "photoRejected": "This photo can't be posted. Please choose another one.",
     "deleteConfirm": "Delete this?"
   },
   "spot": {

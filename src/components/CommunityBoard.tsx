@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import {
   Send,
   MessageSquare,
   MessageCircle,
   LogIn,
   Trash2,
+  ImagePlus,
+  X,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { ImageDecodeError, prepareImage } from "@/lib/image-resize";
 
 interface Post {
   id: number;
@@ -18,6 +22,8 @@ interface Post {
   body: string;
   createdAt: string;
   commentCount: number;
+  mediaUrl: string | null;
+  mediaType: "image" | "video" | null;
 }
 
 interface Comment {
@@ -99,6 +105,7 @@ function PostItem({
   const [replyBody, setReplyBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
 
   const ownsPost = post.userId != null && post.userId === me?.id;
 
@@ -199,6 +206,49 @@ function PostItem({
         {post.body}
       </p>
 
+      {/* 첨부 사진 — 눌러서 원본 크기로 */}
+      {post.mediaUrl && post.mediaType === "image" && (
+        <button
+          type="button"
+          onClick={() => setLightbox(true)}
+          className="mt-3 block overflow-hidden rounded-xl border border-white/10 transition hover:border-white/25"
+        >
+          <Image
+            src={post.mediaUrl}
+            alt=""
+            width={640}
+            height={480}
+            sizes="(max-width: 640px) 100vw, 640px"
+            className="max-h-80 w-auto object-cover"
+          />
+        </button>
+      )}
+
+      {lightbox && post.mediaUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setLightbox(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-sm"
+        >
+          <Image
+            src={post.mediaUrl}
+            alt=""
+            width={1600}
+            height={1200}
+            sizes="100vw"
+            className="max-h-full w-auto object-contain"
+          />
+          <button
+            type="button"
+            aria-label={t("photoClose")}
+            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
       <button
         type="button"
         onClick={toggle}
@@ -284,6 +334,36 @@ export default function CommunityBoard() {
   const [submitting, setSubmitting] = useState(false);
   // undefined = 로딩, null = 비로그인, Me = 로그인
   const [me, setMe] = useState<Me | null | undefined>(undefined);
+  // 첨부 사진 — 스토리지 미설정 서버면 canAttach=false로 UI 자체를 숨긴다
+  const [canAttach, setCanAttach] = useState(false);
+  const [photo, setPhoto] = useState<{ file: File; preview: string } | null>(
+    null,
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 미리보기 objectURL 누수 방지
+  useEffect(() => {
+    const url = photo?.preview;
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [photo?.preview]);
+
+  async function pickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // 같은 파일 다시 고를 수 있게
+    if (!file) return;
+    try {
+      const prepared = await prepareImage(file);
+      if (prepared.size > 5 * 1024 * 1024) {
+        alert(t("photoTooLarge"));
+        return;
+      }
+      setPhoto({ file: prepared, preview: URL.createObjectURL(prepared) });
+    } catch (err) {
+      alert(err instanceof ImageDecodeError ? t("photoUnsupported") : t("submitError"));
+    }
+  }
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -306,6 +386,7 @@ export default function CommunityBoard() {
       .then((data) => {
         if (cancelled) return;
         setPosts(data.posts);
+        setCanAttach(Boolean(data.canAttach));
         setStatus("done");
       })
       .catch(() => {
@@ -323,19 +404,41 @@ export default function CommunityBoard() {
 
     setSubmitting(true);
     try {
+      // 사진이 있으면 multipart, 없으면 기존 JSON 경로 그대로
+      const form = new FormData();
+      form.set("body", trimmedBody);
+      if (photo) form.set("media", photo.file);
+
       const res = await fetch("/api/community", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: trimmedBody }),
+        ...(photo
+          ? { body: form }
+          : {
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ body: trimmedBody }),
+            }),
       });
       if (res.status === 401) {
         setMe(null); // 세션 만료 → 로그인 유도로 전환
+        return;
+      }
+      if (res.status === 422) {
+        alert(t("photoRejected"));
+        return;
+      }
+      if (res.status === 413) {
+        alert(t("photoTooLarge"));
+        return;
+      }
+      if (res.status === 415) {
+        alert(t("photoUnsupported"));
         return;
       }
       if (!res.ok) throw new Error();
       const data = await res.json();
       setPosts((prev) => [data.post, ...prev]);
       setBody("");
+      setPhoto(null);
     } catch {
       alert(t("submitError"));
     } finally {
@@ -365,10 +468,53 @@ export default function CommunityBoard() {
             placeholder={t("bodyPlaceholder")}
             className="w-full resize-none rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60"
           />
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-xs text-slate-500">
-              {body.length}/{BODY_MAX}
-            </span>
+          {/* 첨부 미리보기 */}
+          {photo && (
+            <div className="relative mt-3 w-fit">
+              {/* 로컬 objectURL이라 next/image 대신 img 사용 */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={photo.preview}
+                alt=""
+                className="max-h-44 rounded-lg border border-white/10"
+              />
+              <button
+                type="button"
+                onClick={() => setPhoto(null)}
+                aria-label={t("photoRemove")}
+                className="absolute -right-2 -top-2 rounded-full bg-slate-900 p-1.5 text-slate-300 shadow-lg ring-1 ring-white/15 transition hover:text-white"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          )}
+
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {canAttach && (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={pickPhoto}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={submitting}
+                    className="flex items-center gap-1.5 rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/30 hover:text-white disabled:opacity-40"
+                  >
+                    <ImagePlus size={14} />
+                    {t("photoAdd")}
+                  </button>
+                </>
+              )}
+              <span className="text-xs text-slate-500">
+                {body.length}/{BODY_MAX}
+              </span>
+            </div>
             <button
               type="submit"
               disabled={!body.trim() || submitting}

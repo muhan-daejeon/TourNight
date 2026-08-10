@@ -1,4 +1,9 @@
 import { sql } from "./db";
+import {
+  deleteCommunityMedia,
+  mediaPublicUrl,
+  type MediaKind,
+} from "./storage";
 
 export interface CommunityPost {
   id: number;
@@ -7,6 +12,9 @@ export interface CommunityPost {
   body: string;
   createdAt: string; // ISO 8601
   commentCount: number;
+  /** 첨부 공개 URL (없으면 null) */
+  mediaUrl: string | null;
+  mediaType: MediaKind | null;
 }
 
 export interface CommunityComment {
@@ -28,6 +36,8 @@ interface PostRow {
   body: string;
   created_at: string;
   comment_count?: string;
+  media_path?: string | null;
+  media_type?: string | null;
 }
 
 interface CommentRow {
@@ -46,6 +56,8 @@ function toPost(r: PostRow): CommunityPost {
     body: r.body,
     createdAt: new Date(r.created_at).toISOString(),
     commentCount: Number(r.comment_count ?? 0),
+    mediaUrl: r.media_path ? mediaPublicUrl(r.media_path) : null,
+    mediaType: (r.media_type as MediaKind | null) ?? null,
   };
 }
 
@@ -66,6 +78,7 @@ export async function listPosts(limit = 100): Promise<CommunityPost[]> {
   try {
     const rows = await sql<PostRow[]>`
       select p.id, p.user_id, p.author, p.body, p.created_at,
+             p.media_path, p.media_type,
              (select count(*) from community_comments c where c.post_id = p.id) as comment_count
       from community_posts p
       order by p.created_at desc
@@ -86,15 +99,17 @@ export async function createPost(input: {
   userId: number;
   author: string;
   body: string;
+  media?: { path: string; kind: MediaKind } | null;
 }): Promise<CommunityPost | null> {
   const author = input.author?.trim().slice(0, AUTHOR_MAX) ?? "";
   const body = input.body?.trim().slice(0, BODY_MAX) ?? "";
   if (!author || !body) return null;
 
   const rows = await sql<PostRow[]>`
-    insert into community_posts (user_id, author, body)
-    values (${input.userId}, ${author}, ${body})
-    returning id, user_id, author, body, created_at
+    insert into community_posts (user_id, author, body, media_path, media_type)
+    values (${input.userId}, ${author}, ${body},
+            ${input.media?.path ?? null}, ${input.media?.kind ?? null})
+    returning id, user_id, author, body, created_at, media_path, media_type
   `;
   return toPost(rows[0]);
 }
@@ -146,19 +161,23 @@ export async function createComment(
 
 type DeleteResult = "ok" | "not-found" | "forbidden";
 
-/** 본인(userId 일치) 글만 삭제. 댓글은 FK cascade로 함께 삭제 */
+/**
+ * 본인(userId 일치) 글만 삭제. 댓글은 FK cascade로 함께 삭제.
+ * 첨부 파일도 같이 지운다 — public 버킷이라 남기면 글을 내린 뒤에도 URL로 열람된다.
+ */
 export async function deletePost(
   postId: number,
   userId: number,
 ): Promise<DeleteResult> {
-  const rows = await sql<{ user_id: string | null }[]>`
-    select user_id from community_posts where id = ${postId}
+  const rows = await sql<{ user_id: string | null; media_path: string | null }[]>`
+    select user_id, media_path from community_posts where id = ${postId}
   `;
   if (!rows.length) return "not-found";
   if (rows[0].user_id == null || Number(rows[0].user_id) !== userId) {
     return "forbidden";
   }
   await sql`delete from community_posts where id = ${postId}`;
+  if (rows[0].media_path) await deleteCommunityMedia(rows[0].media_path);
   return "ok";
 }
 
