@@ -2,6 +2,7 @@ import { sql } from "./db";
 import { generateCoursePlan, type CourseCandidate } from "./gemini";
 import { getNearbySpots, getSpot } from "./spots";
 import { getTransitForSpots, type SpotTransit } from "./transit";
+import { getRoutesForLegs, type SpotRoute } from "./routes";
 import type { NightSpot } from "./kto";
 
 export interface CourseStop {
@@ -15,8 +16,12 @@ export interface CourseStop {
 }
 
 export interface CourseLeg {
-  distanceM: number;
+  distanceM: number; // 직선거리
   together: boolean; // KTO 차량 이동 데이터로 함께 방문되는 연결
+  /** 실제 도보 경로 (TMap). 키 미설정·호출 실패 시 null */
+  walk?: SpotRoute | null;
+  /** 실제 대중교통 경로 (TMap) */
+  transit?: SpotRoute | null;
 }
 
 export interface Course {
@@ -186,17 +191,31 @@ async function togetherLookup(ids: string[]) {
   return (a: string, b: string) => set.has(`${a}|${b}`) || set.has(`${b}|${a}`);
 }
 
-/** stops 순서대로 구간 거리·together를 채워 Course 형태로 만든다 */
-async function toCourse(stops: CourseStop[]): Promise<Omit<Course, "id">> {
+/**
+ * stops 순서대로 구간 거리·together를 채워 Course 형태로 만든다.
+ * withRoutes를 주면 각 구간의 실제 도보·대중교통 경로도 함께 붙인다
+ * (AI 코스에서만 사용 — 추천 코스 목록까지 하면 호출이 과해진다).
+ */
+async function toCourse(
+  stops: CourseStop[],
+  withRoutes = false,
+): Promise<Omit<Course, "id">> {
   const isTogether = await togetherLookup(stops.map((s) => s.contentId));
+
+  const pairs = stops.slice(0, -1).map((from, i) => ({ from, to: stops[i + 1] }));
+  const routes = withRoutes ? await getRoutesForLegs(pairs) : null;
+
   const legs: CourseLeg[] = [];
   let totalM = 0;
   for (let i = 0; i < stops.length - 1; i++) {
     const d = Math.round(haversineM(stops[i], stops[i + 1]));
     totalM += d;
+    const r = routes?.get(`${stops[i].contentId}|${stops[i + 1].contentId}`);
     legs.push({
       distanceM: d,
       together: isTogether(stops[i].contentId, stops[i + 1].contentId),
+      walk: r?.walk ?? null,
+      transit: r?.transit ?? null,
     });
   }
   return { stops, legs, totalM };
@@ -283,7 +302,7 @@ export async function getAiCourse(
       transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
       prefCategory: prefCategory ?? null,
       source: "distance",
-      ...(await toCourse(stops)),
+      ...(await toCourse(stops, true)),
     };
   };
 
@@ -318,7 +337,7 @@ export async function getAiCourse(
       transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
       prefCategory: prefCategory ?? null,
       source: "ai",
-      ...(await toCourse(stops)),
+      ...(await toCourse(stops, true)),
     };
   } catch (err) {
     console.warn(

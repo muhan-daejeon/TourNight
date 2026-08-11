@@ -176,6 +176,26 @@ create table if not exists spot_transit (
   updated_at timestamptz not null default now()
 );
 
+-- 스팟 간 실제 이동 경로 (TMap 보행자·대중교통 — db/sync-routes.mjs).
+-- TMap 앱키는 허용 IP 제한이 걸리고 Vercel 출구 IP는 고정이 아니라, 런타임 호출이 불가능하다.
+-- 그래서 등록된 개발 PC에서 배치로 미리 계산해 두고 앱은 이 표만 읽는다.
+--
+-- status는 '경로 없음'과 '아직 계산 안 함'을 구분하기 위해 둔다. 재실행 시 ok가 아닌
+-- 행만 다시 시도하면 되므로, 무료 호출 한도에 걸려도 여러 번 나눠 돌릴 수 있다.
+create table if not exists spot_route (
+  from_content_id text not null,
+  to_content_id text not null,
+  mode text not null check (mode in ('walk', 'transit')),
+  status text not null check (status in ('ok', 'too_close', 'no_route')),
+  duration_sec int,      -- 총 소요 시간
+  distance_m int,        -- 총 이동 거리
+  transfer_count int,    -- 대중교통 환승 횟수 (도보는 null)
+  fare int,              -- 대중교통 요금 (원)
+  legs jsonb not null default '[]',  -- [{mode, route, durationSec, distanceM, path:[[lng,lat],...]}]
+  updated_at timestamptz not null default now(),
+  primary key (from_content_id, to_content_id, mode)
+);
+
 -- 커뮤니티 글/댓글 작성자 계정 연결 (본인 글 삭제 판별용) — users 정의 후에 추가.
 -- 계정 삭제 시 글은 남기되 소유만 해제(set null). 기존 글은 null(삭제 버튼 없음).
 alter table community_posts add column if not exists user_id bigint references users(id) on delete set null;

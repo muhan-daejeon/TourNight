@@ -59,7 +59,14 @@
     "aiCategoryPref": "{category}中心",
     "aiNote": "選んだスポットと周辺の夜スポットから Gemini が構成したコース",
     "aiFallbackNote": "AI の応答が得られず、近い順で構成しました",
-    "presetHeading": "その他のおすすめコース"
+    "presetHeading": "その他のおすすめコース",
+    "modeStraight": "直線",
+    "modeTransit": "公共交通",
+    "modeWalk": "徒歩",
+    "legWalk": "徒歩{min}分",
+    "legTransit": "{min}分・乗換{transfer}回・{fare}ウォン",
+    "legTooClose": "すぐ近く",
+    "legNoRoute": "経路なし・タクシー推奨"
   },
   "etiquette": {
     "title": "ナイトエチケット",

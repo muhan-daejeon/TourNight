@@ -59,7 +59,14 @@
     "aiCategoryPref": "以{category}为主",
     "aiNote": "由 Gemini 依据所选景点及周边夜间景点规划",
     "aiFallbackNote": "未能获取 AI 结果，已按距离由近到远排列",
-    "presetHeading": "其他推荐路线"
+    "presetHeading": "其他推荐路线",
+    "modeStraight": "直线",
+    "modeTransit": "公共交通",
+    "modeWalk": "步行",
+    "legWalk": "步行 {min} 分钟",
+    "legTransit": "{min}分钟 · 换乘{transfer}次 · {fare}韩元",
+    "legTooClose": "非常近",
+    "legNoRoute": "无路线 · 建议打车"
   },
   "etiquette": {
     "title": "夜间礼仪",

@@ -2,13 +2,37 @@
 
 import { useEffect, useRef } from "react";
 import type { Course } from "@/lib/courses";
+import type { RouteLeg } from "@/lib/routes";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type KakaoNS = any;
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-/** 코스 경로를 카카오맵에 번호 마커 + 구간 폴리라인으로 그린다. */
-export default function CourseMap({ course }: { course: Course }) {
+/** 지도에 그릴 이동 수단 — walk/transit은 TMap 실제 경로, straight는 직선 폴백 */
+export type MapMode = "walk" | "transit" | "straight";
+
+/** 탈것 종류별 색 (도보는 회색 점선으로 따로 처리) */
+const MODE_COLOR: Record<string, string> = {
+  BUS: "#38bdf8",
+  SUBWAY: "#a78bfa",
+  EXPRESSBUS: "#38bdf8",
+  TRAIN: "#a78bfa",
+  AIRPLANE: "#f472b6",
+};
+
+/**
+ * 코스 경로를 카카오맵에 그린다.
+ *
+ * TMap이 주는 좌표는 [경도, 위도] WGS84라 kakao.maps.LatLng(위도, 경도)로 뒤집어 넣는다.
+ * 도보 구간은 회색 점선, 탈것 구간은 수단별 색 실선으로 구분한다.
+ */
+export default function CourseMap({
+  course,
+  mode = "straight",
+}: {
+  course: Course;
+  mode?: MapMode;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<KakaoNS>(null);
   const kakaoRef = useRef<KakaoNS>(null);
@@ -26,38 +50,74 @@ export default function CourseMap({ course }: { course: Course }) {
       overlaysRef.current.forEach((o) => o.setMap(null));
       overlaysRef.current = [];
 
-      const path = course.stops.map(
+      const stopPos = course.stops.map(
         (s) => new kakao.maps.LatLng(s.mapY, s.mapX),
       );
+      const bounds = new kakao.maps.LatLngBounds();
+      stopPos.forEach((p: KakaoNS) => bounds.extend(p));
 
-      // 구간 폴리라인 — KTO 이동 연결(together)이면 실선 앰버, 아니면 점선 회색
-      course.legs.forEach((leg, i) => {
-        const line = new kakao.maps.Polyline({
-          path: [path[i], path[i + 1]],
-          strokeWeight: 4,
-          strokeColor: leg.together ? "#fbbf24" : "#94a3b8",
-          strokeOpacity: 0.9,
-          strokeStyle: leg.together ? "solid" : "shortdash",
+      const line = (path: KakaoNS[], color: string, dashed: boolean, weight = 5) => {
+        const pl = new kakao.maps.Polyline({
+          path,
+          strokeWeight: weight,
+          strokeColor: color,
+          strokeOpacity: 0.95,
+          strokeStyle: dashed ? "shortdash" : "solid",
         });
-        line.setMap(map);
-        overlaysRef.current.push(line);
+        pl.setMap(map);
+        overlaysRef.current.push(pl);
+      };
+
+      course.legs.forEach((leg, i) => {
+        const route = mode === "walk" ? leg.walk : mode === "transit" ? leg.transit : null;
+
+        // 실제 경로가 없으면(모드 straight, 미계산, 경로 없음) 직선으로 잇는다
+        if (mode === "straight" || !route || route.status !== "ok" || !route.legs.length) {
+          line(
+            [stopPos[i], stopPos[i + 1]],
+            leg.together ? "#fbbf24" : "#94a3b8",
+            !leg.together,
+            4,
+          );
+          return;
+        }
+
+        route.legs.forEach((seg: RouteLeg) => {
+          if (seg.path.length < 2) return;
+          const path = seg.path.map(
+            ([lng, lat]) => new kakao.maps.LatLng(lat, lng),
+          );
+          path.forEach((p: KakaoNS) => bounds.extend(p));
+          const isWalk = seg.mode === "WALK";
+          line(path, isWalk ? "#94a3b8" : (MODE_COLOR[seg.mode] ?? "#38bdf8"), isWalk, isWalk ? 4 : 6);
+
+          // 탈것 구간 시작점에 노선명 표시 (버스 번호·호선)
+          if (!isWalk && seg.route) {
+            const ov = new kakao.maps.CustomOverlay({
+              position: path[Math.floor(path.length / 2)],
+              yAnchor: 1.4,
+              zIndex: 6,
+              content: `<div style="padding:2px 7px;border-radius:999px;background:${MODE_COLOR[seg.mode] ?? "#38bdf8"};color:#0f172a;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.5)">${seg.route.replace(/^[^:]*:/, "")}</div>`,
+            });
+            ov.setMap(map);
+            overlaysRef.current.push(ov);
+          }
+        });
       });
 
-      // 번호 마커
+      // 번호 마커 (경로 위에 오도록 마지막에)
       course.stops.forEach((s, i) => {
         const ov = new kakao.maps.CustomOverlay({
-          position: path[i],
+          position: stopPos[i],
           xAnchor: 0.5,
           yAnchor: 0.5,
-          zIndex: 5,
+          zIndex: 10,
           content: `<div style="width:26px;height:26px;border-radius:50%;background:#fbbf24;color:#0f172a;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #0f172a;box-shadow:0 2px 8px rgba(0,0,0,.5)">${i + 1}</div>`,
         });
         ov.setMap(map);
         overlaysRef.current.push(ov);
       });
 
-      const bounds = new kakao.maps.LatLngBounds();
-      path.forEach((p: KakaoNS) => bounds.extend(p));
       map.setBounds(bounds, 48, 48, 48, 48);
     };
 
@@ -85,7 +145,7 @@ export default function CourseMap({ course }: { course: Course }) {
     };
 
     if (kakaoRef.current && mapRef.current) {
-      draw(); // 이미 로드됨 → 코스 변경 시 즉시 갱신
+      draw(); // 이미 로드됨 → 코스·모드 변경 시 즉시 갱신
     } else if ("kakao" in window) {
       startInit();
     } else {
@@ -99,7 +159,7 @@ export default function CourseMap({ course }: { course: Course }) {
     return () => {
       cancelled = true;
     };
-  }, [course]);
+  }, [course, mode]);
 
   return (
     <div className="relative h-full overflow-hidden rounded-2xl border border-white/10">
