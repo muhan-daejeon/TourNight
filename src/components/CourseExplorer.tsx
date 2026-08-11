@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import {
   Route,
@@ -13,6 +14,7 @@ import {
   Loader2,
   Bus,
   Footprints,
+  BedDouble,
 } from "lucide-react";
 import CourseMap, { type MapMode } from "./CourseMap";
 import { TransitLine } from "./TransitInfo";
@@ -249,6 +251,48 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                 {aiCourse.tip}
               </p>
             )}
+            {/* 코스가 끝나는 곳 인근 숙소 — 야간 소비를 숙박으로 연결 */}
+            {aiCourse.stays.length > 0 && (
+              <div className="mt-3 border-t border-white/10 pt-3">
+                <p className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-300">
+                  <BedDouble size={13} className="text-amber-300" />
+                  {t("staysNear", {
+                    name: aiCourse.stops[aiCourse.stops.length - 1].title,
+                  })}
+                </p>
+                <div className="mt-2 flex gap-2 overflow-x-auto">
+                  {aiCourse.stays.map((s) => (
+                    <a
+                      key={s.contentId}
+                      href={`https://map.kakao.com/link/to/${encodeURIComponent(s.title)},${s.mapY},${s.mapX}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="group w-32 shrink-0 overflow-hidden rounded-lg border border-white/10 transition hover:border-amber-300/50"
+                    >
+                      <div className="relative h-16 w-full">
+                        <Image
+                          src={s.imageUrl}
+                          alt={s.title}
+                          fill
+                          sizes="128px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="p-1.5">
+                        <p className="truncate text-[11px] font-semibold text-slate-200 group-hover:text-amber-300">
+                          {s.title}
+                        </p>
+                        <p className="text-[10px] text-slate-500">
+                          {formatDistance(s.distM)}
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <p className="mt-2 text-[11px] text-slate-600">
               {aiCourse.source === "ai" ? t("aiNote") : t("aiFallbackNote")}
             </p>

@@ -66,7 +66,8 @@
     "legWalk": "徒歩{min}分",
     "legTransit": "{min}分・乗換{transfer}回・{fare}ウォン",
     "legTooClose": "すぐ近く",
-    "legNoRoute": "経路なし・タクシー推奨"
+    "legNoRoute": "経路なし・タクシー推奨",
+    "staysNear": "{name}周辺の宿"
   },
   "etiquette": {
     "title": "ナイトエチケット",
