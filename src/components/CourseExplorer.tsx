@@ -11,8 +11,10 @@ import {
   Sparkles,
   Lightbulb,
   Loader2,
+  Bus,
+  Footprints,
 } from "lucide-react";
-import CourseMap from "./CourseMap";
+import CourseMap, { type MapMode } from "./CourseMap";
 import { TransitLine } from "./TransitInfo";
 import type { AiCourse, Course } from "@/lib/courses";
 
@@ -75,6 +77,8 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   );
   // 선택 코스 id — null이면 첫 번째 코스
   const [selId, setSelId] = useState<string | null>(null);
+  // 지도에 그릴 이동수단 — 실제 경로가 붙은 AI 코스에서만 전환할 수 있다
+  const [mapMode, setMapMode] = useState<MapMode>("straight");
 
   // 클라이언트 이동으로 from·카테고리가 바뀌면 렌더 중에 초기화 (effect 안 setState 회피)
   const reqKey = `${fromContentId}|${fromCategory}`;
@@ -98,6 +102,11 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
         setAiCourse(data.course);
         setAiState("idle");
         setSelId(data.course.id); // 방금 만든 코스를 바로 지도에 띄운다
+        // 실제 경로가 있으면 직선 대신 그걸 먼저 보여준다.
+        // 대중교통 우선 — 코스 구간은 대개 걸어가기엔 먼 거리다.
+        const legs = data.course.legs;
+        if (legs.some((l) => l.transit?.status === "ok")) setMapMode("transit");
+        else if (legs.some((l) => l.walk?.status === "ok")) setMapMode("walk");
       })
       .catch((err) => {
         if (controller.signal.aborted) return;
@@ -119,6 +128,11 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const kakaoStart = start
     ? `https://map.kakao.com/link/to/${encodeURIComponent(start.title)},${start.mapY},${start.mapX}`
     : "";
+
+  // 구간에 TMap 경로가 하나라도 붙어 있으면 도보/대중교통 전환을 노출한다
+  const hasRealRoute = Boolean(
+    course?.legs.some((l) => l.walk || l.transit),
+  );
 
   const cardClass = (active: boolean) =>
     `w-full rounded-2xl border p-4 text-left transition ${
@@ -282,12 +296,77 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
         </p>
       </div>
 
-      {/* 지도 + 길찾기 */}
+      {/* 지도 + 이동수단 전환 + 길찾기 */}
       {course && (
         <div className="lg:sticky lg:top-20 lg:self-start">
+          {/* 실제 경로가 있는 코스에서만 전환 노출 (추천 코스는 직선) */}
+          {hasRealRoute && (
+            <div className="mb-2 flex gap-1.5">
+              {(
+                [
+                  ["straight", Route, t("modeStraight")],
+                  ["transit", Bus, t("modeTransit")],
+                  ["walk", Footprints, t("modeWalk")],
+                ] as const
+              ).map(([m, Icon, label]) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMapMode(m)}
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    mapMode === m
+                      ? "border-amber-400 bg-amber-400 text-slate-950"
+                      : "border-white/10 bg-white/5 text-slate-300 hover:border-white/25 hover:text-white"
+                  }`}
+                >
+                  <Icon size={13} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="h-80 lg:h-[500px]">
-            <CourseMap course={course} />
+            <CourseMap course={course} mode={mapMode} />
           </div>
+
+          {/* 선택한 이동수단의 구간별 요약 */}
+          {hasRealRoute && mapMode !== "straight" && (
+            <ul className="mt-2 space-y-1">
+              {course.legs.map((leg, i) => {
+                const r = mapMode === "walk" ? leg.walk : leg.transit;
+                const from = course.stops[i].title;
+                const to = course.stops[i + 1].title;
+                let detail: string;
+                if (r?.status === "ok") {
+                  const min = Math.round((r.durationSec ?? 0) / 60);
+                  detail =
+                    mapMode === "walk"
+                      ? t("legWalk", { min })
+                      : t("legTransit", {
+                          min,
+                          transfer: r.transferCount ?? 0,
+                          fare: r.fare ?? 0,
+                        });
+                } else if (r?.status === "too_close") {
+                  detail = t("legTooClose");
+                } else {
+                  detail = t("legNoRoute");
+                }
+                return (
+                  <li key={i} className="flex gap-2 text-[12px] text-slate-400">
+                    <span className="shrink-0 text-slate-600">
+                      {i + 1}→{i + 2}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">
+                      {from} → {to}
+                    </span>
+                    <span className="shrink-0 text-slate-300">{detail}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           <a
             href={kakaoStart}
             target="_blank"

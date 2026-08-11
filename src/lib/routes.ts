@@ -1,0 +1,306 @@
+import { sql } from "./db";
+
+/**
+ * 스팟 간 실제 이동 경로 — 도보는 TMap, 대중교통은 ODsay.
+ *
+ * 코스가 만들어질 때 그 코스의 구간만 계산한다 (구간 2~3개 × 2모드 = 호출 4~6번).
+ * 계산 결과는 spot_route에 캐시하므로 같은 구간이 다시 나오면 호출하지 않는다.
+ *
+ * 키가 없거나 호출이 실패하면 null을 돌려준다 — 경로는 부가 정보라
+ * 없으면 지도가 기존처럼 직선을 그리면 된다.
+ */
+
+// 도보는 TMap 보행자 경로 (무료 한도 넉넉).
+const PED = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1";
+// 대중교통은 ODsay. TMap 대중교통은 무료 한도가 하루 10회뿐이라 코스 3~4번이면
+// 소진돼 온디맨드로 못 쓴다 (실측). ODsay는 1,000회/일이고 IP 제한도 없다.
+const TRANSIT = "https://api.odsay.com/v1/api/searchPubTransPathT";
+
+/** ODsay trafficType → 지도에서 쓰는 수단 코드 */
+const ODSAY_MODE: Record<number, string> = { 1: "SUBWAY", 2: "BUS", 3: "WALK" };
+
+/** 도보를 기본으로 권할 최대 거리 — 이보다 멀면 걷기가 비현실적이라 대중교통을 앞세운다 */
+export const WALKABLE_MAX_M = 1500;
+
+export type RouteMode = "walk" | "transit";
+/** ok = 경로 있음, too_close = 너무 가까워 대중교통 불필요, no_route = 이동 경로 없음 */
+export type RouteStatus = "ok" | "too_close" | "no_route";
+
+export interface RouteLeg {
+  /** WALK / BUS / SUBWAY / EXPRESSBUS ... */
+  mode: string;
+  /** 노선명 (예: "일반:301", "대전 1호선"). 도보는 null */
+  route: string | null;
+  durationSec: number | null;
+  distanceM: number | null;
+  /** [경도, 위도] 좌표열 — 카카오맵 Polyline에 그대로 사용 */
+  path: [number, number][];
+}
+
+export interface SpotRoute {
+  mode: RouteMode;
+  status: RouteStatus;
+  durationSec: number | null;
+  distanceM: number | null;
+  transferCount: number | null;
+  fare: number | null;
+  legs: RouteLeg[];
+}
+
+interface Row {
+  mode: RouteMode;
+  status: RouteStatus;
+  duration_sec: number | null;
+  distance_m: number | null;
+  transfer_count: number | null;
+  fare: number | null;
+  legs: RouteLeg[];
+}
+
+const toRoute = (r: Row): SpotRoute => ({
+  mode: r.mode,
+  status: r.status,
+  durationSec: r.duration_sec,
+  distanceM: r.distance_m,
+  transferCount: r.transfer_count,
+  fare: r.fare,
+  legs: Array.isArray(r.legs) ? r.legs : [],
+});
+
+/** 도보(TMap)·대중교통(ODsay) 중 하나라도 쓸 수 있으면 경로 조회를 시도한다 */
+export function isRoutingConfigured(): boolean {
+  return Boolean(process.env.TMAP_API_KEY || process.env.ODSAY_API_KEY);
+}
+
+async function tmap(
+  url: string,
+  body: unknown,
+  attempt = 1,
+): Promise<Record<string, never> | null> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      appKey: process.env.TMAP_API_KEY as string,
+    },
+    body: JSON.stringify(body),
+    // 코스 생성 응답을 오래 붙잡지 않도록 짧게 끊는다
+    signal: AbortSignal.timeout(8000),
+  });
+  const text = await res.text();
+
+  // 429는 짧은 시간에 몰아친 경우다. 한 번만 쉬었다 다시 시도한다
+  // (코스당 호출이 4~6번뿐이라 여기서 실패하면 그냥 직선 폴백이 낫다)
+  if (res.status === 429 && attempt === 1) {
+    await new Promise((r) => setTimeout(r, 1200));
+    return tmap(url, body, 2);
+  }
+  if (!res.ok) throw new Error(`TMap ${res.status}: ${text.slice(0, 120)}`);
+  if (!text.trim()) return null;
+  return JSON.parse(text);
+}
+
+interface Point {
+  contentId: string;
+  mapX: number;
+  mapY: number;
+}
+
+async function fetchWalk(a: Point, b: Point): Promise<SpotRoute> {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const j: any = await tmap(PED, {
+    startX: a.mapX, startY: a.mapY, endX: b.mapX, endY: b.mapY,
+    startName: "출발", endName: "도착",
+    reqCoordType: "WGS84GEO", resCoordType: "WGS84GEO",
+  });
+  const features = j?.features;
+  const empty: SpotRoute = {
+    mode: "walk", status: "no_route", durationSec: null, distanceM: null,
+    transferCount: null, fare: null, legs: [],
+  };
+  if (!features?.length) return empty;
+
+  const props = features[0].properties;
+  const path: [number, number][] = features
+    .filter((f: any) => f.geometry.type === "LineString")
+    .flatMap((f: any) => f.geometry.coordinates);
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+  if (!path.length) return empty;
+
+  return {
+    mode: "walk",
+    status: "ok",
+    durationSec: props.totalTime ?? null,
+    distanceM: props.totalDistance ?? null,
+    transferCount: null,
+    fare: null,
+    legs: [
+      {
+        mode: "WALK",
+        route: null,
+        durationSec: props.totalTime ?? null,
+        distanceM: props.totalDistance ?? null,
+        path,
+      },
+    ],
+  };
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function fetchTransit(a: Point, b: Point): Promise<SpotRoute> {
+  const none = (status: RouteStatus): SpotRoute => ({
+    mode: "transit", status,
+    durationSec: null, distanceM: null, transferCount: null, fare: null, legs: [],
+  });
+  if (!process.env.ODSAY_API_KEY) return none("no_route");
+
+  const params = new URLSearchParams({
+    apiKey: process.env.ODSAY_API_KEY,
+    SX: String(a.mapX), SY: String(a.mapY),
+    EX: String(b.mapX), EY: String(b.mapY),
+    OPT: "0", // 추천 경로
+    output: "json",
+  });
+  const res = await fetch(`${TRANSIT}?${params}`, {
+    signal: AbortSignal.timeout(8000),
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`ODsay ${res.status}: ${text.slice(0, 120)}`);
+  const j: any = JSON.parse(text);
+
+  // 오류는 배열로 온다: {"error":[{"code","message"}]}
+  const err = Array.isArray(j.error) ? j.error[0] : j.error;
+  if (err) {
+    const msg = String(err.message ?? err.msg ?? "");
+    // 출발·도착이 가까우면 대중교통 대신 도보를 안내해야 하므로 따로 구분한다
+    if (/가까|near|too close/i.test(msg)) return none("too_close");
+    throw new Error(`ODsay 오류 ${err.code}: ${msg}`);
+  }
+  const path = j?.result?.path?.[0];
+  if (!path) return none("no_route");
+
+  const info = path.info ?? {};
+  const legs: RouteLeg[] = (path.subPath ?? []).map((sp: any) => {
+    const mode = ODSAY_MODE[sp.trafficType] ?? "WALK";
+    // 탈것은 경유 정류장 좌표를 이어 폴리라인을 만든다. 실제 도로 형상은 loadLane을
+    // 한 번 더 불러야 얻는데, 구간마다 호출이 배로 늘어 정류장 선으로 근사한다.
+    const stations = sp.passStopList?.stations ?? [];
+    return {
+      mode,
+      route: sp.lane?.[0]?.busNo ?? sp.lane?.[0]?.name ?? null,
+      durationSec: sp.sectionTime ? sp.sectionTime * 60 : null, // ODsay는 분 단위
+      distanceM: sp.distance ?? null,
+      path: stations
+        .map((st: any) => [Number(st.x), Number(st.y)] as [number, number])
+        .filter((p: [number, number]) => p.every(Number.isFinite)),
+    };
+  });
+
+  // 도보 구간은 좌표가 없다. 앞뒤 탈것 구간의 끝점을 이어 선이 끊기지 않게 한다.
+  for (let i = 0; i < legs.length; i++) {
+    if (legs[i].path.length) continue;
+    const prev = legs[i - 1]?.path.at(-1) ?? ([a.mapX, a.mapY] as [number, number]);
+    const next = legs[i + 1]?.path[0] ?? ([b.mapX, b.mapY] as [number, number]);
+    legs[i].path = [prev, next];
+  }
+
+  const transfers =
+    (info.busTransitCount ?? 0) + (info.subwayTransitCount ?? 0);
+  return {
+    mode: "transit",
+    status: "ok",
+    durationSec: info.totalTime ? info.totalTime * 60 : null,
+    distanceM: info.totalDistance ?? null,
+    transferCount: Math.max(0, transfers - 1),
+    fare: info.payment ?? null,
+    legs,
+  };
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/** 캐시에 저장 (실패해도 무시 — 다음 요청에서 다시 계산하면 된다) */
+async function cache(from: string, to: string, r: SpotRoute): Promise<void> {
+  try {
+    await sql`
+      insert into spot_route (from_content_id, to_content_id, mode, status,
+                              duration_sec, distance_m, transfer_count, fare, legs, updated_at)
+      values (${from}, ${to}, ${r.mode}, ${r.status}, ${r.durationSec}, ${r.distanceM},
+              ${r.transferCount}, ${r.fare},
+              ${sql.json(r.legs as unknown as Parameters<typeof sql.json>[0])}, now())
+      on conflict (from_content_id, to_content_id, mode) do update set
+        status = excluded.status, duration_sec = excluded.duration_sec,
+        distance_m = excluded.distance_m, transfer_count = excluded.transfer_count,
+        fare = excluded.fare, legs = excluded.legs, updated_at = now()
+    `;
+  } catch (err) {
+    console.warn(
+      "[routes] 캐시 저장 실패:",
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
+
+/**
+ * 코스 구간들의 도보·대중교통 경로를 한 번에 준비한다.
+ * 캐시에 있으면 그대로, 없으면 TMap을 호출하고 저장한다.
+ * 반환 키는 `${from}|${to}` 형식.
+ */
+export async function getRoutesForLegs(
+  legs: { from: Point; to: Point }[],
+): Promise<Map<string, { walk: SpotRoute | null; transit: SpotRoute | null }>> {
+  const out = new Map<string, { walk: SpotRoute | null; transit: SpotRoute | null }>();
+  if (!legs.length) return out;
+  for (const l of legs) out.set(`${l.from.contentId}|${l.to.contentId}`, { walk: null, transit: null });
+
+  // 1) 캐시 조회
+  try {
+    const rows = await sql<(Row & { from_content_id: string; to_content_id: string })[]>`
+      select from_content_id, to_content_id, mode, status, duration_sec, distance_m,
+             transfer_count, fare, legs
+      from spot_route
+      where from_content_id = any(${legs.map((l) => l.from.contentId)})
+        and to_content_id = any(${legs.map((l) => l.to.contentId)})
+    `;
+    for (const r of rows) {
+      const entry = out.get(`${r.from_content_id}|${r.to_content_id}`);
+      if (entry) entry[r.mode] = toRoute(r);
+    }
+  } catch (err) {
+    console.warn(
+      "[routes] 캐시 조회 실패 — 새로 계산합니다:",
+      err instanceof Error ? err.message : err,
+    );
+  }
+
+  if (!isRoutingConfigured()) return out;
+
+  // 2) 빠진 것만 호출.
+  // 한꺼번에 병렬로 쏘면 TMap 속도 제한(429)에 걸려 절반이 실패하므로 순차로 돈다.
+  // 구간 2~3개 × 2모드 = 4~6번뿐이라 순차여도 몇 초면 끝난다.
+  const todo = legs.flatMap((l) => {
+    const entry = out.get(`${l.from.contentId}|${l.to.contentId}`)!;
+    const modes: RouteMode[] = [];
+    if (!entry.walk) modes.push("walk");
+    if (!entry.transit) modes.push("transit");
+    return modes.map((mode) => ({ leg: l, mode, entry }));
+  });
+
+  for (const [i, job] of todo.entries()) {
+    if (i > 0) await new Promise((r) => setTimeout(r, 250));
+    try {
+      const r =
+        job.mode === "walk"
+          ? await fetchWalk(job.leg.from, job.leg.to)
+          : await fetchTransit(job.leg.from, job.leg.to);
+      job.entry[job.mode] = r;
+      await cache(job.leg.from.contentId, job.leg.to.contentId, r);
+    } catch (err) {
+      console.warn(
+        `[routes] ${job.mode} 경로 실패 (${job.leg.from.contentId}→${job.leg.to.contentId}):`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+
+  return out;
+}

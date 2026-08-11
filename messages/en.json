@@ -59,7 +59,14 @@
     "aiCategoryPref": "{category}-focused",
     "aiNote": "Planned by Gemini from your spot and nearby night spots",
     "aiFallbackNote": "AI was unavailable, so stops are ordered by distance",
-    "presetHeading": "Other recommended courses"
+    "presetHeading": "Other recommended courses",
+    "modeStraight": "Straight",
+    "modeTransit": "Transit",
+    "modeWalk": "Walk",
+    "legWalk": "{min} min walk",
+    "legTransit": "{min} min · {transfer} transfers · ₩{fare}",
+    "legTooClose": "Very close",
+    "legNoRoute": "No route · take a taxi"
   },
   "etiquette": {
     "title": "Night Etiquette",
