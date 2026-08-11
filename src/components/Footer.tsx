@@ -18,8 +18,12 @@ export default function Footer() {
         {t("site.title")} — {t("site.tagline")}
       </p>
       <p className="mt-2 text-xs text-slate-600">{t("footer.notice")}</p>
-      {/* 공공누리 1유형 출처표시 의무 이행 */}
+      {/* 공모전 FAQ 지정 형식의 관광데이터 출처 표기 (텍스트만 허용, 로고 사용 금지) */}
       <p className="mt-1.5 text-[11px] text-slate-700">
+        관광정보 출처: ⓒ한국관광공사 · 대중교통: 국토교통부 · 천문: 한국천문연구원
+      </p>
+      {/* 공공누리 1유형 출처표시 의무 이행 */}
+      <p className="mt-1 text-[11px] text-slate-700">
         Photos: 대전광역시 (공공누리 제1유형) · Wikimedia Commons (CC0 · CC BY-SA
         4.0 © Minseong Kim, Rickinasia, Twotwo2019, Ryuch)
       </p>
