@@ -1,17 +1,23 @@
 import { sql } from "./db";
 
 /**
- * 스팟 간 실제 이동 경로 (TMap 보행자·대중교통).
+ * 스팟 간 실제 이동 경로 — 도보는 TMap, 대중교통은 ODsay.
  *
  * 코스가 만들어질 때 그 코스의 구간만 계산한다 (구간 2~3개 × 2모드 = 호출 4~6번).
  * 계산 결과는 spot_route에 캐시하므로 같은 구간이 다시 나오면 호출하지 않는다.
  *
- * TMAP_API_KEY가 없거나 호출이 실패하면 null을 돌려준다 — 경로는 부가 정보라
+ * 키가 없거나 호출이 실패하면 null을 돌려준다 — 경로는 부가 정보라
  * 없으면 지도가 기존처럼 직선을 그리면 된다.
  */
 
+// 도보는 TMap 보행자 경로 (무료 한도 넉넉).
 const PED = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1";
-const TRA = "https://apis.openapi.sk.com/transit/routes";
+// 대중교통은 ODsay. TMap 대중교통은 무료 한도가 하루 10회뿐이라 코스 3~4번이면
+// 소진돼 온디맨드로 못 쓴다 (실측). ODsay는 1,000회/일이고 IP 제한도 없다.
+const TRANSIT = "https://api.odsay.com/v1/api/searchPubTransPathT";
+
+/** ODsay trafficType → 지도에서 쓰는 수단 코드 */
+const ODSAY_MODE: Record<number, string> = { 1: "SUBWAY", 2: "BUS", 3: "WALK" };
 
 /** 도보를 기본으로 권할 최대 거리 — 이보다 멀면 걷기가 비현실적이라 대중교통을 앞세운다 */
 export const WALKABLE_MAX_M = 1500;
@@ -61,8 +67,9 @@ const toRoute = (r: Row): SpotRoute => ({
   legs: Array.isArray(r.legs) ? r.legs : [],
 });
 
-export function isTmapConfigured(): boolean {
-  return Boolean(process.env.TMAP_API_KEY);
+/** 도보(TMap)·대중교통(ODsay) 중 하나라도 쓸 수 있으면 경로 조회를 시도한다 */
+export function isRoutingConfigured(): boolean {
+  return Boolean(process.env.TMAP_API_KEY || process.env.ODSAY_API_KEY);
 }
 
 async function tmap(
@@ -91,15 +98,6 @@ async function tmap(
   if (!res.ok) throw new Error(`TMap ${res.status}: ${text.slice(0, 120)}`);
   if (!text.trim()) return null;
   return JSON.parse(text);
-}
-
-/** "lng,lat lng,lat ..." → [[lng,lat], ...] */
-function parseLinestring(s: string): [number, number][] {
-  return s
-    .trim()
-    .split(" ")
-    .map((pair) => pair.split(",").map(Number) as [number, number])
-    .filter((p) => p.length === 2 && p.every(Number.isFinite));
 }
 
 interface Point {
@@ -148,46 +146,77 @@ async function fetchWalk(a: Point, b: Point): Promise<SpotRoute> {
   };
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 async function fetchTransit(a: Point, b: Point): Promise<SpotRoute> {
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const j: any = await tmap(TRA, {
-    startX: String(a.mapX), startY: String(a.mapY),
-    endX: String(b.mapX), endY: String(b.mapY),
-    count: 1,
+  const none = (status: RouteStatus): SpotRoute => ({
+    mode: "transit", status,
+    durationSec: null, distanceM: null, transferCount: null, fare: null, legs: [],
   });
-  const it = j?.metaData?.plan?.itineraries?.[0];
-  if (!it) {
-    // 너무 가까워 대중교통이 없는 경우와 진짜 경로가 없는 경우는 안내가 달라야 한다
-    const msg: string = j?.result?.message ?? "";
+  if (!process.env.ODSAY_API_KEY) return none("no_route");
+
+  const params = new URLSearchParams({
+    apiKey: process.env.ODSAY_API_KEY,
+    SX: String(a.mapX), SY: String(a.mapY),
+    EX: String(b.mapX), EY: String(b.mapY),
+    OPT: "0", // 추천 경로
+    output: "json",
+  });
+  const res = await fetch(`${TRANSIT}?${params}`, {
+    signal: AbortSignal.timeout(8000),
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`ODsay ${res.status}: ${text.slice(0, 120)}`);
+  const j: any = JSON.parse(text);
+
+  // 오류는 배열로 온다: {"error":[{"code","message"}]}
+  const err = Array.isArray(j.error) ? j.error[0] : j.error;
+  if (err) {
+    const msg = String(err.message ?? err.msg ?? "");
+    // 출발·도착이 가까우면 대중교통 대신 도보를 안내해야 하므로 따로 구분한다
+    if (/가까|near|too close/i.test(msg)) return none("too_close");
+    throw new Error(`ODsay 오류 ${err.code}: ${msg}`);
+  }
+  const path = j?.result?.path?.[0];
+  if (!path) return none("no_route");
+
+  const info = path.info ?? {};
+  const legs: RouteLeg[] = (path.subPath ?? []).map((sp: any) => {
+    const mode = ODSAY_MODE[sp.trafficType] ?? "WALK";
+    // 탈것은 경유 정류장 좌표를 이어 폴리라인을 만든다. 실제 도로 형상은 loadLane을
+    // 한 번 더 불러야 얻는데, 구간마다 호출이 배로 늘어 정류장 선으로 근사한다.
+    const stations = sp.passStopList?.stations ?? [];
     return {
-      mode: "transit",
-      status: msg.includes("가까움") ? "too_close" : "no_route",
-      durationSec: null, distanceM: null, transferCount: null, fare: null, legs: [],
+      mode,
+      route: sp.lane?.[0]?.busNo ?? sp.lane?.[0]?.name ?? null,
+      durationSec: sp.sectionTime ? sp.sectionTime * 60 : null, // ODsay는 분 단위
+      distanceM: sp.distance ?? null,
+      path: stations
+        .map((st: any) => [Number(st.x), Number(st.y)] as [number, number])
+        .filter((p: [number, number]) => p.every(Number.isFinite)),
     };
+  });
+
+  // 도보 구간은 좌표가 없다. 앞뒤 탈것 구간의 끝점을 이어 선이 끊기지 않게 한다.
+  for (let i = 0; i < legs.length; i++) {
+    if (legs[i].path.length) continue;
+    const prev = legs[i - 1]?.path.at(-1) ?? ([a.mapX, a.mapY] as [number, number]);
+    const next = legs[i + 1]?.path[0] ?? ([b.mapX, b.mapY] as [number, number]);
+    legs[i].path = [prev, next];
   }
 
-  const legs: RouteLeg[] = it.legs.map((l: any) => ({
-    mode: l.mode,
-    route: l.route ?? null,
-    durationSec: l.sectionTime ?? null,
-    distanceM: l.distance ?? null,
-    // 탈것은 passShape에, 도보는 steps 배열에 좌표가 나뉘어 온다
-    path: l.passShape?.linestring
-      ? parseLinestring(l.passShape.linestring)
-      : (l.steps ?? []).flatMap((s: any) => parseLinestring(s.linestring ?? "")),
-  }));
-  /* eslint-enable @typescript-eslint/no-explicit-any */
-
+  const transfers =
+    (info.busTransitCount ?? 0) + (info.subwayTransitCount ?? 0);
   return {
     mode: "transit",
     status: "ok",
-    durationSec: it.totalTime ?? null,
-    distanceM: it.totalDistance ?? null,
-    transferCount: it.transferCount ?? null,
-    fare: it.fare?.regular?.totalFare ?? null,
+    durationSec: info.totalTime ? info.totalTime * 60 : null,
+    distanceM: info.totalDistance ?? null,
+    transferCount: Math.max(0, transfers - 1),
+    fare: info.payment ?? null,
     legs,
   };
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** 캐시에 저장 (실패해도 무시 — 다음 요청에서 다시 계산하면 된다) */
 async function cache(from: string, to: string, r: SpotRoute): Promise<void> {
@@ -243,7 +272,7 @@ export async function getRoutesForLegs(
     );
   }
 
-  if (!isTmapConfigured()) return out;
+  if (!isRoutingConfigured()) return out;
 
   // 2) 빠진 것만 호출.
   // 한꺼번에 병렬로 쏘면 TMap 속도 제한(429)에 걸려 절반이 실패하므로 순차로 돈다.
