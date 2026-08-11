@@ -112,8 +112,10 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
 
       {/* 리스트 + 고정 지도 분할 뷰 */}
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_560px]">
-        {/* 사진 카드가 커진 만큼 2열로 배치해 스크롤 길이를 유지한다 */}
-        <div className="order-2 grid gap-3 sm:grid-cols-2 lg:order-1">
+        {/* 사진 카드가 커진 만큼 2열로 배치해 스크롤 길이를 유지한다.
+            content-start가 없으면 스팟이 적은 카테고리에서 카드가 옆 지도 높이만큼
+            늘어나 사진 아래에 빈 공간이 생긴다 */}
+        <div className="order-2 grid content-start items-start gap-3 sm:grid-cols-2 lg:order-1">
           {filtered.length === 0 && (
             <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
               {t("noResults")}

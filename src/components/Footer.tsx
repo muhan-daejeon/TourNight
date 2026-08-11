@@ -24,8 +24,10 @@ export default function Footer() {
       </p>
       {/* 공공누리 1유형 출처표시 의무 이행 */}
       <p className="mt-1 text-[11px] text-slate-700">
-        Photos: 대전광역시 (공공누리 제1유형) · Wikimedia Commons (CC0 · CC BY-SA
-        4.0 © Minseong Kim, Rickinasia, Twotwo2019, Ryuch)
+        Photos: 대전광역시 (공공누리 제1유형) · Wikimedia Commons (CC0 · CC BY 2.0
+        · CC BY 3.0 · CC BY-SA 2.0 · CC BY-SA 3.0 · CC BY-SA 4.0 © Minseong Kim,
+        Rickinasia, Twotwo2019, Ryuch, superlocal, ccfarmer, lazy fri13th,
+        KOREA.NET, Teemeah)
       </p>
     </footer>
   );

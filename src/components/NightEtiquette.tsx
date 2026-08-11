@@ -76,7 +76,12 @@ interface Guide {
   }[];
 }
 
-export default function NightEtiquette() {
+export default function NightEtiquette({
+  topicImages = {},
+}: {
+  /** 주제별 대표 사진 (서버에서 조회) — 없는 주제는 아이콘 카드로 표시 */
+  topicImages?: Record<string, string>;
+}) {
   const t = useTranslations("etiquette");
   const locale = useLocale();
   const [selected, setSelected] = useState<string | null>(null);
@@ -110,25 +115,57 @@ export default function NightEtiquette() {
       {GROUPS.map((group) => (
         <div key={group.key} className="mb-5">
           <p className="overline-label mb-2">{t(`groups.${group.key}`)}</p>
-          <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-3">
+          {/* 사진이 먼저 보이고 그 아래 주제명을 얹은 카드 */}
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
             {group.topics.map((id) => {
               const Icon = TOPIC_ICONS[id];
+              const image = topicImages[id];
               return (
                 <button
                   key={id}
                   onClick={() => loadTopic(id)}
-                  className={`rounded-2xl border p-3 text-center text-[13px] leading-tight backdrop-blur transition sm:p-4 sm:text-sm ${
+                  className={`group relative h-28 overflow-hidden rounded-2xl border text-left transition sm:h-32 ${
                     selected === id
-                      ? "border-amber-400/60 bg-amber-400/10 text-white shadow-[0_0_20px_rgba(251,191,36,0.15)]"
-                      : "border-white/10 bg-white/5 text-slate-300 hover:-translate-y-0.5 hover:border-white/25 hover:text-white"
+                      ? "border-amber-400/70 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
+                      : "border-white/10 hover:-translate-y-0.5 hover:border-white/25"
                   }`}
                 >
-                  <Icon
-                    size={20}
-                    strokeWidth={1.8}
-                    className={`mx-auto mb-1.5 ${selected === id ? "text-amber-300" : "text-slate-400"}`}
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt=""
+                      fill
+                      sizes="(min-width: 640px) 33vw, 50vw"
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <span className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950">
+                      <Icon size={30} strokeWidth={1.3} className="text-white/20" />
+                    </span>
+                  )}
+                  <span
+                    className={`absolute inset-0 transition ${
+                      selected === id
+                        ? "bg-gradient-to-t from-amber-950/90 via-slate-950/50 to-slate-950/20"
+                        : "bg-gradient-to-t from-slate-950 via-slate-950/45 to-slate-950/10"
+                    }`}
                   />
-                  {t(`topics.${id}`)}
+                  <span className="absolute inset-x-0 bottom-0 flex items-center gap-1.5 p-2.5 text-[13px] font-bold leading-tight sm:text-sm">
+                    <Icon
+                      size={14}
+                      strokeWidth={2.2}
+                      className={`shrink-0 ${selected === id ? "text-amber-300" : "text-amber-300/70"}`}
+                    />
+                    <span
+                      className={
+                        selected === id
+                          ? "text-amber-200"
+                          : "text-white group-hover:text-amber-200"
+                      }
+                    >
+                      {t(`topics.${id}`)}
+                    </span>
+                  </span>
                 </button>
               );
             })}
