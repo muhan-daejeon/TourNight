@@ -56,12 +56,18 @@ export default function CourseMap({
       const bounds = new kakao.maps.LatLngBounds();
       stopPos.forEach((p: KakaoNS) => bounds.extend(p));
 
-      const line = (path: KakaoNS[], color: string, dashed: boolean, weight = 5) => {
+      const line = (
+        path: KakaoNS[],
+        color: string,
+        dashed: boolean,
+        weight = 5,
+        opacity = 0.95,
+      ) => {
         const pl = new kakao.maps.Polyline({
           path,
           strokeWeight: weight,
           strokeColor: color,
-          strokeOpacity: 0.95,
+          strokeOpacity: opacity,
           strokeStyle: dashed ? "shortdash" : "solid",
         });
         pl.setMap(map);
@@ -71,13 +77,16 @@ export default function CourseMap({
       course.legs.forEach((leg, i) => {
         const route = mode === "walk" ? leg.walk : mode === "transit" ? leg.transit : null;
 
-        // 실제 경로가 없으면(모드 straight, 미계산, 경로 없음) 직선으로 잇는다
+        // 실제 경로가 없으면(모드 straight, 미계산, 경로 없음) 직선으로 잇는다.
+        // 실제 경로선과 헷갈리지 않게 흐리고 얇게 그린다 — 색·굵기가 같으면
+        // 도보 탭을 눌러도 아무것도 안 바뀐 것처럼 보인다.
         if (mode === "straight" || !route || route.status !== "ok" || !route.legs.length) {
           line(
             [stopPos[i], stopPos[i + 1]],
-            leg.together ? "#fbbf24" : "#94a3b8",
+            leg.together ? "#fbbf24" : "#64748b",
             !leg.together,
-            4,
+            3,
+            leg.together ? 0.9 : 0.55,
           );
           return;
         }
@@ -88,8 +97,14 @@ export default function CourseMap({
             ([lng, lat]) => new kakao.maps.LatLng(lat, lng),
           );
           path.forEach((p: KakaoNS) => bounds.extend(p));
+          // 도보는 초록 점선, 탈것은 수단별 색 실선 — 직선 폴백(흐린 회색)과 확실히 구분된다
           const isWalk = seg.mode === "WALK";
-          line(path, isWalk ? "#94a3b8" : (MODE_COLOR[seg.mode] ?? "#38bdf8"), isWalk, isWalk ? 4 : 6);
+          line(
+            path,
+            isWalk ? "#34d399" : (MODE_COLOR[seg.mode] ?? "#38bdf8"),
+            isWalk,
+            isWalk ? 5 : 6,
+          );
 
           // 탈것 구간 시작점에 노선명 표시 (버스 번호·호선)
           if (!isWalk && seg.route) {
