@@ -179,4 +179,11 @@ create table if not exists spot_transit (
 -- 커뮤니티 글/댓글 작성자 계정 연결 (본인 글 삭제 판별용) — users 정의 후에 추가.
 -- 계정 삭제 시 글은 남기되 소유만 해제(set null). 기존 글은 null(삭제 버튼 없음).
 alter table community_posts add column if not exists user_id bigint references users(id) on delete set null;
+
+-- 커뮤니티 첨부 사진 (Supabase Storage의 community 버킷).
+-- URL이 아니라 저장 경로를 둔다 — 글 삭제 시 그 경로로 스토리지 객체도 지워야 하고,
+-- 공개 URL은 조회할 때 SUPABASE_URL로 조립하면 되기 때문.
+alter table community_posts add column if not exists media_path text;
+alter table community_posts add column if not exists media_type text
+  check (media_type is null or media_type in ('image', 'video'));
 alter table community_comments add column if not exists user_id bigint references users(id) on delete set null;

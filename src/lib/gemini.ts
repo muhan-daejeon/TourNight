@@ -420,3 +420,62 @@ export async function generateEtiquette(
       : [],
   };
 }
+
+/**
+ * 커뮤니티 첨부 이미지 자동 심사.
+ *
+ * 외국인 대상 공개 게시판이라 부적절 이미지가 그대로 노출되면 곤란하다.
+ * 판정이 애매하면 통과시킨다 — 관광 사진을 오탐으로 막는 쪽이 더 나쁘다.
+ * Gemini 호출 자체가 실패하면 호출부에서 통과시킨다(가용성 우선, 신고 기능으로 보완).
+ */
+export async function screenImage(
+  bytes: ArrayBuffer,
+  mimeType: string,
+): Promise<{ allowed: boolean; reason: string }> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY가 설정되지 않았습니다");
+
+  const prompt = [
+    `You screen photos uploaded to a night-tourism community board for Daejeon, Korea.`,
+    `Block ONLY if the image clearly contains: nudity or sexual content, graphic violence`,
+    `or gore, illegal drug use, hate symbols, or an image whose main subject is a document`,
+    `showing personal data (ID card, passport, credit card, license plate close-up).`,
+    `Everything else is allowed — night scenery, food, drinks, people posing, selfies,`,
+    `crowds, screenshots, memes, blurry or dark photos.`,
+    `If you are unsure, ALLOW it.`,
+    `Return JSON: {"allowed": boolean, "reason": string (short, English, why blocked or "ok")}`,
+  ].join("\n");
+
+  const res = await fetch(
+    `${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              {
+                inline_data: {
+                  mime_type: mimeType,
+                  data: Buffer.from(bytes).toString("base64"),
+                },
+              },
+            ],
+          },
+        ],
+        generationConfig: { responseMimeType: "application/json" },
+      }),
+    },
+  );
+  if (!res.ok) throw new Error(`Gemini API 오류: ${res.status}`);
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error("Gemini 응답이 비어 있습니다");
+  const parsed = JSON.parse(text);
+  return {
+    allowed: parsed.allowed !== false,
+    reason: String(parsed.reason ?? ""),
+  };
+}

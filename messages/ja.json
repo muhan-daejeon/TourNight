@@ -132,6 +132,12 @@
     "loginToPost": "ログインしてレビューを投稿しましょう",
     "loginToComment": "ログインしてコメントしましょう",
     "delete": "削除",
+"photoAdd": "写真を追加",
+    "photoRemove": "写真を削除",
+    "photoClose": "閉じる",
+    "photoTooLarge": "写真が大きすぎます。5MB以下にしてください。",
+    "photoUnsupported": "対応していない形式です。JPG・PNG・WebPのみアップロードできます。",
+    "photoRejected": "この写真は投稿できません。別の写真を選んでください。",
     "deleteConfirm": "削除しますか？"
   },
   "spot": {
