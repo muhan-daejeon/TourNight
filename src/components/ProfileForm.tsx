@@ -64,6 +64,9 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
       setUser(data.user);
       setSaved(true);
       router.refresh(); // 헤더 닉네임 갱신
+      // 가입 직후 국가 입력(welcome)은 여기서 끝 — 프로필에 머무르지 않고 메인으로 보낸다.
+      // replace라 뒤로가기로 가입 플로우에 다시 갇히지 않는다.
+      if (welcome) router.replace("/");
     } catch {
       setError(errorText("generic"));
     } finally {
@@ -154,8 +157,19 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
         disabled={pending || !nickname.trim()}
         className="w-full rounded-full bg-amber-400 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {t("save")}
+        {welcome ? t("saveAndStart") : t("save")}
       </button>
+
+      {/* 국가는 선택 사항이라, 입력 없이도 가입 흐름을 끝낼 수 있어야 한다 */}
+      {welcome && (
+        <button
+          type="button"
+          onClick={() => router.replace("/")}
+          className="w-full py-1 text-center text-sm text-slate-400 transition hover:text-slate-200"
+        >
+          {t("skipForNow")}
+        </button>
+      )}
     </form>
   );
 }
