@@ -3,7 +3,7 @@ import { generateCoursePlan, type CourseCandidate } from "./gemini";
 import { getNearbySpots, getSpot } from "./spots";
 import { getTransitForSpots, type SpotTransit } from "./transit";
 import { getRoutesForLegs, type SpotRoute } from "./routes";
-import type { NightSpot } from "./kto";
+import { fetchNearbyStays, type NearbyStay, type NightSpot } from "./kto";
 
 export interface CourseStop {
   contentId: string;
@@ -44,6 +44,8 @@ export interface AiCourse extends Course {
   transit: (SpotTransit | null)[];
   /** 코스를 짤 때 우선한 카테고리 (홈 필터 기준, 없으면 null) */
   prefCategory: NightSpot["category"] | null;
+  /** 마지막 스팟 인근 숙소 — 야간 일정이 끝나는 곳에서 묵는 게 자연스럽다 */
+  stays: NearbyStay[];
   /** ai = Gemini 설계, distance = Gemini 실패 시 최근접 폴백 */
   source: "ai" | "distance";
 }
@@ -222,6 +224,24 @@ async function toCourse(
 }
 
 /**
+ * 코스 마지막 스팟 인근 숙소. 야간 일정이 끝나는 지점이 곧 묵을 곳이라 거기 기준으로 찾는다.
+ * KTO 키가 없거나 조회가 실패하면 빈 배열 — 숙소는 부가 정보라 코스 생성을 막지 않는다.
+ */
+async function staysNearLastStop(stops: CourseStop[]): Promise<NearbyStay[]> {
+  const last = stops[stops.length - 1];
+  if (!last) return [];
+  try {
+    return await fetchNearbyStays(last.mapX, last.mapY, { radius: 3000, limit: 3 });
+  } catch (err) {
+    console.warn(
+      "[courses] 숙소 조회 실패 — 숙소 없이 진행합니다:",
+      err instanceof Error ? err.message : err,
+    );
+    return [];
+  }
+}
+
+/**
  * 사용자가 지도에서 고른 스팟(anchor)을 반드시 거치는 코스를 생성한다.
  *
  * 후보는 인근 검증 스팟으로 한정하고, Gemini가 그중 2~3곳을 골라 순서를 정한다.
@@ -301,6 +321,7 @@ export async function getAiCourse(
       notes: stops.map(() => ""),
       transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
       prefCategory: prefCategory ?? null,
+      stays: await staysNearLastStop(stops),
       source: "distance",
       ...(await toCourse(stops, true)),
     };
@@ -336,6 +357,7 @@ export async function getAiCourse(
       notes: picked.map((p) => p.note),
       transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
       prefCategory: prefCategory ?? null,
+      stays: await staysNearLastStop(stops),
       source: "ai",
       ...(await toCourse(stops, true)),
     };

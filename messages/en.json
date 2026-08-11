@@ -66,7 +66,8 @@
     "legWalk": "{min} min walk",
     "legTransit": "{min} min · {transfer} transfers · ₩{fare}",
     "legTooClose": "Very close",
-    "legNoRoute": "No route · take a taxi"
+    "legNoRoute": "No route · take a taxi",
+    "staysNear": "Stays near {name}"
   },
   "etiquette": {
     "title": "Night Etiquette",
