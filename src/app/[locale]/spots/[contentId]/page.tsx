@@ -120,8 +120,8 @@ export default async function SpotPage({
 
   return (
     <div>
-      {/* 히어로 이미지 */}
-      <div className="relative h-64 overflow-hidden sm:h-80">
+      {/* 히어로 이미지 — 야경 사진을 크게 보여준다 */}
+      <div className="relative h-80 overflow-hidden sm:h-[26rem] lg:h-[30rem]">
         {spot.imageUrl ? (
           <Image
             src={spot.imageUrl}

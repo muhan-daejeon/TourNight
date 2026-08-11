@@ -107,6 +107,10 @@
     "dos": "이렇게 하세요",
     "donts": "피하세요",
     "saySection": "이럴 때 이렇게 말해요",
+    "level": {
+      "basic": "기본",
+      "advanced": "심화"
+    },
     "relatedSpots": "관련 야간 명소"
   },
   "community": {
@@ -148,6 +152,8 @@
       "unavailable": "이 장소는 혼잡도 예측이 제공되지 않아요."
     },
     "generating": "AI가 이 장소의 야간 가이드를 생성하고 있어요…",
+    "more": "더 보기",
+    "less": "접기",
     "areaVisitors": {
       "line": "{gu} 하루 평균 외지 방문객 약 {count}명",
       "basis": "({month} 기준 · 이동통신 빅데이터)"

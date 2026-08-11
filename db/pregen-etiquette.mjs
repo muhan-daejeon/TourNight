@@ -42,11 +42,17 @@ async function generate(topic, language) {
     `You are a friendly local culture guide for foreign tourists enjoying nightlife in Daejeon, South Korea.`,
     `Topic: ${topic}`,
     `Write in ${language}. Return JSON:`,
-    `{"intro": string (1-2 sentence overview),`,
+    `{"intro": string (ONE sentence, under 25 words),`,
     ` "dos": string[] (exactly 4 short practical DO tips),`,
     ` "donts": string[] (exactly 2 short DON'T cautions),`,
-    ` "phrases": [{"korean","roman","meaning"} x4] (useful Korean phrases, meaning in ${language})}`,
-    `Keep each item under 20 words. Respond with ONLY the JSON.`,
+    ` "phrases": [{"korean","roman","meaning"} x4],`,
+    ` "phrasesAdvanced": [{"korean","roman","meaning"} x4]}`,
+    `- phrases: basic survival lines a first-time visitor can memorize (3-5 words each).`,
+    `- phrasesAdvanced: fuller sentences for making requests or asking permission in this`,
+    `  situation — polite and natural, what a repeat visitor would use. Not translations of`,
+    `  the basic ones; different situations.`,
+    `- meaning: in ${language}. Keep each item under 20 words.`,
+    `Respond with ONLY the JSON.`,
   ].join("\n");
 
   const res = await fetch(
@@ -56,7 +62,11 @@ async function generate(topic, language) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
+        // 표현이 8개로 늘어 기본 상한에서 응답이 잘리는 경우가 있어 넉넉히 준다
+        generationConfig: {
+          responseMimeType: "application/json",
+          maxOutputTokens: 4096,
+        },
       }),
     },
   );
@@ -64,21 +74,26 @@ async function generate(topic, language) {
   const data = await res.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error("빈 응답");
-  JSON.parse(text); // 형식 검증
+  const parsed = JSON.parse(text); // 형식 검증
+  if (!Array.isArray(parsed.phrasesAdvanced) || !parsed.phrasesAdvanced.length) {
+    throw new Error("심화 표현(phrasesAdvanced) 누락");
+  }
   return text;
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// 무료 티어 분당 호출 제한 대응: 429면 대기 후 재시도
+// 무료 티어 호출 제한(429)과 응답이 잘려 JSON 파싱이 깨지는 경우 모두 재시도한다.
+// 한 조합이 실패했다고 전체 실행이 멈추면 남은 조합을 다시 돌려야 해서 손해가 크다.
 async function generateWithRetry(topic, language) {
   for (let attempt = 1; ; attempt += 1) {
     try {
       return await generate(topic, language);
     } catch (e) {
-      if (!e.message.includes("429") || attempt >= 5) throw e;
-      console.log(`  429 — ${attempt * 30}초 대기 후 재시도`);
-      await sleep(attempt * 30_000);
+      if (attempt >= 5) throw e;
+      const wait = e.message.includes("429") ? attempt * 30_000 : 5_000;
+      console.log(`  실패(${e.message}) — ${wait / 1000}초 후 재시도`);
+      await sleep(wait);
     }
   }
 }
@@ -87,10 +102,17 @@ const sql = postgres(process.env.DATABASE_URL, { prepare: false });
 const force = process.argv.includes("--force"); // --force면 기존 것도 재생성
 let ok = 0;
 try {
+  // 심화 표현이 없는 캐시는 기본/심화 도입 전 것이므로 '있음'으로 치지 않고 다시 만든다
   const existing = new Set(
-    (await sql`select topic_id, locale from etiquette_cache`).map(
-      (r) => `${r.topic_id}:${r.locale}`,
-    ),
+    (await sql`select topic_id, locale, content from etiquette_cache`)
+      .filter((r) => {
+        try {
+          return Array.isArray(JSON.parse(r.content).phrasesAdvanced);
+        } catch {
+          return false;
+        }
+      })
+      .map((r) => `${r.topic_id}:${r.locale}`),
   );
   for (const [topicId, topic] of Object.entries(TOPICS)) {
     for (const [locale, language] of Object.entries(LOCALES)) {

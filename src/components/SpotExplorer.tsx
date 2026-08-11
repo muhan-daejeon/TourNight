@@ -112,9 +112,10 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
 
       {/* 리스트 + 고정 지도 분할 뷰 */}
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_560px]">
-        <div className="order-2 flex flex-col gap-2.5 lg:order-1">
+        {/* 사진 카드가 커진 만큼 2열로 배치해 스크롤 길이를 유지한다 */}
+        <div className="order-2 grid gap-3 sm:grid-cols-2 lg:order-1">
           {filtered.length === 0 && (
-            <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-slate-500">
+            <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
               {t("noResults")}
             </p>
           )}
@@ -124,54 +125,55 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
               <article
                 key={spot.contentId}
                 onClick={() => setSelectedId(spot.contentId)}
-                className={`glass-card group flex cursor-pointer items-center gap-3 rounded-xl p-2.5 ${
+                className={`glass-card group cursor-pointer overflow-hidden rounded-2xl ${
                   selectedId === spot.contentId
                     ? "!border-amber-400/60 !bg-amber-400/5"
                     : ""
                 }`}
               >
+                {/* 사진 우선 카드 — 야경 사진이 주인공, 텍스트는 사진 위에 얹는다 */}
                 <div
-                  className={`relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br ${CATEGORY_SCENE[spot.category]}`}
+                  className={`relative flex h-44 items-center justify-center overflow-hidden bg-gradient-to-br sm:h-52 ${CATEGORY_SCENE[spot.category]}`}
                 >
                   {spot.imageUrl ? (
                     <Image
                       src={spot.imageUrl}
                       alt={spot.title}
                       fill
-                      sizes="56px"
-                      className="object-cover"
+                      sizes="(min-width: 1024px) 40vw, 100vw"
+                      className="object-cover transition duration-500 group-hover:scale-[1.03]"
                     />
                   ) : (
-                    <Icon
-                      size={22}
-                      strokeWidth={1.5}
-                      className="text-white/30"
-                    />
+                    <Icon size={40} strokeWidth={1.2} className="text-white/20" />
                   )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-[15px] font-semibold text-slate-100 group-hover:text-amber-300">
-                    {spot.title}
-                  </h3>
-                  <p className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-slate-500">
-                    <span
-                      className={`flex items-center gap-1 font-medium ${CATEGORY_TEXT[spot.category]}`}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent" />
+
+                  <span
+                    className={`absolute left-3 top-3 flex items-center gap-1 rounded-full bg-slate-950/70 px-2.5 py-1 text-[11px] font-bold backdrop-blur ${CATEGORY_TEXT[spot.category]}`}
+                  >
+                    <Icon size={11} strokeWidth={2.4} />
+                    {t(`categories.${spot.category}`)}
+                  </span>
+
+                  <div className="absolute inset-x-0 bottom-0 flex items-end gap-2 p-3.5">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-lg font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] group-hover:text-amber-300">
+                        {spot.title}
+                      </h3>
+                      <p className="truncate text-[13px] text-slate-300">
+                        {spot.addr}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/spots/${spot.contentId}`}
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={spot.title}
+                      className="shrink-0 rounded-full bg-white/10 p-2 text-white backdrop-blur transition hover:bg-amber-400 hover:text-slate-950"
                     >
-                      <Icon size={11} strokeWidth={2.2} />
-                      {t(`categories.${spot.category}`)}
-                    </span>
-                    <span className="text-slate-700">·</span>
-                    <span className="truncate">{spot.addr}</span>
-                  </p>
+                      <ChevronRight size={18} />
+                    </Link>
+                  </div>
                 </div>
-                <Link
-                  href={`/spots/${spot.contentId}`}
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label={spot.title}
-                  className="shrink-0 rounded-full p-2 text-slate-600 transition hover:bg-white/10 hover:text-amber-300"
-                >
-                  <ChevronRight size={18} />
-                </Link>
               </article>
             );
           })}

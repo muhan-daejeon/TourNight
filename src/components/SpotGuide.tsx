@@ -14,6 +14,7 @@ export default function SpotGuide({ contentId }: { contentId: string }) {
   const locale = useLocale();
   const [guide, setGuide] = useState<Guide | null>(null);
   const [status, setStatus] = useState<"loading" | "error" | "done">("loading");
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +62,19 @@ export default function SpotGuide({ contentId }: { contentId: string }) {
         </div>
       ) : (
         <>
-          <p className="mt-3 leading-relaxed text-slate-300">{guide?.intro}</p>
+          {/* 소개문은 길어서 3줄만 보여주고 나머지는 펼쳐 읽게 한다 */}
+          <p
+            className={`mt-3 leading-relaxed text-slate-300 ${expanded ? "" : "line-clamp-3"}`}
+          >
+            {guide?.intro}
+          </p>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-1.5 text-xs font-semibold text-amber-300/80 transition hover:text-amber-300"
+          >
+            {expanded ? t("less") : t("more")}
+          </button>
           <ul className="mt-4 space-y-2">
             {guide?.tips.map((tip, i) => (
               <li key={i} className="flex gap-2 text-sm text-slate-300">

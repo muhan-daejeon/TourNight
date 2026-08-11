@@ -67,6 +67,7 @@ interface Guide {
   dos: string[];
   donts: string[];
   phrases: Phrase[];
+  phrasesAdvanced?: Phrase[];
   spots: {
     contentId: string;
     title: string;
@@ -81,11 +82,13 @@ export default function NightEtiquette() {
   const [selected, setSelected] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [guide, setGuide] = useState<Guide | null>(null);
+  const [level, setLevel] = useState<"basic" | "advanced">("basic");
 
   async function loadTopic(topicId: string) {
     setSelected(topicId);
     setStatus("loading");
     setGuide(null);
+    setLevel("basic");
     try {
       const res = await fetch(`/api/etiquette?topic=${topicId}&locale=${locale}`);
       if (!res.ok) throw new Error();
@@ -95,6 +98,12 @@ export default function NightEtiquette() {
       setStatus("error");
     }
   }
+
+  const hasAdvanced = (guide?.phrasesAdvanced?.length ?? 0) > 0;
+  const phrases =
+    level === "advanced" && hasAdvanced
+      ? guide!.phrasesAdvanced!
+      : (guide?.phrases ?? []);
 
   return (
     <div className="mt-8">
@@ -137,7 +146,7 @@ export default function NightEtiquette() {
 
       {status === "idle" && guide && (
         <div className="mt-6 space-y-4">
-          <p className="leading-relaxed text-slate-300">{guide.intro}</p>
+          <p className="text-sm leading-relaxed text-slate-400">{guide.intro}</p>
 
           {/* Do / Don't */}
           <div className="grid gap-3 sm:grid-cols-2">
@@ -165,15 +174,35 @@ export default function NightEtiquette() {
             </div>
           </div>
 
-          {/* 상황 표현 */}
-          {guide.phrases.length > 0 && (
+          {/* 상황 표현 — 기본(외워 쓰는 짧은 말) / 심화(요청·양해를 구하는 말) */}
+          {phrases.length > 0 && (
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-              <p className="mb-3 flex items-center gap-1.5 text-sm font-bold text-amber-300">
-                <MessageCircle size={14} />
-                {t("saySection")}
-              </p>
+              <div className="mb-3 flex flex-wrap items-center gap-3">
+                <p className="flex items-center gap-1.5 text-sm font-bold text-amber-300">
+                  <MessageCircle size={14} />
+                  {t("saySection")}
+                </p>
+                {hasAdvanced && (
+                  <div className="ml-auto flex gap-1 rounded-full border border-white/10 bg-white/5 p-0.5">
+                    {(["basic", "advanced"] as const).map((lv) => (
+                      <button
+                        key={lv}
+                        type="button"
+                        onClick={() => setLevel(lv)}
+                        className={`rounded-full px-3 py-1 text-xs font-bold transition ${
+                          level === lv
+                            ? "bg-amber-400 text-slate-950"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        {t(`level.${lv}`)}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <ul className="space-y-3">
-                {guide.phrases.map((p, i) => (
+                {phrases.map((p, i) => (
                   <li key={i} className="flex flex-col gap-0.5">
                     <span className="font-semibold text-slate-100">{p.korean}</span>
                     <span className="text-xs text-amber-300/80">{p.roman}</span>
@@ -197,14 +226,14 @@ export default function NightEtiquette() {
                     href={`/spots/${s.contentId}`}
                     className="glass-card group overflow-hidden rounded-xl"
                   >
-                    <div className="relative h-20 bg-slate-800">
+                    <div className="relative h-32 bg-slate-800">
                       {s.imageUrl && (
                         <Image
                           src={s.imageUrl}
                           alt={s.title}
                           fill
-                          sizes="200px"
-                          className="object-cover"
+                          sizes="(min-width: 640px) 33vw, 100vw"
+                          className="object-cover transition duration-500 group-hover:scale-[1.03]"
                         />
                       )}
                     </div>
