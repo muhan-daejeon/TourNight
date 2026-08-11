@@ -19,6 +19,13 @@ const TRANSIT = "https://api.odsay.com/v1/api/searchPubTransPathT";
 /** ODsay trafficType → 지도에서 쓰는 수단 코드 */
 const ODSAY_MODE: Record<number, string> = { 1: "SUBWAY", 2: "BUS", 3: "WALK" };
 
+/**
+ * ODsay 키에 등록된 Service URI. 이 값으로 Referer를 보내야 인증된다.
+ * 배포 도메인이 바뀌면 ODsay 콘솔의 등록 URI와 함께 ODSAY_REFERER를 바꾸면 된다.
+ */
+const ODSAY_REFERER =
+  process.env.ODSAY_REFERER ?? "https://tournight.vercel.app/";
+
 /** 도보를 기본으로 권할 최대 거리 — 이보다 멀면 걷기가 비현실적이라 대중교통을 앞세운다 */
 export const WALKABLE_MAX_M = 1500;
 
@@ -152,7 +159,9 @@ async function fetchTransit(a: Point, b: Point): Promise<SpotRoute> {
     mode: "transit", status,
     durationSec: null, distanceM: null, transferCount: null, fare: null, legs: [],
   });
-  if (!process.env.ODSAY_API_KEY) return none("no_route");
+  // 키가 없을 때 no_route를 돌려주면 그게 캐시에 박혀, 나중에 키를 넣어도
+  // 계속 '경로 없음'으로 남는다. 던져서 캐시를 타지 않게 한다.
+  if (!process.env.ODSAY_API_KEY) throw new Error("ODSAY_API_KEY가 없습니다");
 
   const params = new URLSearchParams({
     apiKey: process.env.ODSAY_API_KEY,
@@ -161,7 +170,11 @@ async function fetchTransit(a: Point, b: Point): Promise<SpotRoute> {
     OPT: "0", // 추천 경로
     output: "json",
   });
+  // ODsay 키는 발급 시 등록한 Service URI에 묶여 있어, Referer로 그 도메인을
+  // 밝히지 않으면 ApiKeyAuthFailed가 난다. 서버 fetch는 Referer를 안 보내므로
+  // 직접 넣어준다 (로컬 개발에서도 등록 도메인을 그대로 쓴다).
   const res = await fetch(`${TRANSIT}?${params}`, {
+    headers: { Referer: ODSAY_REFERER },
     signal: AbortSignal.timeout(8000),
   });
   const text = await res.text();
