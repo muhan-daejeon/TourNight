@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import {
@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { ImageDecodeError, prepareImage } from "@/lib/image-resize";
+import { photoErrorMessage, usePhotoAttach } from "./usePhotoAttach";
 
 interface Post {
   id: number;
@@ -32,6 +32,8 @@ interface Comment {
   author: string;
   body: string;
   createdAt: string;
+  mediaUrl: string | null;
+  mediaType: "image" | "video" | null;
 }
 
 interface Me {
@@ -87,10 +89,12 @@ function LoginPrompt({ text }: { text: string }) {
 function PostItem({
   post,
   me,
+  canAttach,
   onDeleted,
 }: {
   post: Post;
   me: Me | null | undefined;
+  canAttach: boolean;
   onDeleted: () => void;
 }) {
   const t = useTranslations("community");
@@ -106,6 +110,18 @@ function PostItem({
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [lightbox, setLightbox] = useState(false);
+  // 댓글 첨부 — 글 작성과 같은 훅을 쓴다
+  const {
+    photo,
+    clear: clearPhoto,
+    pick: pickPhoto,
+    inputRef: photoInputRef,
+    requestInit: photoRequestInit,
+  } = usePhotoAttach({
+    tooLarge: t("photoTooLarge"),
+    unsupported: t("photoUnsupported"),
+    generic: t("submitError"),
+  });
 
   const ownsPost = post.userId != null && post.userId === me?.id;
 
@@ -134,16 +150,25 @@ function PostItem({
 
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/community/${post.id}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body }),
+      const res = await fetch(
+        `/api/community/${post.id}/comments`,
+        photoRequestInit(body),
+      );
+      const photoErr = photoErrorMessage(res.status, {
+        rejected: t("photoRejected"),
+        tooLarge: t("photoTooLarge"),
+        unsupported: t("photoUnsupported"),
       });
+      if (photoErr) {
+        alert(photoErr);
+        return;
+      }
       if (!res.ok) throw new Error();
       const data = await res.json();
       setComments((prev) => [...(prev ?? []), data.comment]);
       setCount((c) => c + 1);
       setReplyBody("");
+      clearPhoto();
     } catch {
       alert(t("submitError"));
     } finally {
@@ -291,6 +316,23 @@ function PostItem({
                   <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-slate-300">
                     {c.body}
                   </p>
+                  {c.mediaUrl && c.mediaType === "image" && (
+                    <a
+                      href={c.mediaUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1.5 block w-fit overflow-hidden rounded-lg border border-white/10 transition hover:border-white/25"
+                    >
+                      <Image
+                        src={c.mediaUrl}
+                        alt=""
+                        width={320}
+                        height={240}
+                        sizes="320px"
+                        className="max-h-40 w-auto object-cover"
+                      />
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -300,6 +342,26 @@ function PostItem({
 
           {/* 답글 폼 — 로그인 시에만 */}
           {me ? (
+            <>
+            {photo && (
+              <div className="relative w-fit">
+                {/* 로컬 objectURL이라 next/image 대신 img */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photo.preview}
+                  alt=""
+                  className="max-h-28 rounded-lg border border-white/10"
+                />
+                <button
+                  type="button"
+                  onClick={clearPhoto}
+                  aria-label={t("photoRemove")}
+                  className="absolute -right-2 -top-2 rounded-full bg-slate-900 p-1 text-slate-300 shadow-lg ring-1 ring-white/15 transition hover:text-white"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
             <form onSubmit={submitReply} className="flex gap-2">
               <input
                 value={replyBody}
@@ -308,6 +370,26 @@ function PostItem({
                 placeholder={t("commentPlaceholder")}
                 className={`${inputClass} flex-1`}
               />
+              {canAttach && (
+                <>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={pickPhoto}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => photoInputRef.current?.click()}
+                    disabled={submitting}
+                    aria-label={t("photoAdd")}
+                    className="shrink-0 rounded-lg border border-white/15 px-2.5 py-2 text-slate-300 transition hover:border-white/30 hover:text-white disabled:opacity-40"
+                  >
+                    <ImagePlus size={14} />
+                  </button>
+                </>
+              )}
               <button
                 type="submit"
                 disabled={!replyBody.trim() || submitting}
@@ -316,6 +398,7 @@ function PostItem({
                 {t("commentSubmit")}
               </button>
             </form>
+            </>
           ) : (
             <LoginPrompt text={t("loginToComment")} />
           )}
@@ -336,34 +419,17 @@ export default function CommunityBoard() {
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   // 첨부 사진 — 스토리지 미설정 서버면 canAttach=false로 UI 자체를 숨긴다
   const [canAttach, setCanAttach] = useState(false);
-  const [photo, setPhoto] = useState<{ file: File; preview: string } | null>(
-    null,
-  );
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // 미리보기 objectURL 누수 방지
-  useEffect(() => {
-    const url = photo?.preview;
-    return () => {
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [photo?.preview]);
-
-  async function pickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // 같은 파일 다시 고를 수 있게
-    if (!file) return;
-    try {
-      const prepared = await prepareImage(file);
-      if (prepared.size > 5 * 1024 * 1024) {
-        alert(t("photoTooLarge"));
-        return;
-      }
-      setPhoto({ file: prepared, preview: URL.createObjectURL(prepared) });
-    } catch (err) {
-      alert(err instanceof ImageDecodeError ? t("photoUnsupported") : t("submitError"));
-    }
-  }
+  const {
+    photo,
+    clear: clearPhoto,
+    pick: pickPhoto,
+    inputRef: photoInputRef,
+    requestInit: photoRequestInit,
+  } = usePhotoAttach({
+    tooLarge: t("photoTooLarge"),
+    unsupported: t("photoUnsupported"),
+    generic: t("submitError"),
+  });
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -404,41 +470,25 @@ export default function CommunityBoard() {
 
     setSubmitting(true);
     try {
-      // 사진이 있으면 multipart, 없으면 기존 JSON 경로 그대로
-      const form = new FormData();
-      form.set("body", trimmedBody);
-      if (photo) form.set("media", photo.file);
-
-      const res = await fetch("/api/community", {
-        method: "POST",
-        ...(photo
-          ? { body: form }
-          : {
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ body: trimmedBody }),
-            }),
-      });
+      const res = await fetch("/api/community", photoRequestInit(trimmedBody));
       if (res.status === 401) {
         setMe(null); // 세션 만료 → 로그인 유도로 전환
         return;
       }
-      if (res.status === 422) {
-        alert(t("photoRejected"));
-        return;
-      }
-      if (res.status === 413) {
-        alert(t("photoTooLarge"));
-        return;
-      }
-      if (res.status === 415) {
-        alert(t("photoUnsupported"));
+      const photoErr = photoErrorMessage(res.status, {
+        rejected: t("photoRejected"),
+        tooLarge: t("photoTooLarge"),
+        unsupported: t("photoUnsupported"),
+      });
+      if (photoErr) {
+        alert(photoErr);
         return;
       }
       if (!res.ok) throw new Error();
       const data = await res.json();
       setPosts((prev) => [data.post, ...prev]);
       setBody("");
-      setPhoto(null);
+      clearPhoto();
     } catch {
       alert(t("submitError"));
     } finally {
@@ -480,7 +530,7 @@ export default function CommunityBoard() {
               />
               <button
                 type="button"
-                onClick={() => setPhoto(null)}
+                onClick={clearPhoto}
                 aria-label={t("photoRemove")}
                 className="absolute -right-2 -top-2 rounded-full bg-slate-900 p-1.5 text-slate-300 shadow-lg ring-1 ring-white/15 transition hover:text-white"
               >
@@ -494,7 +544,7 @@ export default function CommunityBoard() {
               {canAttach && (
                 <>
                   <input
-                    ref={fileInputRef}
+                    ref={photoInputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     onChange={pickPhoto}
@@ -502,7 +552,7 @@ export default function CommunityBoard() {
                   />
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => photoInputRef.current?.click()}
                     disabled={submitting}
                     className="flex items-center gap-1.5 rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/30 hover:text-white disabled:opacity-40"
                   >
@@ -553,6 +603,7 @@ export default function CommunityBoard() {
               key={post.id}
               post={post}
               me={me}
+              canAttach={canAttach}
               onDeleted={() =>
                 setPosts((prev) => prev.filter((p) => p.id !== post.id))
               }
