@@ -171,7 +171,32 @@ export async function getCourses(
 
     // 스팟 많은 순 → 이동거리 짧은 순
     courses.sort((a, b) => b.stops.length - a.stops.length || a.totalM - b.totalM);
-    return courses.slice(0, maxCourses);
+    const top = courses.slice(0, maxCourses);
+
+    // 노출되는 코스의 구간에만 실제 경로를 붙인다. AI 코스만 실제 경로가 나오면
+    // 같은 화면에서 위아래가 따로 노는 셈이라 추천 코스도 맞춘다.
+    // 결과는 spot_route에 캐시돼, 클러스터가 그대로인 한 재생성 때는 호출이 0이다.
+    try {
+      const pairs = top.flatMap((c) =>
+        c.stops.slice(0, -1).map((from, i) => ({ from, to: c.stops[i + 1] })),
+      );
+      const routes = await getRoutesForLegs(pairs);
+      for (const c of top) {
+        c.legs.forEach((leg, i) => {
+          const r = routes.get(`${c.stops[i].contentId}|${c.stops[i + 1].contentId}`);
+          leg.walk = r?.walk ?? null;
+          leg.transit = r?.transit ?? null;
+        });
+      }
+    } catch (err) {
+      // 경로는 부가 정보 — 실패해도 코스 목록은 그대로 보여준다
+      console.warn(
+        "[courses] 추천 코스 경로 조회 실패 — 직선으로 표시합니다:",
+        err instanceof Error ? err.message : err,
+      );
+    }
+
+    return top;
   } catch (err) {
     console.warn(
       "[courses] 코스 생성 실패 — 빈 목록으로 폴백합니다:",
