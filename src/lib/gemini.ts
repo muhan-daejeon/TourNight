@@ -339,7 +339,10 @@ export interface EtiquetteGuide {
   intro: string;
   dos: string[];
   donts: string[];
+  /** 기본 표현 — 처음 온 사람이 그대로 외워 쓰는 짧은 문장 */
   phrases: Phrase[];
+  /** 심화 표현 — 요청·양해를 구하는 한 단계 자연스러운 문장 */
+  phrasesAdvanced: Phrase[];
 }
 
 /** 구조화된 에티켓 가이드 생성 (Do/Don't + 상황 표현) */
@@ -362,11 +365,17 @@ export async function generateEtiquette(
     `You are a friendly local culture guide for foreign tourists enjoying nightlife in Daejeon, South Korea.`,
     `Topic: ${topic}`,
     `Write in ${language}. Return JSON:`,
-    `{"intro": string (1-2 sentence overview),`,
+    `{"intro": string (ONE sentence, under 25 words),`,
     ` "dos": string[] (exactly 4 short practical DO tips),`,
     ` "donts": string[] (exactly 2 short DON'T cautions),`,
-    ` "phrases": [{"korean","roman","meaning"} x4] (useful Korean phrases for this situation, meaning in ${language})}`,
-    `Keep each item under 20 words. Respond with ONLY the JSON.`,
+    ` "phrases": [{"korean","roman","meaning"} x4],`,
+    ` "phrasesAdvanced": [{"korean","roman","meaning"} x4]}`,
+    `- phrases: basic survival lines a first-time visitor can memorize (3-5 words each).`,
+    `- phrasesAdvanced: fuller sentences for making requests or asking permission in this`,
+    `  situation — polite and natural, what a repeat visitor would use. Not translations of`,
+    `  the basic ones; different situations.`,
+    `- meaning: in ${language}. Keep each item under 20 words.`,
+    `Respond with ONLY the JSON.`,
   ].join("\n");
 
   const res = await fetch(
@@ -376,7 +385,11 @@ export async function generateEtiquette(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
+        // 표현이 8개(기본+심화)로 늘어 기본 상한에서 응답이 잘리는 경우가 있다
+        generationConfig: {
+          responseMimeType: "application/json",
+          maxOutputTokens: 4096,
+        },
       }),
     },
   );
@@ -401,6 +414,9 @@ export async function generateEtiquette(
     donts: Array.isArray(parsed.donts) ? parsed.donts.map(String).slice(0, 2) : [],
     phrases: Array.isArray(parsed.phrases)
       ? parsed.phrases.slice(0, 4).map(toPhrase)
+      : [],
+    phrasesAdvanced: Array.isArray(parsed.phrasesAdvanced)
+      ? parsed.phrasesAdvanced.slice(0, 4).map(toPhrase)
       : [],
   };
 }

@@ -72,7 +72,10 @@ export async function GET(request: NextRequest) {
   if (cached.length > 0) {
     try {
       const guide: EtiquetteGuide = JSON.parse(cached[0].content);
-      return NextResponse.json({ ...guide, spots });
+      // phrasesAdvanced가 없는 캐시는 기본/심화 도입 전에 만들어진 것 → 재생성
+      if (Array.isArray(guide.phrasesAdvanced)) {
+        return NextResponse.json({ ...guide, spots });
+      }
     } catch {
       // 구형(줄글) 캐시면 아래에서 재생성
     }

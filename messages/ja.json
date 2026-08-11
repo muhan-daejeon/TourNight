@@ -107,6 +107,10 @@
     "dos": "こうしましょう",
     "donts": "避けましょう",
     "saySection": "こんな時はこう言おう",
+    "level": {
+      "basic": "基本",
+      "advanced": "応用"
+    },
     "relatedSpots": "関連ナイトスポット"
   },
   "community": {
@@ -147,6 +151,8 @@
       "source": "携帯通信データに基づく7日間予測 · %は最繁忙期(100)比の集中率"
     },
     "generating": "AIがこの場所のナイトガイドを作成中…",
+    "more": "もっと見る",
+    "less": "閉じる",
     "areaVisitors": {
       "line": "{gu}の1日平均域外訪問者 約{count}人",
       "basis": "（{month}基準・通信ビッグデータ）"
