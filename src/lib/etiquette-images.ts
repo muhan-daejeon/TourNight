@@ -3,7 +3,7 @@ import { sql } from "./db";
 /**
  * 에티켓 주제 카드의 대표 사진.
  * 명소 유형 주제는 실제 대전 스팟 사진을, 문화·실용 주제는 라이선스를 확인한
- * 외부 사진(public/etiquette)을 쓴다. 노래방은 쓸 만한 자유 이용 사진이 없어 비워 둔다.
+ * 외부 사진(public/etiquette)을 쓴다.
  */
 const TOPIC_SPOT_TITLE: Record<string, string> = {
   streets: "으능정이문화의거리",
@@ -18,6 +18,7 @@ const TOPIC_SPOT_TITLE: Record<string, string> = {
 const TOPIC_LOCAL_IMAGE: Record<string, string> = {
   pojangmacha: "/etiquette/pojangmacha.jpg",
   dining: "/etiquette/dining.jpg",
+  noraebang: "/etiquette/noraebang.jpg",
   convenience: "/etiquette/convenience.jpg",
   latefood: "/etiquette/latefood.jpg",
   safety: "/etiquette/safety.jpg",
