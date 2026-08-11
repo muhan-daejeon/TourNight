@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listPosts, createPost, BODY_MAX } from "@/lib/community";
 import { getSessionUser } from "@/lib/session";
-import { screenImage } from "@/lib/gemini";
-import {
-  ALLOWED_MEDIA,
-  MEDIA_MAX_BYTES,
-  deleteCommunityMedia,
-  isStorageConfigured,
-  uploadCommunityMedia,
-  type MediaKind,
-} from "@/lib/storage";
+import { prepareMedia, readCommunityInput } from "@/lib/community-media";
+import { deleteCommunityMedia, isStorageConfigured } from "@/lib/storage";
 
 /** 최신 커뮤니티 글 목록 (읽기는 로그인 불필요) */
 export async function GET() {
@@ -27,83 +20,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
   }
 
-  let body = "";
-  let file: File | null = null;
-
-  if (request.headers.get("content-type")?.includes("multipart/form-data")) {
-    let form: FormData;
-    try {
-      form = await request.formData();
-    } catch {
-      return NextResponse.json({ error: "invalid form" }, { status: 400 });
-    }
-    body = typeof form.get("body") === "string" ? String(form.get("body")) : "";
-    const attached = form.get("media");
-    if (attached instanceof File && attached.size > 0) file = attached;
-  } else {
-    let payload: { body?: unknown };
-    try {
-      payload = await request.json();
-    } catch {
-      return NextResponse.json({ error: "invalid json" }, { status: 400 });
-    }
-    body = typeof payload.body === "string" ? payload.body : "";
+  const input = await readCommunityInput(request);
+  if (!input) {
+    return NextResponse.json({ error: "invalid body" }, { status: 400 });
   }
-
-  if (!body.trim()) {
+  if (!input.body.trim()) {
     return NextResponse.json({ error: "body is required" }, { status: 400 });
   }
-  if (body.length > BODY_MAX * 2) {
+  if (input.body.length > BODY_MAX * 2) {
     return NextResponse.json({ error: "too long" }, { status: 400 });
   }
 
-  // 첨부 검증 → 심사 → 업로드
-  let media: { path: string; kind: MediaKind } | null = null;
-  if (file) {
-    if (!isStorageConfigured()) {
-      return NextResponse.json({ error: "attach_unavailable" }, { status: 503 });
-    }
-    const spec = ALLOWED_MEDIA[file.type];
-    if (!spec) {
-      return NextResponse.json({ error: "unsupported_type" }, { status: 415 });
-    }
-    if (file.size > spec.maxBytes || file.size > MEDIA_MAX_BYTES) {
-      return NextResponse.json({ error: "file_too_large" }, { status: 413 });
-    }
-
-    const bytes = await file.arrayBuffer();
-
-    // 부적절 이미지 자동 심사. 심사 자체가 실패하면 통과시킨다 —
-    // Gemini 장애로 글쓰기 전체가 막히는 편이 더 나쁘다.
-    try {
-      const verdict = await screenImage(bytes, file.type);
-      if (!verdict.allowed) {
-        console.warn(`[community] 첨부 거절: ${verdict.reason}`);
-        return NextResponse.json({ error: "media_rejected" }, { status: 422 });
-      }
-    } catch (err) {
-      console.warn(
-        "[community] 첨부 심사 실패 — 통과 처리:",
-        err instanceof Error ? err.message : err,
-      );
-    }
-
-    try {
-      media = await uploadCommunityMedia(bytes, file.type);
-    } catch (err) {
-      console.error(
-        "[community] 첨부 업로드 실패:",
-        err instanceof Error ? err.message : err,
-      );
-      return NextResponse.json({ error: "upload failed" }, { status: 502 });
-    }
+  const prepared = await prepareMedia(input.file);
+  if (!prepared.ok) {
+    return NextResponse.json({ error: prepared.error }, { status: prepared.status });
   }
+  const media = prepared.media;
 
   try {
     const post = await createPost({
       userId: session.userId,
       author: session.nickname,
-      body,
+      body: input.body,
       media,
     });
     if (!post) {

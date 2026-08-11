@@ -203,6 +203,11 @@ alter table community_posts add column if not exists user_id bigint references u
 -- 커뮤니티 첨부 사진 (Supabase Storage의 community 버킷).
 -- URL이 아니라 저장 경로를 둔다 — 글 삭제 시 그 경로로 스토리지 객체도 지워야 하고,
 -- 공개 URL은 조회할 때 SUPABASE_URL로 조립하면 되기 때문.
+-- 댓글 첨부도 글과 동일한 구조 (community 버킷, 경로 저장)
+alter table community_comments add column if not exists media_path text;
+alter table community_comments add column if not exists media_type text
+  check (media_type is null or media_type in ('image', 'video'));
+
 alter table community_posts add column if not exists media_path text;
 alter table community_posts add column if not exists media_type text
   check (media_type is null or media_type in ('image', 'video'));
