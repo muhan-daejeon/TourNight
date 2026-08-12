@@ -22,6 +22,39 @@ import { TransitLine } from "./TransitInfo";
 import type { AiCourse, Course } from "@/lib/courses";
 import { TAXI_NIGHT_SURCHARGE, pickBestMode } from "@/lib/transit-format";
 
+/**
+ * 마지막으로 만든 AI 코스를 브라우저에 남긴다.
+ * 새로고침하거나 다른 페이지를 다녀와도 계속 보이고, 새 코스를 짜면 교체된다.
+ *
+ * 키에 버전을 붙여, 코스 구조가 바뀌면 예전 데이터가 화면을 깨뜨리지 않고 무시된다.
+ */
+const AI_COURSE_KEY = "tournight:aiCourse:v1";
+
+function loadSavedCourse(locale: string): AiCourse | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(AI_COURSE_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as { locale?: string; course?: AiCourse };
+    // 언어를 바꾼 뒤에 예전 언어로 된 코스를 보여주면 어색하다
+    if (saved.locale !== locale) return null;
+    return saved.course?.stops?.length ? saved.course : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCourse(locale: string, course: AiCourse) {
+  try {
+    window.localStorage.setItem(
+      AI_COURSE_KEY,
+      JSON.stringify({ locale, course }),
+    );
+  } catch {
+    // 용량 초과·프라이빗 모드 — 저장만 실패하고 화면은 그대로 동작한다
+  }
+}
+
 function formatDistance(m: number) {
   return m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`;
 }
@@ -297,7 +330,10 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const fromContentId = searchParams.get("from");
   const fromCategory = searchParams.get("category");
 
-  const [aiCourse, setAiCourse] = useState<AiCourse | null>(null);
+  // 새로 짜러 온 게 아니면(?from= 없음) 지난번에 만든 코스를 되살린다
+  const [aiCourse, setAiCourse] = useState<AiCourse | null>(() =>
+    fromContentId ? null : loadSavedCourse(locale),
+  );
   const [aiState, setAiState] = useState<"idle" | "loading" | "error">(
     fromContentId ? "loading" : "idle",
   );
@@ -311,7 +347,9 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const [lastKey, setLastKey] = useState(reqKey);
   if (lastKey !== reqKey) {
     setLastKey(reqKey);
-    setAiCourse(null);
+    // 새로 짜러 왔으면 비우고 다시 받는다. 그냥 코스 페이지로 돌아온 경우라면
+    // 지난번 코스를 되살린다 (안 그러면 여기서 지워져 유지가 무의미해진다).
+    setAiCourse(fromContentId ? null : loadSavedCourse(locale));
     setAiState(fromContentId ? "loading" : "idle");
   }
 
@@ -326,6 +364,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
       .then((data: { course: AiCourse }) => {
         setAiCourse(data.course);
+        saveCourse(locale, data.course); // 새로 짠 코스로 교체 저장
         setAiState("idle");
         setSelId(data.course.id); // 방금 만든 코스를 바로 지도에 띄운다
         // 실제 경로가 있으면 직선 대신 그걸 먼저 보여준다.
