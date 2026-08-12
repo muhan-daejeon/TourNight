@@ -60,6 +60,7 @@
     "aiNote": "선택한 명소와 인근 야간 명소로 Gemini가 구성한 코스",
     "aiFallbackNote": "AI 응답을 받지 못해 가까운 명소 순서로 구성했어요",
     "presetHeading": "다른 추천 코스",
+    "modeBest": "추천",
     "modeStraight": "직선",
     "modeTransit": "대중교통",
     "modeWalk": "도보",
@@ -69,11 +70,12 @@
     "legTransit": "{min}분 · 환승 {transfer}회 · {fare}원",
     "totalMin": "{min}분",
     "totalWalk": "전체 도보 {min}분",
+    "totalBest": "전체 {min}분 · 약 {fare}원",
     "totalTaxi": "전체 {min}분 · 약 {fare}원",
     "taxiNight": "심야(23~04시) 20% 할증 시 약 {fare}원",
     "totalTransit": "전체 {min}분 · 환승 {transfer}회 · {fare}원",
     "legTooClose": "아주 가까움",
-    "legNoRoute": "경로 없음 · 택시 권장",
+    "legNoRoute": "이동 경로 정보 없음",
     "staysNear": "{name} 근처 숙소"
   },
   "etiquette": {

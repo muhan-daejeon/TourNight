@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { Course } from "@/lib/courses";
+import { pickBestMode } from "@/lib/transit-format";
 import type { RouteLeg } from "@/lib/routes";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -9,7 +10,7 @@ type KakaoNS = any;
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** 지도에 그릴 이동 수단 — walk/transit은 TMap 실제 경로, straight는 직선 폴백 */
-export type MapMode = "walk" | "transit" | "taxi" | "straight";
+export type MapMode = "best" | "walk" | "transit" | "taxi" | "straight";
 
 /** 탈것 종류별 색 (도보는 회색 점선으로 따로 처리) */
 const MODE_COLOR: Record<string, string> = {
@@ -75,12 +76,14 @@ export default function CourseMap({
       };
 
       course.legs.forEach((leg, i) => {
+        // 추천 모드는 구간마다 권하는 수단이 다르므로 그 수단의 경로를 그린다
+        const picked = mode === "best" ? pickBestMode(leg) : mode;
         const route =
-          mode === "walk"
+          picked === "walk"
             ? leg.walk
-            : mode === "transit"
+            : picked === "transit"
               ? leg.transit
-              : mode === "taxi"
+              : picked === "taxi"
                 ? leg.taxi
                 : null;
 

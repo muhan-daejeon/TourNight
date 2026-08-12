@@ -60,6 +60,7 @@
     "aiNote": "選んだスポットと周辺の夜スポットから Gemini が構成したコース",
     "aiFallbackNote": "AI の応答が得られず、近い順で構成しました",
     "presetHeading": "その他のおすすめコース",
+    "modeBest": "おすすめ",
     "modeStraight": "直線",
     "modeTransit": "公共交通",
     "modeWalk": "徒歩",
@@ -69,11 +70,12 @@
     "legTransit": "{min}分・乗換{transfer}回・{fare}ウォン",
     "totalMin": "{min}分",
     "totalWalk": "全行程 徒歩{min}分",
+    "totalBest": "全行程 {min}分・約{fare}ウォン",
     "totalTaxi": "全行程 {min}分・約{fare}ウォン",
     "taxiNight": "深夜(23〜4時)20%割増で約{fare}ウォン",
     "totalTransit": "全行程 {min}分・乗換{transfer}回・{fare}ウォン",
     "legTooClose": "すぐ近く",
-    "legNoRoute": "経路なし・タクシー推奨",
+    "legNoRoute": "経路情報なし",
     "staysNear": "{name}周辺の宿"
   },
   "etiquette": {

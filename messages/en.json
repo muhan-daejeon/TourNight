@@ -60,6 +60,7 @@
     "aiNote": "Planned by Gemini from your spot and nearby night spots",
     "aiFallbackNote": "AI was unavailable, so stops are ordered by distance",
     "presetHeading": "Other recommended courses",
+    "modeBest": "Best",
     "modeStraight": "Straight",
     "modeTransit": "Transit",
     "modeWalk": "Walk",
@@ -69,11 +70,12 @@
     "legTransit": "{min} min · {transfer} transfers · ₩{fare}",
     "totalMin": "{min} min",
     "totalWalk": "{min} min walking in total",
+    "totalBest": "{min} min total · approx. {fare} KRW",
     "totalTaxi": "{min} min total · approx. {fare} KRW",
     "taxiNight": "Approx. {fare} KRW with the 20% late-night surcharge (23:00–04:00)",
     "totalTransit": "{min} min total · {transfer} transfers · {fare} KRW",
     "legTooClose": "Very close",
-    "legNoRoute": "No route · take a taxi",
+    "legNoRoute": "No route information",
     "staysNear": "Stays near {name}"
   },
   "etiquette": {

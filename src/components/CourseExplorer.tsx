@@ -20,7 +20,7 @@ import {
 import CourseMap, { type MapMode } from "./CourseMap";
 import { TransitLine } from "./TransitInfo";
 import type { AiCourse, Course } from "@/lib/courses";
-import { TAXI_NIGHT_SURCHARGE } from "@/lib/transit-format";
+import { TAXI_NIGHT_SURCHARGE, pickBestMode } from "@/lib/transit-format";
 
 function formatDistance(m: number) {
   return m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`;
@@ -59,10 +59,12 @@ function StopChain({
 }
 
 /** 선택한 이동수단으로 코스 전체를 도는 데 드는 시간·요금 */
+/** 구간에서 이 수단의 경로 (추천 모드는 구간마다 권하는 수단이 다르다) */
 function routeOf(leg: Course["legs"][number], mode: MapMode) {
-  if (mode === "walk") return leg.walk;
-  if (mode === "transit") return leg.transit;
-  if (mode === "taxi") return leg.taxi;
+  const m = mode === "best" ? pickBestMode(leg) : mode;
+  if (m === "walk") return leg.walk;
+  if (m === "transit") return leg.transit;
+  if (m === "taxi") return leg.taxi;
   return null;
 }
 
@@ -83,6 +85,12 @@ function totalOf(course: Course, mode: MapMode) {
   return ok ? { min: Math.round(sec / 60), fare, transfer } : null;
 }
 
+const MODE_ICON = {
+  walk: Footprints,
+  transit: Bus,
+  taxi: CarTaxiFront,
+} as const;
+
 /**
  * 이동 정보 패널 — 이동수단을 고르고 구간별 소요를 확인한다.
  * 지도 옆 작은 목록으로는 눈에 띄지 않아 코스 카드 바로 아래로 옮겼다.
@@ -98,8 +106,10 @@ function RoutePanel({
   setMode: (m: MapMode) => void;
   t: ReturnType<typeof useTranslations>;
 }) {
-  // 직선은 사용자에게 의미가 없어 노출하지 않는다 (경로가 없을 때 지도만 직선으로 그림)
+  // 직선은 사용자에게 의미가 없어 노출하지 않는다 (경로가 없을 때 지도만 직선으로 그림).
+  // '추천'은 구간마다 가장 알맞은 수단을 섞어 안내한다.
   const modes = [
+    ["best", Sparkles, t("modeBest")],
     ["transit", Bus, t("modeTransit")],
     ["walk", Footprints, t("modeWalk")],
     ["taxi", CarTaxiFront, t("modeTaxi")],
@@ -143,7 +153,12 @@ function RoutePanel({
           return (
             <div className="mt-3">
               <p className="text-sm font-bold text-amber-300">
-                {mode === "walk"
+                {mode === "best"
+                  ? t("totalBest", {
+                      min: total.min,
+                      fare: total.fare.toLocaleString(),
+                    })
+                  : mode === "walk"
                   ? t("totalWalk", { min: total.min })
                   : mode === "taxi"
                     ? t("totalTaxi", {
@@ -173,26 +188,35 @@ function RoutePanel({
       {mode !== "straight" && (
         <ol className="mt-3 space-y-2.5">
           {course.legs.map((leg, i) => {
-            const r = routeOf(leg, mode);
+            // 실제로 안내할 수단 — 고른 수단에 경로가 없으면 걸어갈 수 있는지 먼저 본다
+            const picked =
+              mode === "best"
+                ? pickBestMode(leg)
+                : routeOf(leg, mode)?.status === "ok"
+                  ? (mode as "walk" | "transit" | "taxi")
+                  : pickBestMode(leg);
+            const r = picked === "walk" ? leg.walk : picked === "transit" ? leg.transit : picked === "taxi" ? leg.taxi : null;
+            const LegIcon = picked ? MODE_ICON[picked] : null;
+
             let detail: string;
             if (r?.status === "ok") {
               const min = Math.round((r.durationSec ?? 0) / 60);
               detail =
-                mode === "walk"
+                picked === "walk"
                   ? t("legWalk", { min })
-                  : mode === "taxi"
+                  : picked === "taxi"
                     ? t("legTaxi", { min, fare: (r.fare ?? 0).toLocaleString() })
                     : t("legTransit", {
-                      min,
-                      transfer: r.transferCount ?? 0,
-                      fare: r.fare ?? 0,
-                    });
+                        min,
+                        transfer: r.transferCount ?? 0,
+                        fare: r.fare ?? 0,
+                      });
             } else if (r?.status === "too_close") {
               detail = t("legTooClose");
             } else {
               detail = t("legNoRoute");
             }
-            const unavailable = r?.status !== "ok" && r?.status !== "too_close";
+            const unavailable = !r || (r.status !== "ok" && r.status !== "too_close");
             return (
               <li key={i} className="flex items-start gap-2.5">
                 <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-bold text-slate-300">
@@ -205,10 +229,13 @@ function RoutePanel({
                     {course.stops[i + 1].title}
                   </p>
                   <p
-                    className={`text-[13px] font-semibold ${
+                    className={`flex items-center gap-1.5 text-[13px] font-semibold ${
                       unavailable ? "text-rose-300" : "text-slate-100"
                     }`}
                   >
+                    {LegIcon && !unavailable && (
+                      <LegIcon size={13} className="shrink-0 text-amber-300" />
+                    )}
                     {detail}
                   </p>
                 </div>
@@ -245,7 +272,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   // 선택 코스 id — null이면 첫 번째 코스
   const [selId, setSelId] = useState<string | null>(null);
   // 지도에 그릴 이동수단 — 실제 경로가 붙은 AI 코스에서만 전환할 수 있다
-  const [mapMode, setMapMode] = useState<MapMode>("transit");
+  const [mapMode, setMapMode] = useState<MapMode>("best");
 
   // 클라이언트 이동으로 from·카테고리가 바뀌면 렌더 중에 초기화 (effect 안 setState 회피)
   const reqKey = `${fromContentId}|${fromCategory}`;
@@ -271,9 +298,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
         setSelId(data.course.id); // 방금 만든 코스를 바로 지도에 띄운다
         // 실제 경로가 있으면 직선 대신 그걸 먼저 보여준다.
         // 대중교통 우선 — 코스 구간은 대개 걸어가기엔 먼 거리다.
-        const legs = data.course.legs;
-        if (legs.some((l) => l.transit?.status === "ok")) setMapMode("transit");
-        else if (legs.some((l) => l.walk?.status === "ok")) setMapMode("walk");
+        setMapMode("best");
       })
       .catch((err) => {
         if (controller.signal.aborted) return;
