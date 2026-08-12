@@ -14,11 +14,13 @@ import {
   Loader2,
   Bus,
   Footprints,
+  CarTaxiFront,
   BedDouble,
 } from "lucide-react";
 import CourseMap, { type MapMode } from "./CourseMap";
 import { TransitLine } from "./TransitInfo";
 import type { AiCourse, Course } from "@/lib/courses";
+import { TAXI_NIGHT_SURCHARGE } from "@/lib/transit-format";
 
 function formatDistance(m: number) {
   return m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`;
@@ -57,6 +59,13 @@ function StopChain({
 }
 
 /** 선택한 이동수단으로 코스 전체를 도는 데 드는 시간·요금 */
+function routeOf(leg: Course["legs"][number], mode: MapMode) {
+  if (mode === "walk") return leg.walk;
+  if (mode === "transit") return leg.transit;
+  if (mode === "taxi") return leg.taxi;
+  return null;
+}
+
 function totalOf(course: Course, mode: MapMode) {
   if (mode === "straight") return null;
   let sec = 0;
@@ -64,7 +73,7 @@ function totalOf(course: Course, mode: MapMode) {
   let transfer = 0;
   let ok = false;
   for (const leg of course.legs) {
-    const r = mode === "walk" ? leg.walk : leg.transit;
+    const r = routeOf(leg, mode);
     if (r?.status !== "ok") continue;
     ok = true;
     sec += r.durationSec ?? 0;
@@ -89,10 +98,11 @@ function RoutePanel({
   setMode: (m: MapMode) => void;
   t: ReturnType<typeof useTranslations>;
 }) {
+  // 직선은 사용자에게 의미가 없어 노출하지 않는다 (경로가 없을 때 지도만 직선으로 그림)
   const modes = [
-    ["straight", Route, t("modeStraight")],
     ["transit", Bus, t("modeTransit")],
     ["walk", Footprints, t("modeWalk")],
+    ["taxi", CarTaxiFront, t("modeTaxi")],
   ] as const;
 
   return (
@@ -131,29 +141,48 @@ function RoutePanel({
           const total = totalOf(course, mode);
           if (!total) return null;
           return (
-            <p className="mt-3 text-sm font-bold text-amber-300">
-              {mode === "walk"
-                ? t("totalWalk", { min: total.min })
-                : t("totalTransit", {
-                    min: total.min,
-                    transfer: total.transfer,
-                    fare: total.fare,
+            <div className="mt-3">
+              <p className="text-sm font-bold text-amber-300">
+                {mode === "walk"
+                  ? t("totalWalk", { min: total.min })
+                  : mode === "taxi"
+                    ? t("totalTaxi", {
+                        min: total.min,
+                        fare: total.fare.toLocaleString(),
+                      })
+                    : t("totalTransit", {
+                        min: total.min,
+                        transfer: total.transfer,
+                        fare: total.fare,
+                      })}
+              </p>
+              {/* 야간 이동이 많은 서비스라 심야 할증을 함께 알려준다 */}
+              {mode === "taxi" && total.fare > 0 && (
+                <p className="mt-0.5 text-[12px] text-slate-400">
+                  {t("taxiNight", {
+                    fare: Math.round(
+                      total.fare * (1 + TAXI_NIGHT_SURCHARGE),
+                    ).toLocaleString(),
                   })}
-            </p>
+                </p>
+              )}
+            </div>
           );
         })()}
 
       {mode !== "straight" && (
         <ol className="mt-3 space-y-2.5">
           {course.legs.map((leg, i) => {
-            const r = mode === "walk" ? leg.walk : leg.transit;
+            const r = routeOf(leg, mode);
             let detail: string;
             if (r?.status === "ok") {
               const min = Math.round((r.durationSec ?? 0) / 60);
               detail =
                 mode === "walk"
                   ? t("legWalk", { min })
-                  : t("legTransit", {
+                  : mode === "taxi"
+                    ? t("legTaxi", { min, fare: (r.fare ?? 0).toLocaleString() })
+                    : t("legTransit", {
                       min,
                       transfer: r.transferCount ?? 0,
                       fare: r.fare ?? 0,
@@ -216,7 +245,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   // 선택 코스 id — null이면 첫 번째 코스
   const [selId, setSelId] = useState<string | null>(null);
   // 지도에 그릴 이동수단 — 실제 경로가 붙은 AI 코스에서만 전환할 수 있다
-  const [mapMode, setMapMode] = useState<MapMode>("straight");
+  const [mapMode, setMapMode] = useState<MapMode>("transit");
 
   // 클라이언트 이동으로 from·카테고리가 바뀌면 렌더 중에 초기화 (effect 안 setState 회피)
   const reqKey = `${fromContentId}|${fromCategory}`;

@@ -9,7 +9,7 @@ type KakaoNS = any;
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** 지도에 그릴 이동 수단 — walk/transit은 TMap 실제 경로, straight는 직선 폴백 */
-export type MapMode = "walk" | "transit" | "straight";
+export type MapMode = "walk" | "transit" | "taxi" | "straight";
 
 /** 탈것 종류별 색 (도보는 회색 점선으로 따로 처리) */
 const MODE_COLOR: Record<string, string> = {
@@ -75,7 +75,14 @@ export default function CourseMap({
       };
 
       course.legs.forEach((leg, i) => {
-        const route = mode === "walk" ? leg.walk : mode === "transit" ? leg.transit : null;
+        const route =
+          mode === "walk"
+            ? leg.walk
+            : mode === "transit"
+              ? leg.transit
+              : mode === "taxi"
+                ? leg.taxi
+                : null;
 
         // 실제 경로가 없으면(모드 straight, 미계산, 경로 없음) 직선으로 잇는다.
         // 실제 경로선과 헷갈리지 않게 흐리고 얇게 그린다 — 색·굵기가 같으면
