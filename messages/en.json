@@ -76,6 +76,7 @@
     "totalTransit": "{min} min total · {transfer} transfers · {fare} KRW",
     "legTooClose": "Very close",
     "legNoRoute": "No route information",
+    "legNoRouteMode": "No {mode} route",
     "staysNear": "Stays near {name}"
   },
   "etiquette": {

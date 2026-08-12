@@ -91,6 +91,14 @@ const MODE_ICON = {
   taxi: CarTaxiFront,
 } as const;
 
+/** 번역 키 접미사 (modeWalk / modeTransit / modeTaxi) */
+const MODE_KEY: Record<string, string> = {
+  walk: "Walk",
+  transit: "Transit",
+  taxi: "Taxi",
+  best: "Best",
+};
+
 /**
  * 이동 정보 패널 — 이동수단을 고르고 구간별 소요를 확인한다.
  * 지도 옆 작은 목록으로는 눈에 띄지 않아 코스 카드 바로 아래로 옮겼다.
@@ -188,14 +196,20 @@ function RoutePanel({
       {mode !== "straight" && (
         <ol className="mt-3 space-y-2.5">
           {course.legs.map((leg, i) => {
-            // 실제로 안내할 수단 — 고른 수단에 경로가 없으면 걸어갈 수 있는지 먼저 본다
+            // 수단을 직접 고른 경우엔 그 수단만 보여준다 (섞으면 무엇을 보는지 헷갈린다).
+            // 추천 모드에서만 구간마다 알맞은 수단을 고른다.
             const picked =
               mode === "best"
                 ? pickBestMode(leg)
-                : routeOf(leg, mode)?.status === "ok"
-                  ? (mode as "walk" | "transit" | "taxi")
-                  : pickBestMode(leg);
-            const r = picked === "walk" ? leg.walk : picked === "transit" ? leg.transit : picked === "taxi" ? leg.taxi : null;
+                : (mode as "walk" | "transit" | "taxi");
+            const r =
+              picked === "walk"
+                ? leg.walk
+                : picked === "transit"
+                  ? leg.transit
+                  : picked === "taxi"
+                    ? leg.taxi
+                    : null;
             const LegIcon = picked ? MODE_ICON[picked] : null;
 
             let detail: string;
@@ -213,9 +227,21 @@ function RoutePanel({
                       });
             } else if (r?.status === "too_close") {
               detail = t("legTooClose");
-            } else {
+            } else if (mode === "best") {
               detail = t("legNoRoute");
+            } else {
+              // 어떤 수단이 없는지 밝힌다 ("대중교통 경로 없음")
+              detail = t("legNoRouteMode", { mode: t(`mode${MODE_KEY[mode]}`) });
             }
+            // 그 수단이 없어도 걸어서 갈 만하면 알려준다 (가까운 구간에 헛걸음 방지)
+            const walkMin = Math.round((leg.walk?.durationSec ?? 0) / 60);
+            const walkHint =
+              picked !== "walk" &&
+              r?.status !== "ok" &&
+              leg.walk?.status === "ok" &&
+              walkMin <= 20
+                ? t("legWalk", { min: walkMin })
+                : null;
             const unavailable = !r || (r.status !== "ok" && r.status !== "too_close");
             return (
               <li key={i} className="flex items-start gap-2.5">
@@ -237,6 +263,12 @@ function RoutePanel({
                       <LegIcon size={13} className="shrink-0 text-amber-300" />
                     )}
                     {detail}
+                    {walkHint && (
+                      <span className="flex items-center gap-1 text-[12px] font-medium text-slate-400">
+                        <Footprints size={11} />
+                        {walkHint}
+                      </span>
+                    )}
                   </p>
                 </div>
               </li>

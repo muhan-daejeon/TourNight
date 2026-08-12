@@ -76,6 +76,7 @@
     "totalTransit": "全行程 {min}分・乗換{transfer}回・{fare}ウォン",
     "legTooClose": "すぐ近く",
     "legNoRoute": "経路情報なし",
+    "legNoRouteMode": "{mode}の経路なし",
     "staysNear": "{name}周辺の宿"
   },
   "etiquette": {

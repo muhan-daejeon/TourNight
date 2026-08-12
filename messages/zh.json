@@ -76,6 +76,7 @@
     "totalTransit": "全程 {min} 分钟 · 换乘{transfer}次 · {fare} 韩元",
     "legTooClose": "非常近",
     "legNoRoute": "暂无路线信息",
+    "legNoRouteMode": "无{mode}路线",
     "staysNear": "{name}附近住宿"
   },
   "etiquette": {
