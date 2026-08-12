@@ -12,6 +12,9 @@ import { sql } from "./db";
 
 // 도보는 TMap 보행자 경로 (무료 한도 넉넉).
 const PED = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1";
+// 택시는 TMap 자동차 경로 — 응답의 taxiFare가 주간 기준 예상 요금이다.
+const CAR = "https://apis.openapi.sk.com/tmap/routes?version=1";
+
 // 대중교통은 ODsay. TMap 대중교통은 무료 한도가 하루 10회뿐이라 코스 3~4번이면
 // 소진돼 온디맨드로 못 쓴다 (실측). ODsay는 1,000회/일이고 IP 제한도 없다.
 const TRANSIT = "https://api.odsay.com/v1/api/searchPubTransPathT";
@@ -29,7 +32,7 @@ const ODSAY_REFERER =
 /** 도보를 기본으로 권할 최대 거리 — 이보다 멀면 걷기가 비현실적이라 대중교통을 앞세운다 */
 export const WALKABLE_MAX_M = 1500;
 
-export type RouteMode = "walk" | "transit";
+export type RouteMode = "walk" | "transit" | "taxi";
 /** ok = 경로 있음, too_close = 너무 가까워 대중교통 불필요, no_route = 이동 경로 없음 */
 export type RouteStatus = "ok" | "too_close" | "no_route";
 
@@ -52,6 +55,13 @@ export interface SpotRoute {
   transferCount: number | null;
   fare: number | null;
   legs: RouteLeg[];
+}
+
+/** 한 구간에서 고를 수 있는 이동수단들 */
+export interface RouteSet {
+  walk: SpotRoute | null;
+  transit: SpotRoute | null;
+  taxi: SpotRoute | null;
 }
 
 interface Row {
@@ -113,6 +123,11 @@ interface Point {
   mapY: number;
 }
 
+/** 좌표가 사실상 같은 지점인지 (약 20m 이내) */
+function samePlace(a: Point, b: Point): boolean {
+  return Math.abs(a.mapX - b.mapX) < 0.0002 && Math.abs(a.mapY - b.mapY) < 0.0002;
+}
+
 async function fetchWalk(a: Point, b: Point): Promise<SpotRoute> {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const j: any = await tmap(PED, {
@@ -144,6 +159,48 @@ async function fetchWalk(a: Point, b: Point): Promise<SpotRoute> {
     legs: [
       {
         mode: "WALK",
+        route: null,
+        durationSec: props.totalTime ?? null,
+        distanceM: props.totalDistance ?? null,
+        path,
+      },
+    ],
+  };
+}
+
+/** 택시 — TMap 자동차 경로. 요금(taxiFare)은 주간 기준이라 화면에서 심야 할증을 더한다 */
+async function fetchTaxi(a: Point, b: Point): Promise<SpotRoute> {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const j: any = await tmap(CAR, {
+    startX: a.mapX, startY: a.mapY, endX: b.mapX, endY: b.mapY,
+    reqCoordType: "WGS84GEO", resCoordType: "WGS84GEO",
+    searchOption: "0", // 교통최적 + 추천
+    trafficInfo: "N",
+  });
+  const features = j?.features;
+  const empty: SpotRoute = {
+    mode: "taxi", status: "no_route", durationSec: null, distanceM: null,
+    transferCount: null, fare: null, legs: [],
+  };
+  if (!features?.length) return empty;
+
+  const props = features[0].properties;
+  const path: [number, number][] = features
+    .filter((f: any) => f.geometry?.type === "LineString")
+    .flatMap((f: any) => f.geometry.coordinates);
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+  if (!path.length) return empty;
+
+  return {
+    mode: "taxi",
+    status: "ok",
+    durationSec: props.totalTime ?? null,
+    distanceM: props.totalDistance ?? null,
+    transferCount: null,
+    fare: props.taxiFare ?? null,
+    legs: [
+      {
+        mode: "TAXI",
         route: null,
         durationSec: props.totalTime ?? null,
         distanceM: props.totalDistance ?? null,
@@ -260,10 +317,15 @@ async function cache(from: string, to: string, r: SpotRoute): Promise<void> {
  */
 export async function getRoutesForLegs(
   legs: { from: Point; to: Point }[],
-): Promise<Map<string, { walk: SpotRoute | null; transit: SpotRoute | null }>> {
-  const out = new Map<string, { walk: SpotRoute | null; transit: SpotRoute | null }>();
+): Promise<Map<string, RouteSet>> {
+  const out = new Map<string, RouteSet>();
   if (!legs.length) return out;
-  for (const l of legs) out.set(`${l.from.contentId}|${l.to.contentId}`, { walk: null, transit: null });
+  for (const l of legs)
+    out.set(`${l.from.contentId}|${l.to.contentId}`, {
+      walk: null,
+      transit: null,
+      taxi: null,
+    });
 
   // 1) 캐시 조회
   try {
@@ -292,9 +354,22 @@ export async function getRoutesForLegs(
   // 구간 2~3개 × 2모드 = 4~6번뿐이라 순차여도 몇 초면 끝난다.
   const todo = legs.flatMap((l) => {
     const entry = out.get(`${l.from.contentId}|${l.to.contentId}`)!;
+    // 같은 장소에서 열리는 축제처럼 좌표가 겹치면 경로를 물어봐야 소용없다.
+    // (TMap은 출발=도착이면 좌표계 오류를 돌려준다)
+    if (samePlace(l.from, l.to)) {
+      for (const m of ["walk", "transit", "taxi"] as const) {
+        entry[m] ??= {
+          mode: m, status: "too_close",
+          durationSec: null, distanceM: null,
+          transferCount: null, fare: null, legs: [],
+        };
+      }
+      return [];
+    }
     const modes: RouteMode[] = [];
     if (!entry.walk) modes.push("walk");
     if (!entry.transit) modes.push("transit");
+    if (!entry.taxi) modes.push("taxi");
     return modes.map((mode) => ({ leg: l, mode, entry }));
   });
 
@@ -304,7 +379,9 @@ export async function getRoutesForLegs(
       const r =
         job.mode === "walk"
           ? await fetchWalk(job.leg.from, job.leg.to)
-          : await fetchTransit(job.leg.from, job.leg.to);
+          : job.mode === "taxi"
+            ? await fetchTaxi(job.leg.from, job.leg.to)
+            : await fetchTransit(job.leg.from, job.leg.to);
       job.entry[job.mode] = r;
       await cache(job.leg.from.contentId, job.leg.to.contentId, r);
     } catch (err) {

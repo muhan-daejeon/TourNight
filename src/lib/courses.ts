@@ -20,6 +20,8 @@ export interface CourseLeg {
   together: boolean; // KTO 차량 이동 데이터로 함께 방문되는 연결
   /** 실제 도보 경로 (TMap). 키 미설정·호출 실패 시 null */
   walk?: SpotRoute | null;
+  /** 택시(TMap 자동차) — 소요시간과 예상 요금 */
+  taxi?: SpotRoute | null;
   /** 실제 대중교통 경로 (TMap) */
   transit?: SpotRoute | null;
 }
@@ -186,6 +188,7 @@ export async function getCourses(
           const r = routes.get(`${c.stops[i].contentId}|${c.stops[i + 1].contentId}`);
           leg.walk = r?.walk ?? null;
           leg.transit = r?.transit ?? null;
+          leg.taxi = r?.taxi ?? null;
         });
       }
     } catch (err) {
@@ -243,6 +246,7 @@ async function toCourse(
       together: isTogether(stops[i].contentId, stops[i + 1].contentId),
       walk: r?.walk ?? null,
       transit: r?.transit ?? null,
+      taxi: r?.taxi ?? null,
     });
   }
   return { stops, legs, totalM };

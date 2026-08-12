@@ -185,7 +185,7 @@ create table if not exists spot_transit (
 create table if not exists spot_route (
   from_content_id text not null,
   to_content_id text not null,
-  mode text not null check (mode in ('walk', 'transit')),
+  mode text not null check (mode in ('walk', 'transit', 'taxi')),
   status text not null check (status in ('ok', 'too_close', 'no_route')),
   duration_sec int,      -- 총 소요 시간
   distance_m int,        -- 총 이동 거리
@@ -195,6 +195,12 @@ create table if not exists spot_route (
   updated_at timestamptz not null default now(),
   primary key (from_content_id, to_content_id, mode)
 );
+
+-- 택시(TMap 자동차 경로)를 추가하면서 mode 목록을 넓힌다. 이미 만들어진 테이블은
+-- create table로 갱신되지 않으므로 제약을 다시 건다.
+alter table spot_route drop constraint if exists spot_route_mode_check;
+alter table spot_route add constraint spot_route_mode_check
+  check (mode in ('walk', 'transit', 'taxi'));
 
 -- 커뮤니티 글/댓글 작성자 계정 연결 (본인 글 삭제 판별용) — users 정의 후에 추가.
 -- 계정 삭제 시 글은 남기되 소유만 해제(set null). 기존 글은 null(삭제 버튼 없음).
