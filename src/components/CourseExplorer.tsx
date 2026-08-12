@@ -347,7 +347,12 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   }
 
   const all: Course[] = aiCourse ? [aiCourse, ...courses] : courses;
-  const course = all.find((c) => c.id === selId) ?? all[0];
+  // 선택 없음(null)을 허용한다. 예전에는 ?? all[0]로 항상 하나가 켜져 있어서
+  // 코스를 고르지 않은 상태를 만들 수 없었다.
+  const course = all.find((c) => c.id === selId) ?? null;
+  /** 같은 카드를 다시 누르면 선택 해제 */
+  const toggleCourse = (id: string) =>
+    setSelId((prev) => (prev === id ? null : id));
   const start = course?.stops[0];
   const kakaoStart = start
     ? `https://map.kakao.com/link/to/${encodeURIComponent(start.title)},${start.mapY},${start.mapX}`
@@ -385,7 +390,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
         {aiCourse && (
           <button
             type="button"
-            onClick={() => setSelId(aiCourse.id)}
+            onClick={() => toggleCourse(aiCourse.id)}
             className={cardClass(course?.id === aiCourse.id)}
           >
             <div className="flex items-center justify-between gap-2">
@@ -541,7 +546,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
           <div key={c.id}>
           <button
             type="button"
-            onClick={() => setSelId(c.id)}
+            onClick={() => toggleCourse(c.id)}
             className={cardClass(course?.id === c.id)}
           >
             <div className="flex items-center justify-between gap-2">
@@ -583,6 +588,18 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
           {t("dataNote")}
         </p>
       </div>
+
+      {/* 선택이 없으면 지도 자리를 비워두지 않고 안내를 둔다 (레이아웃 유지) */}
+      {!course && (
+        <div className="lg:sticky lg:top-20 lg:self-start">
+          <div className="flex h-80 items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 text-center lg:h-[500px]">
+            <p className="flex flex-col items-center gap-2 text-sm text-slate-500">
+              <MapPin size={22} strokeWidth={1.5} className="text-slate-600" />
+              {t("selectHint")}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 지도 + 이동수단 전환 + 길찾기 */}
       {course && (

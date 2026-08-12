@@ -77,7 +77,8 @@
     "legTooClose": "非常近",
     "legNoRoute": "暂无路线信息",
     "legNoRouteMode": "无{mode}路线",
-    "staysNear": "{name}附近住宿"
+    "staysNear": "{name}附近住宿",
+    "selectHint": "选择路线后将在地图上显示"
   },
   "etiquette": {
     "title": "夜间礼仪",
