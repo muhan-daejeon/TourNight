@@ -334,7 +334,9 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const [aiCourse, setAiCourse] = useState<AiCourse | null>(() =>
     fromContentId ? null : loadSavedCourse(locale),
   );
-  const [aiState, setAiState] = useState<"idle" | "loading" | "error">(
+  const [aiState, setAiState] = useState<
+    "idle" | "loading" | "error" | "limit"
+  >(
     fromContentId ? "loading" : "idle",
   );
   // 선택 코스 id — null이면 첫 번째 코스
@@ -374,7 +376,8 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
       .catch((err) => {
         if (controller.signal.aborted) return;
         console.warn("[courses] AI 코스 요청 실패:", err);
-        setAiState("error");
+        // 429는 하루 생성 한도 — 실패가 아니라 안내가 필요한 상태다
+        setAiState(err === 429 ? "limit" : "error");
       });
     return () => controller.abort();
   }, [fromContentId, fromCategory, locale]);
@@ -418,6 +421,12 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             <Loader2 size={15} className="animate-spin" />
             {t("aiLoading")}
           </div>
+        )}
+
+        {aiState === "limit" && (
+          <p className="rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] p-4 text-sm text-amber-200/90">
+            {t("aiDailyLimit")}
+          </p>
         )}
 
         {aiState === "error" && (

@@ -78,7 +78,8 @@
     "legNoRoute": "이동 경로 정보 없음",
     "legNoRouteMode": "{mode} 경로 없음",
     "staysNear": "{name} 근처 숙소",
-    "selectHint": "코스를 선택하면 지도에 경로가 표시돼요"
+    "selectHint": "코스를 선택하면 지도에 경로가 표시돼요",
+    "aiDailyLimit": "오늘의 코스 짜기 횟수를 모두 사용했어요. 내일 다시 시도해주세요."
   },
   "etiquette": {
     "title": "나이트 에티켓",

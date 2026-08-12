@@ -78,7 +78,8 @@
     "legNoRoute": "No route information",
     "legNoRouteMode": "No {mode} route",
     "staysNear": "Stays near {name}",
-    "selectHint": "Pick a course to see its route on the map"
+    "selectHint": "Pick a course to see its route on the map",
+    "aiDailyLimit": "You have used all of today's course generations. Please try again tomorrow."
   },
   "etiquette": {
     "title": "Night Etiquette",

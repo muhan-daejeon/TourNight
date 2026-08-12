@@ -78,7 +78,8 @@
     "legNoRoute": "経路情報なし",
     "legNoRouteMode": "{mode}の経路なし",
     "staysNear": "{name}周辺の宿",
-    "selectHint": "コースを選ぶと地図に経路が表示されます"
+    "selectHint": "コースを選ぶと地図に経路が表示されます",
+    "aiDailyLimit": "本日のコース作成回数を使い切りました。明日またお試しください。"
   },
   "etiquette": {
     "title": "ナイトエチケット",
