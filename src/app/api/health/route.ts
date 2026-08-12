@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { getSessionUser } from "@/lib/session";
 
 /**
  * 외부 의존성 상태 점검.
@@ -9,9 +8,12 @@ import { getSessionUser } from "@/lib/session";
  * 경로 API가 막히면 직선으로 그린다. 사용자 경험은 안 깨지지만 그만큼 고장을
  * 알아채기 어렵다. 배포 후 이 엔드포인트 하나만 열면 무엇이 죽었는지 바로 보인다.
  *
- * 접근 제한: HEALTH_TOKEN이 설정돼 있으면 ?token= 으로만, 없으면 로그인 필요.
- * 점검이 외부 API를 실제로 호출하므로 아무나 반복 호출하면 무료 한도를 태운다.
- * 같은 이유로 결과를 짧게 캐시해 연타를 막는다.
+ * 접근 제한: 운영에서는 HEALTH_TOKEN이 있어야만 열린다. 로그인만으로 열어두면
+ * 일반 사용자에게 어떤 API가 죽었는지·버킷 구성 같은 내부 사정이 드러난다.
+ * 토큰이 없거나 틀리면 403이 아니라 404를 준다 — 엔드포인트 존재 자체를 숨긴다.
+ * 로컬 개발에서는 편의상 토큰 없이 열어둔다.
+ *
+ * 점검이 외부 API를 실제로 호출하므로 결과를 짧게 캐시해 연타를 막는다.
  */
 
 const CACHE_MS = 60_000;
@@ -153,12 +155,12 @@ async function checkKto(op: "areaBasedList2" | "locationBasedList2"): Promise<Ch
 
 export async function GET(request: NextRequest) {
   const token = process.env.HEALTH_TOKEN;
-  if (token) {
-    if (request.nextUrl.searchParams.get("token") !== token) {
-      return NextResponse.json({ error: "forbidden" }, { status: 403 });
-    }
-  } else if (!(await getSessionUser())) {
-    return NextResponse.json({ error: "login_required" }, { status: 401 });
+  const notFound = () => NextResponse.json({ error: "not found" }, { status: 404 });
+
+  if (process.env.NODE_ENV === "production") {
+    // 토큰 미설정이면 엔드포인트 자체를 닫는다 (실수로 공개되는 쪽보다 안 열리는 쪽이 낫다)
+    if (!token) return notFound();
+    if (request.nextUrl.searchParams.get("token") !== token) return notFound();
   }
 
   if (cached && Date.now() - cached.at < CACHE_MS) {
