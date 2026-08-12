@@ -8,16 +8,28 @@ import { sql } from "@/lib/db";
  * 경로 API가 막히면 직선으로 그린다. 사용자 경험은 안 깨지지만 그만큼 고장을
  * 알아채기 어렵다. 배포 후 이 엔드포인트 하나만 열면 무엇이 죽었는지 바로 보인다.
  *
+ * 두 단계로 나뉜다.
+ * - 기본: DB 연결과 환경변수 설정 여부만 본다. 외부 API를 부르지 않으므로
+ *   자주 찔러도 무료 한도를 축내지 않는다. 모니터링은 이걸 쓰면 된다.
+ * - ?deep=1: 외부 API를 실제로 호출해 키·권한까지 확인한다. 배포 직후나
+ *   무언가 안 될 때만 손으로 부른다.
+ *
+ * 기본을 얕게 둔 이유: 매번 외부를 부르면 토큰이 유출됐을 때 1분마다 호출만으로도
+ * ODsay 하루 1,000회 한도를 넘길 수 있다. 유출 시 피해를 정보 노출 수준으로 묶는다.
+ *
  * 접근 제한: 운영에서는 HEALTH_TOKEN이 있어야만 열린다. 로그인만으로 열어두면
  * 일반 사용자에게 어떤 API가 죽었는지·버킷 구성 같은 내부 사정이 드러난다.
  * 토큰이 없거나 틀리면 403이 아니라 404를 준다 — 엔드포인트 존재 자체를 숨긴다.
+ * 토큰은 쿼리(?token=)와 헤더(x-health-token) 둘 다 받는다. 쿼리는 서버 로그·
+ * 브라우저 기록에 남으므로 모니터링에는 헤더 쪽을 권한다.
  * 로컬 개발에서는 편의상 토큰 없이 열어둔다.
- *
- * 점검이 외부 API를 실제로 호출하므로 결과를 짧게 캐시해 연타를 막는다.
  */
 
-const CACHE_MS = 60_000;
-let cached: { at: number; body: unknown; ok: boolean } | null = null;
+const CACHE_MS = { shallow: 30_000, deep: 300_000 };
+const cached: Record<"shallow" | "deep", { at: number; body: unknown; ok: boolean } | null> = {
+  shallow: null,
+  deep: null,
+};
 
 type Check = { ok: boolean; detail: string };
 
@@ -153,6 +165,11 @@ async function checkKto(op: "areaBasedList2" | "locationBasedList2"): Promise<Ch
   }
 }
 
+/** 환경변수가 있는지만 본다 (외부 호출 없음) */
+function checkEnv(name: string): Check {
+  return process.env[name] ? ok("설정됨") : missing(name);
+}
+
 export async function GET(request: NextRequest) {
   const token = process.env.HEALTH_TOKEN;
   const notFound = () => NextResponse.json({ error: "not found" }, { status: 404 });
@@ -160,42 +177,58 @@ export async function GET(request: NextRequest) {
   if (process.env.NODE_ENV === "production") {
     // 토큰 미설정이면 엔드포인트 자체를 닫는다 (실수로 공개되는 쪽보다 안 열리는 쪽이 낫다)
     if (!token) return notFound();
-    if (request.nextUrl.searchParams.get("token") !== token) return notFound();
+    const given =
+      request.nextUrl.searchParams.get("token") ??
+      request.headers.get("x-health-token");
+    if (given !== token) return notFound();
   }
 
-  if (cached && Date.now() - cached.at < CACHE_MS) {
-    return NextResponse.json(cached.body, { status: cached.ok ? 200 : 503 });
+  const deep = request.nextUrl.searchParams.get("deep") === "1";
+  const slot = deep ? "deep" : "shallow";
+  const hit = cached[slot];
+  if (hit && Date.now() - hit.at < CACHE_MS[slot]) {
+    return NextResponse.json(hit.body, { status: hit.ok ? 200 : 503 });
   }
 
-  const [db, storage, gemini, tmap, odsay, ktoArea, ktoLocation] =
-    await Promise.all([
-      checkDb(),
-      checkStorage(),
-      checkGemini(),
-      checkTmap(),
-      checkOdsay(),
-      checkKto("areaBasedList2"),
-      checkKto("locationBasedList2"),
-    ]);
-
-  const checks = {
-    db,
-    storage,
-    gemini,
-    tmap,
-    odsay,
-    "kto.areaBasedList2": ktoArea,
-    "kto.locationBasedList2": ktoLocation,
-  };
+  const checks: Record<string, Check> = deep
+    ? await (async () => {
+        const [db, storage, gemini, tmap, odsay, ktoArea, ktoLocation] =
+          await Promise.all([
+            checkDb(),
+            checkStorage(),
+            checkGemini(),
+            checkTmap(),
+            checkOdsay(),
+            checkKto("areaBasedList2"),
+            checkKto("locationBasedList2"),
+          ]);
+        return {
+          db, storage, gemini, tmap, odsay,
+          "kto.areaBasedList2": ktoArea,
+          "kto.locationBasedList2": ktoLocation,
+        };
+      })()
+    : {
+        db: await checkDb(),
+        // 키 유효성까지는 ?deep=1에서 본다 — 여기서는 설정 여부만
+        SUPABASE_URL: checkEnv("SUPABASE_URL"),
+        SUPABASE_SERVICE_ROLE_KEY: checkEnv("SUPABASE_SERVICE_ROLE_KEY"),
+        GEMINI_API_KEY: checkEnv("GEMINI_API_KEY"),
+        TMAP_API_KEY: checkEnv("TMAP_API_KEY"),
+        ODSAY_API_KEY: checkEnv("ODSAY_API_KEY"),
+        KTO_API_KEY: checkEnv("KTO_API_KEY"),
+      };
   const allOk = Object.values(checks).every((c) => c.ok);
   const body = {
     ok: allOk,
+    mode: deep ? "deep" : "shallow",
     checkedAt: new Date().toISOString(),
     checks: Object.fromEntries(
       Object.entries(checks).map(([k, v]) => [k, v.ok ? v.detail : `FAIL: ${v.detail}`]),
     ),
+    ...(deep ? {} : { hint: "외부 API까지 확인하려면 ?deep=1" }),
   };
 
-  cached = { at: Date.now(), body, ok: allOk };
+  cached[slot] = { at: Date.now(), body, ok: allOk };
   return NextResponse.json(body, { status: allOk ? 200 : 503 });
 }
