@@ -202,6 +202,16 @@ alter table spot_route drop constraint if exists spot_route_mode_check;
 alter table spot_route add constraint spot_route_mode_check
   check (mode in ('walk', 'transit', 'taxi'));
 
+-- AI 코스 생성 사용량 (계정·날짜별). 캐시 적중은 세지 않고 실제 생성만 기록한다.
+-- 코스 한 번에 Gemini + TMap + ODsay + KTO를 모두 호출하므로, 계정 하나가
+-- 조합을 바꿔가며 돌리면 외부 API 무료 한도가 하루치씩 소진된다.
+create table if not exists ai_course_usage (
+  user_id bigint not null references users(id) on delete cascade,
+  used_on date not null,
+  count int not null default 0,
+  primary key (user_id, used_on)
+);
+
 -- 커뮤니티 글/댓글 작성자 계정 연결 (본인 글 삭제 판별용) — users 정의 후에 추가.
 -- 계정 삭제 시 글은 남기되 소유만 해제(set null). 기존 글은 null(삭제 버튼 없음).
 alter table community_posts add column if not exists user_id bigint references users(id) on delete set null;
