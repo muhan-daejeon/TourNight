@@ -56,6 +56,142 @@ function StopChain({
   );
 }
 
+/** 선택한 이동수단으로 코스 전체를 도는 데 드는 시간·요금 */
+function totalOf(course: Course, mode: MapMode) {
+  if (mode === "straight") return null;
+  let sec = 0;
+  let fare = 0;
+  let transfer = 0;
+  let ok = false;
+  for (const leg of course.legs) {
+    const r = mode === "walk" ? leg.walk : leg.transit;
+    if (r?.status !== "ok") continue;
+    ok = true;
+    sec += r.durationSec ?? 0;
+    fare += r.fare ?? 0;
+    transfer += r.transferCount ?? 0;
+  }
+  return ok ? { min: Math.round(sec / 60), fare, transfer } : null;
+}
+
+/**
+ * 이동 정보 패널 — 이동수단을 고르고 구간별 소요를 확인한다.
+ * 지도 옆 작은 목록으로는 눈에 띄지 않아 코스 카드 바로 아래로 옮겼다.
+ */
+function RoutePanel({
+  course,
+  mode,
+  setMode,
+  t,
+}: {
+  course: Course;
+  mode: MapMode;
+  setMode: (m: MapMode) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const modes = [
+    ["straight", Route, t("modeStraight")],
+    ["transit", Bus, t("modeTransit")],
+    ["walk", Footprints, t("modeWalk")],
+  ] as const;
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex flex-wrap gap-1.5">
+        {modes.map(([m, Icon, label]) => {
+          const total = totalOf(course, m);
+          return (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold transition ${
+                mode === m
+                  ? "border-amber-400 bg-amber-400 text-slate-950"
+                  : "border-white/10 bg-white/5 text-slate-300 hover:border-white/25 hover:text-white"
+              }`}
+            >
+              <Icon size={14} />
+              {label}
+              {/* 고르기 전에도 얼마나 걸리는지 보이게 총 시간을 칩에 함께 표시 */}
+              {total && (
+                <span
+                  className={mode === m ? "text-slate-900/70" : "text-slate-500"}
+                >
+                  {t("totalMin", { min: total.min })}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {mode !== "straight" &&
+        (() => {
+          const total = totalOf(course, mode);
+          if (!total) return null;
+          return (
+            <p className="mt-3 text-sm font-bold text-amber-300">
+              {mode === "walk"
+                ? t("totalWalk", { min: total.min })
+                : t("totalTransit", {
+                    min: total.min,
+                    transfer: total.transfer,
+                    fare: total.fare,
+                  })}
+            </p>
+          );
+        })()}
+
+      {mode !== "straight" && (
+        <ol className="mt-3 space-y-2.5">
+          {course.legs.map((leg, i) => {
+            const r = mode === "walk" ? leg.walk : leg.transit;
+            let detail: string;
+            if (r?.status === "ok") {
+              const min = Math.round((r.durationSec ?? 0) / 60);
+              detail =
+                mode === "walk"
+                  ? t("legWalk", { min })
+                  : t("legTransit", {
+                      min,
+                      transfer: r.transferCount ?? 0,
+                      fare: r.fare ?? 0,
+                    });
+            } else if (r?.status === "too_close") {
+              detail = t("legTooClose");
+            } else {
+              detail = t("legNoRoute");
+            }
+            const unavailable = r?.status !== "ok" && r?.status !== "too_close";
+            return (
+              <li key={i} className="flex items-start gap-2.5">
+                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-bold text-slate-300">
+                  {i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] text-slate-300">
+                    {course.stops[i].title}
+                    <span className="mx-1 text-slate-600">→</span>
+                    {course.stops[i + 1].title}
+                  </p>
+                  <p
+                    className={`text-[13px] font-semibold ${
+                      unavailable ? "text-rose-300" : "text-slate-100"
+                    }`}
+                  >
+                    {detail}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </div>
+  );
+}
+
 /** 카테고리 배지 색 — 홈 리스트·지도 핀과 같은 계열 */
 const CATEGORY_TEXT: Record<string, string> = {
   science: "text-sky-300",
@@ -299,6 +435,16 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
           </button>
         )}
 
+        {/* 선택한 코스의 이동 정보 — 코스 카드 바로 아래 */}
+        {course && hasRealRoute && aiCourse && course.id === aiCourse.id && (
+          <RoutePanel
+            course={course}
+            mode={mapMode}
+            setMode={setMapMode}
+            t={t}
+          />
+        )}
+
         {/* 기본 추천 코스 */}
         {aiCourse && courses.length > 0 && (
           <p className="px-1 pt-2 text-xs font-semibold text-slate-500">
@@ -306,8 +452,8 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
           </p>
         )}
         {courses.map((c) => (
+          <div key={c.id}>
           <button
-            key={c.id}
             type="button"
             onClick={() => setSelId(c.id)}
             className={cardClass(course?.id === c.id)}
@@ -326,6 +472,18 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             </p>
             <StopChain course={c} t={t} />
           </button>
+          {/* 고른 코스면 그 아래에 이동 정보를 펼친다 */}
+          {course?.id === c.id && hasRealRoute && (
+            <div className="mt-3">
+              <RoutePanel
+                course={c}
+                mode={mapMode}
+                setMode={setMapMode}
+                t={t}
+              />
+            </div>
+          )}
+          </div>
         ))}
 
         {!courses.length && aiState !== "loading" && (
@@ -343,74 +501,9 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
       {/* 지도 + 이동수단 전환 + 길찾기 */}
       {course && (
         <div className="lg:sticky lg:top-20 lg:self-start">
-          {/* 실제 경로가 있는 코스에서만 전환 노출 (추천 코스는 직선) */}
-          {hasRealRoute && (
-            <div className="mb-2 flex gap-1.5">
-              {(
-                [
-                  ["straight", Route, t("modeStraight")],
-                  ["transit", Bus, t("modeTransit")],
-                  ["walk", Footprints, t("modeWalk")],
-                ] as const
-              ).map(([m, Icon, label]) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setMapMode(m)}
-                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                    mapMode === m
-                      ? "border-amber-400 bg-amber-400 text-slate-950"
-                      : "border-white/10 bg-white/5 text-slate-300 hover:border-white/25 hover:text-white"
-                  }`}
-                >
-                  <Icon size={13} />
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
-
           <div className="h-80 lg:h-[500px]">
             <CourseMap course={course} mode={mapMode} />
           </div>
-
-          {/* 선택한 이동수단의 구간별 요약 */}
-          {hasRealRoute && mapMode !== "straight" && (
-            <ul className="mt-2 space-y-1">
-              {course.legs.map((leg, i) => {
-                const r = mapMode === "walk" ? leg.walk : leg.transit;
-                const from = course.stops[i].title;
-                const to = course.stops[i + 1].title;
-                let detail: string;
-                if (r?.status === "ok") {
-                  const min = Math.round((r.durationSec ?? 0) / 60);
-                  detail =
-                    mapMode === "walk"
-                      ? t("legWalk", { min })
-                      : t("legTransit", {
-                          min,
-                          transfer: r.transferCount ?? 0,
-                          fare: r.fare ?? 0,
-                        });
-                } else if (r?.status === "too_close") {
-                  detail = t("legTooClose");
-                } else {
-                  detail = t("legNoRoute");
-                }
-                return (
-                  <li key={i} className="flex gap-2 text-[12px] text-slate-400">
-                    <span className="shrink-0 text-slate-600">
-                      {i + 1}→{i + 2}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate">
-                      {from} → {to}
-                    </span>
-                    <span className="shrink-0 text-slate-300">{detail}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
           <a
             href={kakaoStart}
             target="_blank"

@@ -65,6 +65,9 @@
     "modeWalk": "徒歩",
     "legWalk": "徒歩{min}分",
     "legTransit": "{min}分・乗換{transfer}回・{fare}ウォン",
+    "totalMin": "{min}分",
+    "totalWalk": "全行程 徒歩{min}分",
+    "totalTransit": "全行程 {min}分・乗換{transfer}回・{fare}ウォン",
     "legTooClose": "すぐ近く",
     "legNoRoute": "経路なし・タクシー推奨",
     "staysNear": "{name}周辺の宿"

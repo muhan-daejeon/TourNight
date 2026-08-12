@@ -65,6 +65,9 @@
     "modeWalk": "步行",
     "legWalk": "步行 {min} 分钟",
     "legTransit": "{min}分钟 · 换乘{transfer}次 · {fare}韩元",
+    "totalMin": "{min}分钟",
+    "totalWalk": "全程步行 {min} 分钟",
+    "totalTransit": "全程 {min} 分钟 · 换乘{transfer}次 · {fare} 韩元",
     "legTooClose": "非常近",
     "legNoRoute": "无路线 · 建议打车",
     "staysNear": "{name}附近住宿"

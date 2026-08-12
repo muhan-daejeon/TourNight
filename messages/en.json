@@ -65,6 +65,9 @@
     "modeWalk": "Walk",
     "legWalk": "{min} min walk",
     "legTransit": "{min} min · {transfer} transfers · ₩{fare}",
+    "totalMin": "{min} min",
+    "totalWalk": "{min} min walking in total",
+    "totalTransit": "{min} min total · {transfer} transfers · {fare} KRW",
     "legTooClose": "Very close",
     "legNoRoute": "No route · take a taxi",
     "staysNear": "Stays near {name}"
