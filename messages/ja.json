@@ -77,7 +77,8 @@
     "legTooClose": "すぐ近く",
     "legNoRoute": "経路情報なし",
     "legNoRouteMode": "{mode}の経路なし",
-    "staysNear": "{name}周辺の宿"
+    "staysNear": "{name}周辺の宿",
+    "selectHint": "コースを選ぶと地図に経路が表示されます"
   },
   "etiquette": {
     "title": "ナイトエチケット",

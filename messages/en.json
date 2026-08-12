@@ -77,7 +77,8 @@
     "legTooClose": "Very close",
     "legNoRoute": "No route information",
     "legNoRouteMode": "No {mode} route",
-    "staysNear": "Stays near {name}"
+    "staysNear": "Stays near {name}",
+    "selectHint": "Pick a course to see its route on the map"
   },
   "etiquette": {
     "title": "Night Etiquette",
