@@ -373,24 +373,37 @@ export async function getRoutesForLegs(
     return modes.map((mode) => ({ leg: l, mode, entry }));
   });
 
-  for (const [i, job] of todo.entries()) {
-    if (i > 0) await new Promise((r) => setTimeout(r, 250));
-    try {
-      const r =
-        job.mode === "walk"
-          ? await fetchWalk(job.leg.from, job.leg.to)
-          : job.mode === "taxi"
-            ? await fetchTaxi(job.leg.from, job.leg.to)
-            : await fetchTransit(job.leg.from, job.leg.to);
-      job.entry[job.mode] = r;
-      await cache(job.leg.from.contentId, job.leg.to.contentId, r);
-    } catch (err) {
-      console.warn(
-        `[routes] ${job.mode} 경로 실패 (${job.leg.from.contentId}→${job.leg.to.contentId}):`,
-        err instanceof Error ? err.message : err,
-      );
-    }
+  // 공급자별로 줄을 나눠 병렬로 돈다.
+  // 도보·택시는 TMap, 대중교통은 ODsay라 속도 제한을 서로 공유하지 않는다.
+  // 같은 공급자 안에서만 간격을 두면 되고, 전체 시간은 두 줄 중 긴 쪽으로 줄어든다.
+  // (한 줄로 순차 처리하면 9회에 5초가 걸렸다)
+  const queues: Record<"tmap" | "odsay", typeof todo> = { tmap: [], odsay: [] };
+  for (const job of todo) {
+    queues[job.mode === "transit" ? "odsay" : "tmap"].push(job);
   }
+
+  const runQueue = async (jobs: typeof todo) => {
+    for (const [i, job] of jobs.entries()) {
+      if (i > 0) await new Promise((r) => setTimeout(r, 250));
+      try {
+        const r =
+          job.mode === "walk"
+            ? await fetchWalk(job.leg.from, job.leg.to)
+            : job.mode === "taxi"
+              ? await fetchTaxi(job.leg.from, job.leg.to)
+              : await fetchTransit(job.leg.from, job.leg.to);
+        job.entry[job.mode] = r;
+        await cache(job.leg.from.contentId, job.leg.to.contentId, r);
+      } catch (err) {
+        console.warn(
+          `[routes] ${job.mode} 경로 실패 (${job.leg.from.contentId}→${job.leg.to.contentId}):`,
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }
+  };
+
+  await Promise.all([runQueue(queues.tmap), runQueue(queues.odsay)]);
 
   return out;
 }
