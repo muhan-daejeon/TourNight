@@ -13,6 +13,7 @@ import {
 import { sql } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import { isAdmin, type ActivityAction } from "@/lib/activity";
+import AdminRoleToggle from "@/components/AdminRoleToggle";
 
 // 팀 내부용 페이지 — 다국어 없이 한국어 고정, 항상 최신 데이터
 export const dynamic = "force-dynamic";
@@ -256,6 +257,14 @@ export default async function AdminPage({
                       관리자
                     </span>
                   )}
+                  <span className="ml-auto">
+                    {/* bigint가 문자열로 올 수 있어 숫자로 맞춰 비교한다 */}
+                    <AdminRoleToggle
+                      userId={Number(u.id)}
+                      role={u.role === "admin" ? "admin" : "user"}
+                      isSelf={Number(u.id) === session.userId}
+                    />
+                  </span>
                 </p>
                 <p className="truncate text-[12px] text-slate-500">{u.email}</p>
                 <p className="mt-1 text-[12px] text-slate-400">
