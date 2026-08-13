@@ -86,9 +86,13 @@ export async function listPosts(limit = 100): Promise<CommunityPost[]> {
     const rows = await sql<PostRow[]>`
       select p.id, p.user_id, p.author, p.body, p.created_at,
              p.media_path, p.media_type,
-             (select count(*) from community_comments c where c.post_id = p.id) as comment_count
+             count(c.id) as comment_count
       from community_posts p
-      order by p.created_at desc
+      left join community_comments c on c.post_id = p.id
+      group by p.id
+      -- 시드 글처럼 created_at이 같은 행이 있어 id를 부기준으로 둔다.
+      -- 없으면 쿼리 계획에 따라 순서가 뒤바뀌어 목록이 매번 달라 보인다.
+      order by p.created_at desc, p.id desc
       limit ${limit}
     `;
     return rows.map(toPost);
@@ -128,7 +132,7 @@ export async function listComments(postId: number): Promise<CommunityComment[]> 
       select id, user_id, author, body, created_at, media_path, media_type
       from community_comments
       where post_id = ${postId}
-      order by created_at asc
+      order by created_at asc, id asc
     `;
     return rows.map(toComment);
   } catch (err) {

@@ -408,17 +408,23 @@ function PostItem({
   );
 }
 
-export default function CommunityBoard() {
+export default function CommunityBoard({
+  initialPosts,
+  canAttach,
+}: {
+  /** 서버에서 렌더링한 글 목록 — 첫 화면부터 보이도록 초기값으로 쓴다 */
+  initialPosts: Post[];
+  /** 스토리지 미설정 서버면 false → 첨부 UI 자체를 숨긴다 */
+  canAttach: boolean;
+}) {
   const t = useTranslations("community");
 
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [status, setStatus] = useState<"loading" | "error" | "done">("loading");
+  const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   // undefined = 로딩, null = 비로그인, Me = 로그인
   const [me, setMe] = useState<Me | null | undefined>(undefined);
-  // 첨부 사진 — 스토리지 미설정 서버면 canAttach=false로 UI 자체를 숨긴다
-  const [canAttach, setCanAttach] = useState(false);
+  // canAttach는 서버에서 내려받는다 (스토리지 키 유무는 서버만 안다)
   const {
     photo,
     clear: clearPhoto,
@@ -442,26 +448,6 @@ export default function CommunityBoard() {
       .catch(() => setMe(null));
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/community")
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data) => {
-        if (cancelled) return;
-        setPosts(data.posts);
-        setCanAttach(Boolean(data.canAttach));
-        setStatus("done");
-      })
-      .catch(() => {
-        if (!cancelled) setStatus("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -579,19 +565,9 @@ export default function CommunityBoard() {
         <LoginPrompt text={t("loginToPost")} />
       )}
 
-      {/* 목록 */}
-      {status === "loading" ? (
-        <div className="space-y-3">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-20 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]"
-            />
-          ))}
-        </div>
-      ) : status === "error" ? (
-        <p className="py-10 text-center text-sm text-slate-500">{t("error")}</p>
-      ) : posts.length === 0 ? (
+      {/* 목록 — 서버에서 채워 오므로 로딩 상태가 없다.
+          조회에 실패하면 listPosts가 빈 배열을 주고 아래 빈 상태로 표시된다 */}
+      {posts.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-14 text-center">
           <MessageSquare size={30} strokeWidth={1.5} className="text-slate-600" />
           <p className="text-sm text-slate-500">{t("empty")}</p>
