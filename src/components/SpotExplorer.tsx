@@ -10,6 +10,9 @@ import {
   Building2,
   ChevronRight,
   Search,
+  Plus,
+  Check,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -46,6 +49,24 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
   const [category, setCategory] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // 코스에 담은 명소들 — 담긴 곳을 전부 거치는 AI 코스를 짠다 (최대 4곳)
+  const MAX_BASKET = 4;
+  const [basket, setBasket] = useState<string[]>([]);
+
+  const toggleBasket = (contentId: string) =>
+    setBasket((prev) =>
+      prev.includes(contentId)
+        ? prev.filter((id) => id !== contentId)
+        : prev.length >= MAX_BASKET
+          ? prev
+          : [...prev, contentId],
+    );
+
+  const planCourse = (ids: string[]) =>
+    router.push(
+      `/courses?from=${encodeURIComponent(ids.join(","))}` +
+        (category === "all" ? "" : `&category=${category}`),
+    );
 
   // 카테고리 + 텍스트(이름·주소) 동시 필터
   const filtered = useMemo(() => {
@@ -157,6 +178,34 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                     {t(`categories.${spot.category}`)}
                   </span>
 
+                  {/* 코스에 담기 — 담긴 곳들을 전부 거치는 AI 코스를 짤 수 있다 */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleBasket(spot.contentId);
+                    }}
+                    aria-label={
+                      basket.includes(spot.contentId)
+                        ? t("basketRemove")
+                        : t("basketAdd")
+                    }
+                    className={`absolute right-3 top-3 flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur transition ${
+                      basket.includes(spot.contentId)
+                        ? "bg-amber-400 text-slate-950"
+                        : "bg-slate-950/70 text-slate-200 hover:bg-slate-950/90 hover:text-amber-300"
+                    }`}
+                  >
+                    {basket.includes(spot.contentId) ? (
+                      <Check size={12} strokeWidth={3} />
+                    ) : (
+                      <Plus size={12} strokeWidth={3} />
+                    )}
+                    {basket.includes(spot.contentId)
+                      ? t("basketAdded")
+                      : t("basketAdd")}
+                  </button>
+
                   <div className="absolute inset-x-0 bottom-0 flex items-end gap-2 p-3.5">
                     <div className="min-w-0 flex-1">
                       <h3 className="truncate text-lg font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] group-hover:text-amber-300">
@@ -189,15 +238,51 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             onSelect={setSelectedId}
             // 코스 페이지에서 이 스팟을 거치는 AI 코스를 만들어 추천 코스와 함께 보여준다.
             // 켜둔 카테고리 필터도 넘겨 같은 계열 명소를 우선하게 한다 (강제는 아님)
-            onPlanCourse={(contentId) =>
-              router.push(
-                `/courses?from=${encodeURIComponent(contentId)}` +
-                  (category === "all" ? "" : `&category=${category}`),
-              )
-            }
+            onPlanCourse={(contentId) => planCourse([contentId])}
           />
         </div>
       </div>
+
+      {/* 담은 명소 바 — 2곳 이상 담으면 그 조합으로 코스를 짤 수 있다 */}
+      {basket.length > 0 && (
+        <div className="fixed inset-x-0 bottom-4 z-40 px-4">
+          <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-2 rounded-2xl border border-white/15 bg-slate-950/90 p-3 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur">
+            {basket.map((id) => {
+              const spot = spots.find((s) => s.contentId === id);
+              if (!spot) return null;
+              return (
+                <span
+                  key={id}
+                  className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 py-1 pl-3 pr-1.5 text-[13px] font-semibold text-slate-100"
+                >
+                  {spot.title}
+                  <button
+                    type="button"
+                    onClick={() => toggleBasket(id)}
+                    aria-label={t("basketRemove")}
+                    className="rounded-full p-0.5 text-slate-500 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <X size={13} />
+                  </button>
+                </span>
+              );
+            })}
+            {basket.length >= MAX_BASKET && (
+              <span className="text-[11px] text-slate-500">
+                {t("basketMax", { max: MAX_BASKET })}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => planCourse(basket)}
+              className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
+            >
+              <Sparkles size={14} />
+              {t("basketPlan", { count: basket.length })}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

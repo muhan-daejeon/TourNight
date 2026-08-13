@@ -249,7 +249,8 @@ export interface CourseCandidate {
  * 호출부에서 반환된 contentId가 후보에 있는지 다시 검증한다.
  */
 export async function generateCoursePlan(
-  anchor: CourseCandidate,
+  /** 사용자가 고른 필수 방문지들 — 코스에 전부 포함해야 한다 */
+  anchors: CourseCandidate[],
   candidates: CourseCandidate[],
   locale: string,
   /** 사용자가 홈에서 켜둔 카테고리 필터 — 강제가 아닌 소프트 선호 */
@@ -261,7 +262,7 @@ export async function generateCoursePlan(
   const language = LOCALE_LANGUAGE[locale] ?? "English";
   const busTime = (t?: string | null) =>
     t ? `last bus ${t.slice(0, 2)}:${t.slice(2)}` : "no bus stop within 500m";
-  const list = [anchor, ...candidates]
+  const list = [...anchors, ...candidates]
     .map(
       (c) =>
         `- id=${c.contentId} | ${c.title} | category=${c.category}` +
@@ -272,14 +273,23 @@ export async function generateCoursePlan(
     )
     .join("\n");
 
+  // 앵커 수에 따라 코스 규모를 정한다 — 3곳 이상 담았으면 그대로도 코스가 된다
+  const minStops = Math.max(3, anchors.length);
+  const maxStops = Math.min(5, Math.max(4, anchors.length + 1));
+  const anchorLines = anchors
+    .map((a) => `anchor id=${a.contentId} (${a.title})`)
+    .join("\n");
+
   const prompt = [
     `You are a night tourism course planner for Daejeon, South Korea.`,
-    `Design ONE night course (evening to late night) that MUST include this anchor place:`,
-    `anchor id=${anchor.contentId} (${anchor.title})`,
-    `Choose 2 or 3 more places from this candidate list ONLY (never invent ids or places):`,
+    anchors.length > 1
+      ? `Design ONE night course (evening to late night) that MUST include ALL of these anchor places the visitor chose:`
+      : `Design ONE night course (evening to late night) that MUST include this anchor place:`,
+    anchorLines,
+    `If more stops are needed, choose them from this candidate list ONLY (never invent ids or places):`,
     list,
     `Rules:`,
-    `- Total 3 to 4 stops including the anchor.`,
+    `- Total ${minStops} to ${maxStops} stops including every anchor.`,
     `- Order them so travel is efficient (prefer nearby places, avoid zig-zag) and the mood builds through the night.`,
     ...(preferredCategory
       ? [
@@ -327,7 +337,7 @@ export async function generateCoursePlan(
     summary: String(parsed.summary ?? ""),
     tip: String(parsed.tip ?? ""),
     stops: Array.isArray(parsed.stops)
-      ? parsed.stops.slice(0, 4).map((s: Record<string, unknown>) => ({
+      ? parsed.stops.slice(0, 5).map((s: Record<string, unknown>) => ({
           contentId: String(s?.contentId ?? ""),
           note: String(s?.note ?? ""),
         }))
