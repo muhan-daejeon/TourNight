@@ -19,6 +19,47 @@ const BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
  */
 const NO_THINKING = { thinkingConfig: { thinkingBudget: 0 } };
 
+/** 응답이 없을 때 무한정 기다리지 않도록 하는 상한 */
+const GEMINI_TIMEOUT_MS = 20_000;
+
+/**
+ * Gemini 호출 래퍼 — 타임아웃과 1회 재시도를 붙인다.
+ *
+ * 원래는 타임아웃이 없어서, Gemini가 응답을 주지 않으면 Vercel 함수 한도까지
+ * 매달렸다. 사용자는 로딩만 보고, 코스 생성은 하루 5회 제한이라 그 한 번이
+ * 그대로 날아간다.
+ *
+ * 429·5xx·타임아웃은 잠깐 뒤 한 번 더 시도한다. 대부분 일시적이고, 여기서
+ * 포기하면 코스는 거리 기반 폴백으로, 스팟 가이드는 502로 떨어진다.
+ * 4xx(키·요청 오류)는 다시 해도 같으므로 그대로 돌려준다.
+ */
+async function geminiFetch(
+  url: string,
+  init: RequestInit,
+  attempt = 1,
+): Promise<Response> {
+  try {
+    const res = await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
+    });
+    if ((res.status === 429 || res.status >= 500) && attempt === 1) {
+      await new Promise((r) => setTimeout(r, 800));
+      return geminiFetch(url, init, 2);
+    }
+    return res;
+  } catch (err) {
+    if (attempt === 1) {
+      await new Promise((r) => setTimeout(r, 800));
+      return geminiFetch(url, init, 2);
+    }
+    throw new Error(
+      `Gemini 응답 없음 (${GEMINI_TIMEOUT_MS / 1000}초 초과 또는 네트워크 오류): ` +
+        (err instanceof Error ? err.message : String(err)),
+    );
+  }
+}
+
 const LOCALE_LANGUAGE: Record<string, string> = {
   ko: "Korean",
   en: "English",
@@ -89,7 +130,7 @@ export async function generatePhraseCategory(
     `Short, natural, polite (해요체). Respond with ONLY the JSON array.`,
   ].join("\n");
 
-  const res = await fetch(`${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`, {
+  const res = await geminiFetch(`${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -126,7 +167,7 @@ export async function translatePhrase(
     `"meaning" must be in ${language}. Short, natural, polite (해요체). Respond with ONLY the JSON.`,
   ].join("\n");
 
-  const res = await fetch(`${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`, {
+  const res = await geminiFetch(`${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -167,7 +208,7 @@ export async function generatePhrases(
     `Keep phrases short, natural, and polite. Respond with ONLY the JSON array.`,
   ].join("\n");
 
-  const res = await fetch(
+  const res = await geminiFetch(
     `${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
@@ -213,7 +254,7 @@ export async function generateSpotGuide(
     `- tips: exactly 3 short practical tips for a foreign visitor at night (getting around, etiquette, what to see).`,
   ].join("\n");
 
-  const res = await fetch(
+  const res = await geminiFetch(
     `${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
@@ -328,7 +369,7 @@ export async function generateCoursePlan(
     `Respond with ONLY the JSON.`,
   ].join("\n");
 
-  const res = await fetch(
+  const res = await geminiFetch(
     `${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
@@ -400,7 +441,7 @@ export async function generateEtiquette(
     `Respond with ONLY the JSON.`,
   ].join("\n");
 
-  const res = await fetch(
+  const res = await geminiFetch(
     `${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
@@ -469,7 +510,7 @@ export async function screenImage(
     `Return JSON: {"allowed": boolean, "reason": string (short, English, why blocked or "ok")}`,
   ].join("\n");
 
-  const res = await fetch(
+  const res = await geminiFetch(
     `${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
