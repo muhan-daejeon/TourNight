@@ -7,6 +7,18 @@
 const MODEL = process.env.GEMINI_MODEL || "gemini-flash-latest";
 const BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 
+/**
+ * 내부 추론(thinking)을 끈다.
+ *
+ * 여기서 시키는 일은 주어진 후보 목록에서 고르고 정해진 형식으로 문장을 쓰는
+ * 수준이라 깊은 추론이 필요 없다. 그런데 2.5 계열은 기본으로 thinking을 돌려
+ * 출력 340토큰짜리 응답에 thinking만 2,000토큰을 더 쓴다.
+ *
+ * 실측(코스 설계 프롬프트, 3회): 켬 9.7~13.0초 → 끔 2.4~3.0초.
+ * 같은 후보·같은 순서·환각 없음으로 결과 품질 차이는 없었다.
+ */
+const NO_THINKING = { thinkingConfig: { thinkingBudget: 0 } };
+
 const LOCALE_LANGUAGE: Record<string, string> = {
   ko: "Korean",
   en: "English",
@@ -82,7 +94,7 @@ export async function generatePhraseCategory(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json" },
+      generationConfig: { responseMimeType: "application/json", ...NO_THINKING },
     }),
   });
   if (!res.ok) throw new Error(`Gemini API 오류: ${res.status}`);
@@ -119,7 +131,7 @@ export async function translatePhrase(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json" },
+      generationConfig: { responseMimeType: "application/json", ...NO_THINKING },
     }),
   });
   if (!res.ok) throw new Error(`Gemini API 오류: ${res.status}`);
@@ -162,7 +174,7 @@ export async function generatePhrases(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
+        generationConfig: { responseMimeType: "application/json", ...NO_THINKING },
       }),
     },
   );
@@ -208,7 +220,7 @@ export async function generateSpotGuide(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
+        generationConfig: { responseMimeType: "application/json", ...NO_THINKING },
       }),
     },
   );
@@ -323,7 +335,7 @@ export async function generateCoursePlan(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
+        generationConfig: { responseMimeType: "application/json", ...NO_THINKING },
       }),
     },
   );
@@ -399,6 +411,7 @@ export async function generateEtiquette(
         generationConfig: {
           responseMimeType: "application/json",
           maxOutputTokens: 4096,
+          ...NO_THINKING,
         },
       }),
     },
@@ -475,7 +488,7 @@ export async function screenImage(
             ],
           },
         ],
-        generationConfig: { responseMimeType: "application/json" },
+        generationConfig: { responseMimeType: "application/json", ...NO_THINKING },
       }),
     },
   );
