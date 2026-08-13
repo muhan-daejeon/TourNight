@@ -9,6 +9,13 @@ const BASE_URL = "https://apis.data.go.kr/B551011/KorService2";
 const SERVICE_NAME = "TourNight"; // 공모전 필수: MobileApp 파라미터에 서비스 고유명
 const DAEJEON_AREA_CODE = "3";
 
+/**
+ * KTO 응답 대기 상한. 없으면 공공데이터포털이 느릴 때 페이지 생성이 그만큼
+ * 매달린다 (스팟 상세는 숙소 조회를 기다린다).
+ * 숙소·소개문은 부가 정보라, 늦을 바엔 없는 채로 보여주는 편이 낫다.
+ */
+const KTO_TIMEOUT_MS = 8_000;
+
 export interface NightSpot {
   contentId: string;
   title: string;
@@ -110,6 +117,7 @@ export async function fetchNearbyStays(
   });
   const res = await fetch(`${BASE_URL}/locationBasedList2?${params}`, {
     next: { revalidate: 3600 },
+    signal: AbortSignal.timeout(KTO_TIMEOUT_MS),
   });
   if (!res.ok) return [];
 
@@ -146,6 +154,7 @@ export async function fetchOverviewKo(contentId: string): Promise<string> {
   });
   const res = await fetch(`${BASE_URL}/detailCommon2?${params}`, {
     next: { revalidate: 86400 },
+    signal: AbortSignal.timeout(KTO_TIMEOUT_MS),
   });
   if (!res.ok) return "";
   const data = await res.json();
@@ -182,6 +191,7 @@ export async function fetchNightSpots(): Promise<NightSpot[]> {
 
   const res = await fetch(`${BASE_URL}/areaBasedList2?${params}`, {
     next: { revalidate: 3600 },
+    signal: AbortSignal.timeout(KTO_TIMEOUT_MS),
   });
   if (!res.ok) {
     throw new Error(`KTO API 오류: ${res.status}`);
