@@ -45,6 +45,12 @@ export interface RouteLeg {
   distanceM: number | null;
   /** [경도, 위도] 좌표열 — 카카오맵 Polyline에 그대로 사용 */
   path: [number, number][];
+  /** 승차 정류장 (탈것 구간만, 예전 캐시에는 없을 수 있다) */
+  startName?: string | null;
+  /** 하차 정류장 */
+  endName?: string | null;
+  /** 지나는 정류장 수 */
+  stationCount?: number | null;
 }
 
 export interface SpotRoute {
@@ -252,8 +258,8 @@ async function fetchTransit(a: Point, b: Point): Promise<SpotRoute> {
   const info = path.info ?? {};
   const legs: RouteLeg[] = (path.subPath ?? []).map((sp: any) => {
     const mode = ODSAY_MODE[sp.trafficType] ?? "WALK";
-    // 탈것은 경유 정류장 좌표를 이어 폴리라인을 만든다. 실제 도로 형상은 loadLane을
-    // 한 번 더 불러야 얻는데, 구간마다 호출이 배로 늘어 정류장 선으로 근사한다.
+    // 기본 폴리라인은 경유 정류장 좌표를 이은 근사 — 아래 loadLane이 성공하면
+    // 실제 도로 형상으로 교체된다
     const stations = sp.passStopList?.stations ?? [];
     return {
       mode,
@@ -263,8 +269,43 @@ async function fetchTransit(a: Point, b: Point): Promise<SpotRoute> {
       path: stations
         .map((st: any) => [Number(st.x), Number(st.y)] as [number, number])
         .filter((p: [number, number]) => p.every(Number.isFinite)),
+      // "어느 정류장에서 타서 어디서 내리는지" — 화면 안내에 필요
+      startName: mode === "WALK" ? null : (sp.startName ?? null),
+      endName: mode === "WALK" ? null : (sp.endName ?? null),
+      stationCount:
+        mode === "WALK" ? null : (sp.stationCount ?? stations.length ?? null),
     };
   });
+
+  // 실제 도로 형상 (loadLane) — 정류장 직선 근사는 골목을 가로질러 보여
+  // "버스가 저렇게 다니나?" 싶게 그려진다. 한 경로당 호출 1번이라 부담이 작고,
+  // 실패하면 정류장 근사를 그대로 쓴다.
+  if (info.mapObj) {
+    try {
+      const laneParams = new URLSearchParams({
+        apiKey: process.env.ODSAY_API_KEY,
+        mapObject: `0:0@${info.mapObj}`,
+        output: "json",
+      });
+      const laneRes = await fetch(
+        `https://api.odsay.com/v1/api/loadLane?${laneParams}`,
+        { headers: { Referer: ODSAY_REFERER }, signal: AbortSignal.timeout(8000) },
+      );
+      const laneJ: any = JSON.parse(await laneRes.text());
+      const lanes = laneJ?.result?.lane ?? [];
+      // lane 순서는 탈것 구간 순서와 같다
+      const vehicleLegs = legs.filter((l) => l.mode !== "WALK");
+      lanes.forEach((lane: any, i: number) => {
+        const pts: [number, number][] = (lane.section ?? [])
+          .flatMap((sec: any) => sec.graphPos ?? [])
+          .map((p: any) => [Number(p.x), Number(p.y)] as [number, number])
+          .filter((p: [number, number]) => p.every(Number.isFinite));
+        if (pts.length > 1 && vehicleLegs[i]) vehicleLegs[i].path = pts;
+      });
+    } catch {
+      // 형상 조회 실패는 무시 — 정류장 근사 폴리라인 유지
+    }
+  }
 
   // 도보 구간은 좌표가 없다. 앞뒤 탈것 구간의 끝점을 이어 선이 끊기지 않게 한다.
   for (let i = 0; i < legs.length; i++) {
