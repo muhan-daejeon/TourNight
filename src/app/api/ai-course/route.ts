@@ -29,15 +29,28 @@ const CATEGORIES: NightSpot["category"][] = [
  * 스팟·언어·선호 카테고리당 1건을 DB에 캐시해 반복 클릭 시 Gemini를 다시 부르지 않는다.
  * (거리 기반 폴백으로 만들어진 코스는 캐시하지 않아 다음 요청에서 다시 AI를 시도한다)
  */
+/** 한 코스에 담을 수 있는 필수 방문지 수 — 밤 시간에 도는 현실적인 상한 */
+const MAX_ANCHORS = 4;
+
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
-  const contentId = params.get("contentId") ?? "";
+  // 지도에서 여러 곳을 담으면 쉼표로 이어 온다 (contentId=a,b,c)
+  const contentIds = [
+    ...new Set(
+      (params.get("contentId") ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    ),
+  ].slice(0, MAX_ANCHORS);
   const locale = params.get("locale") ?? "ko";
   const rawCategory = params.get("category") ?? "";
 
-  if (!contentId || !routing.locales.includes(locale as never)) {
+  if (!contentIds.length || !routing.locales.includes(locale as never)) {
     return NextResponse.json({ error: "invalid params" }, { status: 400 });
   }
+  // 캐시 키 — 담는 순서가 달라도 같은 조합이면 같은 코스를 재사용한다
+  const cacheId = [...contentIds].sort().join(",");
 
   const session = await getSessionUser();
   if (!session) {
@@ -51,7 +64,7 @@ export async function GET(request: NextRequest) {
     // 오래된 캐시는 무시한다 — 노선·운영시간이 바뀌어도 예전 코스가 계속 나오면 안 된다
     const cached = await sql<{ course: AiCourse }[]>`
       select course from ai_course_cache
-      where content_id = ${contentId} and locale = ${locale}
+      where content_id = ${cacheId} and locale = ${locale}
         and pref_category = ${cacheCategory}
         and updated_at > now() - ${CACHE_TTL}::interval
     `;
@@ -93,7 +106,7 @@ export async function GET(request: NextRequest) {
 
   let course: AiCourse | null;
   try {
-    course = await getAiCourse(contentId, locale, prefCategory);
+    course = await getAiCourse(contentIds, locale, prefCategory);
   } catch (err) {
     console.warn(
       "[ai-course] 코스 생성 실패:",
@@ -109,7 +122,7 @@ export async function GET(request: NextRequest) {
     try {
       await sql`
         insert into ai_course_cache (content_id, locale, pref_category, course)
-        values (${contentId}, ${locale}, ${cacheCategory}, ${
+        values (${cacheId}, ${locale}, ${cacheCategory}, ${
           // 인터페이스에는 인덱스 시그니처가 없어 postgres의 JSONValue로 캐스팅
           sql.json(course as unknown as Parameters<typeof sql.json>[0])
         })

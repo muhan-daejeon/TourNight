@@ -464,11 +464,16 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             <h3 className="mt-2 font-bold text-slate-100">{aiCourse.title}</h3>
             <p className="mt-0.5 text-xs text-slate-500">
               {t("stopsCount", { count: aiCourse.stops.length })} ·{" "}
-              {t("aiAnchor", {
-                name:
+              {(() => {
+                // 여러 곳을 담아 만든 코스면 "첫 곳 외 N곳 포함"으로 표시
+                const name =
                   aiCourse.stops.find((s) => s.contentId === aiCourse.anchorId)
-                    ?.title ?? "",
-              })}
+                    ?.title ?? "";
+                const extra = (aiCourse.anchorIds?.length ?? 1) - 1;
+                return extra > 0
+                  ? t("aiAnchorMulti", { name, count: extra })
+                  : t("aiAnchor", { name });
+              })()}
             </p>
             {aiCourse.summary && (
               <p className="mt-2 text-[13px] leading-relaxed text-slate-300">

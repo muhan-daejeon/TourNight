@@ -37,6 +37,8 @@ export interface Course {
 export interface AiCourse extends Course {
   /** 기준이 된 스팟 (사용자가 지도에서 클릭한 곳) */
   anchorId: string;
+  /** 여러 곳을 담아 만든 코스면 전체 앵커 목록 (한 곳이면 [anchorId]) */
+  anchorIds?: string[];
   title: string;
   summary: string;
   tip: string;
@@ -282,23 +284,32 @@ async function staysNearLastStop(stops: CourseStop[]): Promise<NearbyStay[]> {
  * 따로 조회해 합친다.
  */
 export async function getAiCourse(
-  contentId: string,
+  contentIds: string[],
   locale = "ko",
   prefCategory?: NightSpot["category"],
 ): Promise<AiCourse | null> {
-  const anchor = await getSpot(contentId, locale);
-  if (!anchor) return null;
+  // 지도에서 여러 곳을 담아 오면 전부 앵커 — 코스에 반드시 포함된다
+  const anchors = (
+    await Promise.all(contentIds.map((id) => getSpot(id, locale)))
+  ).filter((s) => s !== null);
+  if (!anchors.length) return null;
+  const anchor = anchors[0];
+  const anchorIds = new Set(anchors.map((a) => a.contentId));
 
-  const [near, sameCat] = await Promise.all([
-    getNearbySpots(contentId, { limit: 8, locale }),
+  // 후보는 각 앵커 주변에서 모은다 (앵커가 많을수록 채울 자리는 줄어든다)
+  const perAnchor = anchors.length > 1 ? 4 : 8;
+  const nearLists = await Promise.all([
+    ...anchors.map((a) => getNearbySpots(a.contentId, { limit: perAnchor, locale })),
     prefCategory
-      ? getNearbySpots(contentId, { limit: 5, locale, category: prefCategory })
+      ? getNearbySpots(anchor.contentId, { limit: 5, locale, category: prefCategory })
       : Promise.resolve([]),
   ]);
-  // 거리순 후보 + 선호 카테고리 후보 (중복 제거, 가까운 순)
-  const nearby = [...new Map([...near, ...sameCat].map((s) => [s.contentId, s])).values()]
-    .sort((a, b) => a.distanceM - b.distanceM);
-  if (!nearby.length) return null;
+  // 거리순 후보 + 선호 카테고리 후보 (중복·앵커 제거, 가까운 순)
+  const nearby = [...new Map(nearLists.flat().map((s) => [s.contentId, s])).values()]
+    .filter((s) => !anchorIds.has(s.contentId))
+    .sort((a, b) => a.distanceM - b.distanceM)
+    .slice(0, 8);
+  if (!nearby.length && anchors.length < 2) return null;
 
   const toStop = (s: NightSpot): CourseStop => ({
     contentId: s.contentId,
@@ -310,21 +321,21 @@ export async function getAiCourse(
     mapY: s.mapY,
   });
   const byId = new Map<string, CourseStop>();
-  byId.set(anchor.contentId, toStop(anchor));
+  anchors.forEach((a) => byId.set(a.contentId, toStop(a)));
   nearby.forEach((s) => byId.set(s.contentId, toStop(s)));
 
   // 후보 전체의 막차 정보 — 프롬프트에 넣어 "막차 전에 돌 수 있는 순서"를 짜게 한다
   const transitMap = await getTransitForSpots([...byId.keys()]);
   const lastBusOf = (id: string) => transitMap.get(id)?.lastBus ?? null;
 
-  const anchorCandidate: CourseCandidate = {
-    contentId: anchor.contentId,
-    title: anchor.title,
-    category: anchor.category,
-    addr: anchor.addr,
+  const anchorCandidates: CourseCandidate[] = anchors.map((a) => ({
+    contentId: a.contentId,
+    title: a.title,
+    category: a.category,
+    addr: a.addr,
     distanceM: 0,
-    lastBus: lastBusOf(anchor.contentId),
-  };
+    lastBus: lastBusOf(a.contentId),
+  }));
   const candidates: CourseCandidate[] = nearby.map((s) => ({
     contentId: s.contentId,
     title: s.title,
@@ -334,16 +345,18 @@ export async function getAiCourse(
     lastBus: lastBusOf(s.contentId),
   }));
 
-  // 거리 기반 폴백 — anchor에서 가까운 3곳을 최단이웃 순서로
+  // 거리 기반 폴백 — 앵커들 + 가까운 곳으로 4곳을 채워 최단이웃 순서로
   const fallback = async (): Promise<AiCourse> => {
     const anchorStop = byId.get(anchor.contentId)!;
+    const fill = Math.max(0, 4 - anchors.length);
     const stops = orderRoute(
-      [anchorStop, ...nearby.slice(0, 3).map(toStop)],
+      [...anchors.map(toStop), ...nearby.slice(0, fill).map(toStop)],
       anchorStop,
     );
     return {
-      id: `ai-${anchor.contentId}`,
+      id: `ai-${anchors.map((a) => a.contentId).join("+")}`,
       anchorId: anchor.contentId,
+      anchorIds: anchors.map((a) => a.contentId),
       title: anchor.title,
       summary: "",
       tip: "",
@@ -358,32 +371,53 @@ export async function getAiCourse(
 
   try {
     const plan = await generateCoursePlan(
-      anchorCandidate,
+      anchorCandidates,
       candidates,
       locale,
       prefCategory,
     );
 
-    // 후보에 없는 id·중복 제거 → 그래도 anchor는 반드시 포함
+    // 후보에 없는 id·중복 제거 → 그래도 앵커는 전부 반드시 포함
     const seen = new Set<string>();
     const picked = plan.stops.filter((s) => {
       if (!byId.has(s.contentId) || seen.has(s.contentId)) return false;
       seen.add(s.contentId);
       return true;
     });
-    if (!seen.has(anchor.contentId)) {
-      picked.unshift({ contentId: anchor.contentId, note: "" });
+    for (const a of anchors) {
+      if (!seen.has(a.contentId)) {
+        picked.push({ contentId: a.contentId, note: "" });
+        seen.add(a.contentId);
+      }
     }
     if (picked.length < 2) return fallback();
 
-    const stops = picked.map((p) => byId.get(p.contentId)!);
+    let stops = picked.map((p) => byId.get(p.contentId)!);
+    let notes = picked.map((p) => p.note);
+
+    // Gemini가 분위기 서사를 우선하다 동선을 무시하는 경우가 있다
+    // (북→남→북 지그재그 실측). 최단이웃 순서보다 총 이동거리가 30% 이상
+    // 길면 방문지 구성·설명은 그대로 두고 순서만 동선대로 고친다.
+    const pathLen = (arr: CourseStop[]) => {
+      let m = 0;
+      for (let i = 0; i < arr.length - 1; i++) m += haversineM(arr[i], arr[i + 1]);
+      return m;
+    };
+    const ordered = orderRoute([...stops], stops[0]);
+    if (pathLen(stops) > pathLen(ordered) * 1.3) {
+      const noteOf = new Map(stops.map((s, i) => [s.contentId, notes[i]]));
+      stops = ordered;
+      notes = ordered.map((s) => noteOf.get(s.contentId) ?? "");
+    }
+
     return {
-      id: `ai-${anchor.contentId}`,
+      id: `ai-${anchors.map((a) => a.contentId).join("+")}`,
       anchorId: anchor.contentId,
+      anchorIds: anchors.map((a) => a.contentId),
       title: plan.title || anchor.title,
       summary: plan.summary,
       tip: plan.tip,
-      notes: picked.map((p) => p.note),
+      notes,
       transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
       prefCategory: prefCategory ?? null,
       stays: await staysNearLastStop(stops),
