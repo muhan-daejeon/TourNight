@@ -228,3 +228,20 @@ alter table community_posts add column if not exists media_path text;
 alter table community_posts add column if not exists media_type text
   check (media_type is null or media_type in ('image', 'video'));
 alter table community_comments add column if not exists user_id bigint references users(id) on delete set null;
+
+-- 관리자/일반 역할 구분 — 관리자는 코스 생성 한도 없이 쓰고 /admin에 들어갈 수 있다.
+-- 지정: update users set role='admin' where email='...';
+alter table users add column if not exists role text not null default 'user'
+  check (role in ('user', 'admin'));
+
+-- 사용자 활동 로그 — 관리자 페이지에서 "누가 무슨 기능을 어떻게 썼는지"를 본다.
+-- (ai_course / etiquette / phrases / phrase_search / community_post / community_comment / spot_view)
+create table if not exists activity_log (
+  id bigserial primary key,
+  user_id bigint references users(id) on delete set null,
+  action text not null,
+  detail jsonb not null default '{}',
+  created_at timestamptz not null default now()
+);
+create index if not exists activity_log_created_idx on activity_log (created_at desc);
+create index if not exists activity_log_user_idx on activity_log (user_id, created_at desc);

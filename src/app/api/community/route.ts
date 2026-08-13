@@ -3,6 +3,7 @@ import { listPosts, createPost, BODY_MAX } from "@/lib/community";
 import { getSessionUser } from "@/lib/session";
 import { prepareMedia, readCommunityInput } from "@/lib/community-media";
 import { deleteCommunityMedia, isStorageConfigured } from "@/lib/storage";
+import { logActivity } from "@/lib/activity";
 
 /** 최신 커뮤니티 글 목록 (읽기는 로그인 불필요) */
 export async function GET() {
@@ -49,6 +50,10 @@ export async function POST(request: NextRequest) {
       if (media) await deleteCommunityMedia(media.path);
       return NextResponse.json({ error: "invalid input" }, { status: 400 });
     }
+    logActivity(session.userId, "community_post", {
+      postId: post.id,
+      hasPhoto: Boolean(media),
+    });
     return NextResponse.json({ post }, { status: 201 });
   } catch (err) {
     if (media) await deleteCommunityMedia(media.path);

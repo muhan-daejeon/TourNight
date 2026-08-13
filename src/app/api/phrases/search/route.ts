@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { translatePhrase } from "@/lib/gemini";
 import { sql } from "@/lib/db";
 import { routing } from "@/i18n/routing";
+import { getSessionUser } from "@/lib/session";
+import { logActivity } from "@/lib/activity";
 
 /** 하고 싶은 말 검색 → 한국어 번역 + 관련 표현 (질문·언어별 캐시) */
 export async function GET(request: NextRequest) {
@@ -11,6 +13,11 @@ export async function GET(request: NextRequest) {
   if (!q || q.length > 80 || !routing.locales.includes(locale as never)) {
     return NextResponse.json({ error: "invalid params" }, { status: 400 });
   }
+
+  logActivity((await getSessionUser())?.userId ?? null, "phrase_search", {
+    query: q.slice(0, 60),
+    locale,
+  });
 
   const norm = q.toLowerCase().replace(/\s+/g, " ");
   const cached = await sql<{ result: unknown }[]>`

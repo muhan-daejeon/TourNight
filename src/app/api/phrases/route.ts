@@ -6,6 +6,8 @@ import {
 } from "@/lib/gemini";
 import { sql } from "@/lib/db";
 import { routing } from "@/i18n/routing";
+import { getSessionUser } from "@/lib/session";
+import { logActivity } from "@/lib/activity";
 
 /** 상황별 표현집 전체 반환 — 캐시 우선, 없는 카테고리만 생성 */
 export async function GET(request: NextRequest) {
@@ -13,6 +15,8 @@ export async function GET(request: NextRequest) {
   if (!routing.locales.includes(locale as never) || locale === "ko") {
     return NextResponse.json({ error: "invalid params" }, { status: 400 });
   }
+
+  logActivity((await getSessionUser())?.userId ?? null, "phrases", { locale });
 
   const cached = await sql<{ category: string; phrases: Phrase[] }[]>`
     select category, phrases from phrase_book where locale = ${locale}

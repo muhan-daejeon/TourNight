@@ -9,6 +9,8 @@ export interface User {
   email: string;
   nickname: string;
   country: string | null;
+  /** 'admin'은 코스 생성 한도가 없고 /admin 페이지에 들어갈 수 있다 */
+  role: "user" | "admin";
 }
 
 export const EMAIL_MAX = 254;
@@ -41,6 +43,7 @@ interface UserRow {
   email: string;
   nickname: string;
   country: string | null;
+  role: string;
 }
 
 function toUser(r: UserRow): User {
@@ -49,13 +52,14 @@ function toUser(r: UserRow): User {
     email: r.email,
     nickname: r.nickname,
     country: r.country,
+    role: r.role === "admin" ? "admin" : "user",
   };
 }
 
 /** 로그인 검증용 — password_hash 포함 (외부로 반환 금지) */
 export async function findUserByEmail(email: string) {
   const rows = await sql<(UserRow & { password_hash: string | null })[]>`
-    select id, email, nickname, country, password_hash
+    select id, email, nickname, country, role, password_hash
     from users where email = ${email}
   `;
   return rows[0] ?? null;
@@ -63,7 +67,7 @@ export async function findUserByEmail(email: string) {
 
 export async function getUserById(id: number): Promise<User | null> {
   const rows = await sql<UserRow[]>`
-    select id, email, nickname, country from users where id = ${id}
+    select id, email, nickname, country, role from users where id = ${id}
   `;
   return rows[0] ? toUser(rows[0]) : null;
 }
@@ -79,7 +83,7 @@ export async function createUser(input: {
   const rows = await sql<UserRow[]>`
     insert into users (email, password_hash, nickname, country)
     values (${input.email}, ${hash}, ${input.nickname}, ${input.country})
-    returning id, email, nickname, country
+    returning id, email, nickname, country, role
   `;
   return toUser(rows[0]);
 }
@@ -95,7 +99,7 @@ export async function updateProfile(
     update users
     set nickname = ${nickname}, country = ${input.country}
     where id = ${userId}
-    returning id, email, nickname, country
+    returning id, email, nickname, country, role
   `;
   return rows[0] ? toUser(rows[0]) : null;
 }
@@ -113,13 +117,13 @@ export async function findOrCreateGoogleUser(input: {
   const email = input.email.trim().toLowerCase();
 
   const byOauth = await sql<UserRow[]>`
-    select id, email, nickname, country from users
+    select id, email, nickname, country, role from users
     where oauth_provider = 'google' and oauth_id = ${input.googleId}
   `;
   if (byOauth[0]) return { user: toUser(byOauth[0]), isNew: false };
 
   const byEmail = await sql<UserRow[]>`
-    select id, email, nickname, country from users where email = ${email}
+    select id, email, nickname, country, role from users where email = ${email}
   `;
   if (byEmail[0]) {
     await sql`
@@ -136,7 +140,7 @@ export async function findOrCreateGoogleUser(input: {
   const created = await sql<UserRow[]>`
     insert into users (email, nickname, oauth_provider, oauth_id)
     values (${email}, ${nickname}, 'google', ${input.googleId})
-    returning id, email, nickname, country
+    returning id, email, nickname, country, role
   `;
   return { user: toUser(created[0]), isNew: true };
 }

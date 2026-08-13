@@ -7,6 +7,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
 interface Me {
   nickname: string;
+  role?: "user" | "admin";
 }
 
 export default function AuthNav() {
@@ -46,6 +47,15 @@ export default function AuthNav() {
   if (user) {
     return (
       <div className="flex shrink-0 items-center gap-2 text-sm">
+        {/* 팀 내부용 페이지라 다국어 없이 한국어 고정 */}
+        {user.role === "admin" && (
+          <Link
+            href="/admin"
+            className="rounded-full border border-white/15 px-2.5 py-1 text-xs font-semibold text-slate-300 transition hover:border-amber-300/60 hover:text-amber-300"
+          >
+            관리자
+          </Link>
+        )}
         <Link
           href="/profile"
           className="max-w-24 truncate font-semibold text-amber-300 transition hover:text-amber-200"
