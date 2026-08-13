@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteComment } from "@/lib/community";
 import { getSessionUser } from "@/lib/session";
+import { isAdmin } from "@/lib/activity";
 
 /** 본인 댓글 삭제 */
 export async function DELETE(
@@ -18,7 +19,7 @@ export async function DELETE(
   }
 
   try {
-    const result = await deleteComment(commentId, session.userId);
+    const result = await deleteComment(commentId, session.userId, await isAdmin(session.userId));
     if (result === "not-found") {
       return NextResponse.json({ error: "not found" }, { status: 404 });
     }

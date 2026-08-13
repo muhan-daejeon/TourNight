@@ -181,12 +181,14 @@ type DeleteResult = "ok" | "not-found" | "forbidden";
 export async function deletePost(
   postId: number,
   userId: number,
+  /** 관리자 삭제 — 소유자 확인을 건너뛴다 (관리자 페이지의 부적절 글 정리) */
+  asAdmin = false,
 ): Promise<DeleteResult> {
   const rows = await sql<{ user_id: string | null; media_path: string | null }[]>`
     select user_id, media_path from community_posts where id = ${postId}
   `;
   if (!rows.length) return "not-found";
-  if (rows[0].user_id == null || Number(rows[0].user_id) !== userId) {
+  if (!asAdmin && (rows[0].user_id == null || Number(rows[0].user_id) !== userId)) {
     return "forbidden";
   }
   await sql`delete from community_posts where id = ${postId}`;
@@ -198,12 +200,14 @@ export async function deletePost(
 export async function deleteComment(
   commentId: number,
   userId: number,
+  /** 관리자 삭제 — 소유자 확인을 건너뛴다 */
+  asAdmin = false,
 ): Promise<DeleteResult> {
   const rows = await sql<{ user_id: string | null; media_path: string | null }[]>`
     select user_id, media_path from community_comments where id = ${commentId}
   `;
   if (!rows.length) return "not-found";
-  if (rows[0].user_id == null || Number(rows[0].user_id) !== userId) {
+  if (!asAdmin && (rows[0].user_id == null || Number(rows[0].user_id) !== userId)) {
     return "forbidden";
   }
   await sql`delete from community_comments where id = ${commentId}`;
