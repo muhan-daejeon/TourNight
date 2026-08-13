@@ -3,6 +3,7 @@ import { listComments, createComment, BODY_MAX } from "@/lib/community";
 import { getSessionUser } from "@/lib/session";
 import { prepareMedia, readCommunityInput } from "@/lib/community-media";
 import { deleteCommunityMedia } from "@/lib/storage";
+import { logActivity } from "@/lib/activity";
 
 /** 특정 글의 댓글 목록 (읽기는 로그인 불필요) */
 export async function GET(
@@ -68,6 +69,7 @@ export async function POST(
       if (media) await deleteCommunityMedia(media.path);
       return NextResponse.json({ error: "invalid input" }, { status: 400 });
     }
+    logActivity(session.userId, "community_comment", { postId });
     return NextResponse.json({ comment }, { status: 201 });
   } catch (err) {
     if (media) await deleteCommunityMedia(media.path);

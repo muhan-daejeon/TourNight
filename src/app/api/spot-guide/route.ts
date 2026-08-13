@@ -4,6 +4,8 @@ import { fetchOverviewKo } from "@/lib/kto";
 import { getSpot } from "@/lib/spots";
 import { sql } from "@/lib/db";
 import { routing } from "@/i18n/routing";
+import { getSessionUser } from "@/lib/session";
+import { logActivity } from "@/lib/activity";
 
 /**
  * 스팟 가이드: 소개문은 KTO 다국어 서비스의 공식 번역을 우선 사용하고,
@@ -16,6 +18,11 @@ export async function GET(request: NextRequest) {
   if (!contentId || !routing.locales.includes(locale as never)) {
     return NextResponse.json({ error: "invalid params" }, { status: 400 });
   }
+
+  logActivity((await getSessionUser())?.userId ?? null, "spot_view", {
+    contentId,
+    locale,
+  });
 
   // KTO 공식 소개문 (sync-i18n으로 수집된 번역)
   const tr = await sql<{ overview: string | null }[]>`

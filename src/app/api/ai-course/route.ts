@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAiCourse, type AiCourse } from "@/lib/courses";
 import { sql } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
+import { isAdmin, logActivity } from "@/lib/activity";
 import { routing } from "@/i18n/routing";
 import type { NightSpot } from "@/lib/kto";
 
@@ -70,6 +71,11 @@ export async function GET(request: NextRequest) {
     `;
     // transit이 없는 캐시는 교통 정보 도입 전에 만들어진 것 → 무시하고 재생성
     if (cached.length > 0 && Array.isArray(cached[0].course?.transit)) {
+      logActivity(session.userId, "ai_course", {
+        anchors: contentIds,
+        category: cacheCategory || null,
+        cached: true,
+      });
       return NextResponse.json({ course: cached[0].course });
     }
   } catch (err) {
@@ -82,26 +88,30 @@ export async function GET(request: NextRequest) {
 
   // 여기부터는 실제 생성 — 캐시로 답한 경우는 위에서 이미 반환됐으므로 세지 않는다.
   // 원자적으로 올리고 그 결과로 판단해, 동시 요청이 한도를 넘기지 못하게 한다.
-  try {
-    const [{ count }] = await sql<{ count: number }[]>`
-      insert into ai_course_usage (user_id, used_on, count)
-      values (${session.userId}, current_date, 1)
-      on conflict (user_id, used_on)
-      do update set count = ai_course_usage.count + 1
-      returning count
-    `;
-    if (count > DAILY_LIMIT) {
-      return NextResponse.json(
-        { error: "daily_limit", limit: DAILY_LIMIT },
-        { status: 429 },
+  // 관리자는 데모·검수로 여러 번 돌려야 해서 한도를 적용하지 않는다.
+  const admin = await isAdmin(session.userId);
+  if (!admin) {
+    try {
+      const [{ count }] = await sql<{ count: number }[]>`
+        insert into ai_course_usage (user_id, used_on, count)
+        values (${session.userId}, current_date, 1)
+        on conflict (user_id, used_on)
+        do update set count = ai_course_usage.count + 1
+        returning count
+      `;
+      if (count > DAILY_LIMIT) {
+        return NextResponse.json(
+          { error: "daily_limit", limit: DAILY_LIMIT },
+          { status: 429 },
+        );
+      }
+    } catch (err) {
+      // 사용량 기록이 실패해도 기능은 막지 않는다 (한도는 최선 노력)
+      console.warn(
+        "[ai-course] 사용량 기록 실패:",
+        err instanceof Error ? err.message : err,
       );
     }
-  } catch (err) {
-    // 사용량 기록이 실패해도 기능은 막지 않는다 (한도는 최선 노력)
-    console.warn(
-      "[ai-course] 사용량 기록 실패:",
-      err instanceof Error ? err.message : err,
-    );
   }
 
   let course: AiCourse | null;
@@ -137,5 +147,10 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  logActivity(session.userId, "ai_course", {
+    anchors: contentIds,
+    category: cacheCategory || null,
+    cached: false,
+  });
   return NextResponse.json({ course });
 }

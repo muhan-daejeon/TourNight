@@ -6,6 +6,8 @@ import {
 } from "@/lib/gemini";
 import { sql } from "@/lib/db";
 import { routing } from "@/i18n/routing";
+import { getSessionUser } from "@/lib/session";
+import { logActivity } from "@/lib/activity";
 
 /** 주제별 관련 야간 명소 — 에티켓에서 명소 탐색으로 이어지는 동선 */
 const TOPIC_SPOT_FILTER: Record<
@@ -62,6 +64,11 @@ export async function GET(request: NextRequest) {
   if (!(topicId in ETIQUETTE_TOPICS) || !routing.locales.includes(locale as never)) {
     return NextResponse.json({ error: "invalid params" }, { status: 400 });
   }
+
+  logActivity((await getSessionUser())?.userId ?? null, "etiquette", {
+    topic: topicId,
+    locale,
+  });
 
   const spots = await relatedSpots(topicId, locale);
 
