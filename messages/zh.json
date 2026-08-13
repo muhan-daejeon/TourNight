@@ -74,6 +74,8 @@
     "legWalk": "步行 {min} 分钟",
     "legTaxi": "出租车 {min} 分钟 · 约 {fare} 韩元",
     "legTransit": "{min}分钟 · 换乘{transfer}次 · {fare}韩元",
+    "stepRide": "{start}上车 → {end}下车",
+    "stepStations": "{count}站",
     "totalMin": "{min}分钟",
     "totalWalk": "全程步行 {min} 分钟",
     "totalBest": "全程 {min} 分钟 · 约 {fare} 韩元",

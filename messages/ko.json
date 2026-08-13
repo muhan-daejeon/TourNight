@@ -74,6 +74,8 @@
     "legWalk": "도보 {min}분",
     "legTaxi": "택시 {min}분 · 약 {fare}원",
     "legTransit": "{min}분 · 환승 {transfer}회 · {fare}원",
+    "stepRide": "{start} 승차 → {end} 하차",
+    "stepStations": "{count}개 정류장",
     "totalMin": "{min}분",
     "totalWalk": "전체 도보 {min}분",
     "totalBest": "전체 {min}분 · 약 {fare}원",

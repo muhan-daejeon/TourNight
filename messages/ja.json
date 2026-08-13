@@ -74,6 +74,8 @@
     "legWalk": "徒歩{min}分",
     "legTaxi": "タクシー{min}分・約{fare}ウォン",
     "legTransit": "{min}分・乗換{transfer}回・{fare}ウォン",
+    "stepRide": "{start}乗車 → {end}下車",
+    "stepStations": "{count}停留所",
     "totalMin": "{min}分",
     "totalWalk": "全行程 徒歩{min}分",
     "totalBest": "全行程 {min}分・約{fare}ウォン",

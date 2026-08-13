@@ -74,6 +74,8 @@
     "legWalk": "{min} min walk",
     "legTaxi": "{min} min by taxi · approx. {fare} KRW",
     "legTransit": "{min} min · {transfer} transfers · ₩{fare}",
+    "stepRide": "board at {start} → get off at {end}",
+    "stepStations": "{count} stops",
     "totalMin": "{min} min",
     "totalWalk": "{min} min walking in total",
     "totalBest": "{min} min total · approx. {fare} KRW",

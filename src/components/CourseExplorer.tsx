@@ -15,6 +15,7 @@ import {
   Bus,
   Footprints,
   CarTaxiFront,
+  TrainFront,
   BedDouble,
 } from "lucide-react";
 import CourseMap, { type MapMode } from "./CourseMap";
@@ -303,6 +304,52 @@ function RoutePanel({
                       </span>
                     )}
                   </p>
+
+                  {/* 대중교통은 요약만으론 못 탄다 — 몇 번 버스를 어디서 타고
+                      내리는지 단계별로 보여준다 (예전 캐시에는 정류장 정보가 없다) */}
+                  {picked === "transit" &&
+                    r?.status === "ok" &&
+                    r.legs.some((sub) => sub.mode !== "WALK" && sub.startName) && (
+                      <ol className="mt-1.5 space-y-1 border-l border-white/10 pl-2.5">
+                        {r.legs.map((sub, k) => {
+                          if (sub.mode === "WALK") {
+                            const m = Math.round((sub.durationSec ?? 0) / 60);
+                            if (m < 2) return null;
+                            return (
+                              <li
+                                key={k}
+                                className="flex items-center gap-1.5 text-[12px] text-slate-400"
+                              >
+                                <Footprints size={11} className="shrink-0" />
+                                {t("legWalk", { min: m })}
+                              </li>
+                            );
+                          }
+                          const SubIcon = sub.mode === "SUBWAY" ? TrainFront : Bus;
+                          return (
+                            <li
+                              key={k}
+                              className="flex items-start gap-1.5 text-[12px] text-slate-300"
+                            >
+                              <SubIcon
+                                size={11}
+                                className="mt-0.5 shrink-0 text-amber-300/80"
+                              />
+                              <span className="min-w-0">
+                                <b className="text-slate-100">{sub.route}</b>{" "}
+                                {t("stepRide", {
+                                  start: sub.startName ?? "",
+                                  end: sub.endName ?? "",
+                                })}
+                                {sub.stationCount
+                                  ? ` · ${t("stepStations", { count: sub.stationCount })}`
+                                  : ""}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    )}
                 </div>
               </li>
             );
