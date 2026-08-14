@@ -377,10 +377,11 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const fromContentId = searchParams.get("from");
   const fromCategory = searchParams.get("category");
 
-  // 새로 짜러 온 게 아니면(?from= 없음) 지난번에 만든 코스를 되살린다
-  const [aiCourse, setAiCourse] = useState<AiCourse | null>(() =>
-    fromContentId ? null : loadSavedCourse(locale),
-  );
+  // 저장된 코스 복원은 아래 effect에서 마운트 후에 한다.
+  // useState 초기값에서 localStorage를 읽으면 서버 HTML(코스 없음)과
+  // 클라이언트 첫 렌더(코스 있음)가 어긋나 hydration 오류로 트리가 통째로
+  // 재생성된다 — 이때 카카오맵 초기화가 꼬여 지도가 죽는 문제가 있었다.
+  const [aiCourse, setAiCourse] = useState<AiCourse | null>(null);
   const [aiState, setAiState] = useState<
     "idle" | "loading" | "error" | "limit"
   >(
@@ -396,11 +397,21 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const [lastKey, setLastKey] = useState(reqKey);
   if (lastKey !== reqKey) {
     setLastKey(reqKey);
-    // 새로 짜러 왔으면 비우고 다시 받는다. 그냥 코스 페이지로 돌아온 경우라면
-    // 지난번 코스를 되살린다 (안 그러면 여기서 지워져 유지가 무의미해진다).
-    setAiCourse(fromContentId ? null : loadSavedCourse(locale));
+    // 새로 짜러 왔으면 비우고 다시 받는다. 복원은 아래 effect 담당.
+    setAiCourse(null);
     setAiState(fromContentId ? "loading" : "idle");
   }
+
+  // 지난번에 만든 코스 되살리기 — 마운트 후에만 localStorage를 읽어
+  // 서버 렌더와 첫 클라이언트 렌더를 일치시킨다 (hydration 안전)
+  useEffect(() => {
+    if (!fromContentId) {
+      const saved = loadSavedCourse(locale);
+      // 외부 저장소(localStorage) 동기화라 마운트 직후 한 번의 재렌더는 의도된 것
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (saved) setAiCourse(saved);
+    }
+  }, [fromContentId, locale]);
 
   useEffect(() => {
     if (!fromContentId) return;

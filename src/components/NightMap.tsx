@@ -143,6 +143,18 @@ export default function NightMap({
     document.head.appendChild(script);
   }, [spots]);
 
+  // 컨테이너 크기 변화(반응형 높이 전환 등)를 지도에 반영.
+  // relayout 없이 크기만 바뀌면 타일은 보여도 클릭·드래그 좌표가 어긋난다
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      mapRef.current?.relayout();
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   // 현재 필터(카테고리+검색)를 통과한 스팟만 마커 표시
   useEffect(() => {
     const map = mapRef.current;
