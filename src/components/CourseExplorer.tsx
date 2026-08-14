@@ -29,7 +29,9 @@ import { TAXI_NIGHT_SURCHARGE, pickBestMode } from "@/lib/transit-format";
  *
  * 키에 버전을 붙여, 코스 구조가 바뀌면 예전 데이터가 화면을 깨뜨리지 않고 무시된다.
  */
-const AI_COURSE_KEY = "tournight:aiCourse:v1";
+// v2: 대중교통 경로가 정류장 직선 근사 → 실제 도로 형상(loadLane)으로 바뀜.
+// v1 저장본은 옛 직선 좌표가 박제돼 있어 지도에 건물을 가로지르는 선을 그린다.
+const AI_COURSE_KEY = "tournight:aiCourse:v2";
 
 function loadSavedCourse(locale: string): AiCourse | null {
   if (typeof window === "undefined") return null;
