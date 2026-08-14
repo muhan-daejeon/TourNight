@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLocale } from "next-intl";
 import type { Course } from "@/lib/courses";
 import { pickBestMode } from "@/lib/transit-format";
 import type { RouteLeg } from "@/lib/routes";
@@ -34,6 +35,7 @@ export default function CourseMap({
   course: Course;
   mode?: MapMode;
 }) {
+  const locale = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<KakaoNS>(null);
   const kakaoRef = useRef<KakaoNS>(null);
@@ -47,6 +49,11 @@ export default function CourseMap({
       const kakao = kakaoRef.current;
       const map = mapRef.current;
       if (!kakao || !map) return;
+
+      // 컨테이너 크기가 생성 시점과 달라졌으면 내부 크기를 다시 맞춘다.
+      // 어긋난 채로 두면 타일은 보여도 클릭·드래그 히트 영역이 틀어져
+      // 지도가 죽은 것처럼 된다 (탭 이동 후 재선택 등에서 보고됨)
+      map.relayout();
 
       overlaysRef.current.forEach((o) => o.setMap(null));
       overlaysRef.current = [];
@@ -130,14 +137,24 @@ export default function CourseMap({
         });
       });
 
-      // 번호 마커 (경로 위에 오도록 마지막에)
+      // 번호 마커 (경로 위에 오도록 마지막에) — 누르면 그 스팟 상세로 이동
       course.stops.forEach((s, i) => {
+        const el = document.createElement("div");
+        el.innerHTML = `<div title="${s.title.replace(/"/g, "&quot;")}" style="width:26px;height:26px;border-radius:50%;background:#fbbf24;color:#0f172a;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #0f172a;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer">${i + 1}</div>`;
+        // SDK가 오버레이 클릭을 지도 이벤트로 삼키지 않게 여기서 끊는다
+        ["mousedown", "touchstart"].forEach((type) =>
+          el.addEventListener(type, (e) => e.stopPropagation()),
+        );
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          window.location.href = `/${locale}/spots/${encodeURIComponent(s.contentId)}`;
+        });
         const ov = new kakao.maps.CustomOverlay({
           position: stopPos[i],
           xAnchor: 0.5,
           yAnchor: 0.5,
           zIndex: 10,
-          content: `<div style="width:26px;height:26px;border-radius:50%;background:#fbbf24;color:#0f172a;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #0f172a;box-shadow:0 2px 8px rgba(0,0,0,.5)">${i + 1}</div>`,
+          content: el,
         });
         ov.setMap(map);
         overlaysRef.current.push(ov);
@@ -184,7 +201,19 @@ export default function CourseMap({
     return () => {
       cancelled = true;
     };
-  }, [course, mode]);
+  }, [course, mode, locale]);
+
+  // 컨테이너 크기 변화(반응형 h-80↔500px, 사이드바 접힘 등)를 지도에 반영.
+  // relayout 없이 크기만 바뀌면 상호작용 좌표가 어긋난다
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      mapRef.current?.relayout();
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
     <div className="relative h-full overflow-hidden rounded-2xl border border-white/10">
