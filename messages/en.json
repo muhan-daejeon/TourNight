@@ -5,17 +5,21 @@
     "description": "Science, nature, and night — your guide to Daejeon after dark"
   },
   "nav": {
-    "spots": "Night Spots",
-    "courses": "Courses",
+    "spots": "Night spots",
+    "courses": "AI courses",
     "etiquette": "Night Etiquette",
     "community": "Community",
     "phrases": "Survival Korean",
-    "festivals": "Festivals"
+    "festivals": "Festivals",
+    "food": "Food",
+    "stay": "Stay",
+    "shopping": "Shopping",
+    "menu": "All menu"
   },
   "home": {
     "heroTitle": "Daejeon Shines Brighter at Night",
     "heroSubtitle": "Night views, starlight, and festivals of Korea's science city — all in one place",
-    "spotsSection": "Where to Go Tonight",
+    "spotsSection": "Where to tonight?",
     "searchPlaceholder": "Search by name or area",
     "noResults": "No spots found",
     "viewDetail": "View details",
@@ -49,7 +53,7 @@
     "heroAiHighlight": "AI",
     "heroAiSubtitle": "Just pick the spots you want. We'll work out the order, the bus and walking routes, and the last departure times.",
     "heroAiCta": "Plan a course",
-    "festivalsSection": "Daejeon festivals, all year round",
+    "festivalsSection": "{year} Daejeon festivals & events",
     "festivalsSectionSub": "A different night for every season",
     "festivalsViewAll": "See all festivals",
     "spotsSectionSub": "Night views in Daejeon, picked by TOUR A NIGHT",
@@ -61,7 +65,7 @@
     "monthlyIssueTitle": "Monthly newsletter",
     "monthlyIssueCta": "This month's festivals",
     "popularSection": "Popular this week",
-    "popularSectionSub": "Most-discussed community posts",
+    "popularSectionSub": "Top {count} community posts",
     "popularEmpty": "No posts yet.",
     "gallerySection": "Night gallery",
     "gallerySectionSub": "Daejeon nights on TOUR A NIGHT",
@@ -69,10 +73,29 @@
     "guidebookOverline": "The whole Daejeon night, in one book",
     "guidebookTitle": "TOUR A NIGHT GUIDEBOOK",
     "guidebookSubtitle": "From after-dark etiquette to the phrases you'll actually use",
-    "guidebookCta": "Open the guidebook"
+    "guidebookCta": "Open the guidebook",
+    "monthlyIssueBlurb": "Making Daejeon nights even better",
+    "snsSection": "TOUR A NIGHT on Instagram",
+    "snsPending": "Account coming soon",
+    "bookmarkAdd": "Save",
+    "bookmarkRemove": "Remove from saved",
+    "bookmarkFilter": "Saved {count}"
   },
   "footer": {
-    "notice": "This service is an entry for the 2026 Tourism Data Contest."
+    "notice": "This service is an entry for the 2026 Tourism Data Contest.",
+    "toTop": "Back to top",
+    "links": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "support": "Support",
+      "partners": "Partnerships",
+      "notices": "Notices"
+    },
+    "socials": {
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "kakao": "KakaoTalk"
+    }
   },
   "transit": {
     "title": "Getting there & last bus",
@@ -295,5 +318,9 @@
     "viewSpot": "View spot",
     "planCta": "Plan a course via here",
     "more": "More festivals"
+  },
+  "comingSoon": {
+    "short": "Coming soon",
+    "body": "Food, stay and shopping listings come from the Korea Tourism Organization's information service. We're still wiring that data up — this page will fill in as soon as it's ready."
   }
 }

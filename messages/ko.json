@@ -5,17 +5,21 @@
     "description": "과학, 자연, 그리고 밤 — 대전 야간관광 통합 안내"
   },
   "nav": {
-    "spots": "야간 명소",
-    "courses": "추천 코스",
+    "spots": "야경명소",
+    "courses": "AI 추천",
     "etiquette": "나이트 에티켓",
     "community": "커뮤니티",
     "phrases": "서바이벌 한국어",
-    "festivals": "축제&행사"
+    "festivals": "축제&행사",
+    "food": "맛집",
+    "stay": "숙박",
+    "shopping": "쇼핑",
+    "menu": "전체 메뉴"
   },
   "home": {
     "heroTitle": "대전의 밤은 낮보다 빛난다",
     "heroSubtitle": "과학도시 대전의 야경, 별빛, 축제를 한곳에서",
-    "spotsSection": "오늘 밤 가볼 만한 곳",
+    "spotsSection": "오늘 밤, 어디로 갈까요?",
     "searchPlaceholder": "명소 이름·지역으로 검색",
     "noResults": "검색 결과가 없습니다",
     "viewDetail": "자세히 보기",
@@ -49,7 +53,7 @@
     "heroAiHighlight": "AI",
     "heroAiSubtitle": "가고 싶은 명소만 담으면 이동 순서부터 버스·도보 경로, 막차 시간까지 한 번에 정리해 드려요.",
     "heroAiCta": "코스 만들기",
-    "festivalsSection": "1년 내내, 대전 축제&행사",
+    "festivalsSection": "{year} 대전 축제&행사",
     "festivalsSectionSub": "계절마다 이어지는 대전의 다채로운 밤",
     "festivalsViewAll": "전체 축제&행사 보기",
     "spotsSectionSub": "투어나잇이 추천하는 대전 야경 명소",
@@ -61,7 +65,7 @@
     "monthlyIssueTitle": "월간 뉴스레터",
     "monthlyIssueCta": "이달의 축제 보기",
     "popularSection": "이번 주 인기글",
-    "popularSectionSub": "투어나잇 커뮤니티 인기글",
+    "popularSectionSub": "투어나잇 커뮤니티 인기글 TOP {count}",
     "popularEmpty": "아직 올라온 글이 없습니다.",
     "gallerySection": "야경 갤러리",
     "gallerySectionSub": "투어나잇에 등록된 대전의 밤",
@@ -69,10 +73,29 @@
     "guidebookOverline": "대전의 밤을 한 권에 담다",
     "guidebookTitle": "TOUR A NIGHT GUIDEBOOK",
     "guidebookSubtitle": "밤길 에티켓부터 현장에서 바로 쓰는 회화까지",
-    "guidebookCta": "가이드북 보기"
+    "guidebookCta": "가이드북 보기",
+    "monthlyIssueBlurb": "대전의 밤을 더 특별하게!",
+    "snsSection": "TOUR A NIGHT 인스타그램",
+    "snsPending": "계정 준비 중",
+    "bookmarkAdd": "찜하기",
+    "bookmarkRemove": "찜 해제",
+    "bookmarkFilter": "찜한 곳 {count}"
   },
   "footer": {
-    "notice": "본 서비스는 2026 관광데이터 활용 공모전 출품작입니다."
+    "notice": "본 서비스는 2026 관광데이터 활용 공모전 출품작입니다.",
+    "toTop": "맨 위로",
+    "links": {
+      "terms": "이용약관",
+      "privacy": "개인정보처리방침",
+      "support": "고객센터",
+      "partners": "제휴문의",
+      "notices": "공지사항"
+    },
+    "socials": {
+      "instagram": "인스타그램",
+      "youtube": "유튜브",
+      "kakao": "카카오톡"
+    }
   },
   "transit": {
     "title": "가는 길·막차",
@@ -295,5 +318,9 @@
     "viewSpot": "명소 보기",
     "planCta": "이 곳 거치는 코스 짜기",
     "more": "다른 축제도 보기"
+  },
+  "comingSoon": {
+    "short": "준비 중",
+    "body": "맛집·숙박·쇼핑 정보는 한국관광공사 관광정보 서비스에서 받아옵니다. 현재 데이터 연동을 준비하고 있어, 준비가 끝나는 대로 이 자리에 채워 드릴게요."
   }
 }

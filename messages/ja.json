@@ -5,17 +5,21 @@
     "description": "科学と自然、そして夜 — 大田ナイトツアー総合ガイド"
   },
   "nav": {
-    "spots": "夜の名所",
-    "courses": "おすすめコース",
+    "spots": "夜景スポット",
+    "courses": "AIおすすめ",
     "etiquette": "ナイトエチケット",
     "community": "コミュニティ",
     "phrases": "サバイバル韓国語",
-    "festivals": "祭り・イベント"
+    "festivals": "祭り・イベント",
+    "food": "グルメ",
+    "stay": "宿泊",
+    "shopping": "ショッピング",
+    "menu": "メニュー一覧"
   },
   "home": {
     "heroTitle": "大田の夜は昼より輝く",
     "heroSubtitle": "科学都市・大田の夜景、星空、祭りをひとつの場所で",
-    "spotsSection": "今夜行きたい場所",
+    "spotsSection": "今夜、どこへ行きましょう？",
     "searchPlaceholder": "名前・エリアで検索",
     "noResults": "該当する名所がありません",
     "viewDetail": "詳しく見る",
@@ -49,7 +53,7 @@
     "heroAiHighlight": "AI",
     "heroAiSubtitle": "行きたい名所を選ぶだけ。回る順番からバス・徒歩ルート、終電・終バスの時間までまとめてご案内します。",
     "heroAiCta": "コースを作る",
-    "festivalsSection": "一年中つづく、大田の祭り",
+    "festivalsSection": "{year}年 大田の祭り・イベント",
     "festivalsSectionSub": "季節ごとに変わる大田の夜",
     "festivalsViewAll": "祭り・イベントをすべて見る",
     "spotsSectionSub": "TOUR A NIGHT おすすめの大田夜景スポット",
@@ -61,7 +65,7 @@
     "monthlyIssueTitle": "月刊ニュースレター",
     "monthlyIssueCta": "今月の祭りを見る",
     "popularSection": "今週の人気投稿",
-    "popularSectionSub": "コミュニティで話題の投稿",
+    "popularSectionSub": "コミュニティ人気投稿 TOP {count}",
     "popularEmpty": "まだ投稿がありません。",
     "gallerySection": "夜景ギャラリー",
     "gallerySectionSub": "TOUR A NIGHT に登録された大田の夜",
@@ -69,10 +73,29 @@
     "guidebookOverline": "大田の夜を一冊に",
     "guidebookTitle": "TOUR A NIGHT GUIDEBOOK",
     "guidebookSubtitle": "夜のマナーから、その場で使える会話まで",
-    "guidebookCta": "ガイドブックを見る"
+    "guidebookCta": "ガイドブックを見る",
+    "monthlyIssueBlurb": "大田の夜をもっと特別に！",
+    "snsSection": "TOUR A NIGHT インスタグラム",
+    "snsPending": "アカウント準備中",
+    "bookmarkAdd": "保存",
+    "bookmarkRemove": "保存を解除",
+    "bookmarkFilter": "保存した場所 {count}"
   },
   "footer": {
-    "notice": "本サービスは2026観光データ活用コンテストの出品作です。"
+    "notice": "本サービスは2026観光データ活用コンテストの出品作です。",
+    "toTop": "トップへ戻る",
+    "links": {
+      "terms": "利用規約",
+      "privacy": "プライバシーポリシー",
+      "support": "お問い合わせ",
+      "partners": "提携について",
+      "notices": "お知らせ"
+    },
+    "socials": {
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "kakao": "カカオトーク"
+    }
   },
   "transit": {
     "title": "アクセス・終バス",
@@ -295,5 +318,9 @@
     "viewSpot": "スポットを見る",
     "planCta": "ここを通るコースを作る",
     "more": "ほかの祭りも見る"
+  },
+  "comingSoon": {
+    "short": "準備中",
+    "body": "グルメ・宿泊・ショッピング情報は韓国観光公社の観光情報サービスから取得します。現在データ連携を準備中で、整い次第このページに掲載します。"
   }
 }

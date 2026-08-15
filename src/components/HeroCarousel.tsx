@@ -119,6 +119,10 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             className="object-cover opacity-45"
           />
         )}
+        {/* 사진이 없는 슬라이드는 오른쪽에 빛무리를 둬 시안의 우측 이미지 자리를 채운다 */}
+        {!slide.image && (
+          <div className="pointer-events-none absolute -right-24 top-1/2 hidden size-[420px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(165,180,252,0.35),transparent_65%)] sm:block" />
+        )}
         {/* 왼쪽 텍스트가 사진 위에서도 읽히도록 왼쪽을 더 어둡게 깐다 */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-transparent" />
 

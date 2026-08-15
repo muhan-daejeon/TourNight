@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getVerifiedNightSpots } from "@/lib/spots";
 import SpotExplorer from "@/components/SpotExplorer";
@@ -28,7 +29,10 @@ export default async function SpotsPage({
       <p className="mt-3 mb-8 max-w-2xl text-slate-400">
         {t("spotsAllSubtitle")}
       </p>
-      <SpotExplorer spots={spots} />
+      {/* SpotExplorer가 헤더 검색이 넘긴 ?q=를 읽으므로 Suspense로 감싼다 */}
+      <Suspense fallback={<div className="h-96" />}>
+        <SpotExplorer spots={spots} />
+      </Suspense>
     </div>
   );
 }

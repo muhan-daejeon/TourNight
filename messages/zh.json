@@ -5,17 +5,21 @@
     "description": "科学、自然与夜晚 — 大田夜间观光综合指南"
   },
   "nav": {
-    "spots": "夜间景点",
-    "courses": "推荐路线",
+    "spots": "夜景景点",
+    "courses": "AI推荐",
     "etiquette": "夜间礼仪",
     "community": "社区",
     "phrases": "生存韩语",
-    "festivals": "庆典·活动"
+    "festivals": "庆典·活动",
+    "food": "美食",
+    "stay": "住宿",
+    "shopping": "购物",
+    "menu": "全部菜单"
   },
   "home": {
     "heroTitle": "大田的夜晚比白天更璀璨",
     "heroSubtitle": "科学之城大田的夜景、星空与庆典，尽在一处",
-    "spotsSection": "今晚值得一去的地方",
+    "spotsSection": "今晚去哪儿？",
     "searchPlaceholder": "按名称或地区搜索",
     "noResults": "未找到相关景点",
     "viewDetail": "查看详情",
@@ -49,7 +53,7 @@
     "heroAiHighlight": "AI",
     "heroAiSubtitle": "只要选好想去的景点，游览顺序、公交与步行路线、末班车时间都为你一次整理好。",
     "heroAiCta": "生成路线",
-    "festivalsSection": "全年不断的大田庆典",
+    "festivalsSection": "{year} 大田庆典·活动",
     "festivalsSectionSub": "每个季节都有不一样的大田之夜",
     "festivalsViewAll": "查看全部庆典·活动",
     "spotsSectionSub": "TOUR A NIGHT 推荐的大田夜景",
@@ -61,7 +65,7 @@
     "monthlyIssueTitle": "月刊通讯",
     "monthlyIssueCta": "查看本月庆典",
     "popularSection": "本周热门帖",
-    "popularSectionSub": "社区中最受关注的帖子",
+    "popularSectionSub": "社区热门帖 TOP {count}",
     "popularEmpty": "还没有帖子。",
     "gallerySection": "夜景相册",
     "gallerySectionSub": "TOUR A NIGHT 收录的大田之夜",
@@ -69,10 +73,29 @@
     "guidebookOverline": "把大田的夜晚收进一本书",
     "guidebookTitle": "TOUR A NIGHT GUIDEBOOK",
     "guidebookSubtitle": "从夜间礼仪到现场就能用的常用语",
-    "guidebookCta": "打开指南"
+    "guidebookCta": "打开指南",
+    "monthlyIssueBlurb": "让大田的夜晚更特别！",
+    "snsSection": "TOUR A NIGHT 的 Instagram",
+    "snsPending": "账号筹备中",
+    "bookmarkAdd": "收藏",
+    "bookmarkRemove": "取消收藏",
+    "bookmarkFilter": "已收藏 {count}"
   },
   "footer": {
-    "notice": "本服务为2026观光数据应用大赛参赛作品。"
+    "notice": "本服务为2026观光数据应用大赛参赛作品。",
+    "toTop": "回到顶部",
+    "links": {
+      "terms": "使用条款",
+      "privacy": "隐私政策",
+      "support": "客服中心",
+      "partners": "商务合作",
+      "notices": "公告"
+    },
+    "socials": {
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "kakao": "KakaoTalk"
+    }
   },
   "transit": {
     "title": "交通与末班车",
@@ -295,5 +318,9 @@
     "viewSpot": "查看景点",
     "planCta": "生成经过这里的路线",
     "more": "看看其他庆典"
+  },
+  "comingSoon": {
+    "short": "筹备中",
+    "body": "美食·住宿·购物信息来自韩国观光公社的旅游信息服务。目前正在准备数据对接，完成后会第一时间补充到这里。"
   }
 }
