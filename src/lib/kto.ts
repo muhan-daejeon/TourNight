@@ -24,6 +24,8 @@ export interface NightSpot {
   mapY: number; // 위도
   imageUrl: string | null;
   category: "science" | "nature" | "festival" | "city";
+  /** KTO 다국어 서비스의 공식 소개문 (목록 카드 한 줄 설명용, 없으면 null) */
+  overview?: string | null;
 }
 
 /** 키 발급 전 개발용 목 데이터 (대전 대표 야간 명소) */

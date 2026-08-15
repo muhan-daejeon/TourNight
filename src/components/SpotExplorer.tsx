@@ -2,12 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   Telescope,
   Trees,
   Sparkles,
   Building2,
+  Bookmark,
   ChevronRight,
   Search,
   Plus,
@@ -18,6 +20,7 @@ import {
 import { Link, useRouter } from "@/i18n/navigation";
 import type { NightSpot } from "@/lib/kto";
 import NightMap from "./NightMap";
+import { useBookmarks } from "./useBookmarks";
 
 const CATEGORIES = ["all", "science", "nature", "festival", "city"] as const;
 
@@ -47,8 +50,21 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
   const t = useTranslations("home");
   const router = useRouter();
   const [category, setCategory] = useState<string>("all");
-  const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { ids: bookmarks, toggle: toggleBookmark } = useBookmarks();
+  const [onlyBookmarked, setOnlyBookmarked] = useState(false);
+
+  // 헤더 검색이 /spots?q=…로 넘어온다. 사용자가 여기서 다시 치면 그 값이 이기고,
+  // 헤더에서 새로 검색해 URL이 바뀌면 다시 URL을 따라간다.
+  const urlQuery = useSearchParams().get("q") ?? "";
+  const [typedQuery, setTypedQuery] = useState<string | null>(null);
+  const [seenUrlQuery, setSeenUrlQuery] = useState(urlQuery);
+  if (seenUrlQuery !== urlQuery) {
+    setSeenUrlQuery(urlQuery);
+    setTypedQuery(null);
+  }
+  const query = typedQuery ?? urlQuery;
+  const setQuery = setTypedQuery;
   // 코스에 담은 명소들 — 담긴 곳을 전부 거치는 AI 코스를 짠다 (최대 4곳)
   const MAX_BASKET = 4;
   const [basket, setBasket] = useState<string[]>([]);
@@ -73,13 +89,14 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
     const q = query.trim().toLowerCase();
     return spots.filter((s) => {
       if (category !== "all" && s.category !== category) return false;
+      if (onlyBookmarked && !bookmarks.includes(s.contentId)) return false;
       if (!q) return true;
       return (
         s.title.toLowerCase().includes(q) ||
         (s.addr ?? "").toLowerCase().includes(q)
       );
     });
-  }, [spots, category, query]);
+  }, [spots, category, query, onlyBookmarked, bookmarks]);
 
   // 지도 마커 표시 여부 판단용 — 현재 필터를 통과한 스팟 ID 집합
   const visibleIds = useMemo(
@@ -129,6 +146,25 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             </button>
           );
         })}
+        {/* 찜한 곳만 — 하나도 없으면 눌러도 빈 목록이라 아예 띄우지 않는다 */}
+        {bookmarks.length > 0 && (
+          <button
+            onClick={() => setOnlyBookmarked((v) => !v)}
+            aria-pressed={onlyBookmarked}
+            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+              onlyBookmarked
+                ? "border-amber-400 bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.3)]"
+                : "border-white/10 bg-white/5 text-slate-300 backdrop-blur hover:border-white/25 hover:text-white"
+            }`}
+          >
+            <Bookmark
+              size={14}
+              strokeWidth={2.2}
+              fill={onlyBookmarked ? "currentColor" : "none"}
+            />
+            {t("bookmarkFilter", { count: bookmarks.length })}
+          </button>
+        )}
       </div>
 
       {/* 리스트 + 고정 지도 분할 뷰 */}
@@ -177,6 +213,35 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                     <Icon size={11} strokeWidth={2.4} />
                     {t(`categories.${spot.category}`)}
                   </span>
+
+                  {/* 찜 — 브라우저에만 저장되고, 위 '찜한 곳' 칩으로 다시 찾는다 */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleBookmark(spot.contentId);
+                    }}
+                    aria-pressed={bookmarks.includes(spot.contentId)}
+                    aria-label={
+                      bookmarks.includes(spot.contentId)
+                        ? t("bookmarkRemove")
+                        : t("bookmarkAdd")
+                    }
+                    className={`absolute right-3 top-11 rounded-full p-1.5 backdrop-blur transition ${
+                      bookmarks.includes(spot.contentId)
+                        ? "bg-amber-400 text-slate-950"
+                        : "bg-slate-950/70 text-slate-200 hover:bg-slate-950/90 hover:text-amber-300"
+                    }`}
+                  >
+                    <Bookmark
+                      size={13}
+                      fill={
+                        bookmarks.includes(spot.contentId)
+                          ? "currentColor"
+                          : "none"
+                      }
+                    />
+                  </button>
 
                   {/* 코스에 담기 — 담긴 곳들을 전부 거치는 AI 코스를 짤 수 있다 */}
                   <button

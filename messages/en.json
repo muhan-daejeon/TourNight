@@ -9,12 +9,18 @@
     "courses": "Courses",
     "etiquette": "Night Etiquette",
     "community": "Community",
-    "phrases": "Survival Korean"
+    "phrases": "Survival Korean",
+    "festivals": "Festivals",
+    "food": "Food",
+    "stay": "Stay",
+    "shopping": "Shopping",
+    "menu": "All menu",
+    "home": "Home"
   },
   "home": {
     "heroTitle": "Daejeon Shines Brighter at Night",
     "heroSubtitle": "Night views, starlight, and festivals of Korea's science city — all in one place",
-    "spotsSection": "Where to Go Tonight",
+    "spotsSection": "Where to tonight?",
     "searchPlaceholder": "Search by name or area",
     "noResults": "No spots found",
     "viewDetail": "View details",
@@ -33,10 +39,61 @@
       "city": "City"
     },
     "ctaSpots": "Explore Night Spots",
-    "ctaGuide": "Night Etiquette"
+    "ctaGuide": "Night Etiquette",
+    "heroCarousel": "Main banner",
+    "prevSlide": "Previous banner",
+    "nextSlide": "Next banner",
+    "pauseSlides": "Pause auto-rotation",
+    "playSlides": "Resume auto-rotation",
+    "scrollPrev": "Scroll back",
+    "scrollNext": "Scroll forward",
+    "heroFestivalOverline": "Right now, Daejeon nights are special",
+    "heroFestivalCta": "See details",
+    "heroAiOverline": "Your guide to the night",
+    "heroAiTitle": "Let AI plan tonight's course",
+    "heroAiHighlight": "AI",
+    "heroAiSubtitle": "Just pick the spots you want. We'll work out the order, the bus and walking routes, and the last departure times.",
+    "heroAiCta": "Plan a course",
+    "festivalsSection": "{year} Daejeon festivals & events",
+    "festivalsSectionSub": "A different night for every season",
+    "festivalsViewAll": "See all festivals",
+    "spotsSectionSub": "Night views in Daejeon, picked by TourNight",
+    "spotsViewAll": "See all night spots",
+    "spotsAllTitle": "Daejeon night spots",
+    "spotsAllSubtitle": "Explore Daejeon after dark on the map, then save the places you like and turn them into a course.",
+    "newsSection": "TourNight news",
+    "newsSectionSub": "The latest from TourNight",
+    "monthlyIssueTitle": "Monthly newsletter",
+    "monthlyIssueCta": "This month's festivals",
+    "popularSection": "Popular this week",
+    "popularSectionSub": "Top {count} community posts",
+    "popularEmpty": "No posts yet.",
+    "galleryCta": "See more",
+    "guidebookOverline": "The whole Daejeon night, in one book",
+    "guidebookSubtitle": "From after-dark etiquette to the phrases you'll actually use",
+    "guidebookCta": "Open the guidebook",
+    "monthlyIssueBlurb": "Making Daejeon nights even better",
+    "snsSection": "TourNight on Instagram",
+    "snsPending": "Account coming soon",
+    "bookmarkAdd": "Save",
+    "bookmarkRemove": "Remove from saved",
+    "bookmarkFilter": "Saved {count}"
   },
   "footer": {
-    "notice": "This service is an entry for the 2026 Tourism Data Contest."
+    "notice": "This service is an entry for the 2026 Tourism Data Contest.",
+    "toTop": "Back to top",
+    "links": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "support": "Support",
+      "partners": "Partnerships",
+      "notices": "Notices"
+    },
+    "socials": {
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "kakao": "KakaoTalk"
+    }
   },
   "transit": {
     "title": "Getting there & last bus",
@@ -241,5 +298,27 @@
     "moonAge": "Moon age {age}",
     "starNight": "Great night for stargazing",
     "fullMoon": "Full-moon night"
+  },
+  "festivals": {
+    "title": "Festivals & events",
+    "subtitle": "A different Daejeon night for every season",
+    "scheduleNote": "Exact dates and programmes change each year with the organiser's announcement. Please check the official notice before you go.",
+    "annualMonth": "Every {month}",
+    "annualRange": "Every {from}–{to}",
+    "nowOpen": "On now",
+    "upcoming": "Coming up",
+    "place": "Venue",
+    "season": "When",
+    "official": "Official information",
+    "backToList": "All festivals",
+    "aboutTitle": "About this festival",
+    "relatedSpot": "Night spot at the venue",
+    "viewSpot": "View spot",
+    "planCta": "Plan a course via here",
+    "more": "More festivals"
+  },
+  "comingSoon": {
+    "short": "Coming soon",
+    "body": "Food, stay and shopping listings come from the Korea Tourism Organization's information service. We're still wiring that data up — this page will fill in as soon as it's ready."
   }
 }

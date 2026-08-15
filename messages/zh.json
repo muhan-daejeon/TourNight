@@ -9,12 +9,18 @@
     "courses": "推荐路线",
     "etiquette": "夜间礼仪",
     "community": "社区",
-    "phrases": "生存韩语"
+    "phrases": "生存韩语",
+    "festivals": "庆典·活动",
+    "food": "美食",
+    "stay": "住宿",
+    "shopping": "购物",
+    "menu": "全部菜单",
+    "home": "首页"
   },
   "home": {
     "heroTitle": "大田的夜晚比白天更璀璨",
     "heroSubtitle": "科学之城大田的夜景、星空与庆典，尽在一处",
-    "spotsSection": "今晚值得一去的地方",
+    "spotsSection": "今晚去哪儿？",
     "searchPlaceholder": "按名称或地区搜索",
     "noResults": "未找到相关景点",
     "viewDetail": "查看详情",
@@ -33,10 +39,61 @@
       "city": "市区"
     },
     "ctaSpots": "探索夜间景点",
-    "ctaGuide": "夜间礼仪"
+    "ctaGuide": "夜间礼仪",
+    "heroCarousel": "主横幅",
+    "prevSlide": "上一张横幅",
+    "nextSlide": "下一张横幅",
+    "pauseSlides": "暂停自动播放",
+    "playSlides": "继续自动播放",
+    "scrollPrev": "上一个",
+    "scrollNext": "下一个",
+    "heroFestivalOverline": "此刻，大田的夜晚格外特别",
+    "heroFestivalCta": "查看详情",
+    "heroAiOverline": "懂夜晚的向导",
+    "heroAiTitle": "今晚的路线，交给AI来安排",
+    "heroAiHighlight": "AI",
+    "heroAiSubtitle": "只要选好想去的景点，游览顺序、公交与步行路线、末班车时间都为你一次整理好。",
+    "heroAiCta": "生成路线",
+    "festivalsSection": "{year} 大田庆典·活动",
+    "festivalsSectionSub": "每个季节都有不一样的大田之夜",
+    "festivalsViewAll": "查看全部庆典·活动",
+    "spotsSectionSub": "TourNight 推荐的大田夜景",
+    "spotsViewAll": "查看全部夜景景点",
+    "spotsAllTitle": "大田夜景景点",
+    "spotsAllSubtitle": "在地图上探索大田的夜晚，把喜欢的地方收进来，直接生成专属路线。",
+    "newsSection": "TourNight 消息",
+    "newsSectionSub": "TourNight 的最新动态",
+    "monthlyIssueTitle": "月刊通讯",
+    "monthlyIssueCta": "查看本月庆典",
+    "popularSection": "本周热门帖",
+    "popularSectionSub": "社区热门帖 TOP {count}",
+    "popularEmpty": "还没有帖子。",
+    "galleryCta": "查看更多",
+    "guidebookOverline": "把大田的夜晚收进一本书",
+    "guidebookSubtitle": "从夜间礼仪到现场就能用的常用语",
+    "guidebookCta": "打开指南",
+    "monthlyIssueBlurb": "让大田的夜晚更特别！",
+    "snsSection": "TourNight 的 Instagram",
+    "snsPending": "账号筹备中",
+    "bookmarkAdd": "收藏",
+    "bookmarkRemove": "取消收藏",
+    "bookmarkFilter": "已收藏 {count}"
   },
   "footer": {
-    "notice": "本服务为2026观光数据应用大赛参赛作品。"
+    "notice": "本服务为2026观光数据应用大赛参赛作品。",
+    "toTop": "回到顶部",
+    "links": {
+      "terms": "使用条款",
+      "privacy": "隐私政策",
+      "support": "客服中心",
+      "partners": "商务合作",
+      "notices": "公告"
+    },
+    "socials": {
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "kakao": "KakaoTalk"
+    }
   },
   "transit": {
     "title": "交通与末班车",
@@ -241,5 +298,27 @@
     "moonAge": "月龄{age}",
     "starNight": "适合观星的夜晚",
     "fullMoon": "适合赏月的夜晚"
+  },
+  "festivals": {
+    "title": "庆典 & 活动",
+    "subtitle": "全年不断的大田多彩夜晚",
+    "scheduleNote": "具体日期与内容每年会依主办方公告调整，出行前请确认官方通知。",
+    "annualMonth": "每年{month}",
+    "annualRange": "每年{from}~{to}",
+    "nowOpen": "进行中",
+    "upcoming": "即将举行",
+    "place": "地点",
+    "season": "时期",
+    "official": "查看官方信息",
+    "backToList": "全部庆典·活动",
+    "aboutTitle": "庆典介绍",
+    "relatedSpot": "会场夜景景点",
+    "viewSpot": "查看景点",
+    "planCta": "生成经过这里的路线",
+    "more": "看看其他庆典"
+  },
+  "comingSoon": {
+    "short": "筹备中",
+    "body": "美食·住宿·购物信息来自韩国观光公社的旅游信息服务。目前正在准备数据对接，完成后会第一时间补充到这里。"
   }
 }

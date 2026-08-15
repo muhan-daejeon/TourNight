@@ -9,12 +9,18 @@
     "courses": "추천 코스",
     "etiquette": "나이트 에티켓",
     "community": "커뮤니티",
-    "phrases": "서바이벌 한국어"
+    "phrases": "서바이벌 한국어",
+    "festivals": "축제&행사",
+    "food": "맛집",
+    "stay": "숙박",
+    "shopping": "쇼핑",
+    "menu": "전체 메뉴",
+    "home": "홈"
   },
   "home": {
     "heroTitle": "대전의 밤은 낮보다 빛난다",
     "heroSubtitle": "과학도시 대전의 야경, 별빛, 축제를 한곳에서",
-    "spotsSection": "오늘 밤 가볼 만한 곳",
+    "spotsSection": "오늘 밤, 어디로 갈까요?",
     "searchPlaceholder": "명소 이름·지역으로 검색",
     "noResults": "검색 결과가 없습니다",
     "viewDetail": "자세히 보기",
@@ -33,10 +39,61 @@
       "city": "도심"
     },
     "ctaSpots": "야간 명소 보기",
-    "ctaGuide": "나이트 에티켓"
+    "ctaGuide": "나이트 에티켓",
+    "heroCarousel": "메인 배너",
+    "prevSlide": "이전 배너",
+    "nextSlide": "다음 배너",
+    "pauseSlides": "자동 넘김 멈춤",
+    "playSlides": "자동 넘김 시작",
+    "scrollPrev": "이전으로",
+    "scrollNext": "다음으로",
+    "heroFestivalOverline": "지금, 대전의 밤은 특별합니다",
+    "heroFestivalCta": "자세히 보기",
+    "heroAiOverline": "밤을 아는 길잡이",
+    "heroAiTitle": "오늘 밤 코스, AI가 짜 드립니다",
+    "heroAiHighlight": "AI",
+    "heroAiSubtitle": "가고 싶은 명소만 담으면 이동 순서부터 버스·도보 경로, 막차 시간까지 한 번에 정리해 드려요.",
+    "heroAiCta": "코스 만들기",
+    "festivalsSection": "{year} 대전 축제&행사",
+    "festivalsSectionSub": "계절마다 이어지는 대전의 다채로운 밤",
+    "festivalsViewAll": "전체 축제&행사 보기",
+    "spotsSectionSub": "투어나잇이 추천하는 대전 야경 명소",
+    "spotsViewAll": "전체 야경명소 보기",
+    "spotsAllTitle": "대전 야경 명소",
+    "spotsAllSubtitle": "지도와 함께 대전의 밤 명소를 찾아보고, 마음에 드는 곳을 담아 코스로 만들어 보세요.",
+    "newsSection": "투어나잇 소식",
+    "newsSectionSub": "투어나잇의 최신 소식과 업데이트",
+    "monthlyIssueTitle": "월간 뉴스레터",
+    "monthlyIssueCta": "이달의 축제 보기",
+    "popularSection": "이번 주 인기글",
+    "popularSectionSub": "투어나잇 커뮤니티 인기글 TOP {count}",
+    "popularEmpty": "아직 올라온 글이 없습니다.",
+    "galleryCta": "갤러리 더 보기",
+    "guidebookOverline": "대전의 밤을 한 권에 담다",
+    "guidebookSubtitle": "밤길 에티켓부터 현장에서 바로 쓰는 회화까지",
+    "guidebookCta": "가이드북 보기",
+    "monthlyIssueBlurb": "대전의 밤을 더 특별하게!",
+    "snsSection": "TourNight 인스타그램",
+    "snsPending": "계정 준비 중",
+    "bookmarkAdd": "찜하기",
+    "bookmarkRemove": "찜 해제",
+    "bookmarkFilter": "찜한 곳 {count}"
   },
   "footer": {
-    "notice": "본 서비스는 2026 관광데이터 활용 공모전 출품작입니다."
+    "notice": "본 서비스는 2026 관광데이터 활용 공모전 출품작입니다.",
+    "toTop": "맨 위로",
+    "links": {
+      "terms": "이용약관",
+      "privacy": "개인정보처리방침",
+      "support": "고객센터",
+      "partners": "제휴문의",
+      "notices": "공지사항"
+    },
+    "socials": {
+      "instagram": "인스타그램",
+      "youtube": "유튜브",
+      "kakao": "카카오톡"
+    }
   },
   "transit": {
     "title": "가는 길·막차",
@@ -241,5 +298,27 @@
     "moonAge": "월령 {age}일",
     "starNight": "별 보기 좋은 밤",
     "fullMoon": "달맞이 좋은 밤"
+  },
+  "festivals": {
+    "title": "축제 & 행사",
+    "subtitle": "1년 내내 이어지는 대전의 다채로운 밤",
+    "scheduleNote": "정확한 일정과 프로그램은 매년 주최측 공고에 따라 달라집니다. 방문 전 공식 안내를 확인해 주세요.",
+    "annualMonth": "매년 {month}",
+    "annualRange": "매년 {from}~{to}",
+    "nowOpen": "진행 중",
+    "upcoming": "다가오는 축제",
+    "place": "장소",
+    "season": "시기",
+    "official": "공식 안내 보기",
+    "backToList": "축제&행사 전체",
+    "aboutTitle": "축제 소개",
+    "relatedSpot": "축제장 야경 명소",
+    "viewSpot": "명소 보기",
+    "planCta": "이 곳 거치는 코스 짜기",
+    "more": "다른 축제도 보기"
+  },
+  "comingSoon": {
+    "short": "준비 중",
+    "body": "맛집·숙박·쇼핑 정보는 한국관광공사 관광정보 서비스에서 받아옵니다. 현재 데이터 연동을 준비하고 있어, 준비가 끝나는 대로 이 자리에 채워 드릴게요."
   }
 }

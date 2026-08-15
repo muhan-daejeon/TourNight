@@ -9,7 +9,8 @@ export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]>
   try {
     const rows = await sql<SpotRow[]>`
       select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
-             st_x(s.geom) as map_x, st_y(s.geom) as map_y
+             st_x(s.geom) as map_x, st_y(s.geom) as map_y,
+             nullif(trim(tr.overview), '') as official_overview
       from night_spots s
       left join spot_translations tr
         on tr.content_id = s.content_id and tr.locale = ${locale}
@@ -50,6 +51,7 @@ function toSpot(r: SpotRow): NightSpot {
     mapY: r.map_y,
     imageUrl: r.image_url,
     category: r.category as NightSpot["category"],
+    overview: r.official_overview ?? null,
   };
 }
 

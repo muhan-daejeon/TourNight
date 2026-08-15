@@ -105,6 +105,38 @@ export async function listPosts(limit = 100): Promise<CommunityPost[]> {
   }
 }
 
+/**
+ * 이번 주 인기글 — 홈 미리보기용.
+ *
+ * 조회수를 따로 세지 않으므로 댓글 수를 인기 기준으로 쓴다. 최근 7일 글만 보되,
+ * 활동이 적은 주에는 목록이 비어 홈이 휑해지므로 모자라면 최신 글로 채운다.
+ */
+export async function listPopularPosts(limit = 4): Promise<CommunityPost[]> {
+  try {
+    const rows = await sql<PostRow[]>`
+      select p.id, p.user_id, p.author, p.body, p.created_at,
+             p.media_path, p.media_type,
+             count(c.id) as comment_count
+      from community_posts p
+      left join community_comments c on c.post_id = p.id
+      group by p.id
+      -- 이번 주 글을 먼저(댓글 많은 순), 그다음 최신 순으로 자리를 메운다
+      order by (p.created_at >= now() - interval '7 days') desc,
+               count(c.id) desc,
+               p.created_at desc,
+               p.id desc
+      limit ${limit}
+    `;
+    return rows.map(toPost);
+  } catch (err) {
+    console.warn(
+      "[community] 인기글 조회 실패 — 빈 목록으로 폴백합니다:",
+      err instanceof Error ? err.message : err,
+    );
+    return [];
+  }
+}
+
 /** 작성자·본문 정규화 후 저장. 유효하지 않으면 null */
 export async function createPost(input: {
   userId: number;
