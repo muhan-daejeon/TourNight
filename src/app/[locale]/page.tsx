@@ -2,8 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { ArrowRight, BookOpen, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { getVerifiedNightSpots } from "@/lib/spots";
-import { listFestivals } from "@/lib/festivals";
+import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
 import { listNotices } from "@/lib/notices";
 import { listPopularPosts, type CommunityPost } from "@/lib/community";
 import NightInfo from "@/components/NightInfo";
@@ -34,25 +33,32 @@ export default async function HomePage({
     getVerifiedNightSpots(locale),
     listPopularPosts(4),
   ]);
-  const festivals = listFestivals(locale);
   const notices = listNotices(locale);
-  const year = new Date().getFullYear();
+  const festivals = pickFestivals(spots);
+  const photoSpots = spots.filter((s) => s.imageUrl);
 
-  // 히어로: 지금 열리는 대전 축제를 먼저, 그다음 서비스 소개·AI 코스.
-  // 비수기에도 배너가 비지 않도록 뒤 두 장은 항상 붙인다.
+  // 배너 배경 사진 — 등록된 명소 사진을 순서대로 돌려 쓴다. 무작위로 뽑으면
+  // 정적 생성 결과가 매번 달라져 배포마다 배너가 바뀐다
+  const nthPhoto = (n: number) =>
+    photoSpots.length
+      ? photoSpots[n % photoSpots.length].imageUrl!
+      : "/hero-night.jpg";
+
+  // 히어로: 축제 → 서비스 소개 → AI 코스.
+  //
+  // 축제에 '지금 열린다/곧 열린다'를 붙이지 않는다. 개최 일정을 주는 출처가
+  // KTO searchFestival2뿐인데 키가 막혀 있어, 확인 못 한 시기를 단정하면 안 된다.
   const slides: HeroSlide[] = [
-    ...festivals
-      .filter((f) => f.inSeason)
-      .slice(0, 2)
-      .map((f) => ({
-        id: f.id,
-        overline: t("heroFestivalOverline"),
-        title: f.title,
-        subtitle: f.summary,
-        ctaLabel: t("heroFestivalCta"),
-        href: `/festivals/${f.id}`,
-        gradient: f.gradient,
-      })),
+    ...festivals.slice(0, 2).map((f, i) => ({
+      id: f.contentId,
+      overline: t("heroFestivalOverline"),
+      title: f.title,
+      subtitle: f.overview?.replace(/<[^>]*>/g, " ").trim() || f.addr,
+      ctaLabel: t("heroFestivalCta"),
+      href: `/spots/${f.contentId}`,
+      gradient: "from-fuchsia-950 via-purple-950 to-slate-950",
+      image: f.imageUrl ?? nthPhoto(i),
+    })),
     {
       id: "brand",
       overline: site("description"),
@@ -72,10 +78,10 @@ export default async function HomePage({
       ctaLabel: t("heroAiCta"),
       href: "/courses",
       gradient: "from-violet-950 via-indigo-950 to-slate-950",
+      // 앞 축제 배너와 겹치지 않게 뒤쪽 사진에서 고른다
+      image: nthPhoto(photoSpots.length - 1),
     },
   ];
-
-  const photoSpots = spots.filter((s) => s.imageUrl);
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-4">
@@ -88,22 +94,27 @@ export default async function HomePage({
         <NightInfo />
       </div>
 
-      {/* ── 축제&행사 — 1년 캘린더를 포스터로 ── */}
-      <section className="pt-16">
-        <SectionHead
-          title={t("festivalsSection", { year })}
-          subtitle={t("festivalsSectionSub")}
-          href="/festivals"
-          linkLabel={t("festivalsViewAll")}
-        />
-        <ScrollRail label={t("festivalsSection", { year })}>
-          {festivals.slice(0, FESTIVAL_PREVIEW).map((f) => (
-            <div key={f.id} className="w-[186px] shrink-0 snap-start sm:w-[208px]">
-              <FestivalPoster festival={f} />
-            </div>
-          ))}
-        </ScrollRail>
-      </section>
+      {/* ── 축제&행사 — 등록된 축제 명소를 포스터로 ── */}
+      {festivals.length > 0 && (
+        <section className="pt-16">
+          <SectionHead
+            title={t("festivalsSection")}
+            subtitle={t("festivalsSectionSub")}
+            href="/festivals"
+            linkLabel={t("festivalsViewAll")}
+          />
+          <ScrollRail label={t("festivalsSection")}>
+            {festivals.slice(0, FESTIVAL_PREVIEW).map((f) => (
+              <div
+                key={f.contentId}
+                className="w-[186px] shrink-0 snap-start sm:w-[208px]"
+              >
+                <FestivalPoster spot={f} />
+              </div>
+            ))}
+          </ScrollRail>
+        </section>
+      )}
 
       {/* ── 야경 명소 추천 ── */}
       <section className="pt-16">

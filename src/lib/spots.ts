@@ -55,6 +55,18 @@ function toSpot(r: SpotRow): NightSpot {
   };
 }
 
+/**
+ * 축제·행사 명소만 추린다.
+ *
+ * 별도 축제 데이터는 두지 않는다 — 축제 일정(개최일)을 주는 출처는 KTO
+ * searchFestival2인데 키가 막혀 있어, 없는 일정을 지어내느니 야간 명소로 검증된
+ * 축제장만 장소로서 보여준다. 검증 목록을 그대로 걸러 쓰므로 번역·소개문·사진이
+ * 모두 갖춰진 것만 올라온다.
+ */
+export function pickFestivals(spots: NightSpot[]): NightSpot[] {
+  return spots.filter((s) => s.category === "festival");
+}
+
 export interface SpotDetail extends NightSpot {
   /** KTO 다국어 서비스의 공식 소개문 (없으면 null → Gemini 가이드가 대신함) */
   officialOverview: string | null;
