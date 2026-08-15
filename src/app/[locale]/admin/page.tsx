@@ -11,8 +11,10 @@ import {
   MoonStar,
   Eye,
   ImageIcon,
+  Flag,
 } from "lucide-react";
 import { sql } from "@/lib/db";
+import { listReports } from "@/lib/community";
 import { getSessionUser } from "@/lib/session";
 import { isAdmin, type ActivityAction } from "@/lib/activity";
 import AdminRoleToggle from "@/components/AdminRoleToggle";
@@ -41,6 +43,7 @@ const ACTION_META: Record<
   phrase_search: { label: "표현 검색", icon: Search },
   community_post: { label: "커뮤니티 글", icon: MessageCircle },
   community_comment: { label: "커뮤니티 댓글", icon: MessageCircle },
+  community_report: { label: "커뮤니티 신고", icon: Flag },
 };
 
 interface LogRow {
@@ -321,7 +324,7 @@ async function CoursesTab() {
 }
 
 async function CommunityTab() {
-  const [posts, comments] = await Promise.all([
+  const [posts, comments, reports] = await Promise.all([
     sql<
       {
         id: number;
@@ -349,10 +352,56 @@ async function CommunityTab() {
       select id, post_id, author, body, created_at
       from community_comments order by created_at desc limit 50
     `,
+    listReports(30),
   ]);
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">
+      {/* 신고 — 관리자가 제일 먼저 봐야 할 것이라 맨 위에 폭 전체로 둔다 */}
+      <section className="lg:col-span-2">
+        <h2 className="flex items-center gap-2 text-lg font-bold">
+          <Flag size={16} className="text-rose-400" />
+          신고 ({reports.length})
+        </h2>
+        {reports.length === 0 ? (
+          <p className="mt-3 text-sm text-slate-500">접수된 신고가 없어요.</p>
+        ) : (
+          <ol className="mt-3 space-y-2">
+            {reports.map((r) => (
+              <li
+                key={`${r.targetType}-${r.targetId}`}
+                className="rounded-xl border border-rose-400/20 bg-rose-400/[0.04] px-3.5 py-2.5"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-rose-400/20 px-2 py-0.5 text-[11px] font-bold text-rose-200">
+                    {r.reportCount}건
+                  </span>
+                  <span className="text-[11px] text-slate-400">
+                    {r.targetType === "post" ? "글" : "댓글"} #{r.targetId}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    {r.reasons.join(", ")}
+                  </span>
+                  {r.body === null && (
+                    <span className="text-[11px] text-slate-600">
+                      (원본 삭제됨)
+                    </span>
+                  )}
+                </div>
+                {r.body !== null && (
+                  <>
+                    <p className="mt-1.5 text-xs text-slate-500">{r.author}</p>
+                    <p className="mt-0.5 break-words text-sm text-slate-200">
+                      {r.body}
+                    </p>
+                  </>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+
       <section>
         <h2 className="text-lg font-bold">글 ({posts.length})</h2>
         <ol className="mt-3 space-y-2">

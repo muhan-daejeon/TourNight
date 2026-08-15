@@ -8,6 +8,7 @@ export type ActivityAction =
   | "phrase_search"
   | "community_post"
   | "community_comment"
+  | "community_report"
   | "spot_view";
 
 /**

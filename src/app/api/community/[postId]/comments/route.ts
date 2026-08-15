@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listComments, createComment, BODY_MAX } from "@/lib/community";
 import { getSessionUser } from "@/lib/session";
+import { guardCommunityWrite } from "@/lib/community-guard";
 import { prepareMedia, readCommunityInput } from "@/lib/community-media";
 import { deleteCommunityMedia } from "@/lib/storage";
 import { logActivity } from "@/lib/activity";
@@ -47,6 +48,10 @@ export async function POST(
     return NextResponse.json({ error: "too long" }, { status: 400 });
   }
 
+  // 글과 같은 관문 (한도는 댓글 몫으로 따로 센다)
+  const guard = await guardCommunityWrite(session.userId, "comment", input.body);
+  if (!guard.ok) return guard.response;
+
   const prepared = await prepareMedia(input.file);
   if (!prepared.ok) {
     return NextResponse.json({ error: prepared.error }, { status: prepared.status });
@@ -59,6 +64,7 @@ export async function POST(
       author: session.nickname,
       body: input.body,
       media,
+      verified: guard.verified,
     });
     // 저장이 무산되면 방금 올린 파일은 고아가 되므로 되돌린다
     if (comment === "not-found") {

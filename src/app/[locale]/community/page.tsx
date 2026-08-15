@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import CommunityBoard from "@/components/CommunityBoard";
 import { listPosts } from "@/lib/community";
 import { isStorageConfigured } from "@/lib/storage";
+import { mailFrom } from "@/lib/mail";
 
 // 글 목록을 서버에서 채워 보낸다. 브라우저가 다시 불러오지 않으므로 첫 화면부터
 // 글이 보이고, API 왕복이 한 번 줄어든다.
@@ -28,6 +29,9 @@ export default async function CommunityPage({
         <CommunityBoard
           initialPosts={posts}
           canAttach={isStorageConfigured()}
+          // 인증 메일 발신 주소 — 수신 허용 목록에 넣으라고 화면에 띄운다.
+          // 중국·일본 메일함이 모르는 발신자를 잘 거르기 때문에 필요하다
+          mailFrom={mailFrom()}
         />
       </div>
     </div>

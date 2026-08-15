@@ -8,6 +8,7 @@ import {
 } from "@/lib/users";
 import { isValidCountry } from "@/lib/countries";
 import { signSession, SESSION_COOKIE, sessionCookieOptions } from "@/lib/session";
+import { issueVerification } from "@/lib/verification";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -50,6 +51,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const user = await createUser({ email, password, nickname, country });
+    // 인증 메일은 부가 작업이라 실패해도 가입은 성립시킨다. 못 받았으면
+    // 커뮤니티 화면의 '다시 보내기'로 언제든 재발송할 수 있다
+    await issueVerification(user.id).catch((err) =>
+      console.error(
+        "[auth] 가입 직후 인증 메일 발송 실패:",
+        err instanceof Error ? err.message : err,
+      ),
+    );
     const token = await signSession({
       userId: user.id,
       email: user.email,

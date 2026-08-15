@@ -15,6 +15,8 @@ export interface CommunityPost {
   /** 첨부 공개 URL (없으면 null) */
   mediaUrl: string | null;
   mediaType: MediaKind | null;
+  /** 작성자가 메일 인증을 마쳤는지 — 목록에 배지로 표시한다 */
+  authorVerified: boolean;
 }
 
 export interface CommunityComment {
@@ -26,6 +28,8 @@ export interface CommunityComment {
   /** 첨부 공개 URL (없으면 null) */
   mediaUrl: string | null;
   mediaType: MediaKind | null;
+  /** 작성자가 메일 인증을 마쳤는지 */
+  authorVerified: boolean;
 }
 
 /** 입력 제한 */
@@ -41,6 +45,7 @@ interface PostRow {
   comment_count?: string;
   media_path?: string | null;
   media_type?: string | null;
+  author_verified?: boolean;
 }
 
 interface CommentRow {
@@ -51,6 +56,7 @@ interface CommentRow {
   created_at: string;
   media_path?: string | null;
   media_type?: string | null;
+  author_verified?: boolean;
 }
 
 function toPost(r: PostRow): CommunityPost {
@@ -63,6 +69,7 @@ function toPost(r: PostRow): CommunityPost {
     commentCount: Number(r.comment_count ?? 0),
     mediaUrl: r.media_path ? mediaPublicUrl(r.media_path) : null,
     mediaType: (r.media_type as MediaKind | null) ?? null,
+    authorVerified: !!r.author_verified,
   };
 }
 
@@ -75,6 +82,7 @@ function toComment(r: CommentRow): CommunityComment {
     createdAt: new Date(r.created_at).toISOString(),
     mediaUrl: r.media_path ? mediaPublicUrl(r.media_path) : null,
     mediaType: (r.media_type as MediaKind | null) ?? null,
+    authorVerified: !!r.author_verified,
   };
 }
 
@@ -86,9 +94,11 @@ export async function listPosts(limit = 100): Promise<CommunityPost[]> {
     const rows = await sql<PostRow[]>`
       select p.id, p.user_id, p.author, p.body, p.created_at,
              p.media_path, p.media_type,
+             bool_or(u.email_verified_at is not null) as author_verified,
              count(c.id) as comment_count
       from community_posts p
       left join community_comments c on c.post_id = p.id
+      left join users u on u.id = p.user_id
       group by p.id
       -- 시드 글처럼 created_at이 같은 행이 있어 id를 부기준으로 둔다.
       -- 없으면 쿼리 계획에 따라 순서가 뒤바뀌어 목록이 매번 달라 보인다.
@@ -116,9 +126,11 @@ export async function listPopularPosts(limit = 4): Promise<CommunityPost[]> {
     const rows = await sql<PostRow[]>`
       select p.id, p.user_id, p.author, p.body, p.created_at,
              p.media_path, p.media_type,
+             bool_or(u.email_verified_at is not null) as author_verified,
              count(c.id) as comment_count
       from community_posts p
       left join community_comments c on c.post_id = p.id
+      left join users u on u.id = p.user_id
       group by p.id
       -- 이번 주 글을 먼저(댓글 많은 순), 그다음 최신 순으로 자리를 메운다
       order by (p.created_at >= now() - interval '7 days') desc,
@@ -143,6 +155,8 @@ export async function createPost(input: {
   author: string;
   body: string;
   media?: { path: string; kind: MediaKind } | null;
+  /** 관문에서 이미 확인한 값 — 방금 쓴 글에도 배지가 바로 붙게 한다 */
+  verified: boolean;
 }): Promise<CommunityPost | null> {
   const author = input.author?.trim().slice(0, AUTHOR_MAX) ?? "";
   const body = input.body?.trim().slice(0, BODY_MAX) ?? "";
@@ -154,17 +168,20 @@ export async function createPost(input: {
             ${input.media?.path ?? null}, ${input.media?.kind ?? null})
     returning id, user_id, author, body, created_at, media_path, media_type
   `;
-  return toPost(rows[0]);
+  return toPost({ ...rows[0], author_verified: input.verified });
 }
 
 /** 특정 글의 댓글 목록 (오래된 순). DB 실패 시 빈 배열 폴백 */
 export async function listComments(postId: number): Promise<CommunityComment[]> {
   try {
     const rows = await sql<CommentRow[]>`
-      select id, user_id, author, body, created_at, media_path, media_type
-      from community_comments
-      where post_id = ${postId}
-      order by created_at asc, id asc
+      select c.id, c.user_id, c.author, c.body, c.created_at,
+             c.media_path, c.media_type,
+             (u.email_verified_at is not null) as author_verified
+      from community_comments c
+      left join users u on u.id = c.user_id
+      where c.post_id = ${postId}
+      order by c.created_at asc, c.id asc
     `;
     return rows.map(toComment);
   } catch (err) {
@@ -186,6 +203,7 @@ export async function createComment(
     author: string;
     body: string;
     media?: { path: string; kind: MediaKind } | null;
+    verified: boolean;
   },
 ): Promise<CommunityComment | null | "not-found"> {
   const author = input.author?.trim().slice(0, AUTHOR_MAX) ?? "";
@@ -199,7 +217,7 @@ export async function createComment(
               ${input.media?.path ?? null}, ${input.media?.kind ?? null})
       returning id, user_id, author, body, created_at, media_path, media_type
     `;
-    return toComment(rows[0]);
+    return toComment({ ...rows[0], author_verified: input.verified });
   } catch (err) {
     if (err && typeof err === "object" && "code" in err && err.code === "23503") {
       return "not-found";
@@ -249,4 +267,107 @@ export async function deleteComment(
   await sql`delete from community_comments where id = ${commentId}`;
   if (rows[0].media_path) await deleteCommunityMedia(rows[0].media_path);
   return "ok";
+}
+
+export type ReportTarget = "post" | "comment";
+
+/** 신고 사유 — 자유 입력은 받지 않는다 (개인정보·욕설이 그대로 들어올 수 있다) */
+export const REPORT_REASONS = [
+  "spam",
+  "abuse",
+  "sexual",
+  "privacy",
+  "other",
+] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+
+export type ReportResult = "ok" | "duplicate" | "not-found";
+
+/**
+ * 신고 접수. 같은 사람이 같은 대상을 다시 누르면 duplicate.
+ * 대상이 실제로 있는지 먼저 확인해 없는 id로 표가 더러워지는 걸 막는다.
+ */
+export async function reportContent(input: {
+  targetType: ReportTarget;
+  targetId: number;
+  reporterId: number;
+  reason: ReportReason;
+}): Promise<ReportResult> {
+  const exists =
+    input.targetType === "post"
+      ? await sql<{ id: string }[]>`select id from community_posts where id = ${input.targetId}`
+      : await sql<{ id: string }[]>`select id from community_comments where id = ${input.targetId}`;
+  if (!exists.length) return "not-found";
+
+  try {
+    await sql`
+      insert into community_reports (target_type, target_id, reporter_id, reason)
+      values (${input.targetType}, ${input.targetId}, ${input.reporterId}, ${input.reason})
+    `;
+    return "ok";
+  } catch (err) {
+    // 23505 = unique_violation → 이미 신고한 대상
+    if (err && typeof err === "object" && "code" in err && err.code === "23505") {
+      return "duplicate";
+    }
+    throw err;
+  }
+}
+
+export interface ReportedItem {
+  targetType: ReportTarget;
+  targetId: number;
+  reportCount: number;
+  lastReportedAt: string;
+  reasons: string[];
+  /** 원본이 이미 지워졌으면 null */
+  body: string | null;
+  author: string | null;
+}
+
+/** 관리자용 — 신고가 많은 순으로 (원본이 지워진 것도 이력으로 남겨 보여준다) */
+export async function listReports(limit = 50): Promise<ReportedItem[]> {
+  try {
+    const rows = await sql<
+      {
+        target_type: string;
+        target_id: string;
+        report_count: string;
+        last_reported_at: string;
+        reasons: string[];
+        body: string | null;
+        author: string | null;
+      }[]
+    >`
+      select r.target_type, r.target_id,
+             count(*) as report_count,
+             max(r.created_at) as last_reported_at,
+             array_agg(distinct r.reason) as reasons,
+             coalesce(p.body, c.body) as body,
+             coalesce(p.author, c.author) as author
+      from community_reports r
+      left join community_posts p
+        on r.target_type = 'post' and p.id = r.target_id
+      left join community_comments c
+        on r.target_type = 'comment' and c.id = r.target_id
+      group by r.target_type, r.target_id, p.body, c.body, p.author, c.author
+      order by count(*) desc, max(r.created_at) desc
+      limit ${limit}
+    `;
+    return rows.map((r) => ({
+      targetType: r.target_type as ReportTarget,
+      targetId: Number(r.target_id),
+      reportCount: Number(r.report_count),
+      lastReportedAt: new Date(r.last_reported_at).toISOString(),
+      reasons: r.reasons ?? [],
+      body: r.body,
+      author: r.author,
+    }));
+  } catch (err) {
+    console.warn(
+      "[community] 신고 목록 조회 실패:",
+      err instanceof Error ? err.message : err,
+    );
+    return [];
+  }
 }

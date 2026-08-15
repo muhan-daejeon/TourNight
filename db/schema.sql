@@ -94,6 +94,58 @@ create table if not exists users (
   created_at timestamptz not null default now()
 );
 
+-- 메일 인증 시각. boolean 대신 시각으로 둬서 "언제 인증했는지"가 남는다.
+-- null = 미인증 → 커뮤니티 글·댓글 작성만 막힌다 (읽기·명소·코스는 그대로).
+alter table users add column if not exists email_verified_at timestamptz;
+
+-- 메일 인증 토큰.
+--
+-- 원문 토큰은 저장하지 않는다 — 그대로 넣어두면 DB가 새는 순간 아무나 남의 계정을
+-- 인증할 수 있다. 메일에는 원문을 보내고 여기에는 sha256만 남긴다.
+create table if not exists email_verifications (
+  token_hash text primary key,      -- sha256(원문 토큰), hex
+  user_id bigint not null references users(id) on delete cascade,
+  email text not null,              -- 발송 시점 주소 (주소가 바뀌면 옛 토큰은 무효)
+  expires_at timestamptz not null,
+  consumed_at timestamptz,          -- 한 번 쓴 토큰은 재사용 불가
+  created_at timestamptz not null default now()
+);
+
+-- 사용자별 조회(재발송 제한·기존 토큰 정리)가 주 접근 경로다
+create index if not exists email_verifications_user_idx
+  on email_verifications (user_id, created_at desc);
+
+-- 커뮤니티 일일 작성 한도 (ai_course_usage와 같은 방식).
+--
+-- 글·댓글 표를 직접 세지 않고 따로 기록하는 이유는, 쓴 글을 지우면 카운트가
+-- 되돌아가 '쓰고 지우기'를 반복해 한도를 무한히 우회할 수 있기 때문이다.
+create table if not exists community_usage (
+  user_id bigint not null references users(id) on delete cascade,
+  kind text not null check (kind in ('post', 'comment')),
+  used_on date not null,
+  count int not null default 0,
+  primary key (user_id, kind, used_on)
+);
+
+-- 이용자 신고.
+--
+-- 관리자가 모든 글을 볼 수는 없으므로 이용자가 올려주는 통로를 둔다.
+-- 글·댓글에 FK를 걸지 않는 이유는 대상이 둘로 갈리기 때문이고, 원본이 지워져도
+-- 신고 이력은 남겨 같은 작성자의 반복 여부를 볼 수 있게 한다.
+create table if not exists community_reports (
+  id bigint generated always as identity primary key,
+  target_type text not null check (target_type in ('post', 'comment')),
+  target_id bigint not null,
+  reporter_id bigint not null references users(id) on delete cascade,
+  reason text,
+  created_at timestamptz not null default now(),
+  -- 같은 사람이 같은 대상을 여러 번 눌러 건수를 부풀리지 못하게 한다
+  unique (target_type, target_id, reporter_id)
+);
+
+create index if not exists community_reports_target_idx
+  on community_reports (target_type, target_id);
+
 -- 대전 구별 일별 방문자 수 (KTO 빅데이터 지역별 방문자수 — db/sync-visitors.mjs, 집계 지연 있어 최근 가용 7일 저장)
 create table if not exists area_visitors (
   signgu_cd text not null,   -- 30110 동구 / 30140 중구 / 30170 서구 / 30200 유성구 / 30230 대덕구
