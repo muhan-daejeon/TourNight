@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { LogOut } from "lucide-react";
-import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 
 interface Me {
   nickname: string;
@@ -12,8 +12,8 @@ interface Me {
 
 export default function AuthNav() {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const pathname = usePathname();
-  const router = useRouter();
   // undefined = 로딩(아직 모름), null = 비로그인, Me = 로그인
   const [user, setUser] = useState<Me | null | undefined>(undefined);
 
@@ -35,9 +35,10 @@ export default function AuthNav() {
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
-    router.push("/");
-    router.refresh();
+    // 로그인과 같은 이유로 전체 이동. 클라이언트 캐시에는 로그인 상태로 받아둔
+    // 페이지들이 남아 있어, router.push로 옮기면 로그아웃했는데도 이전 화면이
+    // 그대로 보일 수 있다.
+    window.location.assign(`/${locale}`);
   }
 
   if (user === undefined) {
