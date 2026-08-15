@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 const fieldClass =
   "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
@@ -13,7 +14,7 @@ export default function LoginForm({
   oauthError?: boolean;
 }) {
   const t = useTranslations("auth");
-  const router = useRouter();
+  const locale = useLocale();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   // OAuth 콜백 실패로 넘어온 경우 초기 에러 표시
@@ -43,8 +44,14 @@ export default function LoginForm({
         setError(errorText(data.error ?? "generic"));
         return;
       }
-      router.push("/");
-      router.refresh();
+      // 로그인·로그아웃은 클라이언트 이동(router.push)으로 처리하면 안 된다.
+      // 헤더의 홈 링크가 로그인 화면에서 이미 "/"를 프리페치해 두는데, 그때는
+      // 비로그인이라 미들웨어가 로그인 페이지로 돌려보낸 응답이 클라이언트 캐시에
+      // 담긴다. 로그인 직후 push("/")는 그 캐시를 그대로 써서 로그인 화면이
+      // 다시 보인다 (하드 새로고침해야 풀리던 증상).
+      // router.refresh()는 "현재 라우트"의 캐시만 지우므로 이동 대상에는 소용없다.
+      // 전체 이동으로 미들웨어를 새로 태우고 캐시를 우회한다.
+      window.location.assign(`/${locale}`);
     } catch {
       setError(errorText("generic"));
     } finally {

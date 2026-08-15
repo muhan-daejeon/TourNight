@@ -8,17 +8,23 @@ import {
 import { getUserById, updateProfile, NICKNAME_MAX } from "@/lib/users";
 import { isValidCountry } from "@/lib/countries";
 
+/**
+ * 세션 응답은 절대 캐시되면 안 된다. 지시가 없으면 브라우저·중간 캐시가
+ * 임의로 보관할 수 있고, 그러면 로그아웃한 뒤에도 이전 사용자가 남아 보인다.
+ */
+const NO_STORE = { "Cache-Control": "no-store" };
+
 /** 현재 로그인 사용자 (없으면 user: null). 국가·닉네임은 DB 최신값 */
 export async function GET() {
   const session = await getSessionUser();
   if (!session) {
-    return NextResponse.json({ user: null });
+    return NextResponse.json({ user: null }, { headers: NO_STORE });
   }
   try {
     const user = await getUserById(session.userId);
-    return NextResponse.json({ user });
+    return NextResponse.json({ user }, { headers: NO_STORE });
   } catch {
-    return NextResponse.json({ user: null });
+    return NextResponse.json({ user: null }, { headers: NO_STORE });
   }
 }
 
