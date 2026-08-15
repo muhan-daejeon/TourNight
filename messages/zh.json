@@ -250,7 +250,9 @@
       "sexual": "色情内容",
       "privacy": "泄露个人信息",
       "other": "其他"
-    }
+    },
+    "quotaToday": "今日 {used}/{limit}",
+    "quotaHint": "每日发布上限。完成邮箱验证后会提高。"
   },
   "spot": {
     "back": "返回列表",
