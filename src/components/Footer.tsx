@@ -28,7 +28,7 @@ export default function Footer() {
           {/* 브랜드 */}
           <div>
             <p className="text-[17px] font-extrabold tracking-tight text-white">
-              TOUR <span className="text-indigo-400">A</span> NIGHT
+              Tour<span className="text-indigo-400">Night</span>
             </p>
             <p className="mt-1.5 text-xs text-slate-500">{t("site.tagline")}</p>
           </div>
@@ -97,7 +97,7 @@ export default function Footer() {
             lazy fri13th, KOREA.NET, Teemeah)
           </p>
           <p className="mt-4 text-[11px] tracking-wide text-slate-700">
-            © {new Date().getFullYear()} TOUR A NIGHT. ALL RIGHTS RESERVED.
+            © {new Date().getFullYear()} TourNight. ALL RIGHTS RESERVED.
           </p>
         </div>
       </div>

@@ -156,7 +156,7 @@ export default async function HomePage({
                   {monthLabel(locale)}
                 </p>
                 <p className="mt-2.5 text-[15px] font-extrabold leading-tight text-white">
-                  TOUR <span className="text-indigo-300">A</span> NIGHT
+                  Tour<span className="text-indigo-300">Night</span>
                 </p>
                 <h3 className="text-lg font-extrabold leading-tight text-white">
                   {t("monthlyIssueTitle")}
@@ -274,7 +274,7 @@ export default async function HomePage({
             {t("snsSection")}
           </h2>
           <p className="mt-1.5 mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-400">
-            @touranight_official
+            @tournight_official
             <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-bold text-slate-500">
               {t("snsPending")}
             </span>
@@ -327,7 +327,7 @@ export default async function HomePage({
               {t("guidebookOverline")}
             </p>
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-              TOUR <span className="text-indigo-300">A</span> NIGHT GUIDEBOOK
+              Tour<span className="text-indigo-300">Night</span> GUIDEBOOK
             </h2>
             <p className="mt-2 text-sm text-slate-400">
               {t("guidebookSubtitle")}

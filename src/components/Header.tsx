@@ -7,21 +7,25 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import LocaleSwitcher from "./LocaleSwitcher";
 import AuthNav from "./AuthNav";
 
-/** 상단 탭 — 순서가 곧 정보 구조다. ready:false는 데이터 연동 준비 중인 탭 */
+/** 상단 탭 */
 const NAV_ITEMS = [
+  { href: "/", key: "home" },
   { href: "/spots", key: "spots" },
+  { href: "/etiquette", key: "etiquette" },
+  { href: "/phrases", key: "phrases" },
+  { href: "/courses", key: "courses" },
+  { href: "/community", key: "community" },
+] as const;
+
+/**
+ * 전체 메뉴에만 두는 항목. 상단에서 뺐다고 갈 길까지 없애면 주소를 직접 치지
+ * 않는 한 못 들어가므로, 여기에 남겨 둔다.
+ */
+const MENU_EXTRAS = [
   { href: "/festivals", key: "festivals" },
   { href: "/food", key: "food" },
   { href: "/stay", key: "stay" },
   { href: "/shopping", key: "shopping" },
-  { href: "/community", key: "community" },
-  { href: "/courses", key: "courses" },
-] as const;
-
-/** 햄버거 메뉴에만 두는 보조 메뉴 (상단 탭이 7개라 더 못 넣는다) */
-const MENU_EXTRAS = [
-  { href: "/etiquette", key: "etiquette" },
-  { href: "/phrases", key: "phrases" },
 ] as const;
 
 export default function Header() {
@@ -47,6 +51,10 @@ export default function Header() {
       active ? "font-semibold text-amber-300" : "hover:text-amber-300"
     }`;
 
+  // "/"는 startsWith로 보면 모든 경로에 걸리므로 정확히 일치할 때만 현재 탭이다
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // 검색 UI는 야경명소 탐색기가 갖고 있으므로 질의를 넘겨 그쪽에서 이어 받는다
@@ -59,7 +67,7 @@ export default function Header() {
         {/* 브랜드 워드마크는 번역하지 않는다 — 로고이자 서비스 고유명 */}
         <Link href="/" className="flex shrink-0 flex-col leading-none">
           <span className="text-[17px] font-extrabold tracking-tight text-white">
-            TOUR <span className="text-indigo-400">A</span> NIGHT
+            Tour<span className="text-indigo-400">Night</span>
           </span>
           <span className="mt-1 text-[10px] tracking-tight text-slate-500">
             {t("site.tagline")}
@@ -71,7 +79,7 @@ export default function Header() {
             <Link
               key={href}
               href={href}
-              className={linkClass(pathname.startsWith(href))}
+              className={linkClass(isActive(href))}
             >
               {t(`nav.${key}`)}
             </Link>
@@ -151,7 +159,7 @@ export default function Header() {
                 <Link
                   key={href}
                   href={href}
-                  className={linkClass(pathname.startsWith(href))}
+                  className={linkClass(isActive(href))}
                 >
                   {t(`nav.${key}`)}
                 </Link>

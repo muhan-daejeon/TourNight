@@ -5,8 +5,8 @@
     "description": "과학, 자연, 그리고 밤 — 대전 야간관광 통합 안내"
   },
   "nav": {
-    "spots": "야경명소",
-    "courses": "AI 추천",
+    "spots": "야간 명소",
+    "courses": "추천 코스",
     "etiquette": "나이트 에티켓",
     "community": "커뮤니티",
     "phrases": "서바이벌 한국어",
@@ -14,7 +14,8 @@
     "food": "맛집",
     "stay": "숙박",
     "shopping": "쇼핑",
-    "menu": "전체 메뉴"
+    "menu": "전체 메뉴",
+    "home": "홈"
   },
   "home": {
     "heroTitle": "대전의 밤은 낮보다 빛난다",
@@ -67,15 +68,12 @@
     "popularSection": "이번 주 인기글",
     "popularSectionSub": "투어나잇 커뮤니티 인기글 TOP {count}",
     "popularEmpty": "아직 올라온 글이 없습니다.",
-    "gallerySection": "야경 갤러리",
-    "gallerySectionSub": "투어나잇에 등록된 대전의 밤",
     "galleryCta": "갤러리 더 보기",
     "guidebookOverline": "대전의 밤을 한 권에 담다",
-    "guidebookTitle": "TOUR A NIGHT GUIDEBOOK",
     "guidebookSubtitle": "밤길 에티켓부터 현장에서 바로 쓰는 회화까지",
     "guidebookCta": "가이드북 보기",
     "monthlyIssueBlurb": "대전의 밤을 더 특별하게!",
-    "snsSection": "TOUR A NIGHT 인스타그램",
+    "snsSection": "TourNight 인스타그램",
     "snsPending": "계정 준비 중",
     "bookmarkAdd": "찜하기",
     "bookmarkRemove": "찜 해제",
