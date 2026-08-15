@@ -250,7 +250,9 @@
       "sexual": "선정성",
       "privacy": "개인정보 노출",
       "other": "기타"
-    }
+    },
+    "quotaToday": "오늘 {used}/{limit}",
+    "quotaHint": "하루 작성 한도입니다. 이메일 인증을 마치면 늘어납니다."
   },
   "spot": {
     "back": "목록으로",

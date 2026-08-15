@@ -58,6 +58,39 @@ export async function consumeQuota(
   }
 }
 
+export interface QuotaStatus {
+  post: { used: number; limit: number };
+  comment: { used: number; limit: number };
+  verified: boolean;
+}
+
+/** 오늘 얼마나 썼는지 — 작성 폼에 "오늘 1/3"으로 보여준다 */
+export async function getQuotaStatus(
+  userId: number,
+  verified: boolean,
+): Promise<QuotaStatus> {
+  const empty: QuotaStatus = {
+    post: { used: 0, limit: limitFor("post", verified) },
+    comment: { used: 0, limit: limitFor("comment", verified) },
+    verified,
+  };
+  try {
+    const rows = await sql<{ kind: string; count: number }[]>`
+      select kind, count from community_usage
+      where user_id = ${userId} and used_on = current_date
+    `;
+    for (const r of rows) {
+      if (r.kind === "post" || r.kind === "comment") {
+        empty[r.kind].used = Number(r.count);
+      }
+    }
+    return empty;
+  } catch {
+    // 표시용 정보라 실패해도 0으로 보여주고 넘어간다 (실제 한도는 서버가 건다)
+    return empty;
+  }
+}
+
 /** 한도를 되돌린다 — 기록만 남기고 실제 저장에 실패했을 때 */
 export async function refundQuota(
   userId: number,

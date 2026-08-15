@@ -250,7 +250,9 @@
       "sexual": "Sexual content",
       "privacy": "Personal information",
       "other": "Other"
-    }
+    },
+    "quotaToday": "Today {used}/{limit}",
+    "quotaHint": "Your daily posting limit. Verifying your email raises it."
   },
   "spot": {
     "back": "Back to list",

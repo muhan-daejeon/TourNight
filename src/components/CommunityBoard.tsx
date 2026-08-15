@@ -51,6 +51,25 @@ interface Me {
 
 const BODY_MAX = 200;
 
+interface Quota {
+  post: { used: number; limit: number };
+  comment: { used: number; limit: number };
+}
+
+/** "오늘 1/3" — 남은 작성 횟수 표시. 다 쓰면 붉게 */
+function QuotaLabel({ used, limit }: { used: number; limit: number }) {
+  const t = useTranslations("community");
+  const done = used >= limit;
+  return (
+    <span
+      title={t("quotaHint")}
+      className={`shrink-0 text-xs ${done ? "font-semibold text-rose-300" : "text-slate-500"}`}
+    >
+      {t("quotaToday", { used, limit })}
+    </span>
+  );
+}
+
 /**
  * 상대 시간 표기 (방금 전 / N분 전 / … / 7일 넘으면 날짜) — 접속 언어로.
  */
@@ -283,11 +302,18 @@ function PostItem({
   post,
   me,
   canAttach,
+  commentQuota,
+  onQuotaUsed,
+  onQuotaExhausted,
   onDeleted,
 }: {
   post: Post;
   me: Me | null | undefined;
   canAttach: boolean;
+  /** 오늘 댓글 사용량 (모르면 null) */
+  commentQuota: { used: number; limit: number } | null;
+  onQuotaUsed: () => void;
+  onQuotaExhausted: (limit: number) => void;
   onDeleted: () => void;
 }) {
   const t = useTranslations("community");
@@ -358,6 +384,7 @@ function PostItem({
       }
       if (res.status === 429) {
         const data = await res.json().catch(() => ({}));
+        onQuotaExhausted(data.limit ?? 0);
         alert(t("limitReached", { limit: data.limit ?? 0 }));
         return;
       }
@@ -368,6 +395,7 @@ function PostItem({
       if (!res.ok) throw new Error();
       const data = await res.json();
       setComments((prev) => [...(prev ?? []), data.comment]);
+      onQuotaUsed();
       setCount((c) => c + 1);
       setReplyBody("");
       clearPhoto();
@@ -608,6 +636,14 @@ function PostItem({
                 {t("commentSubmit")}
               </button>
             </form>
+            {commentQuota && (
+              <p className="text-right">
+                <QuotaLabel
+                  used={commentQuota.used}
+                  limit={commentQuota.limit}
+                />
+              </p>
+            )}
             </>
           ) : (
             <LoginPrompt text={t("loginToComment")} />
@@ -637,6 +673,7 @@ export default function CommunityBoard({
   const [submitting, setSubmitting] = useState(false);
   // undefined = 로딩, null = 비로그인, Me = 로그인
   const [me, setMe] = useState<Me | null | undefined>(undefined);
+  const [quota, setQuota] = useState<Quota | null>(null);
   // canAttach는 서버에서 내려받는다 (스토리지 키 유무는 서버만 안다)
   const {
     photo,
@@ -665,7 +702,23 @@ export default function CommunityBoard({
         ),
       )
       .catch(() => setMe(null));
+
+    // 남은 작성 횟수 — 비로그인이면 401이라 그냥 비워둔다
+    fetch("/api/community/quota")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data && setQuota({ post: data.post, comment: data.comment }))
+      .catch(() => {});
   }, []);
+
+  /** 글·댓글을 하나 쓰면 표시를 즉시 올린다 (서버 재조회 없이) */
+  const consumeQuota = (kind: "post" | "comment") =>
+    setQuota((q) =>
+      q ? { ...q, [kind]: { ...q[kind], used: q[kind].used + 1 } } : q,
+    );
+
+  /** 한도 초과 응답을 받으면 표시를 꽉 채운다 (다른 탭에서 썼을 수 있다) */
+  const exhaustQuota = (kind: "post" | "comment", limit: number) =>
+    setQuota((q) => (q ? { ...q, [kind]: { used: limit, limit } } : q));
 
 
   async function handleSubmit(e: React.FormEvent) {
@@ -701,6 +754,7 @@ export default function CommunityBoard({
       if (!res.ok) throw new Error();
       const data = await res.json();
       setPosts((prev) => [data.post, ...prev]);
+      consumeQuota("post");
       setBody("");
       clearPhoto();
     } catch {
@@ -783,6 +837,9 @@ export default function CommunityBoard({
               <span className="text-xs text-slate-500">
                 {body.length}/{BODY_MAX}
               </span>
+              {quota && (
+                <QuotaLabel used={quota.post.used} limit={quota.post.limit} />
+              )}
             </div>
             <button
               type="submit"
@@ -814,6 +871,9 @@ export default function CommunityBoard({
               post={post}
               me={me}
               canAttach={canAttach}
+              commentQuota={quota?.comment ?? null}
+              onQuotaUsed={() => consumeQuota("comment")}
+              onQuotaExhausted={(limit) => exhaustQuota("comment", limit)}
               onDeleted={() =>
                 setPosts((prev) => prev.filter((p) => p.id !== post.id))
               }
