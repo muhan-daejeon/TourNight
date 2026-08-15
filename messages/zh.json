@@ -9,7 +9,8 @@
     "courses": "推荐路线",
     "etiquette": "夜间礼仪",
     "community": "社区",
-    "phrases": "生存韩语"
+    "phrases": "生存韩语",
+    "festivals": "庆典·活动"
   },
   "home": {
     "heroTitle": "大田的夜晚比白天更璀璨",
@@ -33,7 +34,42 @@
       "city": "市区"
     },
     "ctaSpots": "探索夜间景点",
-    "ctaGuide": "夜间礼仪"
+    "ctaGuide": "夜间礼仪",
+    "heroCarousel": "主横幅",
+    "prevSlide": "上一张横幅",
+    "nextSlide": "下一张横幅",
+    "pauseSlides": "暂停自动播放",
+    "playSlides": "继续自动播放",
+    "scrollPrev": "上一个",
+    "scrollNext": "下一个",
+    "heroFestivalOverline": "此刻，大田的夜晚格外特别",
+    "heroFestivalCta": "查看详情",
+    "heroAiOverline": "懂夜晚的向导",
+    "heroAiTitle": "今晚的路线，交给AI来安排",
+    "heroAiHighlight": "AI",
+    "heroAiSubtitle": "只要选好想去的景点，游览顺序、公交与步行路线、末班车时间都为你一次整理好。",
+    "heroAiCta": "生成路线",
+    "festivalsSection": "全年不断的大田庆典",
+    "festivalsSectionSub": "每个季节都有不一样的大田之夜",
+    "festivalsViewAll": "查看全部庆典·活动",
+    "spotsSectionSub": "TOUR A NIGHT 推荐的大田夜景",
+    "spotsViewAll": "查看全部夜景景点",
+    "spotsAllTitle": "大田夜景景点",
+    "spotsAllSubtitle": "在地图上探索大田的夜晚，把喜欢的地方收进来，直接生成专属路线。",
+    "newsSection": "TOUR A NIGHT 消息",
+    "newsSectionSub": "TOUR A NIGHT 的最新动态",
+    "monthlyIssueTitle": "月刊通讯",
+    "monthlyIssueCta": "查看本月庆典",
+    "popularSection": "本周热门帖",
+    "popularSectionSub": "社区中最受关注的帖子",
+    "popularEmpty": "还没有帖子。",
+    "gallerySection": "夜景相册",
+    "gallerySectionSub": "TOUR A NIGHT 收录的大田之夜",
+    "galleryCta": "查看更多",
+    "guidebookOverline": "把大田的夜晚收进一本书",
+    "guidebookTitle": "TOUR A NIGHT GUIDEBOOK",
+    "guidebookSubtitle": "从夜间礼仪到现场就能用的常用语",
+    "guidebookCta": "打开指南"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。"
@@ -241,5 +277,23 @@
     "moonAge": "月龄{age}",
     "starNight": "适合观星的夜晚",
     "fullMoon": "适合赏月的夜晚"
+  },
+  "festivals": {
+    "title": "庆典 & 活动",
+    "subtitle": "全年不断的大田多彩夜晚",
+    "scheduleNote": "具体日期与内容每年会依主办方公告调整，出行前请确认官方通知。",
+    "annualMonth": "每年{month}",
+    "annualRange": "每年{from}~{to}",
+    "nowOpen": "进行中",
+    "upcoming": "即将举行",
+    "place": "地点",
+    "season": "时期",
+    "official": "查看官方信息",
+    "backToList": "全部庆典·活动",
+    "aboutTitle": "庆典介绍",
+    "relatedSpot": "会场夜景景点",
+    "viewSpot": "查看景点",
+    "planCta": "生成经过这里的路线",
+    "more": "看看其他庆典"
   }
 }

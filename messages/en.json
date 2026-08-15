@@ -9,7 +9,8 @@
     "courses": "Courses",
     "etiquette": "Night Etiquette",
     "community": "Community",
-    "phrases": "Survival Korean"
+    "phrases": "Survival Korean",
+    "festivals": "Festivals"
   },
   "home": {
     "heroTitle": "Daejeon Shines Brighter at Night",
@@ -33,7 +34,42 @@
       "city": "City"
     },
     "ctaSpots": "Explore Night Spots",
-    "ctaGuide": "Night Etiquette"
+    "ctaGuide": "Night Etiquette",
+    "heroCarousel": "Main banner",
+    "prevSlide": "Previous banner",
+    "nextSlide": "Next banner",
+    "pauseSlides": "Pause auto-rotation",
+    "playSlides": "Resume auto-rotation",
+    "scrollPrev": "Scroll back",
+    "scrollNext": "Scroll forward",
+    "heroFestivalOverline": "Right now, Daejeon nights are special",
+    "heroFestivalCta": "See details",
+    "heroAiOverline": "Your guide to the night",
+    "heroAiTitle": "Let AI plan tonight's course",
+    "heroAiHighlight": "AI",
+    "heroAiSubtitle": "Just pick the spots you want. We'll work out the order, the bus and walking routes, and the last departure times.",
+    "heroAiCta": "Plan a course",
+    "festivalsSection": "Daejeon festivals, all year round",
+    "festivalsSectionSub": "A different night for every season",
+    "festivalsViewAll": "See all festivals",
+    "spotsSectionSub": "Night views in Daejeon, picked by TOUR A NIGHT",
+    "spotsViewAll": "See all night spots",
+    "spotsAllTitle": "Daejeon night spots",
+    "spotsAllSubtitle": "Explore Daejeon after dark on the map, then save the places you like and turn them into a course.",
+    "newsSection": "TOUR A NIGHT news",
+    "newsSectionSub": "The latest from TOUR A NIGHT",
+    "monthlyIssueTitle": "Monthly newsletter",
+    "monthlyIssueCta": "This month's festivals",
+    "popularSection": "Popular this week",
+    "popularSectionSub": "Most-discussed community posts",
+    "popularEmpty": "No posts yet.",
+    "gallerySection": "Night gallery",
+    "gallerySectionSub": "Daejeon nights on TOUR A NIGHT",
+    "galleryCta": "See more",
+    "guidebookOverline": "The whole Daejeon night, in one book",
+    "guidebookTitle": "TOUR A NIGHT GUIDEBOOK",
+    "guidebookSubtitle": "From after-dark etiquette to the phrases you'll actually use",
+    "guidebookCta": "Open the guidebook"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest."
@@ -241,5 +277,23 @@
     "moonAge": "Moon age {age}",
     "starNight": "Great night for stargazing",
     "fullMoon": "Full-moon night"
+  },
+  "festivals": {
+    "title": "Festivals & events",
+    "subtitle": "A different Daejeon night for every season",
+    "scheduleNote": "Exact dates and programmes change each year with the organiser's announcement. Please check the official notice before you go.",
+    "annualMonth": "Every {month}",
+    "annualRange": "Every {from}–{to}",
+    "nowOpen": "On now",
+    "upcoming": "Coming up",
+    "place": "Venue",
+    "season": "When",
+    "official": "Official information",
+    "backToList": "All festivals",
+    "aboutTitle": "About this festival",
+    "relatedSpot": "Night spot at the venue",
+    "viewSpot": "View spot",
+    "planCta": "Plan a course via here",
+    "more": "More festivals"
   }
 }

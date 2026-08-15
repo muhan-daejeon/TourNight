@@ -9,7 +9,8 @@
     "courses": "おすすめコース",
     "etiquette": "ナイトエチケット",
     "community": "コミュニティ",
-    "phrases": "サバイバル韓国語"
+    "phrases": "サバイバル韓国語",
+    "festivals": "祭り・イベント"
   },
   "home": {
     "heroTitle": "大田の夜は昼より輝く",
@@ -33,7 +34,42 @@
       "city": "都心"
     },
     "ctaSpots": "夜の名所を見る",
-    "ctaGuide": "ナイトエチケット"
+    "ctaGuide": "ナイトエチケット",
+    "heroCarousel": "メインバナー",
+    "prevSlide": "前のバナー",
+    "nextSlide": "次のバナー",
+    "pauseSlides": "自動切り替えを停止",
+    "playSlides": "自動切り替えを再開",
+    "scrollPrev": "前へ",
+    "scrollNext": "次へ",
+    "heroFestivalOverline": "いま、大田の夜は特別です",
+    "heroFestivalCta": "詳しく見る",
+    "heroAiOverline": "夜を知る道しるべ",
+    "heroAiTitle": "今夜のコースはAIにおまかせ",
+    "heroAiHighlight": "AI",
+    "heroAiSubtitle": "行きたい名所を選ぶだけ。回る順番からバス・徒歩ルート、終電・終バスの時間までまとめてご案内します。",
+    "heroAiCta": "コースを作る",
+    "festivalsSection": "一年中つづく、大田の祭り",
+    "festivalsSectionSub": "季節ごとに変わる大田の夜",
+    "festivalsViewAll": "祭り・イベントをすべて見る",
+    "spotsSectionSub": "TOUR A NIGHT おすすめの大田夜景スポット",
+    "spotsViewAll": "夜景スポットをすべて見る",
+    "spotsAllTitle": "大田の夜景スポット",
+    "spotsAllSubtitle": "地図で大田の夜を探して、気に入った場所を選べばそのままコースになります。",
+    "newsSection": "TOUR A NIGHT のお知らせ",
+    "newsSectionSub": "TOUR A NIGHT の最新情報",
+    "monthlyIssueTitle": "月刊ニュースレター",
+    "monthlyIssueCta": "今月の祭りを見る",
+    "popularSection": "今週の人気投稿",
+    "popularSectionSub": "コミュニティで話題の投稿",
+    "popularEmpty": "まだ投稿がありません。",
+    "gallerySection": "夜景ギャラリー",
+    "gallerySectionSub": "TOUR A NIGHT に登録された大田の夜",
+    "galleryCta": "もっと見る",
+    "guidebookOverline": "大田の夜を一冊に",
+    "guidebookTitle": "TOUR A NIGHT GUIDEBOOK",
+    "guidebookSubtitle": "夜のマナーから、その場で使える会話まで",
+    "guidebookCta": "ガイドブックを見る"
   },
   "footer": {
     "notice": "本サービスは2026観光データ活用コンテストの出品作です。"
@@ -241,5 +277,23 @@
     "moonAge": "月齢{age}",
     "starNight": "星空観察に良い夜",
     "fullMoon": "お月見に良い夜"
+  },
+  "festivals": {
+    "title": "祭り・イベント",
+    "subtitle": "一年中つづく大田の多彩な夜",
+    "scheduleNote": "正確な日程・内容は毎年主催者の告知によって変わります。おでかけ前に公式案内をご確認ください。",
+    "annualMonth": "毎年{month}",
+    "annualRange": "毎年{from}〜{to}",
+    "nowOpen": "開催中",
+    "upcoming": "まもなく開催",
+    "place": "会場",
+    "season": "時期",
+    "official": "公式案内を見る",
+    "backToList": "祭り・イベント一覧",
+    "aboutTitle": "祭りについて",
+    "relatedSpot": "会場の夜景スポット",
+    "viewSpot": "スポットを見る",
+    "planCta": "ここを通るコースを作る",
+    "more": "ほかの祭りも見る"
   }
 }
