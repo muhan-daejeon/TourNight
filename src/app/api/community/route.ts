@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listPosts, createPost, BODY_MAX } from "@/lib/community";
 import { getSessionUser } from "@/lib/session";
+import { guardCommunityWrite } from "@/lib/community-guard";
 import { prepareMedia, readCommunityInput } from "@/lib/community-media";
 import { deleteCommunityMedia, isStorageConfigured } from "@/lib/storage";
 import { logActivity } from "@/lib/activity";
@@ -32,6 +33,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "too long" }, { status: 400 });
   }
 
+  // 일일 한도 + 본문 검수. 사진 검수(prepareMedia)보다 먼저 봐서, 한도를 넘긴
+  // 요청으로 사진 업로드·Gemini 이미지 호출까지 가지 않게 한다
+  const guard = await guardCommunityWrite(session.userId, "post", input.body);
+  if (!guard.ok) return guard.response;
+
   const prepared = await prepareMedia(input.file);
   if (!prepared.ok) {
     return NextResponse.json({ error: prepared.error }, { status: prepared.status });
@@ -44,6 +50,7 @@ export async function POST(request: NextRequest) {
       author: session.nickname,
       body: input.body,
       media,
+      verified: guard.verified,
     });
     if (!post) {
       // 글 저장이 무산되면 방금 올린 파일은 고아가 되므로 되돌린다

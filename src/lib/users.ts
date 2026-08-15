@@ -11,6 +11,8 @@ export interface User {
   country: string | null;
   /** 'admin'은 코스 생성 한도가 없고 /admin 페이지에 들어갈 수 있다 */
   role: "user" | "admin";
+  /** 메일 인증 완료 여부 — 커뮤니티 글·댓글 작성 조건 */
+  emailVerified: boolean;
 }
 
 export const EMAIL_MAX = 254;
@@ -44,6 +46,7 @@ interface UserRow {
   nickname: string;
   country: string | null;
   role: string;
+  email_verified_at: string | null;
 }
 
 function toUser(r: UserRow): User {
@@ -53,13 +56,14 @@ function toUser(r: UserRow): User {
     nickname: r.nickname,
     country: r.country,
     role: r.role === "admin" ? "admin" : "user",
+    emailVerified: !!r.email_verified_at,
   };
 }
 
 /** 로그인 검증용 — password_hash 포함 (외부로 반환 금지) */
 export async function findUserByEmail(email: string) {
   const rows = await sql<(UserRow & { password_hash: string | null })[]>`
-    select id, email, nickname, country, role, password_hash
+    select id, email, nickname, country, role, email_verified_at, password_hash
     from users where email = ${email}
   `;
   return rows[0] ?? null;
@@ -67,9 +71,28 @@ export async function findUserByEmail(email: string) {
 
 export async function getUserById(id: number): Promise<User | null> {
   const rows = await sql<UserRow[]>`
-    select id, email, nickname, country, role from users where id = ${id}
+    select id, email, nickname, country, role, email_verified_at from users where id = ${id}
   `;
   return rows[0] ? toUser(rows[0]) : null;
+}
+
+/**
+ * 커뮤니티 쓰기 게이트 — 세션이 아니라 DB를 본다.
+ * 세션 토큰에 넣어두면 다른 탭·기기에서 인증해도 재로그인 전까지 반영되지 않는다.
+ */
+export async function isEmailVerified(userId: number): Promise<boolean> {
+  const rows = await sql<{ email_verified_at: string | null }[]>`
+    select email_verified_at from users where id = ${userId}
+  `;
+  return !!rows[0]?.email_verified_at;
+}
+
+/** 구글 로그인처럼 제공자가 이미 주소를 확인해 준 경우 — 다시 묻지 않는다 */
+export async function markVerified(userId: number): Promise<void> {
+  await sql`
+    update users set email_verified_at = now()
+    where id = ${userId} and email_verified_at is null
+  `;
 }
 
 /** 이메일 중복 시 postgres 23505(unique_violation) → 호출부에서 409 처리 */
@@ -83,7 +106,7 @@ export async function createUser(input: {
   const rows = await sql<UserRow[]>`
     insert into users (email, password_hash, nickname, country)
     values (${input.email}, ${hash}, ${input.nickname}, ${input.country})
-    returning id, email, nickname, country, role
+    returning id, email, nickname, country, role, email_verified_at
   `;
   return toUser(rows[0]);
 }
@@ -99,7 +122,7 @@ export async function updateProfile(
     update users
     set nickname = ${nickname}, country = ${input.country}
     where id = ${userId}
-    returning id, email, nickname, country, role
+    returning id, email, nickname, country, role, email_verified_at
   `;
   return rows[0] ? toUser(rows[0]) : null;
 }
@@ -117,13 +140,13 @@ export async function findOrCreateGoogleUser(input: {
   const email = input.email.trim().toLowerCase();
 
   const byOauth = await sql<UserRow[]>`
-    select id, email, nickname, country, role from users
+    select id, email, nickname, country, role, email_verified_at from users
     where oauth_provider = 'google' and oauth_id = ${input.googleId}
   `;
   if (byOauth[0]) return { user: toUser(byOauth[0]), isNew: false };
 
   const byEmail = await sql<UserRow[]>`
-    select id, email, nickname, country, role from users where email = ${email}
+    select id, email, nickname, country, role, email_verified_at from users where email = ${email}
   `;
   if (byEmail[0]) {
     await sql`
@@ -140,7 +163,7 @@ export async function findOrCreateGoogleUser(input: {
   const created = await sql<UserRow[]>`
     insert into users (email, nickname, oauth_provider, oauth_id)
     values (${email}, ${nickname}, 'google', ${input.googleId})
-    returning id, email, nickname, country, role
+    returning id, email, nickname, country, role, email_verified_at
   `;
   return { user: toUser(created[0]), isNew: true };
 }

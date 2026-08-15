@@ -5,7 +5,7 @@ import {
   STATE_COOKIE,
   LOCALE_COOKIE,
 } from "@/lib/oauth";
-import { findOrCreateGoogleUser } from "@/lib/users";
+import { findOrCreateGoogleUser, markVerified } from "@/lib/users";
 import { signSession, SESSION_COOKIE, sessionCookieOptions } from "@/lib/session";
 import { routing } from "@/i18n/routing";
 
@@ -46,6 +46,9 @@ export async function GET(request: NextRequest) {
       email: profile.email,
       name: profile.name,
     });
+    // 위에서 profile.emailVerified를 확인하고 들어왔다 — 구글이 이미 주소 소유를
+    // 검증했으므로 같은 걸 우리가 또 묻지 않는다
+    await markVerified(user.id);
     const token = await signSession({
       userId: user.id,
       email: user.email,
