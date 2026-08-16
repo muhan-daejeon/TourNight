@@ -49,10 +49,10 @@
     "scrollNext": "다음으로",
     "heroFestivalOverline": "지금, 대전의 밤은 특별합니다",
     "heroFestivalCta": "자세히 보기",
-    "heroAiOverline": "밤을 아는 길잡이",
-    "heroAiTitle": "오늘 밤 코스, AI가 짜 드립니다",
-    "heroAiHighlight": "AI",
-    "heroAiSubtitle": "가고 싶은 명소만 담으면 이동 순서부터 버스·도보 경로, 막차 시간까지 한 번에 정리해 드려요.",
+    "heroAiOverline": "AI 코스 추천",
+    "heroAiTitle": "밤을 거니는 가장 스마트한 방법",
+    "heroAiHighlight": "가장 스마트한",
+    "heroAiSubtitle": "가고 싶은 명소를 담기만 하면, 최적 이동 동선부터 수단별 경로, 막차 체크까지 완벽한 밤을 설계해 드려요.",
     "heroAiCta": "코스 만들기",
     "festivalsSection": "대전 축제&행사",
     "festivalsSectionSub": "대전의 밤을 채우는 축제 명소",
@@ -144,7 +144,9 @@
     "legNoRouteMode": "{mode} 경로 없음",
     "staysNear": "{name} 근처 숙소",
     "selectHint": "코스를 선택하면 지도에 경로가 표시돼요",
-    "aiDailyLimit": "오늘의 코스 짜기 횟수를 모두 사용했어요. 내일 다시 시도해주세요."
+    "aiDailyLimit": "오늘의 코스 짜기 횟수를 모두 사용했어요. 내일 다시 시도해주세요.",
+    "tabPreset": "추천 코스",
+    "tabSurvey": "맞춤 코스"
   },
   "etiquette": {
     "title": "나이트 에티켓",
@@ -337,5 +339,55 @@
   "comingSoon": {
     "short": "준비 중",
     "body": "맛집·숙박·쇼핑 정보는 한국관광공사 관광정보 서비스에서 받아옵니다. 현재 데이터 연동을 준비하고 있어, 준비가 끝나는 대로 이 자리에 채워 드릴게요."
+  },
+  "survey": {
+    "q1": "어디서 출발하세요?",
+    "q2": "몇 시부터, 얼마나 볼까요?",
+    "q3": "어떻게 다니실 건가요?",
+    "q4": "누구와 함께 가세요?",
+    "q5": "어떤 곳을 보고 싶으세요?",
+    "myLocation": "현재 위치",
+    "locating": "위치 확인 중…",
+    "gpsNote": "위치는 코스를 짤 때만 쓰고 따로 저장하지 않습니다.",
+    "gpsDenied": "위치를 가져오지 못했습니다. 아래에서 출발지를 골라 주세요.",
+    "gpsUnsupported": "이 브라우저는 위치 기능을 지원하지 않습니다.",
+    "places": {
+      "daejeon": "대전역",
+      "yuseong": "유성온천역",
+      "dunsan": "둔산",
+      "expo": "엑스포과학공원"
+    },
+    "startTime": "출발 시각",
+    "hours": "{h}시간",
+    "transports": {
+      "walk": "걷기 위주",
+      "transit": "버스·지하철",
+      "taxi": "택시도 괜찮아요"
+    },
+    "companions": {
+      "solo": "혼자",
+      "couple": "연인과",
+      "friends": "친구들과",
+      "family": "가족과"
+    },
+    "themes": {
+      "nature": "자연",
+      "city": "도심",
+      "science": "과학",
+      "festival": "축제"
+    },
+    "themeNote": "고르지 않으면 여러 테마를 섞어 드려요. 과학·축제는 등록된 곳이 아직 적습니다.",
+    "submit": "맞춤 코스 만들기",
+    "planning": "코스 짜는 중…",
+    "needOrigin": "출발지를 먼저 골라 주세요.",
+    "stopsCount": "{n}곳 방문",
+    "lastBus": "막차 {time}",
+    "crowded": "붐빌 수 있어요 (혼잡도 {rate})",
+    "quiet": "한산한 편이에요 (혼잡도 {rate})",
+    "crowdNote": "혼잡도는 한국관광공사가 날짜별로 내놓는 예측값입니다. 지금 이 순간의 상황이 아니며, 예측이 없는 곳은 표시하지 않습니다.",
+    "loginRequired": "로그인이 필요합니다.",
+    "limitReached": "오늘 코스 생성 한도({limit}회)를 다 쓰셨어요.",
+    "noCandidates": "출발지 주변에 등록된 야간 명소가 부족합니다. 다른 출발지를 골라 보세요.",
+    "failed": "코스를 만들지 못했습니다. 잠시 후 다시 시도해 주세요."
   }
 }

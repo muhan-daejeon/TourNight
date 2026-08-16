@@ -1,6 +1,15 @@
 import { sql } from "./db";
-import { generateCoursePlan, type CourseCandidate } from "./gemini";
-import { getNearbySpots, getSpot } from "./spots";
+import {
+  generateCoursePlan,
+  generateSurveyCourse,
+  type CourseCandidate,
+} from "./gemini";
+import {
+  getCongestionForSpots,
+  getNearbySpots,
+  getSpot,
+  getSpotsNearPoint,
+} from "./spots";
 import { getTransitForSpots, type SpotTransit } from "./transit";
 import { getRoutesForLegs, type SpotRoute } from "./routes";
 import { fetchNearbyStays, type NearbyStay, type NightSpot } from "./kto";
@@ -427,6 +436,233 @@ export async function getAiCourse(
   } catch (err) {
     console.warn(
       "[courses] AI 코스 생성 실패 — 거리 기반으로 폴백합니다:",
+      err instanceof Error ? err.message : err,
+    );
+    return fallback();
+  }
+}
+
+/* ────────── 설문 기반 맞춤 코스 ────────── */
+
+export type Transport = "walk" | "transit" | "taxi";
+export type Companion = "solo" | "couple" | "friends" | "family";
+
+export interface SurveyInput {
+  /** 출발 좌표 (GPS 또는 고른 숙소·역) */
+  mapX: number;
+  mapY: number;
+  /** "21:00" */
+  startTime: string;
+  durationMin: number;
+  transport: Transport;
+  companion: Companion;
+  categories: NightSpot["category"][];
+  locale: string;
+  /** 혼잡도 조회 기준일 "YYYY-MM-DD" */
+  date: string;
+}
+
+export interface SurveyStopInfo {
+  /** 0~100, 100이 가장 붐빔. null이면 예측 데이터가 없는 곳 */
+  congestion: number | null;
+}
+
+export interface SurveyCourse extends Course {
+  title: string;
+  summary: string;
+  tip: string;
+  notes: string[];
+  transit: (SpotTransit | null)[];
+  /** stops와 같은 순서 */
+  info: SurveyStopInfo[];
+  stays: NearbyStay[];
+  source: "ai" | "distance";
+  /** 실제로 적용된 조건 — 화면에 "왜 이 코스인지" 근거로 보여준다 */
+  applied: {
+    startTime: string;
+    endTime: string;
+    durationMin: number;
+    transport: Transport;
+    targetStops: number;
+  };
+}
+
+/** 한 곳에 머무는 시간 — 야경은 보고 사진 찍으면 끝나므로 길게 잡지 않는다 */
+const DWELL_MIN = 25;
+
+/**
+ * 이동 수단별 구간 평균 이동 시간(분).
+ * spot_route 캐시 실측 평균(도보 48 · 대중교통 22 · 택시 8)을 기준으로 잡았다.
+ */
+const LEG_MIN: Record<Transport, number> = { walk: 45, transit: 22, taxi: 10 };
+
+/**
+ * 주어진 시간에 몇 곳을 돌 수 있는지.
+ *   stops * 체류 + (stops-1) * 이동 <= 전체 시간
+ * 산수라서 AI에 맡기지 않고 서버에서 정한 뒤 프롬프트에 못 박는다.
+ */
+export function planStopCount(durationMin: number, transport: Transport): number {
+  const leg = LEG_MIN[transport];
+  const n = Math.floor((durationMin + leg) / (DWELL_MIN + leg));
+  return Math.min(5, Math.max(2, n));
+}
+
+/** "21:00" + 120분 → "23:00" (자정을 넘기면 그대로 24시 이상으로 표기하지 않고 감아준다) */
+export function addMinutes(hhmm: string, minutes: number): string {
+  const [h, m] = hhmm.split(":").map(Number);
+  const total = (h * 60 + m + minutes) % (24 * 60);
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+/** 동행자에 따른 기본값 조정 — 동행자 자체는 데이터에 닿지 않으므로 다른 값으로 번역한다 */
+const COMPANION_TWEAK: Record<Companion, { dwellBonus: number }> = {
+  solo: { dwellBonus: 0 },
+  couple: { dwellBonus: 5 }, // 한 곳에 더 머무름 → 곳 수는 줄어든다
+  friends: { dwellBonus: 0 },
+  family: { dwellBonus: 10 }, // 아이 동반은 이동이 느리다
+};
+
+/**
+ * 설문 답변만으로 코스를 짠다 (앵커 없음).
+ *
+ * 답변이 프롬프트 양념으로만 쓰이지 않도록, 시간 예산은 서버가 계산해 방문지 수를
+ * 정하고 이동 수단은 실제 경로 조회 모드로 이어진다. Gemini는 "그 안에서 무엇을
+ * 어떤 순서로"만 정한다.
+ */
+export async function getSurveyCourse(
+  input: SurveyInput,
+): Promise<SurveyCourse | null> {
+  const dwell = DWELL_MIN + COMPANION_TWEAK[input.companion].dwellBonus;
+  const leg = LEG_MIN[input.transport];
+  const targetStops = Math.min(
+    5,
+    Math.max(2, Math.floor((input.durationMin + leg) / (dwell + leg))),
+  );
+  const endTime = addMinutes(input.startTime, input.durationMin);
+
+  // 후보는 출발지 주변에서 모은다. 선호 테마가 있으면 그 카테고리를 따로 더 담아
+  // 거리순만으로 한 곳도 안 뽑히는 일을 막는다 (getAiCourse와 같은 방침).
+  const [nearAll, nearPreferred] = await Promise.all([
+    getSpotsNearPoint(input.mapX, input.mapY, { limit: 12, locale: input.locale }),
+    input.categories.length
+      ? getSpotsNearPoint(input.mapX, input.mapY, {
+          limit: 8,
+          categories: input.categories,
+          locale: input.locale,
+        })
+      : Promise.resolve([]),
+  ]);
+  const candidateSpots = [
+    ...new Map(
+      [...nearPreferred, ...nearAll].map((s) => [s.contentId, s]),
+    ).values(),
+  ]
+    .sort((a, b) => a.distanceM - b.distanceM)
+    .slice(0, 14);
+  if (candidateSpots.length < 2) return null;
+
+  const ids = candidateSpots.map((s) => s.contentId);
+  const [transitMap, congestionMap] = await Promise.all([
+    getTransitForSpots(ids),
+    getCongestionForSpots(ids, input.date),
+  ]);
+
+  const toStop = (s: NightSpot): CourseStop => ({
+    contentId: s.contentId,
+    title: s.title,
+    addr: s.addr,
+    category: s.category,
+    imageUrl: s.imageUrl,
+    mapX: s.mapX,
+    mapY: s.mapY,
+  });
+  const byId = new Map(candidateSpots.map((s) => [s.contentId, toStop(s)]));
+
+  const finish = async (
+    stops: CourseStop[],
+    plan: { title: string; summary: string; tip: string; notes: string[] },
+    source: "ai" | "distance",
+  ): Promise<SurveyCourse> => {
+    const base = await toCourse(stops, true);
+    const stays = await staysNearLastStop(stops);
+    return {
+      id: `survey-${stops.map((s) => s.contentId).join("+")}`,
+      ...base,
+      ...plan,
+      transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
+      info: stops.map((s) => ({
+        congestion: congestionMap.get(s.contentId) ?? null,
+      })),
+      stays,
+      source,
+      applied: {
+        startTime: input.startTime,
+        endTime,
+        durationMin: input.durationMin,
+        transport: input.transport,
+        targetStops,
+      },
+    };
+  };
+
+  // 폴백 — 출발지에서 가까운 순으로 채우고 최단이웃 순서로 잇는다
+  const fallback = () =>
+    finish(
+      orderRoute(candidateSpots.slice(0, targetStops).map(toStop)),
+      {
+        title: "",
+        summary: "",
+        tip: "",
+        notes: Array(targetStops).fill(""),
+      },
+      "distance",
+    );
+
+  try {
+    const plan = await generateSurveyCourse(
+      candidateSpots.map((s) => ({
+        contentId: s.contentId,
+        title: s.title,
+        category: s.category,
+        addr: s.addr,
+        distanceM: s.distanceM,
+        lastBus: transitMap.get(s.contentId)?.lastBus ?? null,
+        congestion: congestionMap.get(s.contentId) ?? null,
+      })),
+      {
+        startTime: input.startTime,
+        durationMin: input.durationMin,
+        endTime,
+        transport: input.transport,
+        companion: input.companion,
+        targetStops,
+      },
+      input.locale,
+      input.categories,
+    );
+
+    // 환각 방지 — 후보에 없는 id는 버린다
+    const picked = plan.stops
+      .map((s) => ({ stop: byId.get(s.contentId), note: s.note }))
+      .filter((s): s is { stop: CourseStop; note: string } => !!s.stop);
+    const unique = [
+      ...new Map(picked.map((p) => [p.stop.contentId, p])).values(),
+    ];
+    if (unique.length < 2) return fallback();
+
+    return finish(
+      unique.map((p) => p.stop),
+      {
+        title: plan.title,
+        summary: plan.summary,
+        tip: plan.tip,
+        notes: unique.map((p) => p.note),
+      },
+      "ai",
+    );
+  } catch (err) {
+    console.warn(
+      "[courses] 설문 코스 생성 실패 — 거리 기반으로 대체합니다:",
       err instanceof Error ? err.message : err,
     );
     return fallback();

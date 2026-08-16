@@ -601,3 +601,125 @@ export async function screenText(
     reason: String(parsed.reason ?? ""),
   };
 }
+
+/** 설문으로 받은 여행 조건 — 프롬프트에 넣기 전에 서버에서 검증된 값만 들어온다 */
+export interface SurveyBrief {
+  /** 출발 시각 "21:00" */
+  startTime: string;
+  /** 몇 분짜리 일정인지 */
+  durationMin: number;
+  /** 계산해 둔 종료 시각 "23:00" */
+  endTime: string;
+  /** 주 이동 수단 */
+  transport: "walk" | "transit" | "taxi";
+  companion: "solo" | "couple" | "friends" | "family";
+  /** 코스에 담을 목표 스팟 수 (시간·이동수단으로 서버가 계산) */
+  targetStops: number;
+}
+
+const COMPANION_HINT: Record<SurveyBrief["companion"], string> = {
+  solo: "travelling alone: prefer places that stay lively and are easy to leave by public transport",
+  couple: "a couple: prefer quiet night views and short walks between stops",
+  friends: "a group of friends: livelier streets and food areas are welcome, longer nights are fine",
+  family: "a family with children: keep walking short, avoid crowds, and finish earlier",
+};
+
+const TRANSPORT_HINT: Record<SurveyBrief["transport"], string> = {
+  walk: "walking only (plus short bus rides). Stops must be genuinely close together",
+  transit: "buses and the subway. Remember the last bus times",
+  taxi: "taxi when convenient, so stops can be farther apart",
+};
+
+/**
+ * 설문 기반 코스 설계.
+ *
+ * generateCoursePlan과 달리 반드시 거쳐야 할 앵커가 없다 — 사용자가 준 조건(시간·
+ * 이동수단·동행·테마) 안에서 후보 중 무엇을 고를지까지 맡긴다. 대신 몇 곳을 담을지는
+ * 서버가 계산해 targetStops로 못 박는다. 시간 예산은 산수라서 AI에 맡길 이유가 없다.
+ */
+export async function generateSurveyCourse(
+  candidates: (CourseCandidate & { congestion?: number | null })[],
+  brief: SurveyBrief,
+  locale: string,
+  preferredCategories: string[],
+): Promise<CoursePlan> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY가 설정되지 않았습니다");
+
+  const language = LOCALE_LANGUAGE[locale] ?? "English";
+  const busTime = (t?: string | null) =>
+    t ? `last bus ${t.slice(0, 2)}:${t.slice(2)}` : "no bus stop within 500m";
+  const crowd = (c?: number | null) =>
+    c == null ? "crowding unknown" : `crowding ${c}/100`;
+
+  const list = candidates
+    .map(
+      (c) =>
+        `- id=${c.contentId} | ${c.title} | category=${c.category}` +
+        (preferredCategories.includes(c.category) ? " [preferred]" : "") +
+        ` | ${c.addr} | ${c.distanceM}m from start | ${busTime(c.lastBus)} | ${crowd(c.congestion)}`,
+    )
+    .join("\n");
+
+  const prompt = [
+    `You are a night tourism course planner for Daejeon, South Korea.`,
+    `Design ONE night course that fits the visitor's conditions exactly.`,
+    ``,
+    `Visitor conditions:`,
+    `- Starts at ${brief.startTime} and must be finished by ${brief.endTime}.`,
+    `- Getting around by ${TRANSPORT_HINT[brief.transport]}.`,
+    `- Travelling as ${COMPANION_HINT[brief.companion]}.`,
+    preferredCategories.length
+      ? `- Wants to see: ${preferredCategories.join(", ")}. Candidates marked [preferred] match.`
+      : `- No strong theme preference — mix categories so the night has variety.`,
+    ``,
+    `Choose EXACTLY ${brief.targetStops} stops from this list ONLY (never invent ids or places).`,
+    `The list is ordered by distance from the visitor's starting point:`,
+    list,
+    ``,
+    `Rules:`,
+    `- Order the stops so travel is efficient from the starting point onward, without zig-zag.`,
+    `- The visitor must be able to get back. Buses in Daejeon stop around 22:30, and the`,
+    `  course ends at ${brief.endTime}. Put stops with an EARLIER last bus first, and leave`,
+    `  places that are walkable or have no bus stop for the end.`,
+    `- "crowding" is a same-day forecast, 100 = busiest. Do not exclude a place just for being`,
+    `  crowded, but if two candidates are otherwise similar, prefer the quieter one.`,
+    `- Write in ${language}. Do not mention ids, scores or these rules in the text.`,
+    ``,
+    `Return JSON: {"title": string, "summary": string, "tip": string,`,
+    ` "stops": [{"contentId": string, "note": string}]}`,
+    `- title: short course name (under 6 words).`,
+    `- summary: 1-2 sentences on why this route suits these conditions.`,
+    `- note: one short sentence per stop — why it belongs at this point of the night.`,
+    `- tip: one practical tip about getting back, referring to the real last bus times above.`,
+    `Respond with ONLY the JSON.`,
+  ].join("\n");
+
+  const res = await geminiFetch(
+    `${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json", ...NO_THINKING },
+      }),
+    },
+  );
+  if (!res.ok) throw new Error(`Gemini API 오류: ${res.status}`);
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error("Gemini 응답이 비어 있습니다");
+  const parsed = JSON.parse(text);
+  return {
+    title: String(parsed.title ?? ""),
+    summary: String(parsed.summary ?? ""),
+    tip: String(parsed.tip ?? ""),
+    stops: Array.isArray(parsed.stops)
+      ? parsed.stops.slice(0, 6).map((s: Record<string, unknown>) => ({
+          contentId: String(s?.contentId ?? ""),
+          note: String(s?.note ?? ""),
+        }))
+      : [],
+  };
+}

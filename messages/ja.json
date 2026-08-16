@@ -49,10 +49,10 @@
     "scrollNext": "次へ",
     "heroFestivalOverline": "いま、大田の夜は特別です",
     "heroFestivalCta": "詳しく見る",
-    "heroAiOverline": "夜を知る道しるべ",
-    "heroAiTitle": "今夜のコースはAIにおまかせ",
-    "heroAiHighlight": "AI",
-    "heroAiSubtitle": "行きたい名所を選ぶだけ。回る順番からバス・徒歩ルート、終電・終バスの時間までまとめてご案内します。",
+    "heroAiOverline": "AIコース提案",
+    "heroAiTitle": "夜を歩く、いちばんスマートな方法",
+    "heroAiHighlight": "いちばんスマート",
+    "heroAiSubtitle": "行きたいスポットを選ぶだけ。最適な順路から移動手段ごとのルート、終バスの確認まで、夜をまるごと設計します。",
     "heroAiCta": "コースを作る",
     "festivalsSection": "大田の祭り・イベント",
     "festivalsSectionSub": "大田の夜を彩る祭りの舞台",
@@ -144,7 +144,9 @@
     "legNoRouteMode": "{mode}の経路なし",
     "staysNear": "{name}周辺の宿",
     "selectHint": "コースを選ぶと地図に経路が表示されます",
-    "aiDailyLimit": "本日のコース作成回数を使い切りました。明日またお試しください。"
+    "aiDailyLimit": "本日のコース作成回数を使い切りました。明日またお試しください。",
+    "tabPreset": "おすすめコース",
+    "tabSurvey": "あなた向けコース"
   },
   "etiquette": {
     "title": "ナイトエチケット",
@@ -337,5 +339,55 @@
   "comingSoon": {
     "short": "準備中",
     "body": "グルメ・宿泊・ショッピング情報は韓国観光公社の観光情報サービスから取得します。現在データ連携を準備中で、整い次第このページに掲載します。"
+  },
+  "survey": {
+    "q1": "どこから出発しますか？",
+    "q2": "いつ、どのくらい回りますか？",
+    "q3": "移動手段は？",
+    "q4": "どなたと一緒ですか？",
+    "q5": "何を見たいですか？",
+    "myLocation": "現在地",
+    "locating": "位置を確認中…",
+    "gpsNote": "位置情報はコース作成にのみ使用し、保存しません。",
+    "gpsDenied": "位置を取得できませんでした。下から出発地を選んでください。",
+    "gpsUnsupported": "このブラウザは位置情報に対応していません。",
+    "places": {
+      "daejeon": "大田駅",
+      "yuseong": "儒城温泉駅",
+      "dunsan": "屯山",
+      "expo": "エキスポ科学公園"
+    },
+    "startTime": "出発時刻",
+    "hours": "{h}時間",
+    "transports": {
+      "walk": "徒歩で",
+      "transit": "バス・地下鉄",
+      "taxi": "タクシーも可"
+    },
+    "companions": {
+      "solo": "ひとり",
+      "couple": "カップルで",
+      "friends": "友人と",
+      "family": "家族と"
+    },
+    "themes": {
+      "nature": "自然",
+      "city": "都心",
+      "science": "科学",
+      "festival": "祭り"
+    },
+    "themeNote": "選ばなければ複数のテーマを混ぜます。科学・祭りのスポットはまだ少なめです。",
+    "submit": "コースを作る",
+    "planning": "作成中…",
+    "needOrigin": "先に出発地を選んでください。",
+    "stopsCount": "{n}か所",
+    "lastBus": "終バス {time}",
+    "crowded": "混雑の可能性（混雑度 {rate}）",
+    "quiet": "比較的すいています（混雑度 {rate}）",
+    "crowdNote": "混雑度は韓国観光公社の集中率（日単位）予測で、リアルタイム情報ではありません。予測がない場所は表示しません。",
+    "loginRequired": "ログインが必要です。",
+    "limitReached": "本日のコース作成上限（{limit}回）に達しました。",
+    "noCandidates": "出発地の近くに登録された夜景スポットが足りません。別の出発地をお試しください。",
+    "failed": "コースを作成できませんでした。しばらくしてからお試しください。"
   }
 }

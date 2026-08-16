@@ -9,6 +9,7 @@ export type ActivityAction =
   | "community_post"
   | "community_comment"
   | "community_report"
+  | "course_survey"
   | "spot_view";
 
 /**

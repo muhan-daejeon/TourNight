@@ -49,10 +49,10 @@
     "scrollNext": "下一个",
     "heroFestivalOverline": "此刻，大田的夜晚格外特别",
     "heroFestivalCta": "查看详情",
-    "heroAiOverline": "懂夜晚的向导",
-    "heroAiTitle": "今晚的路线，交给AI来安排",
-    "heroAiHighlight": "AI",
-    "heroAiSubtitle": "只要选好想去的景点，游览顺序、公交与步行路线、末班车时间都为你一次整理好。",
+    "heroAiOverline": "AI 路线推荐",
+    "heroAiTitle": "漫步夜色，最聪明的方式",
+    "heroAiHighlight": "最聪明的方式",
+    "heroAiSubtitle": "只要收藏想去的景点——从最佳动线到各交通方式的路线，再到末班车确认，为你设计完整的夜晚。",
     "heroAiCta": "生成路线",
     "festivalsSection": "大田庆典·活动",
     "festivalsSectionSub": "点亮大田夜晚的庆典场地",
@@ -144,7 +144,9 @@
     "legNoRouteMode": "无{mode}路线",
     "staysNear": "{name}附近住宿",
     "selectHint": "选择路线后将在地图上显示",
-    "aiDailyLimit": "今天的路线生成次数已用完，请明天再试。"
+    "aiDailyLimit": "今天的路线生成次数已用完，请明天再试。",
+    "tabPreset": "推荐路线",
+    "tabSurvey": "专属路线"
   },
   "etiquette": {
     "title": "夜间礼仪",
@@ -337,5 +339,55 @@
   "comingSoon": {
     "short": "筹备中",
     "body": "美食·住宿·购物信息来自韩国观光公社的旅游信息服务。目前正在准备数据对接，完成后会第一时间补充到这里。"
+  },
+  "survey": {
+    "q1": "从哪里出发？",
+    "q2": "什么时候，玩多久？",
+    "q3": "怎么出行？",
+    "q4": "和谁一起？",
+    "q5": "想看什么？",
+    "myLocation": "当前位置",
+    "locating": "定位中…",
+    "gpsNote": "位置仅用于生成路线，不会保存。",
+    "gpsDenied": "无法获取位置，请在下方选择出发地。",
+    "gpsUnsupported": "该浏览器不支持定位功能。",
+    "places": {
+      "daejeon": "大田站",
+      "yuseong": "儒城温泉站",
+      "dunsan": "屯山",
+      "expo": "世博科学公园"
+    },
+    "startTime": "出发时间",
+    "hours": "{h}小时",
+    "transports": {
+      "walk": "步行",
+      "transit": "公交·地铁",
+      "taxi": "可以打车"
+    },
+    "companions": {
+      "solo": "一个人",
+      "couple": "和恋人",
+      "friends": "和朋友",
+      "family": "和家人"
+    },
+    "themes": {
+      "nature": "自然",
+      "city": "城市",
+      "science": "科学",
+      "festival": "庆典"
+    },
+    "themeNote": "不选则为您混合搭配。科学与庆典类景点目前较少。",
+    "submit": "生成专属路线",
+    "planning": "生成中…",
+    "needOrigin": "请先选择出发地。",
+    "stopsCount": "{n}个地点",
+    "lastBus": "末班车 {time}",
+    "crowded": "可能拥挤（拥挤度 {rate}）",
+    "quiet": "相对清静（拥挤度 {rate}）",
+    "crowdNote": "拥挤度为韩国观光公社按日预测，非实时数据。无预测的地点不作标注。",
+    "loginRequired": "需要登录。",
+    "limitReached": "今天的路线生成次数（{limit}次）已用完。",
+    "noCandidates": "出发地附近收录的夜景景点不足，请换一个出发地。",
+    "failed": "未能生成路线，请稍后再试。"
   }
 }

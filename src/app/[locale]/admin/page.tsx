@@ -44,6 +44,7 @@ const ACTION_META: Record<
   community_post: { label: "커뮤니티 글", icon: MessageCircle },
   community_comment: { label: "커뮤니티 댓글", icon: MessageCircle },
   community_report: { label: "커뮤니티 신고", icon: Flag },
+  course_survey: { label: "맞춤 코스 설문", icon: Sparkles },
 };
 
 interface LogRow {
