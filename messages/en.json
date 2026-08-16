@@ -144,7 +144,9 @@
     "legNoRouteMode": "No {mode} route",
     "staysNear": "Stays near {name}",
     "selectHint": "Pick a course to see its route on the map",
-    "aiDailyLimit": "You have used all of today's course generations. Please try again tomorrow."
+    "aiDailyLimit": "You have used all of today's course generations. Please try again tomorrow.",
+    "tabPreset": "Featured courses",
+    "tabSurvey": "Made for you"
   },
   "etiquette": {
     "title": "Night Etiquette",
@@ -337,5 +339,55 @@
   "comingSoon": {
     "short": "Coming soon",
     "body": "Food, stay and shopping listings come from the Korea Tourism Organization's information service. We're still wiring that data up — this page will fill in as soon as it's ready."
+  },
+  "survey": {
+    "q1": "Where are you starting from?",
+    "q2": "When, and for how long?",
+    "q3": "How will you get around?",
+    "q4": "Who are you with?",
+    "q5": "What do you want to see?",
+    "myLocation": "My location",
+    "locating": "Locating…",
+    "gpsNote": "Your location is used only to plan the course and is not stored.",
+    "gpsDenied": "Could not get your location. Please pick a starting point below.",
+    "gpsUnsupported": "This browser does not support location.",
+    "places": {
+      "daejeon": "Daejeon Stn.",
+      "yuseong": "Yuseong Oncheon Stn.",
+      "dunsan": "Dunsan",
+      "expo": "Expo Science Park"
+    },
+    "startTime": "Start time",
+    "hours": "{h}h",
+    "transports": {
+      "walk": "On foot",
+      "transit": "Bus & subway",
+      "taxi": "Taxi is fine"
+    },
+    "companions": {
+      "solo": "Solo",
+      "couple": "As a couple",
+      "friends": "With friends",
+      "family": "With family"
+    },
+    "themes": {
+      "nature": "Nature",
+      "city": "City",
+      "science": "Science",
+      "festival": "Festival"
+    },
+    "themeNote": "Leave blank and we will mix themes. Science and festival spots are still few.",
+    "submit": "Plan my course",
+    "planning": "Planning…",
+    "needOrigin": "Pick a starting point first.",
+    "stopsCount": "{n} stops",
+    "lastBus": "Last bus {time}",
+    "crowded": "May be crowded {rate}",
+    "quiet": "Usually quiet {rate}",
+    "crowdNote": "Crowding is a daily forecast from the Korea Tourism Organization, not live data. Spots without a forecast are not labelled.",
+    "loginRequired": "Please log in.",
+    "limitReached": "You have used today’s limit ({limit} courses).",
+    "noCandidates": "Not enough verified night spots near that starting point. Try another one.",
+    "failed": "Could not build a course. Please try again shortly."
   }
 }

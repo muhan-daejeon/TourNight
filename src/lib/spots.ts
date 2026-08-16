@@ -90,6 +90,73 @@ export async function getSpot(
   return { ...toSpot(rows[0]), officialOverview: rows[0].official_overview ?? null };
 }
 
+/**
+ * 임의 좌표 주변의 검증 스팟 (거리순).
+ *
+ * getNearbySpots는 기준이 '다른 스팟'이라 앵커가 있어야 한다. 설문 코스는 사용자의
+ * 현재 위치·숙소에서 출발하므로 좌표만으로 찾을 수 있어야 한다.
+ */
+export async function getSpotsNearPoint(
+  mapX: number,
+  mapY: number,
+  {
+    limit = 12,
+    categories,
+    locale = "ko",
+  }: {
+    limit?: number;
+    /** 비우면 전체 카테고리 */
+    categories?: NightSpot["category"][];
+    locale?: string;
+  } = {},
+): Promise<NearbySpot[]> {
+  const rows = await sql<SpotRow[]>`
+    select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
+           st_x(s.geom) as map_x, st_y(s.geom) as map_y,
+           nullif(trim(tr.overview), '') as official_overview,
+           round(st_distance(
+             s.geom::geography,
+             st_setsrid(st_makepoint(${mapX}, ${mapY}), 4326)::geography
+           )) as dist_m
+    from night_spots s
+    left join spot_translations tr
+      on tr.content_id = s.content_id and tr.locale = ${locale}
+    where s.night_verified = true
+      and s.image_url is not null
+      ${categories?.length ? sql`and s.category = any(${categories})` : sql``}
+    order by dist_m
+    limit ${limit}
+  `;
+  return rows.map((r) => ({ ...toSpot(r), distanceM: Number(r.dist_m) }));
+}
+
+/**
+ * 여러 스팟의 특정 날짜 혼잡도 (0~100, 100이 가장 붐빔).
+ *
+ * 한국관광공사 관광지 집중률(KT 통신데이터) 예측이라 실시간이 아니고 '일자' 단위다.
+ * 데이터가 없는 스팟은 맵에서 빠진다 — 없는 것을 '한산함'으로 읽으면 안 되므로
+ * 호출부에서 '정보 없음'과 구분해 표시해야 한다.
+ */
+export async function getCongestionForSpots(
+  contentIds: string[],
+  date: string,
+): Promise<Map<string, number>> {
+  if (!contentIds.length) return new Map();
+  try {
+    const rows = await sql<{ content_id: string; rate: string }[]>`
+      select content_id, rate from spot_congestion
+      where content_id = any(${contentIds}) and base_ymd = ${date}
+    `;
+    return new Map(rows.map((r) => [r.content_id, Math.round(Number(r.rate))]));
+  } catch (err) {
+    console.warn(
+      "[spots] 혼잡도 조회 실패:",
+      err instanceof Error ? err.message : err,
+    );
+    return new Map();
+  }
+}
+
 export interface CongestionDay {
   date: string; // YYYY-MM-DD
   rate: number; // 0~100 상대 집중률
