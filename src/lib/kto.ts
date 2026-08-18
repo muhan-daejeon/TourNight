@@ -6,7 +6,7 @@
  */
 
 const BASE_URL = "https://apis.data.go.kr/B551011/KorService2";
-const SERVICE_NAME = "TourNight"; // 공모전 필수: MobileApp 파라미터에 서비스 고유명
+export const SERVICE_NAME = "TourNight"; // 공모전 필수: MobileApp 파라미터에 서비스 고유명
 const DAEJEON_AREA_CODE = "3";
 
 /**

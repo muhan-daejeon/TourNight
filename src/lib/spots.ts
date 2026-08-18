@@ -1,100 +1,162 @@
 import { sql } from "./db";
 import { MOCK_NIGHT_SPOTS, type NightSpot } from "./kto";
+import { getKtoSpots, getKtoOverview, type KtoSpot } from "./kto-live";
 
 /**
- * 야간 검증(night_verified) 완료된 스팟만 조회 — 홈 화면 데이터 소스
- * locale을 주면 KTO 다국어 관광정보 서비스의 공식 번역 명칭으로 표시한다.
+ * 야간 명소 조회 — KTO 원천 정보는 실시간, 우리 판단은 DB.
+ *
+ * 공사가 로컬 DB 적재 대신 실시간 호출을 권고하므로, 이름·주소·좌표·사진 같은
+ * 원천 정보는 저장하지 않고 요청 시점에 KTO에서 받는다(kto-live). DB의
+ * night_spots에는 KTO에 없는 것만 남는다 — 야간 검수 결과(night_verified),
+ * 우리가 매긴 카테고리, 그리고 KTO 미등재 수동 큐레이션 명소(mock-).
+ */
+
+/** DB에 남는 우리 판단 — KTO 원천 데이터가 아니다 */
+interface VerdictRow {
+  content_id: string;
+  category: string;
+  night_verified: boolean;
+  /** KTO 미등재 수동 큐레이션 명소는 원천을 받을 수 없어 자체 정보를 쓴다 */
+  title: string | null;
+  addr: string | null;
+  image_url: string | null;
+  map_x: number | null;
+  map_y: number | null;
+}
+
+interface Verdict {
+  category: NightSpot["category"];
+  verified: boolean;
+  manual: NightSpot | null;
+}
+
+/** 검수 결과를 contentId로 찾을 수 있게 (KTO 미등재 명소는 자체 정보 포함) */
+async function getVerdicts(): Promise<Map<string, Verdict>> {
+  const rows = await sql<VerdictRow[]>`
+    select content_id, category, night_verified, title, addr, image_url,
+           st_x(geom) as map_x, st_y(geom) as map_y
+    from night_spots
+  `;
+  return new Map(
+    rows.map((r) => [
+      r.content_id,
+      {
+        category: r.category as NightSpot["category"],
+        verified: r.night_verified,
+        // KTO에 없는 곳(mock-)은 실시간으로 받을 수 없으므로 저장분을 그대로 쓴다
+        manual: r.content_id.startsWith("mock-")
+          ? {
+              contentId: r.content_id,
+              title: r.title ?? "",
+              addr: r.addr ?? "",
+              mapX: Number(r.map_x),
+              mapY: Number(r.map_y),
+              imageUrl: r.image_url,
+              category: r.category as NightSpot["category"],
+            }
+          : null,
+      },
+    ]),
+  );
+}
+
+const merge = (k: KtoSpot, v: Verdict): NightSpot => ({
+  contentId: k.contentId,
+  title: k.title,
+  addr: k.addr,
+  mapX: k.mapX,
+  mapY: k.mapY,
+  imageUrl: k.imageUrl,
+  category: v.category,
+});
+
+/**
+ * 검수를 통과한 야간 명소 (홈·지도·코스의 공통 데이터 소스).
+ * KTO 실시간 목록과 우리 검수 결과를 맞춰, 통과 + 사진 있는 곳만 돌려준다.
  */
 export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]> {
   try {
-    const rows = await sql<SpotRow[]>`
-      select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
-             st_x(s.geom) as map_x, st_y(s.geom) as map_y,
-             nullif(trim(tr.overview), '') as official_overview
-      from night_spots s
-      left join spot_translations tr
-        on tr.content_id = s.content_id and tr.locale = ${locale}
-      where s.night_verified = true
-        and s.image_url is not null -- 사진 있는 스팟만 노출 (팀 방침)
-      order by s.category, s.title
-    `;
-    return rows.map(toSpot);
+    const [ktoSpots, verdicts] = await Promise.all([
+      getKtoSpots(locale),
+      getVerdicts(),
+    ]);
+
+    const out: NightSpot[] = [];
+    for (const k of ktoSpots) {
+      const v = verdicts.get(k.contentId);
+      if (!v?.verified || !k.imageUrl) continue; // 사진 있는 검수 통과분만 (팀 방침)
+      out.push(merge(k, v));
+    }
+    // KTO 미등재 수동 큐레이션 명소 (국립중앙과학관 등)
+    for (const v of verdicts.values()) {
+      if (v.verified && v.manual?.imageUrl) out.push(v.manual);
+    }
+
+    out.sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
+    return out;
   } catch (err) {
-    // DB 미설정/연결 실패 시 큐레이션 목 데이터로 폴백 (로컬 개발·UI 테스트용).
-    // 실서버에선 DB가 정상이므로 발동하지 않으며, 발동 시 경고 로그를 남긴다.
+    // KTO 장애·DB 장애 시 큐레이션 목 데이터로 폴백 (화면이 비지 않게)
     console.warn(
-      "[spots] DB 조회 실패 — 목 데이터로 폴백합니다:",
+      "[spots] 실시간 조회 실패 — 목 데이터로 폴백합니다:",
       err instanceof Error ? err.message : err,
     );
     return MOCK_NIGHT_SPOTS;
   }
 }
 
-interface SpotRow {
-  content_id: string;
-  title: string;
-  addr: string;
-  category: string;
-  image_url: string | null;
-  map_x: number;
-  map_y: number;
-  dist_m?: number;
-  official_overview?: string | null;
-}
-
-function toSpot(r: SpotRow): NightSpot {
-  return {
-    contentId: r.content_id,
-    title: r.title,
-    addr: r.addr,
-    mapX: r.map_x,
-    mapY: r.map_y,
-    imageUrl: r.image_url,
-    category: r.category as NightSpot["category"],
-    overview: r.official_overview ?? null,
-  };
-}
-
-/**
- * 축제·행사 명소만 추린다.
- *
- * 별도 축제 데이터는 두지 않는다 — 축제 일정(개최일)을 주는 출처는 KTO
- * searchFestival2인데 키가 막혀 있어, 없는 일정을 지어내느니 야간 명소로 검증된
- * 축제장만 장소로서 보여준다. 검증 목록을 그대로 걸러 쓰므로 번역·소개문·사진이
- * 모두 갖춰진 것만 올라온다.
- */
 export function pickFestivals(spots: NightSpot[]): NightSpot[] {
   return spots.filter((s) => s.category === "festival");
 }
 
 export interface SpotDetail extends NightSpot {
-  /** KTO 다국어 서비스의 공식 소개문 (없으면 null → Gemini 가이드가 대신함) */
+  /** KTO 공식 소개문 (없으면 null → Gemini 가이드가 대신함) */
   officialOverview: string | null;
 }
 
-/** 상세 페이지용 단건 조회 — 공식 번역 명칭·소개문 포함 */
+/** 상세 페이지용 단건 조회 — 소개문도 실시간으로 받는다 */
 export async function getSpot(
   contentId: string,
   locale = "ko",
 ): Promise<SpotDetail | null> {
-  const rows = await sql<SpotRow[]>`
-    select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
-           st_x(s.geom) as map_x, st_y(s.geom) as map_y,
-           nullif(trim(tr.overview), '') as official_overview
-    from night_spots s
-    left join spot_translations tr
-      on tr.content_id = s.content_id and tr.locale = ${locale}
-    where s.content_id = ${contentId} and s.night_verified = true
-  `;
-  if (!rows.length) return null;
-  return { ...toSpot(rows[0]), officialOverview: rows[0].official_overview ?? null };
+  const spots = await getVerifiedNightSpots(locale);
+  const spot = spots.find((s) => s.contentId === contentId);
+  if (!spot) return null;
+
+  // 수동 큐레이션 명소는 KTO에 없어 소개문도 없다 (Gemini 가이드가 채운다)
+  if (contentId.startsWith("mock-")) {
+    return { ...spot, officialOverview: null };
+  }
+  try {
+    const overview = await getKtoOverview(contentId, locale);
+    return { ...spot, officialOverview: overview || null };
+  } catch {
+    return { ...spot, officialOverview: null };
+  }
+}
+
+const R = 6371000;
+const rad = (d: number) => (d * Math.PI) / 180;
+
+/** 두 좌표 사이 거리(m) — PostGIS 대신 메모리에서 계산한다 */
+function distanceM(
+  a: { mapX: number; mapY: number },
+  b: { mapX: number; mapY: number },
+): number {
+  const dLat = rad(b.mapY - a.mapY);
+  const dLng = rad(b.mapX - a.mapX);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(rad(a.mapY)) * Math.cos(rad(b.mapY)) * Math.sin(dLng / 2) ** 2;
+  return Math.round(2 * R * Math.asin(Math.sqrt(h)));
+}
+
+export interface NearbySpot extends NightSpot {
+  distanceM: number;
 }
 
 /**
  * 임의 좌표 주변의 검증 스팟 (거리순).
- *
- * getNearbySpots는 기준이 '다른 스팟'이라 앵커가 있어야 한다. 설문 코스는 사용자의
- * 현재 위치·숙소에서 출발하므로 좌표만으로 찾을 수 있어야 한다.
+ * 설문 코스는 사용자의 현재 위치·숙소에서 출발하므로 좌표만으로 찾을 수 있어야 한다.
  */
 export async function getSpotsNearPoint(
   mapX: number,
@@ -110,24 +172,36 @@ export async function getSpotsNearPoint(
     locale?: string;
   } = {},
 ): Promise<NearbySpot[]> {
-  const rows = await sql<SpotRow[]>`
-    select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
-           st_x(s.geom) as map_x, st_y(s.geom) as map_y,
-           nullif(trim(tr.overview), '') as official_overview,
-           round(st_distance(
-             s.geom::geography,
-             st_setsrid(st_makepoint(${mapX}, ${mapY}), 4326)::geography
-           )) as dist_m
-    from night_spots s
-    left join spot_translations tr
-      on tr.content_id = s.content_id and tr.locale = ${locale}
-    where s.night_verified = true
-      and s.image_url is not null
-      ${categories?.length ? sql`and s.category = any(${categories})` : sql``}
-    order by dist_m
-    limit ${limit}
-  `;
-  return rows.map((r) => ({ ...toSpot(r), distanceM: Number(r.dist_m) }));
+  const spots = await getVerifiedNightSpots(locale);
+  return spots
+    .filter((s) => !categories?.length || categories.includes(s.category))
+    .map((s) => ({ ...s, distanceM: distanceM({ mapX, mapY }, s) }))
+    .sort((a, b) => a.distanceM - b.distanceM)
+    .slice(0, limit);
+}
+
+/** 인근 검증 스팟 (거리순). category를 주면 해당 카테고리만 */
+export async function getNearbySpots(
+  contentId: string,
+  {
+    category,
+    limit = 4,
+    locale = "ko",
+  }: {
+    category?: NightSpot["category"];
+    limit?: number;
+    locale?: string;
+  } = {},
+): Promise<NearbySpot[]> {
+  const spots = await getVerifiedNightSpots(locale);
+  const base = spots.find((s) => s.contentId === contentId);
+  if (!base) return [];
+  return spots
+    .filter((s) => s.contentId !== contentId)
+    .filter((s) => !category || s.category === category)
+    .map((s) => ({ ...s, distanceM: distanceM(base, s) }))
+    .sort((a, b) => a.distanceM - b.distanceM)
+    .slice(0, limit);
 }
 
 /**
@@ -172,39 +246,4 @@ export async function getCongestion(contentId: string): Promise<CongestionDay[]>
     order by base_ymd
   `;
   return rows.map((r) => ({ date: r.date, rate: Number(r.rate) }));
-}
-
-export interface NearbySpot extends NightSpot {
-  distanceM: number;
-}
-
-/** 인근 검증 스팟 (거리순). category를 주면 해당 카테고리만 */
-export async function getNearbySpots(
-  contentId: string,
-  {
-    category,
-    limit = 4,
-    locale = "ko",
-  }: {
-    category?: NightSpot["category"];
-    limit?: number;
-    locale?: string;
-  } = {},
-): Promise<NearbySpot[]> {
-  const rows = await sql<SpotRow[]>`
-    select s.content_id, coalesce(tr.title, s.title) as title, s.addr, s.category, s.image_url,
-           st_x(s.geom) as map_x, st_y(s.geom) as map_y,
-           round(st_distance(s.geom::geography, base.geom::geography)) as dist_m
-    from night_spots s
-    cross join (select geom from night_spots where content_id = ${contentId}) base
-    left join spot_translations tr
-      on tr.content_id = s.content_id and tr.locale = ${locale}
-    where s.night_verified = true
-      and s.image_url is not null
-      and s.content_id != ${contentId}
-      ${category ? sql`and s.category = ${category}` : sql``}
-    order by dist_m
-    limit ${limit}
-  `;
-  return rows.map((r) => ({ ...toSpot(r), distanceM: Number(r.dist_m) }));
 }
