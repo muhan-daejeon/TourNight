@@ -1,6 +1,7 @@
 import { sql } from "./db";
 import { MOCK_NIGHT_SPOTS, type NightSpot } from "./kto";
 import { getKtoSpots, getKtoOverview, type KtoSpot } from "./kto-live";
+import { getCongestionRows, normName } from "./kto-stats";
 
 /**
  * 야간 명소 조회 — KTO 원천 정보는 실시간, 우리 판단은 DB.
@@ -217,11 +218,20 @@ export async function getCongestionForSpots(
 ): Promise<Map<string, number>> {
   if (!contentIds.length) return new Map();
   try {
-    const rows = await sql<{ content_id: string; rate: string }[]>`
-      select content_id, rate from spot_congestion
-      where content_id = any(${contentIds}) and base_ymd = ${date}
-    `;
-    return new Map(rows.map((r) => [r.content_id, Math.round(Number(r.rate))]));
+    const [rows, spots] = await Promise.all([
+      getCongestionRows(),
+      getVerifiedNightSpots(),
+    ]);
+    // 집중률 API는 관광지명으로 오므로 우리 스팟 제목과 맞춘다
+    const idByName = new Map(spots.map((s) => [normName(s.title), s.contentId]));
+    const want = new Set(contentIds);
+    const out = new Map<string, number>();
+    for (const r of rows) {
+      if (r.date !== date) continue;
+      const id = idByName.get(normName(r.name));
+      if (id && want.has(id)) out.set(id, Math.round(r.rate));
+    }
+    return out;
   } catch (err) {
     console.warn(
       "[spots] 혼잡도 조회 실패:",
@@ -238,12 +248,33 @@ export interface CongestionDay {
 
 /** 향후 7일 혼잡도 예측 (KT 통신데이터 기반, 데이터 없는 스팟은 빈 배열) */
 export async function getCongestion(contentId: string): Promise<CongestionDay[]> {
-  const rows = await sql<{ date: string; rate: string }[]>`
-    select to_char(base_ymd, 'YYYY-MM-DD') as date, rate
-    from spot_congestion
-    where content_id = ${contentId}
-      and base_ymd >= current_date and base_ymd < current_date + 7
-    order by base_ymd
-  `;
-  return rows.map((r) => ({ date: r.date, rate: Number(r.rate) }));
+  try {
+    const [rows, spots] = await Promise.all([
+      getCongestionRows(),
+      getVerifiedNightSpots(),
+    ]);
+    const spot = spots.find((s) => s.contentId === contentId);
+    if (!spot) return [];
+    const key = normName(spot.title);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const limit = new Date(today);
+    limit.setDate(limit.getDate() + 7);
+
+    return rows
+      .filter((r) => normName(r.name) === key)
+      .filter((r) => {
+        const d = new Date(`${r.date}T00:00:00+09:00`);
+        return d >= today && d < limit;
+      })
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((r) => ({ date: r.date, rate: r.rate }));
+  } catch (err) {
+    console.warn(
+      "[spots] 혼잡도 조회 실패:",
+      err instanceof Error ? err.message : err,
+    );
+    return [];
+  }
 }

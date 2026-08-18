@@ -12,6 +12,7 @@ import {
 } from "./spots";
 import { getTransitForSpots, type SpotTransit } from "./transit";
 import { getRoutesForLegs, type SpotRoute } from "./routes";
+import { getRelatedRows, normName } from "./kto-stats";
 import { fetchNearbyStays, type NearbyStay, type NightSpot } from "./kto";
 
 export interface CourseStop {
@@ -139,14 +140,10 @@ export async function getCourses(
       where s.night_verified = true and s.image_url is not null
     `;
 
-    const edges = await sql<
-      { content_id: string; related_content_id: string }[]
-    >`select content_id, related_content_id from spot_related`;
-    const together = new Set(
-      edges.map((e) => `${e.content_id}|${e.related_content_id}`),
+    // 연관 관광지(차량 이동 통계)도 실시간 조회 — 관광지명으로 오므로 제목과 맞춘다
+    const isTogether = await togetherByName(
+      rows.map((r) => ({ contentId: r.content_id, title: r.title })),
     );
-    const isTogether = (a: string, b: string) =>
-      together.has(`${a}|${b}`) || together.has(`${b}|${a}`);
 
     const toStop = (r: SpotRow): CourseStop => ({
       contentId: r.content_id,
@@ -220,16 +217,41 @@ export async function getCourses(
   }
 }
 
-/** 주어진 스팟들 사이의 KTO 이동 연결(together) 판별기 */
+/**
+ * KTO 연관 관광지(차량 이동 통계)로 '함께 방문되는' 쌍을 판별한다.
+ * API가 관광지명을 주므로 우리 스팟 제목과 정규화해 맞춘다.
+ */
+async function togetherByName(
+  spots: { contentId: string; title: string }[],
+): Promise<(a: string, b: string) => boolean> {
+  try {
+    const rows = await getRelatedRows();
+    const idByName = new Map(spots.map((s) => [normName(s.title), s.contentId]));
+    const set = new Set<string>();
+    for (const r of rows) {
+      const a = idByName.get(normName(r.name));
+      const b = idByName.get(normName(r.relatedName));
+      if (a && b && a !== b) set.add(`${a}|${b}`);
+    }
+    return (a, b) => set.has(`${a}|${b}`) || set.has(`${b}|${a}`);
+  } catch (err) {
+    // 연관 정보는 부가 표시라 실패해도 코스는 그대로 보여준다
+    console.warn(
+      "[courses] 연관 관광지 조회 실패:",
+      err instanceof Error ? err.message : err,
+    );
+    return () => false;
+  }
+}
+
+/** 주어진 스팟들 사이의 연관 판별기 (AI 코스용) */
 async function togetherLookup(ids: string[]) {
-  const edges = await sql<{ content_id: string; related_content_id: string }[]>`
-    select content_id, related_content_id from spot_related
-    where content_id = any(${ids}) and related_content_id = any(${ids})
+  const spots = await sql<{ content_id: string; title: string }[]>`
+    select content_id, title from night_spots where content_id = any(${ids})
   `;
-  const set = new Set(
-    edges.map((e) => `${e.content_id}|${e.related_content_id}`),
+  return togetherByName(
+    spots.map((s) => ({ contentId: s.content_id, title: s.title })),
   );
-  return (a: string, b: string) => set.has(`${a}|${b}`) || set.has(`${b}|${a}`);
 }
 
 /**
