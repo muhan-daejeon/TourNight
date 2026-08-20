@@ -175,8 +175,16 @@ function TourBox() {
     const key = STEPS[step - 1].key;
 
     let raf = 0;
-    let scrolled = false;
-    const deadline = performance.now() + 2500;
+    /**
+     * 몇 개의 본문 대상을 기준으로 스크롤했는지.
+     *
+     * 서버에서 받아 와 뒤늦게 붙는 대상이 있다 (표현집이 그렇다). 처음 한 번만
+     * 스크롤하면 검색창 하나만 놓고 자리를 잡아 두고, 목록이 붙은 뒤에는 다시
+     * 맞추지 않아 설명 상자가 정작 볼 것을 덮는다. 대상 수가 늘면 다시 맞춘다.
+     */
+    let scrolledFor = 0;
+    // 늦게 붙는 대상을 기다린다 (첫 방문이면 API 응답까지 걸린다)
+    const deadline = performance.now() + 5000;
 
     const rectsOf = (sel: string) =>
       [...document.querySelectorAll(sel)]
@@ -195,8 +203,8 @@ function TourBox() {
     const tick = () => {
       const m = measure();
       if (m) {
-        if (!scrolled) {
-          scrolled = true;
+        if (m.content.length !== scrolledFor) {
+          scrolledFor = m.content.length;
           // 스크롤 위치는 본문 대상만으로 정한다 — 헤더 탭은 늘 화면 위에 붙어 있어
           // 함께 계산하면 항상 맨 위로 올라가 버린다
           const top = Math.min(...m.content.map((b) => b.top));

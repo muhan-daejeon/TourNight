@@ -153,6 +153,9 @@ export default function SurvivalPhrases() {
             return (
               <div
                 key={c}
+                // 둘러보기에서 펼쳐져 있는 묶음도 함께 밝힌다. 검색창만 비추면
+                // 무엇을 하는 곳인지만 보이고 어떤 표현이 나오는지는 안 보인다.
+                data-tour={open ? "phrases" : undefined}
                 className="overflow-hidden rounded-2xl border border-white/10"
               >
                 <button
