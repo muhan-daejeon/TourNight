@@ -99,7 +99,7 @@ export default function SurvivalPhrases() {
   return (
     <div className="mt-6">
       {/* 하고 싶은 말 검색 → 한국어 번역 */}
-      <form onSubmit={search} className="relative">
+      <form onSubmit={search} data-tour="phrases" className="relative">
         <Search
           size={16}
           className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"

@@ -18,14 +18,16 @@ const NAV_ITEMS = [
 ] as const;
 
 /**
- * 둘러보기 단계와 짝지어지는 탭.
- * 3단계(에티켓)는 회화까지 함께 다루므로 두 탭을 같은 키로 묶는다.
+ * 둘러보기 단계와 짝지어지는 탭. 단계마다 탭 하나씩 1:1로 맞춘다.
+ *
+ * 전에는 에티켓 단계가 회화 탭까지 함께 밝혔는데, 설명은 매너 얘기만 하면서
+ * 테두리는 두 곳에 쳐져 무엇을 보라는 건지 어긋났다. 회화는 별도 단계로 뺐다.
  */
 const TOUR_KEY: Record<string, string> = {
   spots: "spots",
   courses: "courses",
   etiquette: "etiquette",
-  phrases: "etiquette",
+  phrases: "phrases",
   community: "community",
 };
 
