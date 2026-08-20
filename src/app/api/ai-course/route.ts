@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAiCourse, type AiCourse } from "@/lib/courses";
 import { sql } from "@/lib/db";
-import { getSessionUser } from "@/lib/session";
+import { getActiveSessionUser } from "@/lib/session";
 import { isAdmin, logActivity } from "@/lib/activity";
 import { routing } from "@/i18n/routing";
 import type { NightSpot } from "@/lib/kto";
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   // 캐시 키 — 담는 순서가 달라도 같은 조합이면 같은 코스를 재사용한다
   const cacheId = [...contentIds].sort().join(",");
 
-  const session = await getSessionUser();
+  const session = await getActiveSessionUser();
   if (!session) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
   }

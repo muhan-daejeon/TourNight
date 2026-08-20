@@ -389,5 +389,41 @@
     "limitReached": "You have used today’s limit ({limit} courses).",
     "noCandidates": "Not enough verified night spots near that starting point. Try another one.",
     "failed": "Could not build a course. Please try again shortly."
+  },
+  "tour": {
+    "label": "Quick tour",
+    "skip": "Skip",
+    "next": "Next",
+    "prev": "Back",
+    "begin": "Start",
+    "close": "Close",
+    "welcome": {
+      "title": "Welcome to TourNight",
+      "body": "One minute is all it takes to learn how to enjoy Daejeon after dark."
+    },
+    "steps": {
+      "spots": {
+        "title": "Only the places that shine at night",
+        "body": "We list spots that are genuinely open after dark. Find them on the map and save the ones you like."
+      },
+      "courses": {
+        "title": "Tonight’s route in one minute",
+        "body": "Pick your time and how you’ll travel. We arrange the order, the bus and walking routes, and the last bus back."
+      },
+      "etiquette": {
+        "title": "So nothing feels awkward",
+        "body": "Street food tents, noraebang, late-night diners — the manners that only exist at night, plus Korean you can show on the spot."
+      },
+      "community": {
+        "title": "Nights from people who went first",
+        "body": "Share photos and reviews, and ask anything. Verify your email to join in more freely."
+      }
+    },
+    "done": {
+      "title": "You’re all set",
+      "body": "Just tell us how much time you have tonight. We’ll build the course.",
+      "cta": "Plan a course"
+    },
+    "replay": "Replay the tour"
   }
 }

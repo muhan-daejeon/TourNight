@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/session";
+import { getActiveSessionUser } from "@/lib/session";
 import {
   reportContent,
   REPORT_REASONS,
@@ -15,7 +15,7 @@ import { logActivity } from "@/lib/activity";
  * 사유는 정해진 값만 받는다 — 자유 입력을 열면 욕설·개인정보가 그대로 저장된다.
  */
 export async function POST(request: NextRequest) {
-  const session = await getSessionUser();
+  const session = await getActiveSessionUser();
   if (!session) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
   }

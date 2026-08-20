@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listPosts, createPost, BODY_MAX } from "@/lib/community";
-import { getSessionUser } from "@/lib/session";
+import { getActiveSessionUser } from "@/lib/session";
 import { guardCommunityWrite } from "@/lib/community-guard";
 import { prepareMedia, readCommunityInput } from "@/lib/community-media";
 import { deleteCommunityMedia, isStorageConfigured } from "@/lib/storage";
@@ -17,7 +17,7 @@ export async function GET() {
  * 사진 첨부는 multipart/form-data로 받는다 (JSON 본문도 계속 지원).
  */
 export async function POST(request: NextRequest) {
-  const session = await getSessionUser();
+  const session = await getActiveSessionUser();
   if (!session) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
   }

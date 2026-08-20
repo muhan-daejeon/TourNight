@@ -4,7 +4,7 @@ import {
   type Companion,
   type Transport,
 } from "@/lib/courses";
-import { getSessionUser } from "@/lib/session";
+import { getActiveSessionUser } from "@/lib/session";
 import { isAdmin, logActivity } from "@/lib/activity";
 import { consumeCourseQuota } from "@/lib/course-quota";
 import { routing } from "@/i18n/routing";
@@ -35,7 +35,7 @@ const DURATIONS = [60, 120, 180, 240];
  * AI가 고른다. 조합이 사실상 무한해 캐시하지 않는다 — 그래서 한도가 더 중요하다.
  */
 export async function POST(request: NextRequest) {
-  const session = await getSessionUser();
+  const session = await getActiveSessionUser();
   if (!session) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
   }

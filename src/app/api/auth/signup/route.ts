@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  bumpSessionVersion,
   createUser,
   EMAIL_MAX,
   NICKNAME_MAX,
@@ -59,10 +60,12 @@ export async function POST(request: NextRequest) {
         err instanceof Error ? err.message : err,
       ),
     );
+    const sessionVersion = await bumpSessionVersion(user.id);
     const token = await signSession({
       userId: user.id,
       email: user.email,
       nickname: user.nickname,
+      sessionVersion,
     });
     const res = NextResponse.json({ user }, { status: 201 });
     res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
