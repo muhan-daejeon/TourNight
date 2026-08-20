@@ -98,6 +98,18 @@ create table if not exists users (
 -- null = 미인증 → 커뮤니티 글·댓글 작성만 막힌다 (읽기·명소·코스는 그대로).
 alter table users add column if not exists email_verified_at timestamptz;
 
+-- 활성 세션 세대. 로그인할 때마다 1씩 올리고 그 값을 세션 토큰에 넣는다.
+-- 토큰의 값이 여기보다 낮으면 '이미 다른 기기에서 로그인된 계정'이므로 무효다.
+-- 계정 하나를 여러 사람이 돌려쓰는 걸 막는 용도 (IP는 보지 않는다 — 관광객은
+-- 이동하면서 IP가 계속 바뀌어 정상 이용자만 걸린다).
+alter table users add column if not exists session_version int not null default 0;
+
+-- 가입 후 둘러보기(온보딩)를 본 시각. boolean이 아니라 시각으로 두면 '언제 봤는지'가
+-- 남아, 기능이 크게 늘었을 때 다시 권할지 판단할 근거가 된다.
+-- 건너뛰기도 여기에 기록한다 — 프로필에서 언제든 다시 볼 수 있으므로 둘을 구분할
+-- 실익이 없다.
+alter table users add column if not exists tour_completed_at timestamptz;
+
 -- 메일 인증 토큰.
 --
 -- 원문 토큰은 저장하지 않는다 — 그대로 넣어두면 DB가 새는 순간 아무나 남의 계정을

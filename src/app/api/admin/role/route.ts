@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { getSessionUser } from "@/lib/session";
+import { getActiveSessionUser } from "@/lib/session";
 import { isAdmin } from "@/lib/activity";
 
 /** 관리자 지정/해제 — 관리자만 호출할 수 있고, 자기 자신은 해제할 수 없다 */
 export async function POST(request: NextRequest) {
-  const session = await getSessionUser();
+  const session = await getActiveSessionUser();
   if (!session || !(await isAdmin(session.userId))) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }

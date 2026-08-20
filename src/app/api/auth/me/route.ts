@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  getSessionUser,
+  getActiveSessionUser,
   signSession,
   SESSION_COOKIE,
   sessionCookieOptions,
@@ -16,7 +16,7 @@ const NO_STORE = { "Cache-Control": "no-store" };
 
 /** 현재 로그인 사용자 (없으면 user: null). 국가·닉네임은 DB 최신값 */
 export async function GET() {
-  const session = await getSessionUser();
+  const session = await getActiveSessionUser();
   if (!session) {
     return NextResponse.json({ user: null }, { headers: NO_STORE });
   }
@@ -30,7 +30,7 @@ export async function GET() {
 
 /** 프로필(닉네임·국가) 수정 — 로그인 필요. 닉네임 변경은 세션에도 반영 */
 export async function PATCH(request: NextRequest) {
-  const session = await getSessionUser();
+  const session = await getActiveSessionUser();
   if (!session) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
   }
@@ -61,11 +61,14 @@ export async function PATCH(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "invalid_nickname" }, { status: 400 });
     }
-    // 닉네임이 세션 payload에 있으므로 재발급 (이후 커뮤니티 작성자에 반영)
+    // 닉네임이 세션 payload에 있으므로 재발급 (이후 커뮤니티 작성자에 반영).
+    // 로그인이 아니라 정보 갱신이므로 세대는 올리지 않는다 — 올리면 프로필을
+    // 고칠 때마다 자기 다른 기기가 로그아웃된다.
     const token = await signSession({
       userId: user.id,
       email: user.email,
       nickname: user.nickname,
+      sessionVersion: session.sessionVersion ?? 0,
     });
     const res = NextResponse.json({ user });
     res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);

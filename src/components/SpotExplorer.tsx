@@ -295,7 +295,10 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
           })}
         </div>
 
-        <div className="order-1 h-80 lg:order-2 lg:sticky lg:top-20 lg:h-[620px]">
+        <div
+          data-tour="spots"
+          className="order-1 h-80 lg:order-2 lg:sticky lg:top-20 lg:h-[620px]"
+        >
           <NightMap
             spots={spots}
             visibleIds={visibleIds}

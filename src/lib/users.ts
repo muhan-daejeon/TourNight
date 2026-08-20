@@ -13,6 +13,8 @@ export interface User {
   role: "user" | "admin";
   /** 메일 인증 완료 여부 — 커뮤니티 글·댓글 작성 조건 */
   emailVerified: boolean;
+  /** 가입 후 둘러보기를 이미 봤는지 (건너뛰기 포함) */
+  tourCompleted: boolean;
 }
 
 export const EMAIL_MAX = 254;
@@ -47,6 +49,7 @@ interface UserRow {
   country: string | null;
   role: string;
   email_verified_at: string | null;
+  tour_completed_at: string | null;
 }
 
 function toUser(r: UserRow): User {
@@ -57,13 +60,14 @@ function toUser(r: UserRow): User {
     country: r.country,
     role: r.role === "admin" ? "admin" : "user",
     emailVerified: !!r.email_verified_at,
+    tourCompleted: !!r.tour_completed_at,
   };
 }
 
 /** 로그인 검증용 — password_hash 포함 (외부로 반환 금지) */
 export async function findUserByEmail(email: string) {
   const rows = await sql<(UserRow & { password_hash: string | null })[]>`
-    select id, email, nickname, country, role, email_verified_at, password_hash
+    select id, email, nickname, country, role, email_verified_at, tour_completed_at, password_hash
     from users where email = ${email}
   `;
   return rows[0] ?? null;
@@ -71,7 +75,7 @@ export async function findUserByEmail(email: string) {
 
 export async function getUserById(id: number): Promise<User | null> {
   const rows = await sql<UserRow[]>`
-    select id, email, nickname, country, role, email_verified_at from users where id = ${id}
+    select id, email, nickname, country, role, email_verified_at, tour_completed_at from users where id = ${id}
   `;
   return rows[0] ? toUser(rows[0]) : null;
 }
@@ -106,7 +110,7 @@ export async function createUser(input: {
   const rows = await sql<UserRow[]>`
     insert into users (email, password_hash, nickname, country)
     values (${input.email}, ${hash}, ${input.nickname}, ${input.country})
-    returning id, email, nickname, country, role, email_verified_at
+    returning id, email, nickname, country, role, email_verified_at, tour_completed_at
   `;
   return toUser(rows[0]);
 }
@@ -122,7 +126,7 @@ export async function updateProfile(
     update users
     set nickname = ${nickname}, country = ${input.country}
     where id = ${userId}
-    returning id, email, nickname, country, role, email_verified_at
+    returning id, email, nickname, country, role, email_verified_at, tour_completed_at
   `;
   return rows[0] ? toUser(rows[0]) : null;
 }
@@ -140,13 +144,13 @@ export async function findOrCreateGoogleUser(input: {
   const email = input.email.trim().toLowerCase();
 
   const byOauth = await sql<UserRow[]>`
-    select id, email, nickname, country, role, email_verified_at from users
+    select id, email, nickname, country, role, email_verified_at, tour_completed_at from users
     where oauth_provider = 'google' and oauth_id = ${input.googleId}
   `;
   if (byOauth[0]) return { user: toUser(byOauth[0]), isNew: false };
 
   const byEmail = await sql<UserRow[]>`
-    select id, email, nickname, country, role, email_verified_at from users where email = ${email}
+    select id, email, nickname, country, role, email_verified_at, tour_completed_at from users where email = ${email}
   `;
   if (byEmail[0]) {
     await sql`
@@ -163,7 +167,52 @@ export async function findOrCreateGoogleUser(input: {
   const created = await sql<UserRow[]>`
     insert into users (email, nickname, oauth_provider, oauth_id)
     values (${email}, ${nickname}, 'google', ${input.googleId})
-    returning id, email, nickname, country, role, email_verified_at
+    returning id, email, nickname, country, role, email_verified_at, tour_completed_at
   `;
   return { user: toUser(created[0]), isNew: true };
+}
+
+/**
+ * 세션 세대를 올리고 새 값을 돌려준다 — 로그인할 때마다 호출한다.
+ *
+ * 이 값이 오르는 순간 이전 기기의 토큰은 옛 세대가 되어 무효해진다.
+ * 계정 하나를 여러 사람이 나눠 쓰는 걸 막는 장치다.
+ */
+export async function bumpSessionVersion(userId: number): Promise<number> {
+  const rows = await sql<{ session_version: number }[]>`
+    update users set session_version = session_version + 1
+    where id = ${userId}
+    returning session_version
+  `;
+  return rows[0]?.session_version ?? 0;
+}
+
+/** 토큰에 실린 세대가 아직 현재 세대인지 */
+export async function isSessionCurrent(
+  userId: number,
+  sessionVersion: number,
+): Promise<boolean> {
+  try {
+    const rows = await sql<{ session_version: number }[]>`
+      select session_version from users where id = ${userId}
+    `;
+    if (!rows.length) return false;
+    return sessionVersion >= rows[0].session_version;
+  } catch (err) {
+    // DB 장애로 정상 이용자를 로그아웃시키지는 않는다 — 세션 검증의 본체는
+    // JWT 서명이고, 이 대조는 그 위에 얹는 보조 장치다
+    console.warn(
+      "[auth] 세션 세대 확인 실패 — 통과시킵니다:",
+      err instanceof Error ? err.message : err,
+    );
+    return true;
+  }
+}
+
+/** 둘러보기를 본 것으로 기록 (완료·건너뛰기 모두). 이미 본 계정은 시각을 덮지 않는다 */
+export async function completeTour(userId: number): Promise<void> {
+  await sql`
+    update users set tour_completed_at = now()
+    where id = ${userId} and tour_completed_at is null
+  `;
 }

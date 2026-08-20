@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listComments, createComment, BODY_MAX } from "@/lib/community";
-import { getSessionUser } from "@/lib/session";
+import { getActiveSessionUser } from "@/lib/session";
 import { guardCommunityWrite } from "@/lib/community-guard";
 import { prepareMedia, readCommunityInput } from "@/lib/community-media";
 import { deleteCommunityMedia } from "@/lib/storage";
@@ -32,7 +32,7 @@ export async function POST(
     return NextResponse.json({ error: "invalid post id" }, { status: 400 });
   }
 
-  const session = await getSessionUser();
+  const session = await getActiveSessionUser();
   if (!session) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
   }

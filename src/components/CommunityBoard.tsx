@@ -770,6 +770,7 @@ export default function CommunityBoard({
       <VerifyResultBanner />
 
       {/* 작성 영역 — 로그인만 하면 쓸 수 있고, 미인증이면 한도가 낮다는 안내만 얹는다 */}
+      <div data-tour="community">
       {me === undefined ? (
         <div className="h-28 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
       ) : me ? (
@@ -855,6 +856,7 @@ export default function CommunityBoard({
       ) : (
         <LoginPrompt text={t("loginToPost")} />
       )}
+      </div>
 
       {/* 목록 — 서버에서 채워 오므로 로딩 상태가 없다.
           조회에 실패하면 listPosts가 빈 배열을 주고 아래 빈 상태로 표시된다 */}
