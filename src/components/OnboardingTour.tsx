@@ -32,11 +32,37 @@ const STEPS: { key: string; href: string; Icon: LucideIcon }[] = [
   { key: "community", href: "/community", Icon: MessagesSquare },
 ];
 
-/** 하이라이트할 요소를 찾는 표식 — 각 페이지 컴포넌트에 data-tour로 붙여 둔다 */
+/**
+ * 하이라이트 대상 표식.
+ * - data-tour     : 그 페이지의 본문 영역. 이 위치로 스크롤한다.
+ * - data-tour-nav : 헤더의 해당 탭. 위치가 고정이라 구멍만 뚫고 스크롤 계산에선 뺀다.
+ */
 const targetOf = (key: string) => `[data-tour="${key}"]`;
+
+/** 지금 단계에 해당하는 헤더 탭만 함께 밝힌다 (어느 메뉴 얘기인지 보이도록) */
+const navTargetOf = (key: string) => `[data-tour-nav="${key}"]`;
 
 /** 구멍 주위 여백 */
 const PAD = 8;
+
+/**
+ * 스크롤할 때 위쪽에 비워둘 높이.
+ * 헤더가 sticky라 scrollIntoView를 그냥 쓰면 대상이 헤더 밑으로 들어가 버리고,
+ * 구멍에는 대상 대신 헤더가 드러난다.
+ */
+const HEADER_OFFSET = 104;
+
+/** clip-path용 둥근 사각형 한 조각 (r=0이면 각진 사각형) */
+function rectPath(x: number, y: number, w: number, h: number, r: number): string {
+  const rad = Math.max(0, Math.min(r, w / 2, h / 2));
+  if (rad === 0) return `M${x} ${y}H${x + w}V${y + h}H${x}Z`;
+  return (
+    `M${x + rad} ${y}H${x + w - rad}A${rad} ${rad} 0 0 1 ${x + w} ${y + rad}` +
+    `V${y + h - rad}A${rad} ${rad} 0 0 1 ${x + w - rad} ${y + h}` +
+    `H${x + rad}A${rad} ${rad} 0 0 1 ${x} ${y + h - rad}` +
+    `V${y + rad}A${rad} ${rad} 0 0 1 ${x + rad} ${y}Z`
+  );
+}
 
 interface Box {
   top: number;
@@ -67,7 +93,7 @@ function TourBox() {
   // 하이라이트할 영역 (뷰포트 기준). 대상이 없으면 화면 전체를 흐리게 한다
   // 어느 단계에서 잰 값인지 함께 담는다 — 단계가 바뀐 직후 옛 구멍이 한 프레임
   // 남는 걸 막는다 (효과 안에서 굳이 null로 비우지 않아도 된다)
-  const [hole, setHole] = useState<{ phase: number; box: Box } | null>(null);
+  const [hole, setHole] = useState<{ phase: number; boxes: Box[] } | null>(null);
   // 아직 본 적 없는 계정이면 홈에 도착했을 때 저절로 시작한다
   const [autoStart, setAutoStart] = useState(false);
   const [closed, setClosed] = useState(false);
@@ -150,18 +176,39 @@ function TourBox() {
     let scrolled = false;
     const deadline = performance.now() + 2500;
 
+    const rectsOf = (sel: string) =>
+      [...document.querySelectorAll(sel)]
+        .map((el) => el.getBoundingClientRect())
+        // 화면에서 접힌 요소(좁은 화면의 헤더 탭 등)는 구멍을 뚫을 게 없다
+        .filter((r) => r.width > 0 && r.height > 0)
+        .map((r) => ({ top: r.top, left: r.left, width: r.width, height: r.height }));
+
+    /** 본문 대상 + 헤더 탭을 모아 각각의 구멍으로 쓴다 */
+    const measure = () => {
+      const content = rectsOf(targetOf(key));
+      if (!content.length) return null;
+      return { content, all: [...content, ...rectsOf(navTargetOf(key))] };
+    };
+
     const tick = () => {
-      const el = document.querySelector(targetOf(key));
-      if (el) {
+      const m = measure();
+      if (m) {
         if (!scrolled) {
           scrolled = true;
-          el.scrollIntoView({ block: "center", behavior: "smooth" });
+          // 스크롤 위치는 본문 대상만으로 정한다 — 헤더 탭은 늘 화면 위에 붙어 있어
+          // 함께 계산하면 항상 맨 위로 올라가 버린다
+          const top = Math.min(...m.content.map((b) => b.top));
+          const bottom = Math.max(...m.content.map((b) => b.top + b.height));
+          const span = bottom - top;
+          const room = window.innerHeight - HEADER_OFFSET;
+          // 대상 전체가 들어가면 가운데로, 넘치면 첫 부분이 헤더 아래 오도록
+          const target =
+            span < room
+              ? window.scrollY + top - HEADER_OFFSET - (room - span) / 2
+              : window.scrollY + top - HEADER_OFFSET;
+          window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
         }
-        const r = el.getBoundingClientRect();
-        setHole({
-          phase: step,
-          box: { top: r.top, left: r.left, width: r.width, height: r.height },
-        });
+        setHole({ phase: step, boxes: m.all });
       }
       // 스크롤이 멎을 때까지는 계속 따라간다
       if (performance.now() < deadline) raf = requestAnimationFrame(tick);
@@ -170,13 +217,8 @@ function TourBox() {
 
     // 스크롤·창 크기 변화에도 구멍이 어긋나지 않게
     const follow = () => {
-      const el = document.querySelector(targetOf(key));
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      setHole({
-        phase: step,
-        box: { top: r.top, left: r.left, width: r.width, height: r.height },
-      });
+      const m = measure();
+      if (m) setHole({ phase: step, boxes: m.all });
     };
     window.addEventListener("scroll", follow, { passive: true });
     window.addEventListener("resize", follow);
@@ -216,38 +258,52 @@ function TourBox() {
         : { title: t(`steps.${step!.key}.title`), text: t(`steps.${step!.key}.body`) };
 
   // 이번 단계에서 잰 값만 쓴다 (환영·완료 단계에는 구멍이 없다)
-  const box = isStep && hole?.phase === phase ? hole.box : null;
+  const boxes = isStep && hole?.phase === phase ? hole.boxes : null;
+
+  const veil =
+    "fixed inset-0 z-[55] bg-slate-950/55 backdrop-blur-[3px]";
 
   /**
-   * 흐림막은 구멍을 뺀 네 조각으로 만든다.
-   * backdrop-filter는 '구멍 뚫린 한 장'으로 만들 수 없어서, 위·아래·좌·우를
-   * 따로 덮어 가운데만 선명하게 남긴다.
+   * 흐림막 한 장에 구멍을 여러 개 뚫는다.
+   *
+   * 처음엔 위·아래·좌·우 네 조각으로 덮었는데, 그 방식은 구멍이 하나일 때만 된다.
+   * 화면 전체 사각형 뒤에 구멍 사각형들을 이어 붙이고 evenodd를 주면 안쪽이
+   * 뚫린다 — backdrop-filter도 clip-path를 따른다.
    */
-  const veil =
-    "fixed z-[55] bg-slate-950/55 backdrop-blur-[3px] transition-[top,left,width,height] duration-300";
+  const clip = boxes
+    ? `path(evenodd, "${rectPath(0, 0, window.innerWidth, window.innerHeight, 0)}${boxes
+        .map((b) =>
+          rectPath(b.left - PAD, b.top - PAD, b.width + PAD * 2, b.height + PAD * 2, 14),
+        )
+        .join("")}")`
+    : undefined;
 
-  // 구멍이 화면 위쪽이면 상자를 아래에, 아래쪽이면 위에 둔다 (가리지 않게)
-  const boxAtBottom = !box || box.top + box.height / 2 < window.innerHeight / 2;
+  // 구멍들이 화면 위쪽에 몰려 있으면 상자를 아래에, 아래쪽이면 위에 둔다
+  // 헤더 탭(맨 위)은 빼고 본문 구멍만으로 판단한다
+  const contentBoxes = boxes?.filter((b) => b.top > HEADER_OFFSET) ?? [];
+  const midY = contentBoxes.length
+    ? contentBoxes.reduce((acc, b) => acc + b.top + b.height / 2, 0) /
+      contentBoxes.length
+    : 0;
+  const boxAtBottom = !boxes || midY < window.innerHeight / 2;
 
   return (
     <>
-      {box ? (
-        <>
-          <div className={veil} style={{ top: 0, left: 0, right: 0, height: Math.max(0, box.top - PAD) }} />
-          <div className={veil} style={{ top: Math.max(0, box.top - PAD), left: 0, width: Math.max(0, box.left - PAD), height: box.height + PAD * 2 }} />
-          <div className={veil} style={{ top: Math.max(0, box.top - PAD), left: box.left + box.width + PAD, right: 0, height: box.height + PAD * 2 }} />
-          <div className={veil} style={{ top: box.top + box.height + PAD, left: 0, right: 0, bottom: 0 }} />
-          {/* 구멍 테두리 — 어디를 보라는 건지 분명하게 */}
-          <div
-            aria-hidden
-            className="pointer-events-none fixed z-[56] rounded-2xl ring-2 ring-amber-400/80 transition-[top,left,width,height] duration-300"
-            style={{ top: box.top - PAD, left: box.left - PAD, width: box.width + PAD * 2, height: box.height + PAD * 2 }}
-          />
-        </>
-      ) : (
-        // 환영·완료 화면이거나 대상을 못 찾은 경우 — 화면 전체를 흐리게
-        <div className={`${veil} inset-0`} />
-      )}
+      <div className={veil} style={clip ? { clipPath: clip } : undefined} />
+      {/* 구멍 테두리 — 어디를 보라는 건지 분명하게 */}
+      {boxes?.map((b, i) => (
+        <div
+          key={i}
+          aria-hidden
+          className="pointer-events-none fixed z-[56] rounded-[14px] ring-2 ring-amber-400/80"
+          style={{
+            top: b.top - PAD,
+            left: b.left - PAD,
+            width: b.width + PAD * 2,
+            height: b.height + PAD * 2,
+          }}
+        />
+      ))}
 
     <div
       ref={boxRef}
@@ -256,13 +312,13 @@ function TourBox() {
       aria-modal="false"
       aria-label={t("label")}
       className={
-        box
-          ? `fixed inset-x-0 z-[60] px-4 outline-none sm:inset-x-auto sm:left-1/2 sm:w-[400px] sm:-translate-x-1/2 ${boxAtBottom ? "bottom-6" : "top-6"}`
+        boxes
+          ? `fixed inset-x-0 z-[60] px-4 outline-none sm:inset-x-auto sm:left-1/2 sm:w-[400px] sm:-translate-x-1/2 ${boxAtBottom ? "bottom-6" : "top-32"}`
           : // 환영·완료는 화면 한가운데 (첫 화면에서 눈에 바로 들어와야 한다)
             "fixed inset-0 z-[60] flex items-center justify-center px-4 outline-none"
       }
     >
-      <div className={box ? "" : "w-full sm:w-[420px]"}>
+      <div className={boxes ? "" : "w-full sm:w-[420px]"}>
       <div className="rounded-2xl border border-amber-400/25 bg-slate-950/95 p-5 shadow-[0_12px_48px_rgba(0,0,0,0.7)] backdrop-blur">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
