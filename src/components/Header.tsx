@@ -18,6 +18,18 @@ const NAV_ITEMS = [
 ] as const;
 
 /**
+ * 둘러보기 단계와 짝지어지는 탭.
+ * 3단계(에티켓)는 회화까지 함께 다루므로 두 탭을 같은 키로 묶는다.
+ */
+const TOUR_KEY: Record<string, string> = {
+  spots: "spots",
+  courses: "courses",
+  etiquette: "etiquette",
+  phrases: "etiquette",
+  community: "community",
+};
+
+/**
  * 전체 메뉴에만 두는 항목. 상단에서 뺐다고 갈 길까지 없애면 주소를 직접 치지
  * 않는 한 못 들어가므로, 여기에 남겨 둔다.
  */
@@ -79,6 +91,8 @@ export default function Header() {
             <Link
               key={href}
               href={href}
+              // 둘러보기에서 이 탭도 함께 밝힌다 (어느 메뉴 얘기인지 보이도록)
+              data-tour-nav={TOUR_KEY[key]}
               className={linkClass(isActive(href))}
             >
               {t(`nav.${key}`)}
