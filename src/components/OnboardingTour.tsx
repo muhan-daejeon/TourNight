@@ -7,6 +7,7 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  Languages,
   MapPin,
   MessagesSquare,
   Route,
@@ -29,6 +30,7 @@ const STEPS: { key: string; href: string; Icon: LucideIcon }[] = [
   { key: "spots", href: "/spots", Icon: MapPin },
   { key: "courses", href: "/courses", Icon: Route },
   { key: "etiquette", href: "/etiquette", Icon: Sparkles },
+  { key: "phrases", href: "/phrases", Icon: Languages },
   { key: "community", href: "/community", Icon: MessagesSquare },
 ];
 

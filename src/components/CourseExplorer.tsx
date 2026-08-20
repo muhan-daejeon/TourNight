@@ -378,6 +378,8 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const searchParams = useSearchParams();
   const fromContentId = searchParams.get("from");
   const fromCategory = searchParams.get("category");
+  // 둘러보기로 들어온 단계인지 (?tour=n)
+  const tourParam = searchParams.get("tour");
 
   // 저장된 코스 복원은 아래 effect에서 마운트 후에 한다.
   // useState 초기값에서 localStorage를 읽으면 서버 HTML(코스 없음)과
@@ -393,6 +395,19 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const [selId, setSelId] = useState<string | null>(null);
   // 지도에 그릴 이동수단 — 실제 경로가 붙은 AI 코스에서만 전환할 수 있다
   const [mapMode, setMapMode] = useState<MapMode>("best");
+
+  /**
+   * 둘러보기로 이 페이지에 들어오면 첫 코스를 미리 골라 둔다.
+   *
+   * 고르기 전에는 지도 자리가 안내 문구라, 코스를 밝혀 봐야 목록만 보이고
+   * "실제로 어떤 동선인지"는 안 보인다. 한 번만 골라 주고, 그 뒤 사용자가
+   * 직접 해제하면 그대로 둔다 (매 렌더마다 되살리면 해제가 안 된다).
+   */
+  const [tourPicked, setTourPicked] = useState<string | null>(null);
+  if (tourParam && tourPicked !== tourParam) {
+    setTourPicked(tourParam);
+    if (!selId && courses.length) setSelId(courses[0].id);
+  }
 
   // 클라이언트 이동으로 from·카테고리가 바뀌면 렌더 중에 초기화 (effect 안 setState 회피)
   const reqKey = `${fromContentId}|${fromCategory}`;
@@ -655,8 +670,10 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             {t("presetHeading")}
           </p>
         )}
-        {courses.map((c) => (
-          <div key={c.id}>
+        {courses.map((c, ci) => (
+          // 둘러보기에서 첫 코스 카드도 함께 밝힌다. 탭 줄만 비추면 "여기서 코스를
+          // 고른다"까지만 보이고, 코스가 실제로 어떻게 짜이는지는 안 보인다.
+          <div key={c.id} data-tour={ci === 0 ? "courses" : undefined}>
           <button
             type="button"
             onClick={() => toggleCourse(c.id)}
@@ -716,7 +733,8 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
 
       {/* 지도 + 이동수단 전환 + 길찾기 */}
       {course && (
-        <div className="lg:sticky lg:top-20 lg:self-start">
+        // 둘러보기에서 코스 카드와 함께 지도까지 밝힌다
+        <div data-tour="courses" className="lg:sticky lg:top-20 lg:self-start">
           <div className="h-80 lg:h-[500px]">
             <CourseMap course={course} mode={mapMode} />
           </div>
