@@ -11,6 +11,7 @@ import AuthNav from "./AuthNav";
 const NAV_ITEMS = [
   { href: "/", key: "home" },
   { href: "/spots", key: "spots" },
+  { href: "/personality", key: "personality" },
   { href: "/etiquette", key: "etiquette" },
   { href: "/phrases", key: "phrases" },
   { href: "/courses", key: "courses" },
