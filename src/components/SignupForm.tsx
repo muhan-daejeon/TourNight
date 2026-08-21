@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { COUNTRIES } from "@/lib/countries";
+import { COUNTRIES, localeForCountry } from "@/lib/countries";
 
 const fieldClass =
   "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
@@ -47,11 +47,15 @@ export default function SignupForm() {
         setError(errorText(data.error ?? "generic"));
         return;
       }
+      // 가입자의 국적에 맞춰 첫 언어를 정한다 — 도착한 홈에서 바로 시작되는
+      // 둘러보기(온보딩)까지 그 언어로 보이게 된다. 국가를 안 고른 경우에만
+      // 지금까지 보던 언어(브라우저 감지값)를 유지한다.
+      const target = country ? localeForCountry(country) : locale;
       // 로그인과 같은 이유로 전체 이동해야 한다. 헤더의 홈 링크를 Next가 미리
       // 받아두는데, 가입 화면에서는 아직 비로그인이라 그 응답이 로그인 페이지로의
       // 리다이렉트다. router.push("/")는 그 캐시를 그대로 써서 방금 가입했는데도
       // 로그인 화면이 뜬다. router.refresh()는 "현재 라우트"의 캐시만 지운다.
-      window.location.assign(`/${locale}`);
+      window.location.assign(`/${target}`);
     } catch {
       setError(errorText("generic"));
     } finally {
