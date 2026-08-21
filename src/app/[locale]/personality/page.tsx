@@ -14,9 +14,11 @@ export default async function PersonalityPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("personality");
-  // 결과에서 성향에 맞는 코스·스팟을 추천하므로 미리 받아 넘긴다 (서로 무관 → 동시에)
+  // 결과에서 성향에 맞는 코스·스팟을 추천하므로 미리 받아 넘긴다 (서로 무관 → 동시에).
+  // 코스 카드는 경유지 정보만 쓰므로 경로(TMap/ODsay) 계산은 건너뛴다 — 켜두면
+  // 빌드 정적 생성이 60초를 넘겨 실패한다.
   const [courses, spots] = await Promise.all([
-    getCourses(locale),
+    getCourses(locale, { withRoutes: false }),
     getVerifiedNightSpots(locale),
   ]);
 
