@@ -43,8 +43,9 @@ async function getVerdicts(): Promise<Map<string, Verdict>> {
       {
         category: r.category as NightSpot["category"],
         verified: r.night_verified,
-        // KTO에 없는 곳(mock-)은 실시간으로 받을 수 없으므로 저장분을 그대로 쓴다
-        manual: r.content_id.startsWith("mock-")
+        // KTO에 없는 곳(mock-)은 실시간으로 받을 수 없으므로 저장분을 그대로 쓴다.
+        // content_id가 빠진 불량 행이 있어도 전체 조회가 죽지 않도록 널 방어한다.
+        manual: r.content_id?.startsWith("mock-")
           ? {
               contentId: r.content_id,
               title: r.title ?? "",

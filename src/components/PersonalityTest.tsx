@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowRight,
   BarChart3,
@@ -43,18 +43,32 @@ type Phase = "intro" | "quiz" | "analyzing" | "result";
  * 마스코트·선택지 일러스트는 아직 에셋이 없어 아이콘·그라데이션 자리표시자로
  * 두었다 — 이미지가 준비되면 그 자리만 교체하면 된다.
  */
-export default function PersonalityTest({
-  courses,
-  spots,
-}: {
-  courses: Course[];
-  spots: NightSpot[];
-}) {
+export default function PersonalityTest() {
   const t = useTranslations("personality");
   const th = useTranslations("home"); // 카테고리 라벨 재사용
+  const locale = useLocale();
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, OptionKey>>({});
+
+  // 추천 코스·스팟은 KTO 실시간 조회라 결과에서만 필요하다. 테스트를 푸는 동안
+  // 백그라운드로 미리 받아 둬, 결과에 도달할 즈음엔 준비돼 있게 한다.
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [spots, setSpots] = useState<NightSpot[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/personality/recos?locale=${locale}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        setCourses(d.courses ?? []);
+        setSpots(d.spots ?? []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [locale]);
 
   const result = useMemo(
     () => (phase === "result" ? scorePersonality(answers) : null),
