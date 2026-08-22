@@ -59,3 +59,6 @@ node_modules/
 
 # 브라우저 확인용 스크린샷 (커밋 대상 아님)
 /tour-screenshots/
+
+# Claude Code가 로컬에 설치하는 스킬·설정
+/.claude/
