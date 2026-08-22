@@ -152,6 +152,12 @@ export default async function SpotPage({
               <MapPin size={14} className="shrink-0 text-slate-400" />
               {spot.addr}
             </p>
+            {/* 한글 원문 주소도 남겨 둔다 — 택시 기사에게는 이쪽을 보여줘야 통한다 */}
+            {spot.addrKo && spot.addrKo !== spot.addr && (
+              <p className="mt-0.5 pl-[22px] text-[13px] text-slate-400">
+                {spot.addrKo}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -189,7 +195,7 @@ export default async function SpotPage({
             <CongestionForecast days={congestion} locale={locale} />
 
             {/* 지역 방문객 규모 — KTO 빅데이터 (구 단위 실측) */}
-            <AreaVisitors addr={spot.addr} />
+            <AreaVisitors addr={spot.addrKo ?? spot.addr} />
 
             {/* 근처 자연 야경 (대전 차별점: 도심 → 자연 연계) */}
             {natureNearby.length > 0 && (

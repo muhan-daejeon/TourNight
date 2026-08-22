@@ -41,6 +41,11 @@ create table if not exists spot_translations (
   primary key (content_id, locale)
 );
 
+-- 번역·로마자 주소. KTO 다국어 서비스가 주는 addr1이 있으면 그걸 쓰고, 키가 막혀
+-- 있으면 Gemini로 채운다. 원문 한글 주소는 night_spots.addr에 그대로 남겨 둔다 --
+-- 자치구를 뽑아 쓰는 곳(방문객 통계·해시태그)이 있고, 택시에서 보여줄 일도 있다.
+alter table spot_translations add column if not exists addr text;
+
 -- 스팟별 현지화 가이드 캐시 (KTO 개요 → Gemini 번역·요약 + 야간 팁, 스팟·언어당 1회 생성)
 create table if not exists spot_guide (
   content_id text not null,

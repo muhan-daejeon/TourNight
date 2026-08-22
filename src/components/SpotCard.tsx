@@ -29,7 +29,10 @@ const CATEGORY_SCENE: Record<string, string> = {
   city: "from-amber-950 via-slate-900 to-orange-950",
 };
 
-/** 주소에서 자치구만 뽑아 해시태그로 쓴다 ("대전광역시 유성구 …" → "유성구") */
+/**
+ * 주소에서 자치구만 뽑아 해시태그로 쓴다 ("대전광역시 유성구 …" → "유성구").
+ * 화면 주소는 언어에 따라 번역돼 있으므로 반드시 한글 원문에서 뽑는다.
+ */
 function district(addr: string): string | null {
   return addr?.match(/([가-힣]+[구군])/)?.[1] ?? null;
 }
@@ -51,7 +54,7 @@ export default function SpotCard({ spot }: { spot: NightSpot }) {
   const Icon = CATEGORY_ICON[spot.category] ?? Building2;
   const { ids, toggle } = useBookmarks();
   const saved = ids.includes(spot.contentId);
-  const gu = district(spot.addr ?? "");
+  const gu = district(spot.addrKo ?? spot.addr ?? "");
 
   return (
     <article className="group relative h-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-1 hover:border-amber-400/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)]">

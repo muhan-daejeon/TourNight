@@ -17,7 +17,9 @@
     "db:related": "node --env-file=.env.local db/sync-related.mjs",
     "db:visitors": "node --env-file=.env.local db/sync-visitors.mjs",
     "db:transit": "node --env-file=.env.local db/sync-transit.mjs",
-    "db:routes": "node --env-file=.env.local db/sync-routes.mjs"
+    "db:routes": "node --env-file=.env.local db/sync-routes.mjs",
+    "db:i18n:addr": "node --env-file=.env.local db/sync-i18n.mjs --addr-only",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@types/nodemailer": "^8.0.1",

@@ -73,6 +73,35 @@ function normalizeTitle(title, koTitle, locale) {
   return t;
 }
 
+/** Gemini에 JSON 하나를 받아 온다. 한도에 걸리면 다음 모델로 내려간다. */
+async function geminiJson(prompt) {
+  const call = (model) =>
+    fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            maxOutputTokens: 2048,
+          },
+        }),
+      },
+    );
+
+  let res = await call(GEMINI_MODELS[modelIndex]);
+  if (res.status === 429 && modelIndex + 1 < GEMINI_MODELS.length) {
+    modelIndex += 1;
+    console.log(`  한도 초과 — ${GEMINI_MODELS[modelIndex]}로 전환`);
+    res = await call(GEMINI_MODELS[modelIndex]);
+  }
+  if (!res.ok) throw new Error(`Gemini ${res.status}`);
+  const data = await res.json();
+  return JSON.parse(data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}");
+}
+
 async function translateSpot(title, overview, locale) {
   const language = LANG_NAME[locale] ?? "English";
   const prompt = [
@@ -102,39 +131,101 @@ async function translateSpot(title, overview, locale) {
     .filter(Boolean)
     .join("\n");
 
-  const call = (model) =>
-    fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            maxOutputTokens: 2048,
-          },
-        }),
-      },
-    );
-
-  let res = await call(GEMINI_MODELS[modelIndex]);
-  if (res.status === 429 && modelIndex + 1 < GEMINI_MODELS.length) {
-    modelIndex += 1;
-    console.log(`  한도 초과 — ${GEMINI_MODELS[modelIndex]}로 전환`);
-    res = await call(GEMINI_MODELS[modelIndex]);
-  }
-  if (!res.ok) throw new Error(`Gemini ${res.status}`);
-  const data = await res.json();
-  const parsed = JSON.parse(
-    data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}",
-  );
+  const parsed = await geminiJson(prompt);
   const t = String(parsed.title ?? "").trim();
   if (!t) throw new Error("번역 제목이 비어 있음");
   return {
     title: normalizeTitle(t, title, locale),
     overview: String(parsed.overview ?? "").trim(),
   };
+}
+
+// 언어별 주소 표기 규칙 — 제목과 같은 원칙(현지 표기 + 원문 병기 없음)을 따른다.
+// 주소는 이름과 달리 한글을 병기하지 않는다. 한 줄로 잘려 나오는 자리라 길면
+// 뒤가 사라지고, 원문 한글은 상세 화면에 따로 그대로 보여준다.
+const ADDR_RULE = {
+  en: [
+    `- Romanize with Revised Romanization and order it Western style:`,
+    `  "대전광역시 서구 둔산로 100" -> "100 Dunsan-ro, Seo-gu, Daejeon".`,
+    `  Keep road/district suffixes as -ro, -gil, -gu, -dong.`,
+  ],
+  ja: [
+    `- Write it in Japanese with the Korean administrative units kept:`,
+    `  "대전광역시 서구 둔산로 100" -> "大田広域市 西区 屯山路100".`,
+    `  Pure Korean words with no kanji become katakana (도마동 -> トマ洞).`,
+  ],
+  zh: [
+    `- Write it in Simplified Chinese with the Korean administrative units kept:`,
+    `  "대전광역시 서구 둔산로 100" -> "大田广域市 西区 屯山路100".`,
+    `  Pure Korean words with no hanja are transliterated by sound.`,
+  ],
+};
+
+/** 주소 한 줄을 해당 언어 표기로 옮긴다 (번지·번호는 그대로 둔다) */
+async function translateAddr(addr, locale) {
+  const prompt = [
+    `Convert this South Korean address for a foreign visitor.`,
+    `Korean address: ${addr}`,
+    `Return JSON: {"addr": string}`,
+    ...(ADDR_RULE[locale] ?? ADDR_RULE.en),
+    `- Keep every number exactly as given. Do not add, drop or reorder places.`,
+    `- The result must contain NO Hangul at all.`,
+    `- If the address ends with a parenthesised legal-dong like "(소제동)",`,
+    `  convert it too and keep it in parentheses.`,
+    `Respond with ONLY the JSON.`,
+  ].join("\n");
+
+  const out = await geminiJson(prompt);
+  const a = String(out.addr ?? "").trim();
+  if (!a) throw new Error("번역 주소가 비어 있음");
+  // 한글이 남았으면 저장하지 않는다 — 반쯤 번역된 주소가 원문보다 나쁘다
+  if (/[가-힣]/.test(a)) throw new Error(`한글이 남음: ${a}`);
+  return a;
+}
+
+/**
+ * 주소 번역 채우기.
+ *
+ * 제목·소개문과 달리 KTO 다국어 서비스에서 받아 둔 행에도 주소가 비어 있다
+ * (그 시절엔 컬럼이 없었다). 그래서 제목 보완과 조건이 달라 패스를 따로 둔다.
+ */
+async function fillMissingAddrs() {
+  if (!process.env.GEMINI_API_KEY) {
+    console.log("GEMINI_API_KEY가 없어 주소 번역을 건너뜁니다");
+    return;
+  }
+  const redo = process.argv.includes("--redo-addr");
+  for (const locale of Object.keys(LANG_SERVICES)) {
+    const missing = await sql`
+      select s.content_id, s.title, s.addr
+      from night_spots s
+      join spot_translations tr
+        on tr.content_id = s.content_id and tr.locale = ${locale}
+      where s.night_verified = true and s.image_url is not null
+        and nullif(trim(s.addr), '') is not null
+        and (${redo} or nullif(trim(tr.addr), '') is null)
+      order by s.title
+    `;
+    if (!missing.length) {
+      console.log(`[${locale}] 주소 번역 대상 없음`);
+      continue;
+    }
+    let done = 0;
+    for (const s of missing) {
+      try {
+        const addr = await translateAddr(s.addr, locale);
+        await sql`
+          update spot_translations set addr = ${addr}, updated_at = now()
+          where content_id = ${s.content_id} and locale = ${locale}
+        `;
+        done += 1;
+      } catch (err) {
+        console.warn(`  ${s.title} 주소 실패: ${err.message}`);
+      }
+      await sleep(4000); // 분당 호출 한도 회피
+    }
+    console.log(`[${locale}] 주소 번역: ${done}/${missing.length}건`);
+  }
 }
 
 async function fillMissingWithAi() {
@@ -244,10 +335,21 @@ function distM(lat1, lng1, lat2, lng2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+// --addr-only: 주소 번역만 채운다 (컬럼을 새로 만든 뒤 한 번 돌리는 용도)
+if (process.argv.includes("--addr-only")) {
+  try {
+    await fillMissingAddrs();
+  } finally {
+    await sql.end();
+  }
+  process.exit(0);
+}
+
 // --ai-only: KTO 재수집 없이 빠진 번역만 채운다 (스팟을 새로 추가했을 때)
 if (process.argv.includes("--ai-only")) {
   try {
     await fillMissingWithAi();
+    await fillMissingAddrs();
   } finally {
     await sql.end();
   }
@@ -310,12 +412,15 @@ try {
         continue;
       }
       const overview = await fetchOverview(service, best.contentid);
+      // 공식 주소가 있으면 그것을 쓴다 — AI 보완(fillMissingAddrs)보다 정확하다
+      const addr = String(best.addr1 ?? "").trim() || null;
       await sql`
-        insert into spot_translations (content_id, locale, lang_content_id, title, overview)
-        values (${s.content_id}, ${locale}, ${best.contentid}, ${best.title}, ${overview})
+        insert into spot_translations (content_id, locale, lang_content_id, title, overview, addr)
+        values (${s.content_id}, ${locale}, ${best.contentid}, ${best.title}, ${overview}, ${addr})
         on conflict (content_id, locale) do update
           set lang_content_id = excluded.lang_content_id,
-              title = excluded.title, overview = excluded.overview, updated_at = now()
+              title = excluded.title, overview = excluded.overview,
+              addr = coalesce(excluded.addr, spot_translations.addr), updated_at = now()
       `;
       matched += 1;
       await sleep(120);
@@ -324,6 +429,7 @@ try {
   }
 
   await fillMissingWithAi();
+  await fillMissingAddrs();
 } finally {
   await sql.end();
 }
