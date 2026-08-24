@@ -41,6 +41,11 @@ create table if not exists spot_translations (
   primary key (content_id, locale)
 );
 
+-- 번역·로마자 주소. KTO 다국어 서비스가 주는 addr1이 있으면 그걸 쓰고, 키가 막혀
+-- 있으면 Gemini로 채운다. 원문 한글 주소는 night_spots.addr에 그대로 남겨 둔다 --
+-- 자치구를 뽑아 쓰는 곳(방문객 통계·해시태그)이 있고, 택시에서 보여줄 일도 있다.
+alter table spot_translations add column if not exists addr text;
+
 -- 스팟별 현지화 가이드 캐시 (KTO 개요 → Gemini 번역·요약 + 야간 팁, 스팟·언어당 1회 생성)
 create table if not exists spot_guide (
   content_id text not null,
@@ -97,6 +102,18 @@ create table if not exists users (
 -- 메일 인증 시각. boolean 대신 시각으로 둬서 "언제 인증했는지"가 남는다.
 -- null = 미인증 → 커뮤니티 글·댓글 작성만 막힌다 (읽기·명소·코스는 그대로).
 alter table users add column if not exists email_verified_at timestamptz;
+
+-- 활성 세션 세대. 로그인할 때마다 1씩 올리고 그 값을 세션 토큰에 넣는다.
+-- 토큰의 값이 여기보다 낮으면 '이미 다른 기기에서 로그인된 계정'이므로 무효다.
+-- 계정 하나를 여러 사람이 돌려쓰는 걸 막는 용도 (IP는 보지 않는다 — 관광객은
+-- 이동하면서 IP가 계속 바뀌어 정상 이용자만 걸린다).
+alter table users add column if not exists session_version int not null default 0;
+
+-- 가입 후 둘러보기(온보딩)를 본 시각. boolean이 아니라 시각으로 두면 '언제 봤는지'가
+-- 남아, 기능이 크게 늘었을 때 다시 권할지 판단할 근거가 된다.
+-- 건너뛰기도 여기에 기록한다 — 프로필에서 언제든 다시 볼 수 있으므로 둘을 구분할
+-- 실익이 없다.
+alter table users add column if not exists tour_completed_at timestamptz;
 
 -- 메일 인증 토큰.
 --

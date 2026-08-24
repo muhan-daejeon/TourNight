@@ -28,6 +28,15 @@ interface Verdict {
   category: NightSpot["category"];
   verified: boolean;
   manual: NightSpot | null;
+  /**
+   * 한글 원문 주소.
+   *
+   * KTO에서 받는 주소는 고른 언어로 번역돼 온다. 그런데 주소에서 자치구를
+   * 뽑아 쓰는 곳(방문객 통계·해시태그)이 정규식으로 한글을 찾으므로, 번역
+   * 주소만 있으면 한국어 외의 언어에서 전부 빈손이 된다. DB에 남아 있는
+   * 원문을 함께 실어 보낸다.
+   */
+  addrKo: string | null;
 }
 
 /** 검수 결과를 contentId로 찾을 수 있게 (KTO 미등재 명소는 자체 정보 포함) */
@@ -43,12 +52,15 @@ async function getVerdicts(): Promise<Map<string, Verdict>> {
       {
         category: r.category as NightSpot["category"],
         verified: r.night_verified,
-        // KTO에 없는 곳(mock-)은 실시간으로 받을 수 없으므로 저장분을 그대로 쓴다
-        manual: r.content_id.startsWith("mock-")
+        addrKo: r.addr,
+        // KTO에 없는 곳(mock-)은 실시간으로 받을 수 없으므로 저장분을 그대로 쓴다.
+        // content_id가 빠진 불량 행이 있어도 전체 조회가 죽지 않도록 널 방어한다.
+        manual: r.content_id?.startsWith("mock-")
           ? {
               contentId: r.content_id,
               title: r.title ?? "",
               addr: r.addr ?? "",
+              addrKo: r.addr ?? "",
               mapX: Number(r.map_x),
               mapY: Number(r.map_y),
               imageUrl: r.image_url,
@@ -64,6 +76,7 @@ const merge = (k: KtoSpot, v: Verdict): NightSpot => ({
   contentId: k.contentId,
   title: k.title,
   addr: k.addr,
+  addrKo: v.addrKo ?? k.addr,
   mapX: k.mapX,
   mapY: k.mapY,
   imageUrl: k.imageUrl,

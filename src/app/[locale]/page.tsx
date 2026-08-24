@@ -49,6 +49,18 @@ export default async function HomePage({
   // 축제에 '지금 열린다/곧 열린다'를 붙이지 않는다. 개최 일정을 주는 출처가
   // KTO searchFestival2뿐인데 키가 막혀 있어, 확인 못 한 시기를 단정하면 안 된다.
   const slides: HeroSlide[] = [
+    // 여행성향 테스트 — 메인에서 바로 시작하는 진입점 (기획 목업의 대표 히어로)
+    {
+      id: "persona",
+      overline: t("heroPersonaOverline"),
+      title: t("heroPersonaTitle"),
+      highlight: t("heroPersonaHighlight"),
+      subtitle: t("heroPersonaSubtitle"),
+      ctaLabel: t("heroPersonaCta"),
+      href: "/personality",
+      gradient: "from-indigo-950 via-purple-950 to-slate-950",
+      image: nthPhoto(1),
+    },
     ...festivals.slice(0, 2).map((f, i) => ({
       id: f.contentId,
       overline: t("heroFestivalOverline"),

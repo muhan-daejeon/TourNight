@@ -15,7 +15,8 @@
     "stay": "Stay",
     "shopping": "Shopping",
     "menu": "All menu",
-    "home": "Home"
+    "home": "Home",
+    "personality": "Persona Test"
   },
   "home": {
     "heroTitle": "Daejeon Shines Brighter at Night",
@@ -83,7 +84,12 @@
     "howToStep2": "Then tap <b>Plan course</b> in the bar below",
     "howToStep3": "AI sets the order and shows routes and travel times",
     "howToClose": "Close",
-    "basketOne": "One place is enough - we'll link nearby spots into a course"
+    "basketOne": "One place is enough - we'll link nearby spots into a course",
+    "heroPersonaOverline": "Daejeon nights — find your own color",
+    "heroPersonaTitle": "My Night Travel Persona Test",
+    "heroPersonaHighlight": "Persona",
+    "heroPersonaSubtitle": "Preview night courses picked just for your type through a quick simulation.",
+    "heroPersonaCta": "Start the test"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest.",
@@ -395,5 +401,372 @@
     "limitReached": "You have used today’s limit ({limit} courses).",
     "noCandidates": "Not enough verified night spots near that starting point. Try another one.",
     "failed": "Could not build a course. Please try again shortly."
+  },
+  "tour": {
+    "label": "Quick tour",
+    "skip": "Skip",
+    "next": "Next",
+    "prev": "Back",
+    "begin": "Start",
+    "close": "Close",
+    "welcome": {
+      "title": "Welcome to TourNight",
+      "body": "One minute is all it takes to learn how to enjoy Daejeon after dark."
+    },
+    "steps": {
+      "spots": {
+        "title": "Only the places that shine at night",
+        "body": "We list spots that are genuinely open after dark. Find them on the map and save the ones you like."
+      },
+      "courses": {
+        "title": "Tonight’s route in one minute",
+        "body": "Pick your time and how you’ll travel. We arrange the order, the bus and walking routes, and the last bus back."
+      },
+      "etiquette": {
+        "title": "So nothing feels awkward",
+        "body": "Street food tents, noraebang, late-night diners — the manners that only exist after dark, sorted by the situation you're in."
+      },
+      "phrases": {
+        "title": "Stuck for words? Show the screen",
+        "body": "Type what you want to say and we turn it into Korean, pronunciation included. Read it aloud, or just hold up the screen."
+      },
+      "community": {
+        "title": "Nights from people who went first",
+        "body": "Share photos and reviews, and ask anything. Verify your email to join in more freely."
+      }
+    },
+    "done": {
+      "title": "You’re all set",
+      "body": "Just tell us how much time you have tonight. We’ll build the course.",
+      "cta": "Plan a course"
+    },
+    "replay": "Replay the tour"
+  },
+  "personality": {
+    "title": "Night Travel Persona Test",
+    "subtitle": "Discover your Daejeon night-travel style in 12 questions — with night courses picked for your type.",
+    "introTitle": "What would you do?",
+    "introBody": "Just pick your gut choice for each 'what if' scene. There are no wrong answers — go with what pulls you.",
+    "introMeta": "{count} questions · about 2 minutes",
+    "start": "Start test",
+    "prev": "Back",
+    "resultOverline": "Your night persona",
+    "alsoStrong": "You're also strong in",
+    "recommendTitle": "Night courses for your type",
+    "recommendCta": "See recommended courses",
+    "seeSpots": "Browse night spots",
+    "restart": "Retake",
+    "noCourses": "No courses to recommend yet — try building one on the courses page.",
+    "questions": {
+      "q1": {
+        "text": "You've made it to Daejeon Station! Checked in, and about 3 hours left before nightfall. First move?",
+        "a": "Just start walking. Wander the nearby alleys and stumble onto a local bar or a tiny cafe.",
+        "b": "Check what festivals, night markets or events are on tonight, and head where the crowd is.",
+        "c": "Take it easy. Find a scenic riverside walk near the hotel and stroll quietly.",
+        "d": "Hold on — search 'Daejeon must-see night spots' first and plan a route around photogenic places."
+      },
+      "q2": {
+        "text": "You reach the night market — but you're short on time. If you can pick only one zone?",
+        "a": "Head for the tucked-away alley or the row of local food stalls only locals seem to know.",
+        "b": "Go where the game booths, hands-on stalls and buskers are clustered.",
+        "c": "Hit the food zone and taste a few of the region's signature dishes.",
+        "d": "Head near the photo spot where the whole market fits in one frame."
+      },
+      "q3": {
+        "text": "As you walk, a local suddenly speaks up: \"This pub is really hot — want to come along?\"",
+        "a": "The thrill of joining strangers wins — you say \"Let's go!\" right away.",
+        "b": "Your plan is set, so you politely decline and stick to it.",
+        "c": "You hesitate a bit, but the hope of a new connection wins and you tag along.",
+        "d": "You check the pub's vibe on social media first, then weigh if it's your taste."
+      },
+      "q4": {
+        "text": "You must pick just one Daejeon night tour course. Which pulls you most?",
+        "a": "Explore on foot — hidden alleys, local bars and secret night-view points you'd never find by day.",
+        "b": "Hear Daejeon's history and city stories while touring late-night venues and storytelling walks.",
+        "c": "A 'night food crawl' through night markets, local eateries and late-night bites.",
+        "d": "Spend the night among people, with outdoor performances and festivals."
+      },
+      "q5": {
+        "text": "It starts to drizzle. You have an umbrella and one or two more hours to roam. You…",
+        "a": "Even better — head to a lesser-known area where you can explore rainy alleys and local bars.",
+        "b": "Find somewhere indoors like a theater, museum or exhibition to enjoy culture and stories out of the rain.",
+        "c": "Rain means food. Move to an indoor food court or covered market zone and keep eating.",
+        "d": "Change plans — settle into a cafe near the hotel and relax over the night view."
+      },
+      "q6": {
+        "text": "How do you take photos while traveling?",
+        "a": "Photos are just for memories — I record only enough to remember later.",
+        "b": "That lighting is gorgeous! I hunt for beautiful views and enjoy the shots themselves.",
+        "c": "Anything tasty or unusual, I make sure to snap once.",
+        "d": "Snapped it! Posted it! I love putting it on my story live and watching the reactions."
+      },
+      "q7": {
+        "text": "You've got some time to yourself. The most ideal scene is…",
+        "a": "Open the map app and follow a path few people take to discover somewhere interesting.",
+        "b": "Read about the city's history and culture in a quiet spot and get lost in thought.",
+        "c": "Listen to music by the river or an overlook and gaze at the city lights for a long while.",
+        "d": "Watch the food and the flow of people at a night market or on the street."
+      },
+      "q8": {
+        "text": "A friend asks, \"If you had to post one highlight of your Daejeon trip, what would it be?\" You pick…",
+        "a": "A photo of a hidden alley or local shop — the 'wait, this place existed?' kind.",
+        "b": "A night-view shot with beautiful light and lines, or a moody walking snap.",
+        "c": "A photo of a unique late-night dish you feel you can only get in Daejeon.",
+        "d": "A scene of people laughing together, or a clip from a performance or festival."
+      },
+      "q9": {
+        "text": "There are four night programs you could join. If you sign up for just one first?",
+        "a": "A small local bar tour (roaming the alleys with a local).",
+        "b": "A night history and culture guided tour.",
+        "c": "A night market food tour.",
+        "d": "A night festival or live performance."
+      },
+      "q10": {
+        "text": "Your schedule wrapped up early — suddenly a whole 2 hours opened up. How do you use it?",
+        "a": "Head to a neighborhood not on the plan — hop on a bus or subway on a whim.",
+        "b": "Wind down and relax at a cafe or hot spring, wrapping up the day.",
+        "c": "There's still something I haven't eaten — go back to the market or a local spot for more.",
+        "d": "Scan social media and the map app to hunt for 'a night spot only I know' in Daejeon."
+      },
+      "q11": {
+        "text": "The trip is ending. Recalling Daejeon's night, the first ideal scene that comes to mind is…",
+        "a": "Walking a newly found alley and meeting a view you didn't expect.",
+        "b": "Listening to or reflecting on the city's stories, history and culture in a quiet place.",
+        "c": "Laughing under the lights, enjoying music, performances and festivals with others.",
+        "d": "Walking with food in hand amid the smells and sounds of the night market."
+      },
+      "q12": {
+        "text": "Last night of the trip. Which thought would make you go, 'Daejeon… I have to come back'?",
+        "a": "The feeling that there are still so many alleys and local spots left to explore.",
+        "b": "Curiosity to learn Daejeon's culture, history and art more deeply.",
+        "c": "The urge to try more dishes and new late-night combos you didn't get to.",
+        "d": "The wish to feel again the gatherings and vibe with the people you met in Daejeon."
+      }
+    },
+    "types": {
+      "explorer": {
+        "name": "NIGHT EXPLORER",
+        "tagline": "The night adventurer",
+        "desc": "You get the biggest kick out of exploring new alleys, local spots and off-the-map routes. 'We came all this way — let's check out where others don't go' comes naturally to you.",
+        "keywords": [
+          "#AlleyExplorer",
+          "#LocalFinder",
+          "#HiddenSpots"
+        ],
+        "strengths": [
+          "A knack for finding paths others skip",
+          "Ease with going with the flow",
+          "Ability to uncover local-only places"
+        ],
+        "traits": [
+          "You prefer wandering over a fixed route.",
+          "Alleys, local spots and off-map routes thrill you.",
+          "You're drawn to 'where others don't go'."
+        ],
+        "tips": [
+          "Plan a walking route through the alleys.",
+          "Aim for local bars and food-stall rows.",
+          "Leave a lesser-known area for last."
+        ]
+      },
+      "player": {
+        "name": "NIGHT PLAYER",
+        "tagline": "The night reveler",
+        "desc": "You build your night around things to do — festivals, night markets, games, hands-on experiences and events. You love high-energy places alive with sound and light.",
+        "keywords": [
+          "#FestivalLover",
+          "#Recharged",
+          "#NightMarket"
+        ],
+        "strengths": [
+          "Energy that lifts the mood",
+          "High spirits even in crowds",
+          "A quick eye for things to do"
+        ],
+        "traits": [
+          "Festivals and events are your night's core.",
+          "You love places alive with sound and light.",
+          "You can't walk past a hands-on booth."
+        ],
+        "tips": [
+          "Check tonight's festivals and events first.",
+          "Head where buskers and shows gather.",
+          "Pick a market packed with activity booths."
+        ]
+      },
+      "socializer": {
+        "name": "NIGHT SOCIALIZER",
+        "tagline": "The night connector",
+        "desc": "You'd rather spend the night among people — locals, fellow travelers, companions. You enjoy meeting new people and good conversation, and remember trips as relationships.",
+        "keywords": [
+          "#PeoplePerson",
+          "#Gatherings",
+          "#TravelFriends"
+        ],
+        "strengths": [
+          "Easy rapport with strangers",
+          "Warmth that remembers trips as bonds",
+          "The spark that lifts any group"
+        ],
+        "traits": [
+          "Together beats solo for you.",
+          "You enjoy new people, talk and meetups.",
+          "You remember trips by 'who with'."
+        ],
+        "tips": [
+          "Look for small local tours and meetups.",
+          "Use guesthouse lounges and pubs.",
+          "Festival-style courses suit you well."
+        ]
+      },
+      "viewLover": {
+        "name": "NIGHT VIEW LOVER",
+        "tagline": "The scenery lover",
+        "desc": "You savor light and landscape itself — night views, mood, quiet walks, photo spots. You linger by rivers, overlooks and trails, soaking in the city's night air.",
+        "keywords": [
+          "#ViewCollector",
+          "#MoodyWalks",
+          "#PhotoSpots"
+        ],
+        "strengths": [
+          "Patience to savor a mood",
+          "An eye for light and landscape",
+          "A taste for quiet moments"
+        ],
+        "traits": [
+          "You savor night views and mood itself.",
+          "You linger by rivers, overlooks and trails.",
+          "You love feeling the city's night air."
+        ],
+        "tips": [
+          "Add an overlook or riverside walk.",
+          "Aim for the blue hour after sunset.",
+          "Keep a relaxed pace and stay a while."
+        ]
+      },
+      "culturist": {
+        "name": "NIGHT CULTURIST",
+        "tagline": "The culture seeker",
+        "desc": "You want to know the city's story through history, art and storytelling walks. Late-night museums, exhibitions, performances and story tours pull you in.",
+        "keywords": [
+          "#StoryBuff",
+          "#NightCulture",
+          "#HistoryWalks"
+        ],
+        "strengths": [
+          "Curiosity that reads a city's context",
+          "The gift of deepening a trip with stories",
+          "A love of learning"
+        ],
+        "traits": [
+          "You're curious about the city's story and art.",
+          "Late-night museums and exhibits draw you.",
+          "The more you know, the more you see."
+        ],
+        "tips": [
+          "Check late-opening exhibits and museums.",
+          "Book a guided or storytelling tour.",
+          "Build your route around history stops."
+        ]
+      },
+      "foodie": {
+        "name": "NIGHT FOODIE",
+        "tagline": "The night foodie",
+        "desc": "For you, what you eat is the heart of the night — night markets, local eateries, late-night food runs. Daejeon after dark is your time to complete a personal food crawl.",
+        "keywords": [
+          "#NightFoodie",
+          "#FlavorFinder",
+          "#EatItAll"
+        ],
+        "strengths": [
+          "Courage to try new flavors",
+          "A talent for finding local gems",
+          "Charm that bonds people over food"
+        ],
+        "traits": [
+          "Night markets and local eats are the point.",
+          "Discovering new dishes delights you.",
+          "You want to know a place through its food."
+        ],
+        "tips": [
+          "Add a night-market food tour.",
+          "Chain local eateries into a food crawl.",
+          "List the region's signature dishes."
+        ]
+      },
+      "trendsetter": {
+        "name": "NIGHT TRENDSETTER",
+        "tagline": "The digital storyteller",
+        "desc": "How you'll show your night on social media — photos, video, stories, live — is part of the trip itself. You naturally think about how to capture and share the moment.",
+        "keywords": [
+          "#Documenter",
+          "#SocialVibe",
+          "#HotSpots"
+        ],
+        "strengths": [
+          "A knack for capturing the moment",
+          "A quick eye for trends",
+          "Joy in sharing experiences"
+        ],
+        "traits": [
+          "You think about how to capture the night.",
+          "Photos, video, stories and live come naturally.",
+          "You're tuned to hot spots and photo spots."
+        ],
+        "tips": [
+          "Build a route around photo spots.",
+          "Aim for blue hour and great lighting.",
+          "List hot spots and photo landmarks ahead."
+        ]
+      }
+    },
+    "metaCount": "{count} questions",
+    "metaTime": "about 2 min",
+    "next": "Next",
+    "seeResult": "See result",
+    "how1": {
+      "title": "Read the scene",
+      "body": "Read a real 'what if' travel moment."
+    },
+    "how2": {
+      "title": "Make a choice",
+      "body": "Pick the option that pulls you more."
+    },
+    "how3": {
+      "title": "Analyze",
+      "body": "Your choices reveal your persona."
+    },
+    "how4": {
+      "title": "Get picks",
+      "body": "Get a night trip matched to your type."
+    },
+    "analyzingTitle": "Test complete!",
+    "analyzingBody": "Analyzing your travel persona… hang tight!",
+    "analyzingProgress": "Analyzing… {pct}%",
+    "primaryBadge": "Primary type",
+    "detailCta": "See detailed result",
+    "otherTest": "Take another test",
+    "detailTitle": "Your persona in detail",
+    "detailSub": "See your type scores at a glance.",
+    "keywordsTitle": "Persona keywords",
+    "strengthsTitle": "Your strengths",
+    "traitsHeading": "This is you!",
+    "matchedCourseCta": "See matched courses",
+    "noSpots": "No spots to recommend yet.",
+    "tabs": {
+      "traits": "Traits",
+      "courses": "Courses",
+      "spots": "Spots",
+      "tips": "Tips"
+    },
+    "axes": {
+      "explorer": "Explore",
+      "player": "Play",
+      "socializer": "Social",
+      "viewLover": "Scenery",
+      "culturist": "Culture",
+      "foodie": "Food",
+      "trendsetter": "Express"
+    }
   }
 }

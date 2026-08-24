@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findUserByEmail, verifyPassword } from "@/lib/users";
+import {
+  bumpSessionVersion,
+  findUserByEmail,
+  verifyPassword,
+} from "@/lib/users";
 import { signSession, SESSION_COOKIE, sessionCookieOptions } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
@@ -34,10 +38,13 @@ export async function POST(request: NextRequest) {
       nickname: found.nickname,
       country: found.country,
     };
+    // 새 세대를 발급해 이전 기기의 세션을 무효화한다 (계정 돌려쓰기 방지)
+    const sessionVersion = await bumpSessionVersion(user.id);
     const token = await signSession({
       userId: user.id,
       email: user.email,
       nickname: user.nickname,
+      sessionVersion,
     });
     const res = NextResponse.json({ user });
     res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);

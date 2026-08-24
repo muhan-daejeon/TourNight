@@ -99,7 +99,7 @@ export default function SurvivalPhrases() {
   return (
     <div className="mt-6">
       {/* 하고 싶은 말 검색 → 한국어 번역 */}
-      <form onSubmit={search} className="relative">
+      <form onSubmit={search} data-tour="phrases" className="relative">
         <Search
           size={16}
           className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
@@ -153,6 +153,9 @@ export default function SurvivalPhrases() {
             return (
               <div
                 key={c}
+                // 둘러보기에서 펼쳐져 있는 묶음도 함께 밝힌다. 검색창만 비추면
+                // 무엇을 하는 곳인지만 보이고 어떤 표현이 나오는지는 안 보인다.
+                data-tour={open ? "phrases" : undefined}
                 className="overflow-hidden rounded-2xl border border-white/10"
               >
                 <button

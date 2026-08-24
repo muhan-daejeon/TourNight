@@ -50,3 +50,21 @@ export function isValidCountry(code: string): boolean {
 export function countryByCode(code: string | null | undefined): Country | undefined {
   return code ? COUNTRIES.find((c) => c.code === code) : undefined;
 }
+
+/**
+ * 국가 코드 → 앱 지원 언어(ko/en/ja/zh) 매핑.
+ * 가입자의 국적에 맞는 초기 언어를 정할 때 쓴다. 지원 언어를 늘리면
+ * routing.locales와 함께 여기 항목도 넓히면 된다.
+ */
+const COUNTRY_LOCALE: Record<string, string> = {
+  KR: "ko",
+  JP: "ja",
+  CN: "zh",
+  TW: "zh",
+  HK: "zh",
+};
+
+/** 국적에 맞는 초기 언어. 미지원 국가·미선택은 외국인 기본값인 영어로 폴백 */
+export function localeForCountry(code: string | null | undefined): string {
+  return (code && COUNTRY_LOCALE[code]) || "en";
+}

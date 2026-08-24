@@ -111,7 +111,7 @@ export default function NightEtiquette({
       : (guide?.phrases ?? []);
 
   return (
-    <div className="mt-8">
+    <div className="mt-8" data-tour="etiquette">
       {GROUPS.map((group) => (
         <div key={group.key} className="mb-5">
           <p className="overline-label mb-2">{t(`groups.${group.key}`)}</p>

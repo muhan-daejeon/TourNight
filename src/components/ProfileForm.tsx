@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { LogIn } from "lucide-react";
+import { Compass, LogIn } from "lucide-react";
 import { COUNTRIES } from "@/lib/countries";
 import { Link, useRouter } from "@/i18n/navigation";
 
@@ -18,6 +18,7 @@ const fieldClass =
 
 export default function ProfileForm({ welcome = false }: { welcome?: boolean }) {
   const t = useTranslations("auth");
+  const tTour = useTranslations("tour");
   const router = useRouter();
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [nickname, setNickname] = useState("");
@@ -159,6 +160,19 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
       >
         {welcome ? t("saveAndStart") : t("save")}
       </button>
+
+      {/* 둘러보기는 한 번 닫으면 저절로 다시 뜨지 않으므로, 돌아올 길을 여기 둔다.
+          가입 직후(welcome) 화면에서는 아직 볼 차례가 아니라 숨긴다 */}
+      {!welcome && (
+        <button
+          type="button"
+          onClick={() => router.push("/?tour=start")}
+          className="flex w-full items-center justify-center gap-1.5 rounded-full border border-white/15 py-2.5 text-sm font-semibold text-slate-300 transition hover:border-amber-400/50 hover:text-amber-300"
+        >
+          <Compass size={15} />
+          {tTour("replay")}
+        </button>
+      )}
 
       {/* 국가는 선택 사항이라, 입력 없이도 가입 흐름을 끝낼 수 있어야 한다 */}
       {welcome && (

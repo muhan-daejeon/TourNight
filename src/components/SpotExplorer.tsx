@@ -229,11 +229,14 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
               {t("noResults")}
             </p>
           )}
-          {filtered.map((spot) => {
+          {filtered.map((spot, si) => {
             const Icon = CATEGORY_ICON[spot.category];
             return (
               <article
                 key={spot.contentId}
+                // 둘러보기에서 첫 두 줄은 지도와 함께 밝힌다. 지도만 비추면
+                // "여기서 위치를 본다"까지만 보이고 어떤 명소들이 있는지는 안 보인다.
+                data-tour={si < 4 ? "spots" : undefined}
                 onClick={() => setSelectedId(spot.contentId)}
                 className={`glass-card group cursor-pointer overflow-hidden rounded-2xl ${
                   selectedId === spot.contentId
@@ -350,7 +353,10 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
           })}
         </div>
 
-        <div className="order-1 h-80 lg:order-2 lg:sticky lg:top-20 lg:h-[620px]">
+        <div
+          data-tour="spots"
+          className="order-1 h-80 lg:order-2 lg:sticky lg:top-20 lg:h-[620px]"
+        >
           <NightMap
             spots={spots}
             visibleIds={visibleIds}

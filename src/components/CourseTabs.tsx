@@ -32,6 +32,7 @@ export default function CourseTabs({ courses }: { courses: Course[] }) {
   return (
     <div>
       <div
+        data-tour="courses"
         role="tablist"
         aria-label={t("title")}
         className="mb-7 flex gap-2 border-b border-white/[0.08]"

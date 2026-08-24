@@ -13,10 +13,25 @@ const NAV_ITEMS = [
   { href: "/spots", key: "spots" },
   { href: "/festivals", key: "festivals" },
   { href: "/courses", key: "courses" },
+  { href: "/personality", key: "personality" },
   { href: "/etiquette", key: "etiquette" },
   { href: "/phrases", key: "phrases" },
   { href: "/community", key: "community" },
 ] as const;
+
+/**
+ * 둘러보기 단계와 짝지어지는 탭. 단계마다 탭 하나씩 1:1로 맞춘다.
+ *
+ * 전에는 에티켓 단계가 회화 탭까지 함께 밝혔는데, 설명은 매너 얘기만 하면서
+ * 테두리는 두 곳에 쳐져 무엇을 보라는 건지 어긋났다. 회화는 별도 단계로 뺐다.
+ */
+const TOUR_KEY: Record<string, string> = {
+  spots: "spots",
+  courses: "courses",
+  etiquette: "etiquette",
+  phrases: "phrases",
+  community: "community",
+};
 
 /**
  * 전체 메뉴에만 두는 항목. 상단에서 뺐다고 갈 길까지 없애면 주소를 직접 치지
@@ -79,6 +94,8 @@ export default function Header() {
             <Link
               key={href}
               href={href}
+              // 둘러보기에서 이 탭도 함께 밝힌다 (어느 메뉴 얘기인지 보이도록)
+              data-tour-nav={TOUR_KEY[key]}
               className={linkClass(isActive(href))}
             >
               {t(`nav.${key}`)}

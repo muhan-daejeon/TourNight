@@ -118,7 +118,7 @@ function orderRoute(spots: CourseStop[], start?: CourseStop): CourseStop[] {
  */
 export async function getCourses(
   locale = "ko",
-  { maxCourses = 5, maxStops = 5, minStops = 3 } = {},
+  { maxCourses = 5, maxStops = 5, minStops = 3, withRoutes = true } = {},
 ): Promise<Course[]> {
   try {
     const [{ n }] = await sql<{ n: number }[]>`
@@ -189,7 +189,9 @@ export async function getCourses(
     // 노출되는 코스의 구간에만 실제 경로를 붙인다. AI 코스만 실제 경로가 나오면
     // 같은 화면에서 위아래가 따로 노는 셈이라 추천 코스도 맞춘다.
     // 결과는 spot_route에 캐시돼, 클러스터가 그대로인 한 재생성 때는 호출이 0이다.
-    try {
+    // withRoutes=false면 이 단계를 건너뛴다 — 경유지 정보만 쓰는 화면(성향 결과 등)에서
+    // TMap/ODsay 호출로 빌드가 60초를 넘겨 실패하던 것을 막는다.
+    if (withRoutes) try {
       const pairs = top.flatMap((c) =>
         c.stops.slice(0, -1).map((from, i) => ({ from, to: c.stops[i + 1] })),
       );

@@ -45,3 +45,20 @@ next-env.d.ts
 
 # 로컬 작업 문서 (커밋 금지)
 야간스팟_검수목록.md
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# 브라우저 확인용 임시 스크립트 (Playwright) — 커밋하지 않는다
+*.local.mjs
+
+# 브라우저 확인용 스크린샷 (커밋 대상 아님)
+/tour-screenshots/
+
+# Claude Code가 로컬에 설치하는 스킬·설정
+/.claude/

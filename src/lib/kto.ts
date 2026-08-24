@@ -19,7 +19,15 @@ const KTO_TIMEOUT_MS = 8_000;
 export interface NightSpot {
   contentId: string;
   title: string;
+  /** 화면에 보여줄 주소 — 언어를 고르면 그 언어 표기로 내려온다 */
   addr: string;
+  /**
+   * 한글 원문 주소.
+   *
+   * 번역 주소로는 못 하는 일이 둘 있다. 자치구를 뽑아 쓰는 곳(방문객 통계·
+   * 해시태그)이 정규식으로 한글을 찾고, 택시에서는 한글 주소를 보여줘야 통한다.
+   */
+  addrKo?: string;
   mapX: number; // 경도
   mapY: number; // 위도
   imageUrl: string | null;
