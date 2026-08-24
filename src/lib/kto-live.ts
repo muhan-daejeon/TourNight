@@ -25,6 +25,31 @@ const SERVICE: Record<string, string> = {
   zh: "ChsService2",
 };
 
+/**
+ * 분류 코드가 국문과 다국어 서비스에서 다르다.
+ * 국문 12·14·15 = 다국어 76·78·85 (관광지·문화시설·축제).
+ */
+const CONTENT_TYPES: Record<string, string[]> = {
+  ko: ["12", "14", "15"],
+  other: ["76", "78", "85"],
+};
+
+/**
+ * 다국어 제목에서 괄호 안 한글 원문을 뽑는다.
+ * 예) "ハンバッ樹木園（한밭수목원）" → "한밭수목원"
+ *
+ * 언어별 서비스는 contentId 체계가 국문과 완전히 달라서, 우리 검수 결과(국문
+ * contentId 기준)와 맞출 열쇠가 이 한글 원문뿐이다.
+ */
+function koreanInTitle(title: string): string | null {
+  const m = [...title.matchAll(/[（(]\s*([^（()）]*[가-힣][^（()）]*?)\s*[）)]/g)];
+  const last = m.at(-1)?.[1]?.trim();
+  return last || null;
+}
+
+const matchKey = (s: string) =>
+  s.replace(/\s+/g, "").replace(/[()（）·]/g, "").toLowerCase();
+
 interface ListItem {
   contentid: string;
   title: string;
@@ -39,7 +64,10 @@ interface ListItem {
 
 /** KTO 원천 명소 한 건 — DB에 저장하지 않고 요청 때마다 받는다 */
 export interface KtoSpot {
+  /** 국문 서비스 기준 contentId — 검수·경로·화면 전부 이 값을 쓴다 */
   contentId: string;
+  /** 지금 언어 서비스에서의 contentId (상세 조회용) */
+  langContentId: string;
   title: string;
   addr: string;
   mapX: number;
@@ -77,6 +105,7 @@ async function call(
 
 const toSpot = (i: ListItem): KtoSpot => ({
   contentId: i.contentid,
+  langContentId: i.contentid,
   title: i.title,
   addr: i.addr1 ?? "",
   mapX: Number(i.mapx),
@@ -91,16 +120,16 @@ const toSpot = (i: ListItem): KtoSpot => ({
  * 대전 전체 명소를 언어별로 조회한다 (관광지 12 + 문화시설 14 + 축제 15).
  * 페이지당 100건씩, 응답이 빈 페이지가 나오면 멈춘다.
  */
-async function fetchAll(locale: string): Promise<KtoSpot[]> {
-  const service = SERVICE[locale] ?? SERVICE.ko;
+async function fetchService(
+  service: string,
+  contentTypes: string[],
+): Promise<KtoSpot[]> {
   const out = new Map<string, KtoSpot>();
-
-  for (const contentTypeId of ["12", "14", "15"]) {
+  for (const contentTypeId of contentTypes) {
     for (let page = 1; page <= 5; page++) {
       const items = await call(service, "areaBasedList2", {
         numOfRows: "100",
         pageNo: String(page),
-        arrange: "A",
         areaCode: DAEJEON,
         contentTypeId,
       });
@@ -115,6 +144,40 @@ async function fetchAll(locale: string): Promise<KtoSpot[]> {
   }
   return [...out.values()];
 }
+
+/**
+ * 대전 전체 명소.
+ *
+ * 국문 목록을 뼈대로 삼고(검수 결과·좌표·contentId가 여기 기준), 다른 언어를
+ * 볼 때는 그 언어 목록을 덧입혀 이름만 공식 번역으로 바꾼다. 언어별 서비스는
+ * contentId가 달라 그대로 쓰면 검수 결과와 하나도 맞지 않는다.
+ */
+async function fetchAll(locale: string): Promise<KtoSpot[]> {
+  const base = await fetchService(SERVICE.ko, CONTENT_TYPES.ko);
+  if (locale === "ko" || !SERVICE[locale]) return base;
+
+  const translated = await fetchService(SERVICE[locale], CONTENT_TYPES.other);
+  const byKorean = new Map<string, ListItemLike>();
+  for (const t of translated) {
+    const ko = koreanInTitle(t.title);
+    if (ko) byKorean.set(matchKey(ko), t);
+  }
+
+  return base.map((s) => {
+    const t = byKorean.get(matchKey(s.title));
+    if (!t) return s; // 번역이 없으면 국문 이름 그대로 (빈칸보다 낫다)
+    return {
+      ...s,
+      // 괄호 안 한글 원문은 떼고 번역만 남긴다
+      title: t.title.replace(/[（(]\s*[^（()）]*[가-힣][^（()）]*?\s*[）)]/g, "").trim(),
+      addr: t.addr || s.addr,
+      langContentId: t.contentId,
+      imageUrl: s.imageUrl ?? t.imageUrl,
+    };
+  });
+}
+
+type ListItemLike = KtoSpot;
 
 /**
  * 언어별 대전 명소 목록 (1시간 캐시).
@@ -132,10 +195,14 @@ export const getKtoOverview = (contentId: string, locale: string) =>
   unstable_cache(
     async () => {
       const service = SERVICE[locale] ?? SERVICE.ko;
-      const rows = await call(service, "detailCommon2", {
-        contentId,
-        // 언어 서비스마다 contentId 체계가 달라, 없으면 빈 값으로 폴백한다
-      });
+      // 언어 서비스는 contentId가 다르므로 그 언어 목록에서 짝을 찾아 조회한다
+      const langId =
+        locale === "ko"
+          ? contentId
+          : (await fetchAll(locale)).find((s) => s.contentId === contentId)
+              ?.langContentId;
+      if (!langId) return "";
+      const rows = await call(service, "detailCommon2", { contentId: langId });
       const raw = (rows[0] as unknown as { overview?: string })?.overview ?? "";
       return raw.replace(/<[^>]+>/g, "").trim();
     },

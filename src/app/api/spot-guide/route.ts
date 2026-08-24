@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateSpotGuide } from "@/lib/gemini";
-import { fetchOverviewKo } from "@/lib/kto";
+import { getKtoOverview } from "@/lib/kto-live";
 import { getSpot } from "@/lib/spots";
 import { sql } from "@/lib/db";
 import { routing } from "@/i18n/routing";
@@ -24,12 +24,8 @@ export async function GET(request: NextRequest) {
     locale,
   });
 
-  // KTO 공식 소개문 (sync-i18n으로 수집된 번역)
-  const tr = await sql<{ overview: string | null }[]>`
-    select overview from spot_translations
-    where content_id = ${contentId} and locale = ${locale}
-  `;
-  const official = tr[0]?.overview?.trim() || "";
+  // KTO 공식 소개문 — 저장분이 아니라 언어별 서비스에서 요청 시점에 받는다
+  const official = (await getKtoOverview(contentId, locale)).trim();
 
   const cached = await sql<{ intro: string; tips: string[] }[]>`
     select intro, tips from spot_guide
@@ -50,7 +46,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // 팁 생성 컨텍스트: 공식 번역 > 국문 개요 순으로 제공
-    const context = official || (await fetchOverviewKo(contentId));
+    const context = official || (await getKtoOverview(contentId, "ko"));
     const guide = await generateSpotGuide(spot, context, locale);
     await sql`
       insert into spot_guide (content_id, locale, intro, tips)

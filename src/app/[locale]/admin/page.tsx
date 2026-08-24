@@ -14,6 +14,7 @@ import {
   Flag,
 } from "lucide-react";
 import { sql } from "@/lib/db";
+import { getVerifiedNightSpots } from "@/lib/spots";
 import { listReports } from "@/lib/community";
 import { getSessionUser } from "@/lib/session";
 import { isAdmin, type ActivityAction } from "@/lib/activity";
@@ -101,10 +102,11 @@ async function titleMap(rows: LogRow[]): Promise<Map<string, string>> {
     if (r.detail.contentId) ids.add(String(r.detail.contentId));
   }
   if (!ids.size) return new Map();
-  const rows2 = await sql<{ content_id: string; title: string }[]>`
-    select content_id, title from night_spots where content_id = any(${[...ids]})
-  `;
-  return new Map(rows2.map((t) => [t.content_id, t.title]));
+  // 명소 이름은 KTO 실시간 목록에서 찾는다 (저장분을 쓰지 않는다)
+  const spots = await getVerifiedNightSpots("ko");
+  return new Map(
+    spots.filter((s) => ids.has(s.contentId)).map((s) => [s.contentId, s.title]),
+  );
 }
 
 /* ---------- 탭별 내용 ---------- */
@@ -242,11 +244,9 @@ async function CoursesTab() {
   const popularIds = popular.map((p) => p.id);
   const popularTitles = popularIds.length
     ? new Map(
-        (
-          await sql<{ content_id: string; title: string }[]>`
-            select content_id, title from night_spots where content_id = any(${popularIds})
-          `
-        ).map((t) => [t.content_id, t.title]),
+        (await getVerifiedNightSpots("ko"))
+          .filter((s) => popularIds.includes(s.contentId))
+          .map((s) => [s.contentId, s.title]),
       )
     : new Map<string, string>();
 

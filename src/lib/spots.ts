@@ -1,6 +1,7 @@
 import { sql } from "./db";
 import { MOCK_NIGHT_SPOTS, type NightSpot } from "./kto";
 import { getKtoSpots, getKtoOverview, type KtoSpot } from "./kto-live";
+import { getCongestionRows, normName } from "./kto-stats";
 
 /**
  * 야간 명소 조회 — KTO 원천 정보는 실시간, 우리 판단은 DB.
@@ -28,23 +29,21 @@ interface Verdict {
   category: NightSpot["category"];
   verified: boolean;
   manual: NightSpot | null;
-  /**
-   * 한글 원문 주소.
-   *
-   * KTO에서 받는 주소는 고른 언어로 번역돼 온다. 그런데 주소에서 자치구를
-   * 뽑아 쓰는 곳(방문객 통계·해시태그)이 정규식으로 한글을 찾으므로, 번역
-   * 주소만 있으면 한국어 외의 언어에서 전부 빈손이 된다. DB에 남아 있는
-   * 원문을 함께 실어 보낸다.
-   */
-  addrKo: string | null;
 }
 
 /** 검수 결과를 contentId로 찾을 수 있게 (KTO 미등재 명소는 자체 정보 포함) */
-async function getVerdicts(): Promise<Map<string, Verdict>> {
+async function getVerdicts(locale: string): Promise<Map<string, Verdict>> {
+  // KTO에 있는 곳은 판정만 읽는다. title·addr·좌표는 실시간으로 받으므로
+  // 저장분이 필요 없고, KTO 미등재 수동 명소(mock-)만 우리 정보를 쓴다.
+  // 그 수동 명소의 외국어 이름은 KTO에 없어 우리가 직접 넣어 둔 번역을 쓴다.
   const rows = await sql<VerdictRow[]>`
-    select content_id, category, night_verified, title, addr, image_url,
-           st_x(geom) as map_x, st_y(geom) as map_y
-    from night_spots
+    select s.content_id, s.category, s.night_verified,
+           coalesce(tr.title, s.title) as title, s.addr, s.image_url,
+           st_x(s.geom) as map_x, st_y(s.geom) as map_y
+    from night_spots s
+    left join spot_translations tr
+      on tr.content_id = s.content_id and tr.locale = ${locale}
+    where s.night_verified = true
   `;
   return new Map(
     rows.map((r) => [
@@ -52,7 +51,6 @@ async function getVerdicts(): Promise<Map<string, Verdict>> {
       {
         category: r.category as NightSpot["category"],
         verified: r.night_verified,
-        addrKo: r.addr,
         // KTO에 없는 곳(mock-)은 실시간으로 받을 수 없으므로 저장분을 그대로 쓴다.
         // content_id가 빠진 불량 행이 있어도 전체 조회가 죽지 않도록 널 방어한다.
         manual: r.content_id?.startsWith("mock-")
@@ -72,11 +70,11 @@ async function getVerdicts(): Promise<Map<string, Verdict>> {
   );
 }
 
-const merge = (k: KtoSpot, v: Verdict): NightSpot => ({
+const merge = (k: KtoSpot, v: Verdict, addrKo: string): NightSpot => ({
   contentId: k.contentId,
   title: k.title,
   addr: k.addr,
-  addrKo: v.addrKo ?? k.addr,
+  addrKo: addrKo || k.addr,
   mapX: k.mapX,
   mapY: k.mapY,
   imageUrl: k.imageUrl,
@@ -89,16 +87,22 @@ const merge = (k: KtoSpot, v: Verdict): NightSpot => ({
  */
 export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]> {
   try {
-    const [ktoSpots, verdicts] = await Promise.all([
+    // 자치구를 뽑아 쓰는 곳(방문객 통계·해시태그)이 한글 주소를 정규식으로 찾으므로
+    // 다른 언어를 볼 때도 한국어 주소를 함께 싣는다. 같은 캐시를 재사용해 비용은 없다.
+    const [ktoSpots, koSpots, verdicts] = await Promise.all([
       getKtoSpots(locale),
-      getVerdicts(),
+      locale === "ko" ? Promise.resolve(null) : getKtoSpots("ko"),
+      getVerdicts(locale),
     ]);
+    const addrKoById = new Map(
+      (koSpots ?? []).map((s) => [s.contentId, s.addr]),
+    );
 
     const out: NightSpot[] = [];
     for (const k of ktoSpots) {
       const v = verdicts.get(k.contentId);
       if (!v?.verified || !k.imageUrl) continue; // 사진 있는 검수 통과분만 (팀 방침)
-      out.push(merge(k, v));
+      out.push(merge(k, v, addrKoById.get(k.contentId) ?? k.addr));
     }
     // KTO 미등재 수동 큐레이션 명소 (국립중앙과학관 등)
     for (const v of verdicts.values()) {
@@ -230,11 +234,22 @@ export async function getCongestionForSpots(
 ): Promise<Map<string, number>> {
   if (!contentIds.length) return new Map();
   try {
-    const rows = await sql<{ content_id: string; rate: string }[]>`
-      select content_id, rate from spot_congestion
-      where content_id = any(${contentIds}) and base_ymd = ${date}
-    `;
-    return new Map(rows.map((r) => [r.content_id, Math.round(Number(r.rate))]));
+    // 집중률 API는 contentId가 아니라 관광지명으로 응답한다 → 이름으로 맞춘다
+    const [rows, spots] = await Promise.all([
+      getCongestionRows(),
+      getVerifiedNightSpots("ko"),
+    ]);
+    const idByName = new Map(spots.map((s) => [normName(s.title), s.contentId]));
+    const wanted = new Set(contentIds);
+    const ymd = date.replace(/-/g, "");
+
+    const out = new Map<string, number>();
+    for (const r of rows) {
+      if (r.baseYmd !== ymd) continue;
+      const id = idByName.get(normName(r.tAtsNm));
+      if (id && wanted.has(id)) out.set(id, Math.round(Number(r.cnctrRate)));
+    }
+    return out;
   } catch (err) {
     console.warn(
       "[spots] 혼잡도 조회 실패:",
@@ -251,12 +266,35 @@ export interface CongestionDay {
 
 /** 향후 7일 혼잡도 예측 (KT 통신데이터 기반, 데이터 없는 스팟은 빈 배열) */
 export async function getCongestion(contentId: string): Promise<CongestionDay[]> {
-  const rows = await sql<{ date: string; rate: string }[]>`
-    select to_char(base_ymd, 'YYYY-MM-DD') as date, rate
-    from spot_congestion
-    where content_id = ${contentId}
-      and base_ymd >= current_date and base_ymd < current_date + 7
-    order by base_ymd
-  `;
-  return rows.map((r) => ({ date: r.date, rate: Number(r.rate) }));
+  try {
+    const [rows, spots] = await Promise.all([
+      getCongestionRows(),
+      getVerifiedNightSpots("ko"),
+    ]);
+    const title = spots.find((s) => s.contentId === contentId)?.title;
+    if (!title) return [];
+
+    const key = normName(title);
+    const today = new Date();
+    const from = todayYmd(today);
+    const to = todayYmd(new Date(today.getTime() + 7 * 24 * 3600 * 1000));
+
+    return rows
+      .filter((r) => normName(r.tAtsNm) === key)
+      .filter((r) => r.baseYmd >= from && r.baseYmd < to)
+      .sort((a, b) => a.baseYmd.localeCompare(b.baseYmd))
+      .map((r) => ({ date: dashed(r.baseYmd), rate: Number(r.cnctrRate) }));
+  } catch (err) {
+    console.warn(
+      "[spots] 혼잡도 조회 실패:",
+      err instanceof Error ? err.message : err,
+    );
+    return [];
+  }
 }
+
+const todayYmd = (d: Date) =>
+  `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+
+/** YYYYMMDD → YYYY-MM-DD */
+const dashed = (s: string) => `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;

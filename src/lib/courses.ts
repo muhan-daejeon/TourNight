@@ -1,4 +1,3 @@
-import { sql } from "./db";
 import {
   generateCoursePlan,
   generateSurveyCourse,
@@ -9,7 +8,9 @@ import {
   getNearbySpots,
   getSpot,
   getSpotsNearPoint,
+  getVerifiedNightSpots,
 } from "./spots";
+import { getRelatedRows, normName } from "./kto-stats";
 import { getTransitForSpots, type SpotTransit } from "./transit";
 import { getRoutesForLegs, type SpotRoute } from "./routes";
 import { fetchNearbyStays, type NearbyStay, type NightSpot } from "./kto";
@@ -63,15 +64,84 @@ export interface AiCourse extends Course {
   source: "ai" | "distance";
 }
 
-interface SpotRow {
-  content_id: string;
-  title: string;
-  addr: string;
-  category: string;
-  image_url: string | null;
-  mapx: number;
-  mapy: number;
-  cl: number;
+/**
+ * 좌표로 k개 무리 짓기 (Lloyd k-means).
+ *
+ * 전에는 PostGIS st_clusterkmeans로 DB에서 묶었는데, 명소를 저장하지 않고
+ * 실시간으로 받게 되면서 좌표도 DB에 없다. 대전 한 도시 범위라 위경도를
+ * 평면으로 봐도 오차가 무시할 만하다.
+ *
+ * 초기 중심은 정렬된 목록에서 균등 간격으로 고른다 — 난수를 쓰면 같은 입력에도
+ * 코스가 매번 달라져 캐시·화면이 흔들린다.
+ */
+function clusterByLocation(spots: CourseStop[], k: number): CourseStop[][] {
+  if (spots.length <= k) return spots.map((s) => [s]);
+
+  const sorted = [...spots].sort(
+    (a, b) => a.mapX - b.mapX || a.mapY - b.mapY,
+  );
+  const step = sorted.length / k;
+  let centers = Array.from({ length: k }, (_, i) => {
+    const s = sorted[Math.floor(i * step)];
+    return { x: s.mapX, y: s.mapY };
+  });
+
+  let groups: CourseStop[][] = [];
+  for (let iter = 0; iter < 20; iter++) {
+    groups = Array.from({ length: k }, () => [] as CourseStop[]);
+    for (const s of sorted) {
+      let best = 0;
+      let bestD = Infinity;
+      centers.forEach((c, i) => {
+        const d = (s.mapX - c.x) ** 2 + (s.mapY - c.y) ** 2;
+        if (d < bestD) {
+          bestD = d;
+          best = i;
+        }
+      });
+      groups[best].push(s);
+    }
+    const next = groups.map((g, i) =>
+      g.length === 0
+        ? centers[i]
+        : {
+            x: g.reduce((t, s) => t + s.mapX, 0) / g.length,
+            y: g.reduce((t, s) => t + s.mapY, 0) / g.length,
+          },
+    );
+    const moved = next.some(
+      (c, i) => Math.abs(c.x - centers[i].x) > 1e-9 || Math.abs(c.y - centers[i].y) > 1e-9,
+    );
+    centers = next;
+    if (!moved) break;
+  }
+  return groups.filter((g) => g.length > 0);
+}
+
+/**
+ * 이름으로 맞춘 KTO 연관 관광지 판별기.
+ *
+ * 연관 통계 API는 contentId가 아니라 관광지 이름으로 응답하므로, 우리 명소
+ * 제목과 이름을 정규화해 맞춘다. (전에는 이 결과를 spot_related에 적재해 뒀다)
+ */
+async function togetherByName(spots: { contentId: string; title: string }[]) {
+  try {
+    const rows = await getRelatedRows();
+    const idByName = new Map(spots.map((s) => [normName(s.title), s.contentId]));
+    const set = new Set<string>();
+    for (const r of rows) {
+      const a = idByName.get(normName(r.tAtsNm));
+      const b = idByName.get(normName(r.rlteTatsNm));
+      if (a && b && a !== b) set.add(`${a}|${b}`);
+    }
+    return (a: string, b: string) => set.has(`${a}|${b}`) || set.has(`${b}|${a}`);
+  } catch (err) {
+    console.warn(
+      "[courses] 연관 관광지 조회 실패:",
+      err instanceof Error ? err.message : err,
+    );
+    return () => false;
+  }
 }
 
 interface LatLng {
@@ -121,52 +191,26 @@ export async function getCourses(
   { maxCourses = 5, maxStops = 5, minStops = 3, withRoutes = true } = {},
 ): Promise<Course[]> {
   try {
-    const [{ n }] = await sql<{ n: number }[]>`
-      select count(*)::int n from night_spots
-      where night_verified = true and image_url is not null
-    `;
+    // 명소는 KTO 실시간 목록을 쓴다 (제목·주소·좌표·사진 모두 원천 그대로)
+    const spots = await getVerifiedNightSpots(locale);
+    const n = spots.length;
     if (n < minStops) return [];
     const k = Math.min(10, Math.max(3, Math.round(n / 4)));
 
-    const rows = await sql<SpotRow[]>`
-      select s.content_id, coalesce(tr.title, s.title) as title, s.addr,
-             s.category, s.image_url,
-             st_x(s.geom) as mapx, st_y(s.geom) as mapy,
-             st_clusterkmeans(s.geom, ${k}) over () as cl
-      from night_spots s
-      left join spot_translations tr
-        on tr.content_id = s.content_id and tr.locale = ${locale}
-      where s.night_verified = true and s.image_url is not null
-    `;
+    const stopsAll: CourseStop[] = spots.map((s) => ({
+      contentId: s.contentId,
+      title: s.title,
+      addr: s.addr,
+      category: s.category,
+      imageUrl: s.imageUrl,
+      mapX: s.mapX,
+      mapY: s.mapY,
+    }));
 
-    const edges = await sql<
-      { content_id: string; related_content_id: string }[]
-    >`select content_id, related_content_id from spot_related`;
-    const together = new Set(
-      edges.map((e) => `${e.content_id}|${e.related_content_id}`),
-    );
-    const isTogether = (a: string, b: string) =>
-      together.has(`${a}|${b}`) || together.has(`${b}|${a}`);
-
-    const toStop = (r: SpotRow): CourseStop => ({
-      contentId: r.content_id,
-      title: r.title,
-      addr: r.addr,
-      category: r.category as NightSpot["category"],
-      imageUrl: r.image_url,
-      mapX: Number(r.mapx),
-      mapY: Number(r.mapy),
-    });
-
-    const clusters = new Map<number, CourseStop[]>();
-    for (const r of rows) {
-      const arr = clusters.get(r.cl) ?? [];
-      arr.push(toStop(r));
-      clusters.set(r.cl, arr);
-    }
+    const isTogether = await togetherByName(stopsAll);
 
     const courses: Course[] = [];
-    for (const group of clusters.values()) {
+    for (const group of clusterByLocation(stopsAll, k)) {
       if (group.length < minStops) continue;
       const stops = orderRoute(group).slice(0, maxStops);
       const legs: CourseLeg[] = [];
@@ -224,14 +268,10 @@ export async function getCourses(
 
 /** 주어진 스팟들 사이의 KTO 이동 연결(together) 판별기 */
 async function togetherLookup(ids: string[]) {
-  const edges = await sql<{ content_id: string; related_content_id: string }[]>`
-    select content_id, related_content_id from spot_related
-    where content_id = any(${ids}) and related_content_id = any(${ids})
-  `;
-  const set = new Set(
-    edges.map((e) => `${e.content_id}|${e.related_content_id}`),
+  const spots = (await getVerifiedNightSpots("ko")).filter((s) =>
+    ids.includes(s.contentId),
   );
-  return (a: string, b: string) => set.has(`${a}|${b}`) || set.has(`${b}|${a}`);
+  return togetherByName(spots);
 }
 
 /**

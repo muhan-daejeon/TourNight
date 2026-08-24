@@ -4,15 +4,35 @@
 create extension if not exists postgis;
 
 -- 야간관광 스팟 (KTO 데이터 적재 대상, 키 발급 전에는 목 데이터 시드)
+-- 야간 명소 검수 결과.
+--
+-- KTO에 있는 곳은 이름·주소·좌표·사진을 저장하지 않는다 — 서비스가 요청 시점에
+-- API로 받는다(src/lib/kto-live.ts). 여기 남는 것은 우리 판단(카테고리·야간 검수)이다.
+-- title/addr/geom/image_url은 KTO 미등재 수동 큐레이션 명소(mock-)에만 채운다.
 create table if not exists night_spots (
   id bigint generated always as identity primary key,
-  content_id text unique not null,       -- KTO contentId (목 데이터는 mock- 접두사)
-  title text not null,
-  addr text,
+  content_id text unique not null,       -- KTO contentId (수동 등록은 mock- 접두사)
+  title text,                            -- mock- 전용
+  addr text,                             -- mock- 전용
   category text not null check (category in ('science', 'nature', 'festival', 'city')),
-  image_url text,
-  geom geometry(Point, 4326) not null,   -- 경도/위도 (WGS84)
+  image_url text,                        -- mock- 전용
+  geom geometry(Point, 4326),            -- mock- 전용 (경도/위도, WGS84)
   created_at timestamptz not null default now()
+);
+
+-- 기존 배포분 정리 — KTO 원천을 담던 시절의 not null 제약을 푼다
+alter table night_spots alter column title drop not null;
+alter table night_spots alter column geom drop not null;
+
+-- KTO 미등재 수동 명소(mock-)의 외국어 이름.
+-- KTO에 있는 곳은 언어별 서비스가 공식 번역을 주므로 저장하지 않는다 —
+-- 여기 남는 것은 공사에 없어 우리가 직접 옮긴 이름뿐이다.
+create table if not exists spot_translations (
+  content_id text not null,
+  locale text not null,            -- en / ja / zh / ko
+  title text,
+  updated_at timestamptz not null default now(),
+  primary key (content_id, locale)
 );
 
 create index if not exists night_spots_geom_idx on night_spots using gist (geom);
@@ -30,21 +50,7 @@ alter table night_spots add column if not exists use_time text;
 alter table night_spots add column if not exists night_candidate boolean;
 alter table night_spots add column if not exists night_reason text;
 
--- KTO 다국어 관광정보 서비스(영/일/중 GW) 공식 번역 — 좌표 매칭으로 수집 (db/sync-i18n.mjs)
-create table if not exists spot_translations (
-  content_id text not null,        -- 우리 night_spots의 content_id (국문 기준)
-  locale text not null,            -- en / ja / zh / ko
-  lang_content_id text,            -- 해당 언어 서비스의 contentid
-  title text,                      -- 공식 번역 명칭
-  overview text,                   -- 공식 번역 소개문
-  updated_at timestamptz not null default now(),
-  primary key (content_id, locale)
-);
 
--- 번역·로마자 주소. KTO 다국어 서비스가 주는 addr1이 있으면 그걸 쓰고, 키가 막혀
--- 있으면 Gemini로 채운다. 원문 한글 주소는 night_spots.addr에 그대로 남겨 둔다 --
--- 자치구를 뽑아 쓰는 곳(방문객 통계·해시태그)이 있고, 택시에서 보여줄 일도 있다.
-alter table spot_translations add column if not exists addr text;
 
 -- 스팟별 현지화 가이드 캐시 (KTO 개요 → Gemini 번역·요약 + 야간 팁, 스팟·언어당 1회 생성)
 create table if not exists spot_guide (
@@ -56,13 +62,6 @@ create table if not exists spot_guide (
   primary key (content_id, locale)
 );
 
--- 관광지 집중률 예측 (KT 통신데이터 기반, TatsCnctrRateService — db/sync-congestion.mjs)
-create table if not exists spot_congestion (
-  content_id text not null,
-  base_ymd date not null,
-  rate numeric not null,  -- 0~100 상대 집중률 (가장 붐비는 시기 = 100)
-  primary key (content_id, base_ymd)
-);
 
 -- 커뮤니티 한줄 후기/질문 (로그인 없이 이름만 입력, 스팟 연동은 content_id로 선택)
 create table if not exists community_posts (
@@ -163,14 +162,6 @@ create table if not exists community_reports (
 create index if not exists community_reports_target_idx
   on community_reports (target_type, target_id);
 
--- 대전 구별 일별 방문자 수 (KTO 빅데이터 지역별 방문자수 — db/sync-visitors.mjs, 집계 지연 있어 최근 가용 7일 저장)
-create table if not exists area_visitors (
-  signgu_cd text not null,   -- 30110 동구 / 30140 중구 / 30170 서구 / 30200 유성구 / 30230 대덕구
-  base_ymd date not null,
-  tou_div text not null,     -- 1 현지인 / 2 외지인 / 3 외국인
-  num numeric not null,
-  primary key (signgu_cd, base_ymd, tou_div)
-);
 
 -- 서바이벌 한국어 표현 캐시 (언어당 1회 생성) — v2(phrase_book)로 대체, 호환용 유지
 create table if not exists phrase_cache (
@@ -206,15 +197,6 @@ create table if not exists etiquette_cache (
   primary key (topic_id, locale)
 );
 
--- KTO 연관 관광지(차량 이동 기반) 중 우리 야간명소끼리의 연결 — 코스 '함께 방문' 배지용.
--- db/sync-related.mjs가 TarRlteTarService1에서 수집해 좌표 있는 우리 스팟쌍만 저장한다.
-create table if not exists spot_related (
-  content_id text not null,          -- 기준 스팟(night_spots.content_id)
-  related_content_id text not null,  -- 연관 스팟(우리 스팟)
-  rank int,                          -- KTO 연관 순위
-  base_ym text,                      -- 수집 기준월 (YYYYMM)
-  primary key (content_id, related_content_id)
-);
 
 -- AI 코스 짜기 캐시 (지도에서 스팟 선택 → Gemini가 그 스팟을 거치는 코스 생성).
 -- 스팟·언어당 1건만 두고 재요청 시 재사용한다 (심사/데모 때 실시간 Gemini 의존 축소).

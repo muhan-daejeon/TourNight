@@ -1,4 +1,4 @@
-import { sql } from "./db";
+import { getVerifiedNightSpots } from "./spots";
 
 /**
  * 에티켓 주제 카드의 대표 사진.
@@ -27,12 +27,11 @@ const TOPIC_LOCAL_IMAGE: Record<string, string> = {
 export async function getTopicImages(): Promise<Record<string, string>> {
   const images = { ...TOPIC_LOCAL_IMAGE };
   try {
-    const titles = Object.values(TOPIC_SPOT_TITLE);
-    const rows = await sql<{ title: string; image_url: string }[]>`
-      select title, image_url from night_spots
-      where title = any(${titles}) and image_url is not null
-    `;
-    const byTitle = new Map(rows.map((r) => [r.title, r.image_url]));
+    // 명소 사진은 KTO 실시간 목록에서 가져온다 (저장분을 쓰지 않는다)
+    const spots = await getVerifiedNightSpots("ko");
+    const byTitle = new Map(
+      spots.filter((s) => s.imageUrl).map((s) => [s.title, s.imageUrl!]),
+    );
     for (const [topic, title] of Object.entries(TOPIC_SPOT_TITLE)) {
       const url = byTitle.get(title);
       if (url) images[topic] = url;
