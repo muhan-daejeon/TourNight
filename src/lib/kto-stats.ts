@@ -43,7 +43,11 @@ async function callAll<T>(
   for (let page = 1; page <= maxPages && out.length < total; page++) {
     const res = await fetch(
       `${BASE}/${path}?${params({ ...extra, pageNo: String(page) })}`,
-      { signal: AbortSignal.timeout(TIMEOUT_MS) },
+      {
+        // 통계는 하루 단위로만 바뀐다. 파일 캐시라 빌드 워커끼리 공유된다
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+        next: { revalidate: 21600, tags: ["kto-stats"] },
+      },
     );
     if (!res.ok) throw new Error(`KTO ${path} ${res.status}`);
     const body = (await res.json())?.response?.body;

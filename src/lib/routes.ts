@@ -329,6 +329,20 @@ async function fetchTransit(a: Point, b: Point): Promise<SpotRoute> {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
+/**
+ * 다시 호출해도 결과가 바뀌지 않는 실패인지.
+ *
+ * ODsay -98은 출·도착이 700m 이내라 대중교통을 안내하지 않는 경우고,
+ * TMap 3102는 보행자 경로가 없는 구간이다. 둘 다 좌표가 그대로인 한 영구적이다.
+ */
+function isPermanentFailure(message: string): boolean {
+  return (
+    /오류 -98/.test(message) || // ODsay: 700m 이내
+    /"code":"310[0-9]"/.test(message) || // TMap: 지원되지 않는 구간
+    /400/.test(message)
+  );
+}
+
 /** 캐시에 저장 (실패해도 무시 — 다음 요청에서 다시 계산하면 된다) */
 async function cache(from: string, to: string, r: SpotRoute): Promise<void> {
   try {
@@ -436,10 +450,27 @@ export async function getRoutesForLegs(
         job.entry[job.mode] = r;
         await cache(job.leg.from.contentId, job.leg.to.contentId, r);
       } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
         console.warn(
           `[routes] ${job.mode} 경로 실패 (${job.leg.from.contentId}→${job.leg.to.contentId}):`,
-          err instanceof Error ? err.message : err,
+          message,
         );
+        // 다시 물어봐도 같은 답이 오는 실패는 기록해 둔다. 그러지 않으면
+        // 빌드할 때마다 같은 구간을 또 부른다 (언어 4개 × 코스 구간마다).
+        // 타임아웃·5xx 같은 일시적 실패는 남기지 않는다 — 다음엔 될 수 있다.
+        if (isPermanentFailure(message)) {
+          const noRoute: SpotRoute = {
+            mode: job.mode,
+            status: "no_route",
+            durationSec: null,
+            distanceM: null,
+            transferCount: null,
+            fare: null,
+            legs: [],
+          };
+          job.entry[job.mode] = noRoute;
+          await cache(job.leg.from.contentId, job.leg.to.contentId, noRoute);
+        }
       }
     }
   };
