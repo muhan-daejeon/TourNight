@@ -193,6 +193,61 @@ export async function translatePhrase(
   };
 }
 
+/**
+ * 명소 이름 번역 (KTO 다국어 서비스에 없는 곳 전용).
+ *
+ * 공사에 영문·일문·중문판이 있는 곳은 공식 표기를 실시간으로 받아 쓴다.
+ * 없는 곳만 여기로 온다 — 그대로 두면 외국어 화면에 한글 이름이 남기 때문이다.
+ *
+ * 표기 방식은 공사 공식 번역과 맞춘다(일·중은 현지 문자 + 괄호 안 한글).
+ * 그래야 한 화면에 공식 표기와 우리 번역이 섞여도 어색하지 않다.
+ */
+export async function translateSpotTitles(
+  titles: string[],
+  locale: string,
+): Promise<Record<string, string>> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || titles.length === 0) return {};
+
+  const language = LOCALE_LANGUAGE[locale] ?? "English";
+  const style: Record<string, string> = {
+    en: 'Romanize the proper noun and translate the common noun. e.g. "뿌리공원" → "Ppuri Park", "대전역 동광장" → "Daejeon Station East Plaza".',
+    ja: 'Use katakana/kanji, then the Korean original in full-width parentheses. e.g. "뿌리공원" → "プリ公園（뿌리공원）".',
+    zh: 'Use simplified Chinese, then the Korean original in parentheses. e.g. "뿌리공원" → "根园（뿌리공원）".',
+  };
+
+  const prompt = [
+    `Translate these Korean tourist attraction names in Daejeon, Korea into ${language}.`,
+    style[locale] ?? style.en,
+    `Keep them short — these are labels on cards, not sentences.`,
+    `Return JSON: {"<original Korean name>": "<translated name>"} for every input.`,
+    `Names: ${JSON.stringify(titles.slice(0, 40))}`,
+    `Respond with ONLY the JSON.`,
+  ].join("\n");
+
+  const res = await geminiFetch(`${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json", ...NO_THINKING },
+    }),
+  });
+  if (!res.ok) throw new Error(`Gemini API 오류: ${res.status}`);
+  const data = await res.json();
+  const parsed = JSON.parse(
+    data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}",
+  );
+
+  const out: Record<string, string> = {};
+  for (const [ko, translated] of Object.entries(parsed)) {
+    const t = String(translated ?? "").trim();
+    // 번역이 원문 그대로거나 비었으면 버린다 (한글이 그대로 남는 것을 막는다)
+    if (t && t !== ko) out[ko] = t;
+  }
+  return out;
+}
+
 /** 밤 상황 서바이벌 한국어 표현 생성 (비한국어 사용자용) */
 export async function generatePhrases(
   locale: string,

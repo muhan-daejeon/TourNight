@@ -24,16 +24,22 @@ create table if not exists night_spots (
 alter table night_spots alter column title drop not null;
 alter table night_spots alter column geom drop not null;
 
--- KTO 미등재 수동 명소(mock-)의 외국어 이름.
--- KTO에 있는 곳은 언어별 서비스가 공식 번역을 주므로 저장하지 않는다 —
--- 여기 남는 것은 공사에 없어 우리가 직접 옮긴 이름뿐이다.
+-- 공사에 다국어판이 없는 명소의 외국어 이름.
+--
+-- KTO에 영·일·중판이 있는 곳은 언어별 서비스가 공식 표기를 주므로 저장하지 않는다.
+-- 여기 남는 것은 두 가지뿐이다 — 수동 큐레이션 명소(mock-)의 손번역과,
+-- 공사 다국어 서비스에 등재가 없어 우리가 AI로 옮긴 이름(source='ai').
 create table if not exists spot_translations (
   content_id text not null,
   locale text not null,            -- en / ja / zh / ko
   title text,
+  source text not null default 'manual' check (source in ('manual', 'ai')),
   updated_at timestamptz not null default now(),
   primary key (content_id, locale)
 );
+
+alter table spot_translations add column if not exists source text
+  not null default 'manual';
 
 create index if not exists night_spots_geom_idx on night_spots using gist (geom);
 
