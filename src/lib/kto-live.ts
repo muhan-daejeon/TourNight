@@ -95,7 +95,12 @@ async function call(
 ): Promise<ListItem[]> {
   const res = await fetch(
     `${BASE}/${service}/${operation}?${params(extra)}`,
-    { signal: AbortSignal.timeout(TIMEOUT_MS) },
+    {
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+      // 응답을 Next 데이터 캐시(파일)에 둔다. 빌드는 워커를 11개 띄우는데
+      // 메모리 캐시는 프로세스마다 따로라 워커 수만큼 같은 호출을 반복했다.
+      next: { revalidate: 3600, tags: ["kto-spots"] },
+    },
   );
   if (!res.ok) throw new Error(`KTO ${service}/${operation} ${res.status}`);
   const body = (await res.json())?.response?.body;
@@ -199,7 +204,7 @@ export const getKtoOverview = (contentId: string, locale: string) =>
       const langId =
         locale === "ko"
           ? contentId
-          : (await fetchAll(locale)).find((s) => s.contentId === contentId)
+          : (await getKtoSpots(locale)).find((s) => s.contentId === contentId)
               ?.langContentId;
       if (!langId) return "";
       const rows = await call(service, "detailCommon2", { contentId: langId });

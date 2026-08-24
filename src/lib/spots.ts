@@ -145,6 +145,9 @@ const filling = new Set<string>();
 
 function fillMissingTitles(spots: NightSpot[], locale: string): void {
   if (locale === "ko" || filling.has(locale)) return;
+  // 빌드 중에는 부르지 않는다. 페이지를 만드는 워커가 Gemini 응답을 기다리다
+  // 60초를 넘겨 재시도에 걸린다. 초기 채움은 배치(npm run i18n:titles)가 맡는다.
+  if (process.env.NEXT_PHASE === "phase-production-build") return;
   const missing = spots.filter((s) => /[가-힣]/.test(s.title));
   if (missing.length === 0) return;
 
