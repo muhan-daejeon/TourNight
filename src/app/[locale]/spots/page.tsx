@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getVerifiedNightSpots } from "@/lib/spots";
 import SpotExplorer from "@/components/SpotExplorer";
+import PageHero, { PageBody } from "@/components/PageHero";
 
 // DB의 야간 검증 스팟 기준, 1시간 주기로 재생성
 export const revalidate = 3600;
@@ -21,18 +22,19 @@ export default async function SpotsPage({
   const spots = await getVerifiedNightSpots(locale);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
-      <p className="overline-label">Tonight</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight">
-        {t("spotsAllTitle")}
-      </h1>
-      <p className="mt-3 mb-8 max-w-2xl text-slate-400">
-        {t("spotsAllSubtitle")}
-      </p>
-      {/* SpotExplorer가 헤더 검색이 넘긴 ?q=를 읽으므로 Suspense로 감싼다 */}
-      <Suspense fallback={<div className="h-96" />}>
-        <SpotExplorer spots={spots} />
-      </Suspense>
-    </div>
+    <>
+      <PageHero
+        image="/hero-night.jpg"
+        overline="Tonight"
+        title={t("spotsAllTitle")}
+        subtitle={t("spotsAllSubtitle")}
+      />
+      <PageBody>
+        {/* SpotExplorer가 헤더 검색이 넘긴 ?q=를 읽으므로 Suspense로 감싼다 */}
+        <Suspense fallback={<div className="h-96" />}>
+          <SpotExplorer spots={spots} />
+        </Suspense>
+      </PageBody>
+    </>
   );
 }

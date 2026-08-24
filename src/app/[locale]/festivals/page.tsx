@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
 import FestivalPoster from "@/components/FestivalPoster";
+import PageHero, { PageBody } from "@/components/PageHero";
 
 // 야간 검증 스팟 기준, 1시간 주기로 재생성
 export const revalidate = 3600;
@@ -20,25 +21,30 @@ export default async function FestivalsPage({
   const festivals = pickFestivals(await getVerifiedNightSpots(locale));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
-      <p className="overline-label">Festivals</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight">{t("title")}</h1>
-      <p className="mt-3 max-w-2xl text-slate-400">{t("subtitle")}</p>
-      <p className="mt-3 max-w-2xl text-xs leading-relaxed text-slate-500">
-        {t("scheduleNote")}
-      </p>
-
-      {festivals.length === 0 ? (
-        <p className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-12 text-center text-sm text-slate-500">
-          {t("empty")}
+    <>
+      <PageHero
+        image="/spots/hanbit-tower.jpg"
+        overline="Festivals"
+        title={t("title")}
+        subtitle={t("subtitle")}
+      />
+      <PageBody>
+        <p className="max-w-2xl text-xs leading-relaxed text-slate-500">
+          {t("scheduleNote")}
         </p>
-      ) : (
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {festivals.map((f) => (
-            <FestivalPoster key={f.contentId} spot={f} />
-          ))}
-        </div>
-      )}
-    </div>
+
+        {festivals.length === 0 ? (
+          <p className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-12 text-center text-sm text-slate-500">
+            {t("empty")}
+          </p>
+        ) : (
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {festivals.map((f) => (
+              <FestivalPoster key={f.contentId} spot={f} />
+            ))}
+          </div>
+        )}
+      </PageBody>
+    </>
   );
 }

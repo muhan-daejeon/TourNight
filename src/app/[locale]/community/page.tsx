@@ -3,6 +3,7 @@ import CommunityBoard from "@/components/CommunityBoard";
 import { listPosts } from "@/lib/community";
 import { isStorageConfigured } from "@/lib/storage";
 import { mailFrom } from "@/lib/mail";
+import PageHero, { PageBody } from "@/components/PageHero";
 
 // 글 목록을 서버에서 채워 보낸다. 브라우저가 다시 불러오지 않으므로 첫 화면부터
 // 글이 보이고, API 왕복이 한 번 줄어든다.
@@ -21,11 +22,15 @@ export default async function CommunityPage({
   const posts = await listPosts();
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-16">
-      <p className="overline-label">Night Talk</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight">{t("title")}</h1>
-      <p className="mt-3 text-slate-400">{t("subtitle")}</p>
-      <div className="mt-8">
+    <>
+      <PageHero
+        image="/spots/jungangro-night.jpg"
+        width="narrow"
+        overline="Night Talk"
+        title={t("title")}
+        subtitle={t("subtitle")}
+      />
+      <PageBody width="narrow">
         <CommunityBoard
           initialPosts={posts}
           canAttach={isStorageConfigured()}
@@ -33,7 +38,7 @@ export default async function CommunityPage({
           // 중국·일본 메일함이 모르는 발신자를 잘 거르기 때문에 필요하다
           mailFrom={mailFrom()}
         />
-      </div>
-    </div>
+      </PageBody>
+    </>
   );
 }

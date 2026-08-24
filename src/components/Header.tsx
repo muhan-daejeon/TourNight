@@ -11,9 +11,10 @@ import AuthNav from "./AuthNav";
 const NAV_ITEMS = [
   { href: "/", key: "home" },
   { href: "/spots", key: "spots" },
+  { href: "/festivals", key: "festivals" },
+  { href: "/courses", key: "courses" },
   { href: "/etiquette", key: "etiquette" },
   { href: "/phrases", key: "phrases" },
-  { href: "/courses", key: "courses" },
   { href: "/community", key: "community" },
 ] as const;
 
@@ -22,7 +23,6 @@ const NAV_ITEMS = [
  * 않는 한 못 들어가므로, 여기에 남겨 둔다.
  */
 const MENU_EXTRAS = [
-  { href: "/festivals", key: "festivals" },
   { href: "/food", key: "food" },
   { href: "/stay", key: "stay" },
   { href: "/shopping", key: "shopping" },

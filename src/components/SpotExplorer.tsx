@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -12,6 +12,7 @@ import {
   Bookmark,
   ChevronRight,
   Search,
+  Route,
   Plus,
   Check,
   X,
@@ -69,7 +70,22 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
   const MAX_BASKET = 4;
   const [basket, setBasket] = useState<string[]>([]);
 
-  const toggleBasket = (contentId: string) =>
+  // '담기'가 코스 만들기의 시작이라는 걸 처음 온 사람은 알 수 없다 → 3단계로 알려준다.
+  // 한 번 닫았거나 이미 담아 본 사람에게는 다시 띄우지 않는다
+  const HOWTO_KEY = "tournight:howto:basket";
+  const [showHowTo, setShowHowTo] = useState(false);
+  useEffect(() => {
+    // 서버 HTML과 어긋나지 않도록 그린 뒤에 읽는다
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setShowHowTo(localStorage.getItem(HOWTO_KEY) !== "done");
+  }, []);
+  const closeHowTo = () => {
+    localStorage.setItem(HOWTO_KEY, "done");
+    setShowHowTo(false);
+  };
+
+  const toggleBasket = (contentId: string) => {
+    closeHowTo();
     setBasket((prev) =>
       prev.includes(contentId)
         ? prev.filter((id) => id !== contentId)
@@ -77,6 +93,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
           ? prev
           : [...prev, contentId],
     );
+  };
 
   const planCourse = (ids: string[]) =>
     router.push(
@@ -108,8 +125,42 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
   const activeSelectedId =
     selectedId && visibleIds.has(selectedId) ? selectedId : null;
 
+  const steps = ["howToStep1", "howToStep2", "howToStep3"] as const;
+
   return (
     <div>
+      {/* 코스 만드는 법 — 처음 온 사람을 위한 3단계 안내 */}
+      {showHowTo && (
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-amber-400/25 bg-amber-400/[0.06] px-5 py-4">
+          <p className="flex items-center gap-2 pr-8 text-sm font-bold text-amber-300">
+            <Route size={16} />
+            {t("howToTitle")}
+          </p>
+          <ol className="mt-3 grid gap-2 sm:grid-cols-3">
+            {steps.map((key, i) => (
+              <li key={key} className="flex items-start gap-2">
+                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[11px] font-extrabold text-slate-950">
+                  {i + 1}
+                </span>
+                <span className="text-[13px] leading-snug text-slate-300">
+                  {t.rich(key, {
+                    b: (c) => <b className="font-bold text-white">{c}</b>,
+                  })}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <button
+            type="button"
+            onClick={closeHowTo}
+            aria-label={t("howToClose")}
+            className="absolute right-3 top-3 rounded-full p-1 text-slate-400 transition hover:bg-white/10 hover:text-white"
+          >
+            <X size={15} />
+          </button>
+        </div>
+      )}
+
       {/* 검색창 */}
       <div className="relative mb-3">
         <Search
@@ -203,7 +254,11 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                       className="object-cover transition duration-500 group-hover:scale-[1.03]"
                     />
                   ) : (
-                    <Icon size={40} strokeWidth={1.2} className="text-white/20" />
+                    <Icon
+                      size={40}
+                      strokeWidth={1.2}
+                      className="text-white/20"
+                    />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent" />
 
@@ -332,11 +387,15 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                 </span>
               );
             })}
-            {basket.length >= MAX_BASKET && (
+            {basket.length >= MAX_BASKET ? (
               <span className="text-[11px] text-slate-500">
                 {t("basketMax", { max: MAX_BASKET })}
               </span>
-            )}
+            ) : basket.length === 1 ? (
+              <span className="text-[11px] text-slate-500">
+                {t("basketOne")}
+              </span>
+            ) : null}
             <button
               type="button"
               onClick={() => planCourse(basket)}

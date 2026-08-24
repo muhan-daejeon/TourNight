@@ -25,7 +25,7 @@
     "noResults": "未找到相关景点",
     "viewDetail": "查看详情",
     "planCourse": "规划路线",
-    "basketAdd": "加入",
+    "basketAdd": "添加",
     "basketAdded": "已加入",
     "basketRemove": "移除",
     "basketMax": "最多可加入{max}个地点",
@@ -77,7 +77,13 @@
     "snsPending": "账号筹备中",
     "bookmarkAdd": "收藏",
     "bookmarkRemove": "取消收藏",
-    "bookmarkFilter": "已收藏 {count}"
+    "bookmarkFilter": "已收藏 {count}",
+    "howToTitle": "选择喜欢的地点，打造专属路线",
+    "howToStep1": "点击景点照片上的<b>添加</b>，选出想去的地方",
+    "howToStep2": "再点下方出现的<b>生成路线</b>",
+    "howToStep3": "AI 会安排顺序，并给出交通路线和所需时间",
+    "howToClose": "关闭",
+    "basketOne": "只选一处也可以 - 我们会串联附近景点生成路线"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。",
