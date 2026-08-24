@@ -29,23 +29,21 @@ interface Verdict {
   category: NightSpot["category"];
   verified: boolean;
   manual: NightSpot | null;
-  /**
-   * 한글 원문 주소.
-   *
-   * KTO에서 받는 주소는 고른 언어로 번역돼 온다. 그런데 주소에서 자치구를
-   * 뽑아 쓰는 곳(방문객 통계·해시태그)이 정규식으로 한글을 찾으므로, 번역
-   * 주소만 있으면 한국어 외의 언어에서 전부 빈손이 된다. DB에 남아 있는
-   * 원문을 함께 실어 보낸다.
-   */
-  addrKo: string | null;
 }
 
 /** 검수 결과를 contentId로 찾을 수 있게 (KTO 미등재 명소는 자체 정보 포함) */
-async function getVerdicts(): Promise<Map<string, Verdict>> {
+async function getVerdicts(locale: string): Promise<Map<string, Verdict>> {
+  // KTO에 있는 곳은 판정만 읽는다. title·addr·좌표는 실시간으로 받으므로
+  // 저장분이 필요 없고, KTO 미등재 수동 명소(mock-)만 우리 정보를 쓴다.
+  // 그 수동 명소의 외국어 이름은 KTO에 없어 우리가 직접 넣어 둔 번역을 쓴다.
   const rows = await sql<VerdictRow[]>`
-    select content_id, category, night_verified, title, addr, image_url,
-           st_x(geom) as map_x, st_y(geom) as map_y
-    from night_spots
+    select s.content_id, s.category, s.night_verified,
+           coalesce(tr.title, s.title) as title, s.addr, s.image_url,
+           st_x(s.geom) as map_x, st_y(s.geom) as map_y
+    from night_spots s
+    left join spot_translations tr
+      on tr.content_id = s.content_id and tr.locale = ${locale}
+    where s.night_verified = true
   `;
   return new Map(
     rows.map((r) => [
@@ -53,7 +51,6 @@ async function getVerdicts(): Promise<Map<string, Verdict>> {
       {
         category: r.category as NightSpot["category"],
         verified: r.night_verified,
-        addrKo: r.addr,
         // KTO에 없는 곳(mock-)은 실시간으로 받을 수 없으므로 저장분을 그대로 쓴다.
         // content_id가 빠진 불량 행이 있어도 전체 조회가 죽지 않도록 널 방어한다.
         manual: r.content_id?.startsWith("mock-")
@@ -73,11 +70,11 @@ async function getVerdicts(): Promise<Map<string, Verdict>> {
   );
 }
 
-const merge = (k: KtoSpot, v: Verdict): NightSpot => ({
+const merge = (k: KtoSpot, v: Verdict, addrKo: string): NightSpot => ({
   contentId: k.contentId,
   title: k.title,
   addr: k.addr,
-  addrKo: v.addrKo ?? k.addr,
+  addrKo: addrKo || k.addr,
   mapX: k.mapX,
   mapY: k.mapY,
   imageUrl: k.imageUrl,
@@ -90,16 +87,22 @@ const merge = (k: KtoSpot, v: Verdict): NightSpot => ({
  */
 export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]> {
   try {
-    const [ktoSpots, verdicts] = await Promise.all([
+    // 자치구를 뽑아 쓰는 곳(방문객 통계·해시태그)이 한글 주소를 정규식으로 찾으므로
+    // 다른 언어를 볼 때도 한국어 주소를 함께 싣는다. 같은 캐시를 재사용해 비용은 없다.
+    const [ktoSpots, koSpots, verdicts] = await Promise.all([
       getKtoSpots(locale),
-      getVerdicts(),
+      locale === "ko" ? Promise.resolve(null) : getKtoSpots("ko"),
+      getVerdicts(locale),
     ]);
+    const addrKoById = new Map(
+      (koSpots ?? []).map((s) => [s.contentId, s.addr]),
+    );
 
     const out: NightSpot[] = [];
     for (const k of ktoSpots) {
       const v = verdicts.get(k.contentId);
       if (!v?.verified || !k.imageUrl) continue; // 사진 있는 검수 통과분만 (팀 방침)
-      out.push(merge(k, v));
+      out.push(merge(k, v, addrKoById.get(k.contentId) ?? k.addr));
     }
     // KTO 미등재 수동 큐레이션 명소 (국립중앙과학관 등)
     for (const v of verdicts.values()) {

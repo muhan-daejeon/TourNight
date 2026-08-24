@@ -1,6 +1,9 @@
 // 2단계: 야간 방문 적합성 1차 분류
 // ① detailIntro2로 운영시간(usetime) 수집 → ② Gemini 배치 분류 → night_candidate/night_reason 저장
 // 사용법: npm run db:classify   (최종 확정은 사람 검수 후 night_verified 갱신)
+//
+// 판정에 쓰는 이름·운영시간은 실행 시점에 KTO에서 받아 메모리로만 쓴다.
+// DB에 남기는 것은 판정 결과(night_candidate/night_reason)뿐이다.
 import postgres from "postgres";
 
 const KTO_BASE = "https://apis.data.go.kr/B551011/KorService2";
@@ -18,6 +21,33 @@ const TIME_FIELD = {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const sql = postgres(process.env.DATABASE_URL, { prepare: false });
+
+/** 판정에 쓸 이름을 KTO에서 받아 온다 (저장하지 않는다) */
+async function fetchTitles() {
+  const byId = new Map();
+  for (const contentTypeId of ["12", "14", "15", "28", "38"]) {
+    for (let pageNo = 1; pageNo <= 10; pageNo += 1) {
+      const params = new URLSearchParams({
+        serviceKey: process.env.KTO_API_KEY,
+        MobileOS: "ETC",
+        MobileApp: "TourNight",
+        _type: "json",
+        numOfRows: "100",
+        pageNo: String(pageNo),
+        arrange: "A",
+        areaCode: "3",
+        contentTypeId,
+      });
+      const res = await fetch(`${KTO_BASE}/areaBasedList2?${params}`);
+      if (!res.ok) throw new Error(`KTO ${res.status}`);
+      const items = (await res.json())?.response?.body?.items?.item ?? [];
+      items.forEach((i) => byId.set(i.contentid, i.title));
+      if (items.length < 100) break;
+      await sleep(150);
+    }
+  }
+  return byId;
+}
 
 async function fetchUseTime(contentId, contentTypeId) {
   const params = new URLSearchParams({
@@ -98,12 +128,15 @@ try {
     await sleep(150);
   }
 
-  // ② Gemini 배치 분류 (미분류만)
-  const rows = await sql`
-    select content_id, title, category, use_time from night_spots
-    where content_id not like 'mock-%' and night_candidate is null
-    order by content_id
-  `;
+  // ② Gemini 배치 분류 (미분류만) — 이름은 KTO에서 받아 온다
+  const titles = await fetchTitles();
+  const rows = (
+    await sql`
+      select content_id, category, use_time from night_spots
+      where content_id not like 'mock-%' and night_candidate is null
+      order by content_id
+    `
+  ).map((r) => ({ ...r, title: titles.get(r.content_id) ?? "" }));
   console.log(`분류 대상: ${rows.length}건`);
   for (let i = 0; i < rows.length; i += 25) {
     const chunk = rows.slice(i, i + 25);

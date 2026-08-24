@@ -1,6 +1,9 @@
-// KTO TourAPI → night_spots 동기화 (1단계: 대전 전체 수집, night_verified=false로 적재)
+// KTO TourAPI → 야간 검수 대상 등록 (1단계: 대전 전체를 훑어 검수 큐에 올린다)
 // 사용법: npm run db:sync
-// 공모전 유의: 원천 데이터 수정 없이 그대로 적재, 재실행 시 최신 데이터로 갱신(동기화)
+//
+// 원천 정보(이름·주소·좌표·사진)는 저장하지 않는다. 서비스가 그것들을 요청
+// 시점에 API로 받기 때문이다(src/lib/kto-live.ts). 여기서 DB에 남기는 것은
+// '어떤 곳을 검수 대상으로 볼지'와 우리 카테고리 판정뿐이다.
 import postgres from "postgres";
 
 const BASE_URL = "https://apis.data.go.kr/B551011/KorService2";
@@ -54,23 +57,14 @@ try {
       got += items.length;
       for (const it of items) {
         if (!it.mapx || !it.mapy || Number(it.mapx) === 0) continue; // 좌표 없는 데이터 제외
+        // 판정에 필요한 것만 남긴다 — 이름·주소·좌표·사진은 저장하지 않는다.
+        // content_type_id는 다음 단계(운영시간 조회)에서 쓰고, category는 우리 판정이다.
         await sql`
-          insert into night_spots (content_id, title, addr, category, image_url, geom, content_type_id, cat1, cat3)
-          values (
-            ${it.contentid}, ${it.title}, ${it.addr1 || ""}, ${mapCategory(it)},
-            ${it.firstimage || null},
-            st_setsrid(st_makepoint(${Number(it.mapx)}, ${Number(it.mapy)}), 4326),
-            ${it.contenttypeid}, ${it.cat1 || null}, ${it.cat3 || null}
-          )
+          insert into night_spots (content_id, category, content_type_id)
+          values (${it.contentid}, ${mapCategory(it)}, ${it.contenttypeid})
           on conflict (content_id) do update set
-            title = excluded.title,
-            addr = excluded.addr,
             category = excluded.category,
-            image_url = excluded.image_url,
-            geom = excluded.geom,
-            content_type_id = excluded.content_type_id,
-            cat1 = excluded.cat1,
-            cat3 = excluded.cat3
+            content_type_id = excluded.content_type_id
         `;
         upserted += 1;
       }
