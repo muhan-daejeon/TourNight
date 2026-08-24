@@ -234,7 +234,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             type="button"
             onClick={() => go(-1)}
             aria-label={t("prevSlide")}
-            className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/15 bg-slate-950/50 p-2.5 text-white backdrop-blur transition hover:bg-slate-950/80 sm:left-5"
+            className="absolute left-5 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/15 bg-slate-950/50 p-2.5 text-white backdrop-blur transition hover:bg-slate-950/80 sm:block"
           >
             <ChevronLeft size={20} />
           </button>
@@ -242,12 +242,20 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             type="button"
             onClick={() => go(1)}
             aria-label={t("nextSlide")}
-            className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/15 bg-slate-950/50 p-2.5 text-white backdrop-blur transition hover:bg-slate-950/80 sm:right-5"
+            className="absolute right-5 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/15 bg-slate-950/50 p-2.5 text-white backdrop-blur transition hover:bg-slate-950/80 sm:block"
           >
             <ChevronRight size={20} />
           </button>
 
           <div className="absolute inset-x-0 bottom-5 z-10 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => go(-1)}
+              aria-label={t("prevSlide")}
+              className="rounded-full p-1 text-slate-300 transition hover:text-white sm:hidden"
+            >
+              <ChevronLeft size={15} />
+            </button>
             {/* 몇 번째인지는 화면에 보이므로, 읽어주는 쪽은 이 한 줄만 담당한다 */}
             <span
               aria-live="polite"
@@ -262,6 +270,14 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               className="rounded-full p-1 text-slate-300 transition hover:text-white"
             >
               {playing ? <Pause size={13} /> : <Play size={13} />}
+            </button>
+            <button
+              type="button"
+              onClick={() => go(1)}
+              aria-label={t("nextSlide")}
+              className="rounded-full p-1 text-slate-300 transition hover:text-white sm:hidden"
+            >
+              <ChevronRight size={15} />
             </button>
           </div>
         </>
