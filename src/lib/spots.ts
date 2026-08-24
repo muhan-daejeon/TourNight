@@ -1,6 +1,7 @@
 import { sql } from "./db";
 import { MOCK_NIGHT_SPOTS, type NightSpot } from "./kto";
 import { getKtoSpots, getKtoOverview, type KtoSpot } from "./kto-live";
+import { getCongestionRows, normName } from "./kto-stats";
 
 /**
  * 야간 명소 조회 — KTO 원천 정보는 실시간, 우리 판단은 DB.
@@ -230,11 +231,22 @@ export async function getCongestionForSpots(
 ): Promise<Map<string, number>> {
   if (!contentIds.length) return new Map();
   try {
-    const rows = await sql<{ content_id: string; rate: string }[]>`
-      select content_id, rate from spot_congestion
-      where content_id = any(${contentIds}) and base_ymd = ${date}
-    `;
-    return new Map(rows.map((r) => [r.content_id, Math.round(Number(r.rate))]));
+    // 집중률 API는 contentId가 아니라 관광지명으로 응답한다 → 이름으로 맞춘다
+    const [rows, spots] = await Promise.all([
+      getCongestionRows(),
+      getVerifiedNightSpots("ko"),
+    ]);
+    const idByName = new Map(spots.map((s) => [normName(s.title), s.contentId]));
+    const wanted = new Set(contentIds);
+    const ymd = date.replace(/-/g, "");
+
+    const out = new Map<string, number>();
+    for (const r of rows) {
+      if (r.baseYmd !== ymd) continue;
+      const id = idByName.get(normName(r.tAtsNm));
+      if (id && wanted.has(id)) out.set(id, Math.round(Number(r.cnctrRate)));
+    }
+    return out;
   } catch (err) {
     console.warn(
       "[spots] 혼잡도 조회 실패:",
@@ -251,12 +263,35 @@ export interface CongestionDay {
 
 /** 향후 7일 혼잡도 예측 (KT 통신데이터 기반, 데이터 없는 스팟은 빈 배열) */
 export async function getCongestion(contentId: string): Promise<CongestionDay[]> {
-  const rows = await sql<{ date: string; rate: string }[]>`
-    select to_char(base_ymd, 'YYYY-MM-DD') as date, rate
-    from spot_congestion
-    where content_id = ${contentId}
-      and base_ymd >= current_date and base_ymd < current_date + 7
-    order by base_ymd
-  `;
-  return rows.map((r) => ({ date: r.date, rate: Number(r.rate) }));
+  try {
+    const [rows, spots] = await Promise.all([
+      getCongestionRows(),
+      getVerifiedNightSpots("ko"),
+    ]);
+    const title = spots.find((s) => s.contentId === contentId)?.title;
+    if (!title) return [];
+
+    const key = normName(title);
+    const today = new Date();
+    const from = todayYmd(today);
+    const to = todayYmd(new Date(today.getTime() + 7 * 24 * 3600 * 1000));
+
+    return rows
+      .filter((r) => normName(r.tAtsNm) === key)
+      .filter((r) => r.baseYmd >= from && r.baseYmd < to)
+      .sort((a, b) => a.baseYmd.localeCompare(b.baseYmd))
+      .map((r) => ({ date: dashed(r.baseYmd), rate: Number(r.cnctrRate) }));
+  } catch (err) {
+    console.warn(
+      "[spots] 혼잡도 조회 실패:",
+      err instanceof Error ? err.message : err,
+    );
+    return [];
+  }
 }
+
+const todayYmd = (d: Date) =>
+  `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+
+/** YYYYMMDD → YYYY-MM-DD */
+const dashed = (s: string) => `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;

@@ -5,6 +5,7 @@ import {
   type EtiquetteGuide,
 } from "@/lib/gemini";
 import { sql } from "@/lib/db";
+import { getVerifiedNightSpots } from "@/lib/spots";
 import { routing } from "@/i18n/routing";
 import { getSessionUser } from "@/lib/session";
 import { logActivity } from "@/lib/activity";
@@ -34,27 +35,28 @@ interface RelatedSpot {
 async function relatedSpots(topicId: string, locale: string): Promise<RelatedSpot[]> {
   const filter = TOPIC_SPOT_FILTER[topicId];
   if (!filter) return [];
-  const rows = await sql<
-    { content_id: string; title: string; image_url: string | null; category: string }[]
-  >`
-    select s.content_id, coalesce(tr.title, s.title) as title, s.image_url, s.category
-    from night_spots s
-    left join spot_translations tr
-      on tr.content_id = s.content_id and tr.locale = ${locale}
-    where s.night_verified = true and s.image_url is not null
-      and (
-        ${filter.categories ? sql`s.category = any(${filter.categories})` : sql`false`}
-        or ${filter.titles ? sql`s.title = any(${filter.titles})` : sql`false`}
-        or ${filter.patterns ? sql`s.title ilike any(${filter.patterns})` : sql`false`}
-      )
-    limit 3
-  `;
-  return rows.map((r) => ({
-    contentId: r.content_id,
-    title: r.title,
-    imageUrl: r.image_url,
-    category: r.category,
-  }));
+
+  // 명소는 KTO 실시간 목록에서 고른다 (제목·사진 모두 원천 그대로)
+  const spots = await getVerifiedNightSpots(locale);
+  const like = (title: string, pattern: string) =>
+    // SQL ilike의 %를 그대로 쓰던 필터라 같은 의미로 맞춘다
+    new RegExp(`^${pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/%/g, ".*")}$`, "i")
+      .test(title);
+
+  return spots
+    .filter(
+      (s) =>
+        filter.categories?.includes(s.category) ||
+        filter.titles?.includes(s.title) ||
+        filter.patterns?.some((p) => like(s.title, p)),
+    )
+    .slice(0, 3)
+    .map((s) => ({
+      contentId: s.contentId,
+      title: s.title,
+      imageUrl: s.imageUrl,
+      category: s.category,
+    }));
 }
 
 export async function GET(request: NextRequest) {
