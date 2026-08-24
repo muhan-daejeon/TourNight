@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import PersonalityTest from "@/components/PersonalityTest";
+import PageHero, { PageBody } from "@/components/PageHero";
 
 export default async function PersonalityPage({
   params,
@@ -14,11 +15,16 @@ export default async function PersonalityPage({
   // (KTO 실시간 호출을 빌드에 넣으면 정적 생성이 타임아웃되므로 페이지는 데이터를
   //  받지 않는다 — 화면 셸만 정적으로 만든다.)
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16">
-      <p className="overline-label">Night Persona</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight">{t("title")}</h1>
-      <p className="mt-3 mb-8 max-w-2xl text-slate-400">{t("subtitle")}</p>
-      <PersonalityTest />
-    </div>
+    <>
+      <PageHero
+        image="/spots/sikjangsan.jpg"
+        overline="Night Persona"
+        title={t("title")}
+        subtitle={t("subtitle")}
+      />
+      <PageBody>
+        <PersonalityTest />
+      </PageBody>
+    </>
   );
 }
