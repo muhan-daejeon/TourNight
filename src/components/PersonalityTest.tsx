@@ -425,6 +425,8 @@ function Detail({
 }) {
   type TabKey = "traits" | "courses" | "spots" | "tips";
   const [tab, setTab] = useState<TabKey>("traits");
+  // 'n곳' 표기는 코스 화면과 같은 문구를 쓴다 (personality에는 없는 키다)
+  const tc = useTranslations("courses");
   const values = useMemo(() => radarValues(scores), [scores]);
 
   const keywords = t.raw(`types.${primary}.keywords`) as string[];
@@ -536,7 +538,7 @@ function Detail({
               {recCourses.length ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {recCourses.map((c) => (
-                    <CourseCard key={c.id} course={c} th={th} labelStops={t} />
+                    <CourseCard key={c.id} course={c} th={th} labelStops={tc} />
                   ))}
                 </div>
               ) : (
