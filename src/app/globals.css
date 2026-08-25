@@ -20,12 +20,6 @@ body {
   background: rgba(251, 191, 36, 0.3);
 }
 
-/* 이미 본 인트로는 첫 페인트 전에 통째로 숨긴다 (레이아웃에 심은 인라인
-   스크립트가 하이드레이션 전에 html[data-intro-seen]를 붙인다) */
-html[data-intro-seen] [data-intro-root] {
-  display: none;
-}
-
 /* 스크롤은 되지만 막대는 안 보이게 — 스냅 컨테이너 전용 */
 .no-scrollbar {
   scrollbar-width: none; /* Firefox */

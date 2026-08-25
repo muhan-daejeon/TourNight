@@ -106,14 +106,18 @@ function Slide({
       {/* 왼쪽 텍스트가 사진 위에서도 읽히도록 왼쪽을 더 어둡게 깐다 */}
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-transparent" />
 
-      <div className="relative flex min-h-[408px] flex-col justify-center px-7 py-14 sm:min-h-[504px] sm:px-14 sm:py-20">
+      {/* 높이를 min-height가 아니라 고정 height로 둔다 — 번역마다 글 길이가 달라
+          (특히 영어가 한국어보다 꽤 길다) min-height면 그 장의 텍스트가 줄바꿈되는
+          만큼 캐러셀 전체 높이가 로케일별로 들쭉날쭉해진다. 넘치는 줄은 아래
+          subtitle의 line-clamp로 조용히 자른다 */}
+      <div className="relative flex h-[408px] flex-col justify-center px-7 py-14 sm:h-[504px] sm:px-14 sm:py-20">
         <p className="text-xs font-semibold tracking-[0.18em] text-slate-300 sm:text-sm">
           {slide.overline}
         </p>
-        <h1 className="mt-4 max-w-xl text-3xl font-extrabold leading-[1.22] tracking-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.8)] sm:text-5xl">
+        <h1 className="mt-4 line-clamp-2 max-w-xl text-3xl font-extrabold leading-[1.22] tracking-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.8)] sm:text-5xl">
           <TitleWithHighlight title={slide.title} highlight={slide.highlight} />
         </h1>
-        <p className="mt-5 max-w-md text-sm leading-relaxed text-slate-300 sm:text-base">
+        <p className="mt-5 line-clamp-3 max-w-md text-sm leading-relaxed text-slate-300 sm:text-base">
           {slide.subtitle}
         </p>
         <div className="mt-8">
