@@ -28,7 +28,7 @@ export default function Footer() {
           {/* 브랜드 */}
           <div>
             <p className="text-[17px] font-extrabold tracking-tight text-white">
-              Tour<span className="text-indigo-400">Night</span>
+              Tour<span className="text-amber-400">Night</span>
             </p>
             <p className="mt-1.5 text-xs text-slate-500">{t("site.tagline")}</p>
           </div>

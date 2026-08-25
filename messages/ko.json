@@ -4,6 +4,10 @@
     "tagline": "대전의 밤을 여행하다",
     "description": "과학, 자연, 그리고 밤 — 대전 야간관광 통합 안내"
   },
+  "intro": {
+    "tagline": "대전의 밤,\n당신만의 색깔을 찾아서",
+    "skip": "건너뛰기"
+  },
   "nav": {
     "spots": "야간 명소",
     "courses": "추천 코스",
@@ -49,7 +53,10 @@
     "scrollPrev": "이전으로",
     "scrollNext": "다음으로",
     "heroFestivalOverline": "지금, 대전의 밤은 특별합니다",
+    "heroFestivalTitle": "대전의 밤을 채우는 축제 명소",
+    "heroFestivalSubtitle": "현재 진행 중인 축제만 모아봤어요",
     "heroFestivalCta": "자세히 보기",
+    "scrollDown": "SCROLL DOWN",
     "heroAiOverline": "AI 코스 추천",
     "heroAiTitle": "밤을 거니는 가장 스마트한 방법",
     "heroAiHighlight": "가장 스마트한",
@@ -205,6 +212,8 @@
     },
     "dos": "이렇게 하세요",
     "donts": "피하세요",
+    "prevItem": "이전 항목",
+    "nextItem": "다음 항목",
     "saySection": "이럴 때 이렇게 말해요",
     "level": {
       "basic": "기본",

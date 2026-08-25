@@ -4,6 +4,10 @@
     "tagline": "Travel the Night of Daejeon",
     "description": "Science, nature, and night — your guide to Daejeon after dark"
   },
+  "intro": {
+    "tagline": "Daejeon nights,\nfind your own color",
+    "skip": "Skip"
+  },
   "nav": {
     "spots": "Night Spots",
     "courses": "Courses",
@@ -49,7 +53,10 @@
     "scrollPrev": "Scroll back",
     "scrollNext": "Scroll forward",
     "heroFestivalOverline": "Right now, Daejeon nights are special",
+    "heroFestivalTitle": "Festival spots that fill the Daejeon night",
+    "heroFestivalSubtitle": "Only the festivals happening right now",
     "heroFestivalCta": "See details",
+    "scrollDown": "SCROLL DOWN",
     "heroAiOverline": "AI course planner",
     "heroAiTitle": "The smartest way to wander the night",
     "heroAiHighlight": "smartest",
@@ -205,6 +212,8 @@
     },
     "dos": "Do",
     "donts": "Don't",
+    "prevItem": "Previous item",
+    "nextItem": "Next item",
     "saySection": "What to say",
     "level": {
       "basic": "Basic",

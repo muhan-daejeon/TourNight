@@ -4,6 +4,10 @@
     "tagline": "畅游大田之夜",
     "description": "科学、自然与夜晚 — 大田夜间观光综合指南"
   },
+  "intro": {
+    "tagline": "大田的夜晚，\n寻找专属你的色彩",
+    "skip": "跳过"
+  },
   "nav": {
     "spots": "夜间景点",
     "courses": "推荐路线",
@@ -49,7 +53,10 @@
     "scrollPrev": "上一个",
     "scrollNext": "下一个",
     "heroFestivalOverline": "此刻，大田的夜晚格外特别",
+    "heroFestivalTitle": "点亮大田夜晚的庆典场地",
+    "heroFestivalSubtitle": "只收录正在进行中的庆典",
     "heroFestivalCta": "查看详情",
+    "scrollDown": "SCROLL DOWN",
     "heroAiOverline": "AI 路线推荐",
     "heroAiTitle": "漫步夜色，最聪明的方式",
     "heroAiHighlight": "最聪明的方式",
@@ -205,6 +212,8 @@
     },
     "dos": "建议这样做",
     "donts": "请避免",
+    "prevItem": "上一项",
+    "nextItem": "下一项",
     "saySection": "这时可以这样说",
     "level": {
       "basic": "基础",

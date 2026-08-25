@@ -4,6 +4,10 @@
     "tagline": "大田の夜を旅する",
     "description": "科学と自然、そして夜 — 大田ナイトツアー総合ガイド"
   },
+  "intro": {
+    "tagline": "大田の夜、\nあなただけの色を見つけて",
+    "skip": "スキップ"
+  },
   "nav": {
     "spots": "夜の名所",
     "courses": "おすすめコース",
@@ -49,7 +53,10 @@
     "scrollPrev": "前へ",
     "scrollNext": "次へ",
     "heroFestivalOverline": "いま、大田の夜は特別です",
+    "heroFestivalTitle": "大田の夜を彩る祭りの舞台",
+    "heroFestivalSubtitle": "いま開催中の祭りだけを集めました",
     "heroFestivalCta": "詳しく見る",
+    "scrollDown": "SCROLL DOWN",
     "heroAiOverline": "AIコース提案",
     "heroAiTitle": "夜を歩く、いちばんスマートな方法",
     "heroAiHighlight": "いちばんスマート",
@@ -205,6 +212,8 @@
     },
     "dos": "こうしましょう",
     "donts": "避けましょう",
+    "prevItem": "前の項目",
+    "nextItem": "次の項目",
     "saySection": "こんな時はこう言おう",
     "level": {
       "basic": "基本",

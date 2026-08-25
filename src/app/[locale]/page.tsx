@@ -1,22 +1,19 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
-import { ArrowRight, BookOpen, MessageSquare } from "lucide-react";
+import { ArrowRight, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
+import { getVerifiedNightSpots } from "@/lib/spots";
 import { listNotices } from "@/lib/notices";
 import { listPopularPosts, type CommunityPost } from "@/lib/community";
 import NightInfo from "@/components/NightInfo";
 import HeroCarousel, { type HeroSlide } from "@/components/HeroCarousel";
-import ScrollRail from "@/components/ScrollRail";
-import FestivalPoster from "@/components/FestivalPoster";
-import SpotCard from "@/components/SpotCard";
+import IntroSequence from "@/components/IntroSequence";
+import ScrollDownHint from "@/components/ScrollDownHint";
+import GuidebookBanner from "@/components/GuidebookBanner";
+import SnapScreens from "@/components/SnapScreens";
 
 // 야간 검증 스팟·커뮤니티 인기글 기준, 1시간 주기로 재생성
 export const revalidate = 3600;
-
-/** 홈에 미리 보여줄 개수 — 나머지는 각 탭에서 전부 본다 */
-const SPOT_PREVIEW = 8;
-const FESTIVAL_PREVIEW = 8;
 
 export default async function HomePage({
   params,
@@ -31,10 +28,9 @@ export default async function HomePage({
   // 서로 의존하지 않으므로 한 번에 — 순차로 돌리면 홈 생성이 그만큼 늦어진다
   const [spots, popular] = await Promise.all([
     getVerifiedNightSpots(locale),
-    listPopularPosts(4),
+    listPopularPosts(3),
   ]);
-  const notices = listNotices(locale);
-  const festivals = pickFestivals(spots);
+  const notices = listNotices(locale).slice(0, 2);
   const photoSpots = spots.filter((s) => s.imageUrl);
 
   // 배너 배경 사진 — 등록된 명소 사진을 순서대로 돌려 쓴다. 무작위로 뽑으면
@@ -61,16 +57,17 @@ export default async function HomePage({
       gradient: "from-indigo-950 via-purple-950 to-slate-950",
       image: nthPhoto(1),
     },
-    ...festivals.slice(0, 2).map((f, i) => ({
-      id: f.contentId,
+    // 축제 명소 — 특정 축제 데이터가 아니라 축제&행사 탭으로 안내하는 고정 배너
+    {
+      id: "festivals",
       overline: t("heroFestivalOverline"),
-      title: f.title,
-      subtitle: f.overview?.replace(/<[^>]*>/g, " ").trim() || f.addr,
+      title: t("heroFestivalTitle"),
+      subtitle: t("heroFestivalSubtitle"),
       ctaLabel: t("heroFestivalCta"),
-      href: `/spots/${f.contentId}`,
+      href: "/festivals",
       gradient: "from-fuchsia-950 via-purple-950 to-slate-950",
-      image: f.imageUrl ?? nthPhoto(i),
-    })),
+      image: nthPhoto(2),
+    },
     {
       id: "brand",
       overline: site("description"),
@@ -97,68 +94,43 @@ export default async function HomePage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-4">
-      <div className="pt-5">
-        <HeroCarousel slides={slides} />
-      </div>
+      <IntroSequence />
 
-      {/* 오늘 밤 정보 — 천문연구원 일몰·월령 */}
-      <div className="pt-6">
-        <NightInfo />
-      </div>
-
-      {/* ── 축제&행사 — 등록된 축제 명소를 포스터로 ── */}
-      {festivals.length > 0 && (
-        <section className="pt-16">
-          <SectionHead
-            title={t("festivalsSection")}
-            subtitle={t("festivalsSectionSub")}
-            href="/festivals"
-            linkLabel={t("festivalsViewAll")}
-          />
-          <ScrollRail label={t("festivalsSection")}>
-            {festivals.slice(0, FESTIVAL_PREVIEW).map((f) => (
-              <div
-                key={f.contentId}
-                className="w-[186px] shrink-0 snap-start sm:w-[208px]"
-              >
-                <FestivalPoster spot={f} />
+      {/* 화면 1: 슬라이드 배너 / 화면 2: 소식·인기글·SNS + 가이드북 —
+          휠로 넘길 때 다음 화면으로 전환되는 느낌을 주는 스냅 컨테이너 */}
+      <SnapScreens>
+        <section className="relative min-h-screen">
+          {/* 슬라이드는 (헤더 밑) 화면 정중앙 — 가로·세로 모두.
+              --header-h는 로고+메뉴 "행" 자신의 높이만 담고 있고, 실제 헤더는
+              그 위에 같은 높이의 여백까지 더해 총 2배 높이를 차지한다 — 그래서
+              여기서도 2배를 뺀다. 이 section 자체는 이미 헤더 바로 아래에서
+              시작하므로, 안쪽 박스는 거기서부터 "보이는 화면 높이"만큼만 잡아야
+              가운데가 실제로 보이는 영역의 가운데와 맞는다. 오늘 밤 정보·스크롤
+              화살표는 그 박스 맨 아래에 겹쳐 띄워, 슬라이드 자체의 중앙 계산엔
+              끼어들지 않는다 — 다만 화면이 낮으면 그 둘이 슬라이드 아래쪽과
+              부딪혀서, 슬라이드를 정중앙보다 살짝 위로 올려 여유를 둔다 */}
+          <div
+            className="absolute inset-x-0 top-0"
+            style={{ height: "calc(100vh - (var(--header-h, 0px) * 2))" }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center px-4">
+              <div style={{ transform: "translateY(-40px)" }}>
+                <HeroCarousel slides={slides} />
               </div>
-            ))}
-          </ScrollRail>
+            </div>
+            <div className="absolute inset-x-0 bottom-4 flex flex-col items-center gap-2 px-4">
+              {/* 오늘 밤 정보 — 천문연구원 일몰·월령 */}
+              <NightInfo />
+              <ScrollDownHint />
+            </div>
+          </div>
         </section>
-      )}
 
-      {/* ── 야경 명소 추천 ── */}
-      <section className="pt-16">
-        <SectionHead
-          title={t("spotsSection")}
-          subtitle={t("spotsSectionSub")}
-          href="/spots"
-          linkLabel={t("spotsViewAll")}
-        />
-        {spots.length === 0 ? (
-          <p className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-slate-500">
-            {t("noResults")}
-          </p>
-        ) : (
-          <ScrollRail label={t("spotsSection")}>
-            {spots.slice(0, SPOT_PREVIEW).map((spot) => (
-              <div
-                key={spot.contentId}
-                className="w-[250px] shrink-0 snap-start sm:w-[264px]"
-              >
-                <SpotCard spot={spot} />
-              </div>
-            ))}
-          </ScrollRail>
-        )}
-      </section>
-
-      {/* ── 소식 · 인기글 · SNS ── */}
-      <section
-        id="news"
-        className="grid scroll-mt-24 gap-10 pt-16 lg:grid-cols-[1.5fr_1fr_1fr]"
-      >
+        <section id="content" className="pt-10">
+          <div
+            id="news"
+            className="grid scroll-mt-24 gap-10 lg:grid-cols-[1.5fr_1fr_1fr]"
+          >
         {/* 투어나잇 소식 */}
         <div className="min-w-0">
           <h2 className="text-xl font-bold tracking-tight">
@@ -171,7 +143,7 @@ export default async function HomePage({
             {/* 월간 소식 카드 — 시안의 월간 뉴스레터 자리 */}
             <Link
               href="/festivals"
-              className="group relative flex min-h-[230px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-indigo-900 via-violet-950 to-slate-950 transition hover:border-amber-400/40"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-indigo-900 via-violet-950 to-slate-950 transition hover:border-amber-400/40"
             >
               <div className="pointer-events-none absolute inset-x-0 -top-14 h-36 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.2),transparent_70%)]" />
               <div className="relative flex-1 p-5">
@@ -179,7 +151,7 @@ export default async function HomePage({
                   {monthLabel(locale)}
                 </p>
                 <p className="mt-2.5 text-[15px] font-extrabold leading-tight text-white">
-                  Tour<span className="text-indigo-300">Night</span>
+                  Tour<span className="text-amber-400">Night</span>
                 </p>
                 <h3 className="text-lg font-extrabold leading-tight text-white">
                   {t("monthlyIssueTitle")}
@@ -303,7 +275,7 @@ export default async function HomePage({
             </span>
           </p>
           <div className="grid grid-cols-3 gap-2">
-            {photoSpots.slice(0, 6).map((s) => (
+            {photoSpots.slice(0, 3).map((s) => (
               <Link
                 key={s.contentId}
                 href={`/spots/${s.contentId}`}
@@ -328,96 +300,14 @@ export default async function HomePage({
             <ArrowRight size={13} />
           </Link>
         </div>
-      </section>
-
-      {/* ── 가이드북 배너 ── */}
-      <section className="mt-20">
-        <Link
-          href="/etiquette"
-          className="group relative flex flex-col items-start gap-6 overflow-hidden rounded-3xl border border-white/10 px-7 py-10 transition hover:border-amber-400/40 sm:flex-row sm:items-center sm:px-12"
-        >
-          <Image
-            src="/hero-night.jpg"
-            alt=""
-            fill
-            sizes="(min-width: 1152px) 1120px, 100vw"
-            className="object-cover opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-indigo-950/70" />
-          <div className="relative flex-1">
-            <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-slate-400">
-              <BookOpen size={15} className="text-amber-300" />
-              {t("guidebookOverline")}
-            </p>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-              Tour<span className="text-indigo-300">Night</span> GUIDEBOOK
-            </h2>
-            <p className="mt-2 text-sm text-slate-400">
-              {t("guidebookSubtitle")}
-            </p>
-            <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-400 px-6 py-3 text-sm font-bold text-slate-950 transition group-hover:bg-amber-300">
-              {t("guidebookCta")}
-              <ArrowRight size={16} />
-            </span>
           </div>
 
-          {/* 가이드북 표지 — 시안의 책 이미지 자리. 실물 사진이 없으니 표지를
-              직접 세워 둔다 (뒤에 한 권 겹쳐 두께를 만든다) */}
-          <div className="relative hidden shrink-0 sm:block">
-            <div className="absolute left-3 top-2 h-[168px] w-[124px] rotate-6 rounded-lg bg-indigo-900/70 shadow-[0_10px_30px_rgba(0,0,0,0.5)]" />
-            <div className="relative h-[176px] w-[130px] overflow-hidden rounded-lg border border-white/15 shadow-[0_14px_40px_rgba(0,0,0,0.6)] transition duration-500 group-hover:-translate-y-1">
-              <Image
-                src="/spots/hanbit-tower.jpg"
-                alt=""
-                fill
-                sizes="130px"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/70 to-slate-950/95" />
-              {/* 책등 */}
-              <div className="absolute inset-y-0 left-0 w-2.5 bg-gradient-to-r from-black/70 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-3.5">
-                <p className="text-[13px] font-extrabold leading-tight text-white">
-                  Tour<span className="text-indigo-300">Night</span>
-                </p>
-                <p className="mt-0.5 text-[9px] font-bold tracking-[0.2em] text-amber-300">
-                  GUIDEBOOK
-                </p>
-                <span className="mt-2 block h-px w-8 bg-amber-300/70" />
-              </div>
-            </div>
+          {/* ── 가이드북 배너 ── */}
+          <div className="mt-14">
+            <GuidebookBanner />
           </div>
-        </Link>
-      </section>
-    </div>
-  );
-}
-
-/** 섹션 제목 + 오른쪽 전체보기 링크 */
-function SectionHead({
-  title,
-  subtitle,
-  href,
-  linkLabel,
-}: {
-  title: string;
-  subtitle: string;
-  href: string;
-  linkLabel: string;
-}) {
-  return (
-    <div className="mb-6 flex items-end justify-between gap-4">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-        <p className="mt-1.5 text-sm text-slate-400">{subtitle}</p>
-      </div>
-      <Link
-        href={href}
-        className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-slate-400 transition hover:text-amber-300"
-      >
-        {linkLabel}
-        <ArrowRight size={15} />
-      </Link>
+        </section>
+      </SnapScreens>
     </div>
   );
 }
