@@ -19,6 +19,8 @@ interface VerdictRow {
   night_verified: boolean;
   /** KTO 미등재 수동 큐레이션 명소는 원천을 받을 수 없어 자체 정보를 쓴다 */
   title: string | null;
+  /** 공사 다국어판이 없어 우리가 채운 이름 */
+  saved_title: string | null;
   addr: string | null;
   image_url: string | null;
   map_x: number | null;
@@ -29,6 +31,8 @@ interface Verdict {
   category: NightSpot["category"];
   verified: boolean;
   manual: NightSpot | null;
+  /** 공사에 다국어판이 없어 우리가 채운 이름 (없으면 null) */
+  savedTitle: string | null;
 }
 
 /** 검수 결과를 contentId로 찾을 수 있게 (KTO 미등재 명소는 자체 정보 포함) */
@@ -38,7 +42,8 @@ async function getVerdicts(locale: string): Promise<Map<string, Verdict>> {
   // 그 수동 명소의 외국어 이름은 KTO에 없어 우리가 직접 넣어 둔 번역을 쓴다.
   const rows = await sql<VerdictRow[]>`
     select s.content_id, s.category, s.night_verified,
-           coalesce(tr.title, s.title) as title, s.addr, s.image_url,
+           coalesce(tr.title, s.title) as title, tr.title as saved_title,
+           s.addr, s.image_url,
            st_x(s.geom) as map_x, st_y(s.geom) as map_y
     from night_spots s
     left join spot_translations tr
@@ -51,6 +56,7 @@ async function getVerdicts(locale: string): Promise<Map<string, Verdict>> {
       {
         category: r.category as NightSpot["category"],
         verified: r.night_verified,
+        savedTitle: r.saved_title ?? null,
         // KTO에 없는 곳(mock-)은 실시간으로 받을 수 없으므로 저장분을 그대로 쓴다.
         // content_id가 빠진 불량 행이 있어도 전체 조회가 죽지 않도록 널 방어한다.
         manual: r.content_id?.startsWith("mock-")
@@ -70,9 +76,13 @@ async function getVerdicts(locale: string): Promise<Map<string, Verdict>> {
   );
 }
 
-const merge = (k: KtoSpot, v: Verdict, addrKo: string): NightSpot => ({
+/** 공사 다국어판이 없어 이름이 한글 그대로인지 */
+const untranslated = (title: string, locale: string) =>
+  locale !== "ko" && /[가-힣]/.test(title);
+
+const merge = (k: KtoSpot, v: Verdict, addrKo: string, locale: string): NightSpot => ({
   contentId: k.contentId,
-  title: k.title,
+  title: untranslated(k.title, locale) ? (v.savedTitle ?? k.title) : k.title,
   addr: k.addr,
   addrKo: addrKo || k.addr,
   mapX: k.mapX,
@@ -102,12 +112,16 @@ export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]>
     for (const k of ktoSpots) {
       const v = verdicts.get(k.contentId);
       if (!v?.verified || !k.imageUrl) continue; // 사진 있는 검수 통과분만 (팀 방침)
-      out.push(merge(k, v, addrKoById.get(k.contentId) ?? k.addr));
+      out.push(merge(k, v, addrKoById.get(k.contentId) ?? k.addr, locale));
     }
     // KTO 미등재 수동 큐레이션 명소 (국립중앙과학관 등)
     for (const v of verdicts.values()) {
       if (v.verified && v.manual?.imageUrl) out.push(v.manual);
     }
+
+    // 공사에도 없고 우리 저장분에도 없는 이름은 뒤에서 번역해 둔다.
+    // 이번 응답을 붙잡아 두면 첫 방문이 느려지고 빌드가 타임아웃되므로 기다리지 않는다.
+    fillMissingTitles(out, locale);
 
     out.sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
     return out;
@@ -119,6 +133,53 @@ export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]>
     );
     return MOCK_NIGHT_SPOTS;
   }
+}
+
+/**
+ * 아직 번역이 없는 이름을 AI로 채워 다음 요청부터 쓰이게 한다.
+ *
+ * 화면을 기다리게 하지 않으려고 결과를 기다리지 않는다(fire-and-forget).
+ * 같은 이름을 두 번 부르지 않도록 진행 중인 언어는 표시해 둔다.
+ */
+const filling = new Set<string>();
+
+function fillMissingTitles(spots: NightSpot[], locale: string): void {
+  if (locale === "ko" || filling.has(locale)) return;
+  // 빌드 중에는 부르지 않는다. 페이지를 만드는 워커가 Gemini 응답을 기다리다
+  // 60초를 넘겨 재시도에 걸린다. 초기 채움은 배치(npm run i18n:titles)가 맡는다.
+  if (process.env.NEXT_PHASE === "phase-production-build") return;
+  const missing = spots.filter((s) => /[가-힣]/.test(s.title));
+  if (missing.length === 0) return;
+
+  filling.add(locale);
+  void (async () => {
+    try {
+      const { translateSpotTitles } = await import("./gemini");
+      const byKo = new Map(missing.map((s) => [s.title, s.contentId]));
+      const translated = await translateSpotTitles([...byKo.keys()], locale);
+
+      for (const [ko, title] of Object.entries(translated)) {
+        const contentId = byKo.get(ko);
+        if (!contentId) continue;
+        await sql`
+          insert into spot_translations (content_id, locale, title, source)
+          values (${contentId}, ${locale}, ${title}, 'ai')
+          on conflict (content_id, locale) do update
+            set title = excluded.title, source = 'ai', updated_at = now()
+        `;
+      }
+      console.log(
+        `[spots] ${locale} 이름 ${Object.keys(translated).length}건 번역해 저장했습니다`,
+      );
+    } catch (err) {
+      console.warn(
+        "[spots] 이름 번역 실패:",
+        err instanceof Error ? err.message : err,
+      );
+    } finally {
+      filling.delete(locale);
+    }
+  })();
 }
 
 export function pickFestivals(spots: NightSpot[]): NightSpot[] {
