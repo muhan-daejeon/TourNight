@@ -6,7 +6,8 @@
   },
   "intro": {
     "tagline": "Daejeon nights,\nfind your own color",
-    "skip": "Skip"
+    "skip": "Skip",
+    "scrollDown": "SCROLL DOWN"
   },
   "nav": {
     "spots": "Night Spots",
@@ -219,7 +220,61 @@
       "basic": "Basic",
       "advanced": "Advanced"
     },
-    "relatedSpots": "Related night spots"
+    "relatedSpots": "Related night spots",
+    "items": {
+      "streets": {
+        "dos": ["Please walk on the right side.", "Enjoy street food near the food carts, then throw your trash in a bin."],
+        "donts": ["Please don't be loud near residential areas."]
+      },
+      "parks": {
+        "dos": ["When walking your pet, keep the leash short and bring waste bags.", "Use the designated path for bikes and scooters.", "Please tidy up your spot after a picnic."],
+        "donts": ["Please don't disturb others by being loud in the plaza.", "Please don't stay past closing hours."]
+      },
+      "views": {
+        "dos": ["Please don't get in the way when others are taking photos.", "Check the opening hours and closed days before you go."],
+        "donts": ["Please don't lean on the railing while enjoying the view.", "Please don't block the walkway with a tripod."]
+      },
+      "nature": {
+        "dos": ["Please point your lantern toward the ground."],
+        "donts": ["Please don't shine your lantern at wildlife.", "Please stay on the marked path."]
+      },
+      "oncheon": {
+        "dos": ["Please rinse your feet before using the foot bath.", "Please wear the provided sauna clothes in the jjimjilbang."],
+        "donts": ["Please don't run or swim in the bathing pool.", "Please use the towel only to dry yourself."]
+      },
+      "pojangmacha": {
+        "dos": ["Order a variety of dishes at the pojangmacha and share them."],
+        "donts": ["Please don't haggle over the price.", "Please don't bring in outside food."]
+      },
+      "dining": {
+        "dos": ["When an elder pours you a drink, receive it with both hands."],
+        "donts": ["Please don't pour your own drink while your glass still has some left."]
+      },
+      "noraebang": {
+        "dos": ["Please use a microphone cover.", "Enjoy the noraebang together with a tambourine."],
+        "donts": ["Please don't hold the microphone too close to your mouth."]
+      },
+      "festival": {
+        "dos": ["Please wait your turn in line."],
+        "donts": ["Please don't block the way to take photos."]
+      },
+      "latefood": {
+        "dos": ["Try chimaek — the culture of enjoying fried chicken with beer."],
+        "donts": []
+      },
+      "convenience": {
+        "dos": ["Top up a T-money transit card for public transport.", "Please dispose of your trash properly after using the store."],
+        "donts": ["Please don't leave your trash behind after using the store."]
+      },
+      "transport": {
+        "dos": ["If public transit has stopped, look for a taxi stand near the station.", "Check the bus operating hours.", "If you've been drinking, use a designated-driver service."],
+        "donts": ["Please don't walk alone through dark alleys."]
+      },
+      "safety": {
+        "dos": ["In an emergency, call 112 or 119."],
+        "donts": ["Please don't accept drinks from strangers."]
+      }
+    }
   },
   "community": {
     "title": "Night Community",

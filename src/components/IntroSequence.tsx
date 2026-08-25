@@ -24,11 +24,11 @@ import { useTranslations } from "next-intl";
  * (스크롤 하이재킹 없음), 매 스크롤 이벤트 값을 그대로 쓰지 않고 rAF 루프로
  * 계속 완만하게 뒤쫓아가며(lerp) 적용해 트랙패드·휠 입력이 뚝뚝 끊겨도 매끄럽다.
  *
- * 재생 조건: localStorage의 tn_intro_seen이 없으면 재생, 있으면(이미 이 브라우저에서
- * 본 적 있으면) 건너뛴다 — 새로고침·재방문에도 유지된다. 다만 tn_intro_replay가
- * 서 있으면(가입 직후 SignupForm이 심어 둔다) seen과 무관하게 한 번 더 재생하고,
- * 끝나면 그 표시를 지운다. layout.tsx의 인라인 스크립트가 하이드레이션 전에
- * html[data-intro-seen]을 붙여, 이미 본 경우 첫 페인트부터 번쩍임 없이 숨긴다.
+ * 재생 조건: 진짜로(브라우저가 문서를 새로) 홈에 들어올 때만 재생한다. 다른 메뉴를
+ * 보다가 라우터로(클라이언트 사이드 내비게이션) 홈에 돌아온 것은 "새로 접속"이
+ * 아니므로 건너뛴다 — moduleAlreadyRan이 그 구분자다: 새로고침/새 탭처럼 이 모듈이
+ * 처음부터 다시 평가될 때만 false로 시작하고, 라우터 이동으로는 리셋되지 않는다.
+ * '동작 줄이기'를 켠 경우에도 건너뛴다.
  */
 
 const WORD = "TourNight";
@@ -48,6 +48,35 @@ const GRAY: [number, number, number] = [156, 163, 175];
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
+// 브라우저 쪽 모듈 스코프 — 진짜 새 문서 로드(새로고침·새 탭·주소 직접 입력)에서만
+// 다시 false로 초기화된다. 같은 로드 안에서 라우터로 페이지를 옮겨 다녀도 이 값은
+// 그대로 살아있어, 홈으로 되돌아와도 재생하지 않는다.
+//
+// 이 값은 오직 클라이언트(useSyncExternalStore의 getSnapshot)에서만 읽고 쓴다.
+// getServerSnapshot에서 건드리면 안 된다 — 서버 렌더는 (개발 서버가 오래 떠
+// 있는 동안) 여러 요청이 같은 Node 모듈 인스턴스를 공유해서, 한 번이라도
+// 여기서 true로 바뀌면 그 뒤 모든 사용자의 첫 방문까지 인트로가 안 뜨게 된다.
+let moduleAlreadyRan = false;
+
+/** 이 마운트가 "새 문서 로드에서의 첫 마운트"인지 — 라우터로 돌아온 재마운트면 true */
+function useIsSpaRevisit() {
+  const capturedRef = useRef<boolean | undefined>(undefined);
+  return useSyncExternalStore(
+    () => () => {},
+    () => {
+      // useSyncExternalStore는 같은 렌더 안에서 getSnapshot을 여러 번 부를 수 있어
+      // (tearing 감지) 매번 새로 읽고 쓰면 두 번째 호출부터 값이 달라져 버린다 —
+      // ref로 한 번만 확정한다
+      if (capturedRef.current === undefined) {
+        capturedRef.current = moduleAlreadyRan;
+        moduleAlreadyRan = true;
+      }
+      return capturedRef.current;
+    },
+    () => false,
+  );
+}
+
 /** OS의 '동작 줄이기' 설정 — HeroCarousel과 동일한 패턴 */
 function useReducedMotion() {
   return useSyncExternalStore(
@@ -57,26 +86,6 @@ function useReducedMotion() {
       return () => mq.removeEventListener("change", onChange);
     },
     () => window.matchMedia(REDUCED_MOTION).matches,
-    () => false,
-  );
-}
-
-/** 이 브라우저에서 건너뛰어야 하는지 — localStorage는 세션과 달리 새로고침·재방문에도
- * 남는다. replay 예약이 있으면 이미 봤어도 건너뛰지 않는다. 서버에서는 알 수 없어
- * 항상 "재생"으로 그렸다가 하이드레이션 후 맞춘다 — 실제 번쩍임은 레이아웃의 인라인
- * 스크립트(+ CSS)가 막는다 */
-function useShouldSkip() {
-  return useSyncExternalStore(
-    () => () => {},
-    () => {
-      try {
-        const replay = localStorage.getItem("tn_intro_replay") === "1";
-        const seen = localStorage.getItem("tn_intro_seen") === "1";
-        return seen && !replay;
-      } catch {
-        return false;
-      }
-    },
     () => false,
   );
 }
@@ -99,7 +108,7 @@ function staggerLocal(globalP: number, total: number, i: number) {
 
 export default function IntroSequence() {
   const reducedMotion = useReducedMotion();
-  const shouldSkip = useShouldSkip();
+  const isSpaRevisit = useIsSpaRevisit();
   const t = useTranslations("intro");
 
   const [finished, setFinished] = useState(false);
@@ -109,6 +118,11 @@ export default function IntroSequence() {
   const [landStyle, setLandStyle] = useState<CSSProperties>({
     transform: "translate(-50%, -50%)",
   });
+  // 원의 최대 크기 계산용. 서버는 실제 뷰포트를 몰라 고정값으로 그리고, 마운트
+  // 후에만 진짜 크기로 맞춘다 — 처음부터 window.innerWidth를 쓰면 서버가 그린
+  // 값과 달라져 하이드레이션 경고가 난다 (이 값은 원이 사실상 안 보이는
+  // 단계에서만 쓰이므로, 하이드레이션 뒤 한 번 갱신되는 건 눈에 띄지 않는다)
+  const [viewport, setViewport] = useState({ w: 1920, h: 1080 });
 
   const landedRef = useRef(false);
   const logoRef = useRef<HTMLSpanElement>(null);
@@ -117,13 +131,13 @@ export default function IntroSequence() {
 
   // 타이핑이 다 끝났는지는 별도 상태 없이 글자 수로 그때그때 판단한다
   const phase0Done = typedCount >= WORD.length;
-  const done = finished || shouldSkip || reducedMotion;
+  const done = finished || reducedMotion || isSpaRevisit;
 
   const finish = useCallback(() => {
-    try {
-      localStorage.setItem("tn_intro_seen", "1");
-      localStorage.removeItem("tn_intro_replay");
-    } catch {}
+    // 스크롤로 여기까지 밀고 온 거리(스페이서)가 이 순간 통째로 사라지므로,
+    // 그대로 두면 브라우저가 스크롤 위치를 억지로 맞추다 화면 2(콘텐츠)에
+    // 떨어뜨린다. 커튼이 아직 화면을 완전히 덮은 채라 이 점프는 보이지 않는다
+    window.scrollTo(0, 0);
     setFinished(true);
   }, []);
 
@@ -162,6 +176,14 @@ export default function IntroSequence() {
     if (logoRef.current) logoRef.current.style.transform = "translate(-50%, -50%)";
     triggerEnd();
   }, [triggerEnd]);
+
+  // 실제 뷰포트 크기로 갱신 (마운트 후 1회 + 크기 변경 시)
+  useEffect(() => {
+    const update = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   // 타이핑 (스크롤과 무관, 자동 재생)
   useEffect(() => {
@@ -221,10 +243,11 @@ export default function IntroSequence() {
   const bgColor =
     progress < STAGE_A_END ? lerpColor(AMBER, BLACK, stageAProgress) : "rgb(0, 0, 0)";
 
-  const vw = typeof window !== "undefined" ? window.innerWidth : 1920;
-  const vh = typeof window !== "undefined" ? window.innerHeight : 1080;
-  const diag = Math.hypot(vw, vh) * 1.2;
-  const circleSize = progress < STAGE_A_END ? 0 : 16 + stageBProgress * (diag - 16);
+  const diag = Math.hypot(viewport.w, viewport.h) * 1.2;
+  // 원은 항상 diag 크기로 놓아두고 scale()만 바꾼다 — width/height를 매 프레임
+  // 바꾸면 레이아웃을 다시 계산해야 해서(리플로) 뚝뚝 끊긴다. scale은 합성 단계
+  // (컴포지터)에서만 처리돼 훨씬 매끄럽다
+  const circleScale = progress < STAGE_A_END ? 0 : (16 + stageBProgress * (diag - 16)) / diag;
 
   const lines = t("tagline").split("\n");
   const totalChars = lines.reduce((n, l) => n + l.length, 0);
@@ -236,7 +259,7 @@ export default function IntroSequence() {
   const riseOffset = (1 - stageEProgress) * 100;
 
   return (
-    <div data-intro-root>
+    <div>
       {/* 스크롤로 이 시퀀스를 밀고 지나갈 유효 구간 */}
       <div aria-hidden style={{ height: `${SPACER_VH}vh` }} />
 
@@ -254,8 +277,9 @@ export default function IntroSequence() {
                   style={{
                     color: i < TOUR_LEN ? "#ffffff" : "#000000",
                     opacity: 1 - local,
+                    // translateY만 쓴다 — blur는 프레임마다 여러 글자를 동시에
+                    // 다시 흐리게 그려야 해서(레이어 리페인트) 버벅임의 흔한 원인이다
                     transform: `translateY(${local * 44}px)`,
-                    filter: `blur(${local * 3}px)`,
                   }}
                 >
                   {ch}
@@ -265,14 +289,14 @@ export default function IntroSequence() {
           </p>
         </div>
 
-        {/* B — 흰 원이 커지며 화면을 덮는다 */}
+        {/* B — 흰 원이 커지며 화면을 덮는다 (크기는 고정, scale만 애니메이션) */}
         <div
           aria-hidden
           className="absolute left-1/2 top-1/2 rounded-full bg-white"
           style={{
-            width: circleSize,
-            height: circleSize,
-            transform: "translate(-50%, -50%)",
+            width: diag,
+            height: diag,
+            transform: `translate(-50%, -50%) scale(${circleScale})`,
           }}
         />
 
@@ -315,11 +339,25 @@ export default function IntroSequence() {
           <span className="text-amber-400">Night</span>
         </span>
 
+        {/* 스크롤로 진행하는 구간(타이핑이 끝난 뒤부터 착지 전까지) 내내 아주
+            옅게 안내한다. 배경이 노랑→검정→흰색→검정으로 계속 바뀌므로 고정
+            색 대신 blend-mode로 어떤 배경에서도 옅게나마 보이게 한다 */}
+        {phase0Done && !landing && (
+          <p
+            aria-hidden
+            className="absolute bottom-12 left-1/2 z-[102] -translate-x-1/2 text-[10px] font-semibold tracking-[0.3em] text-white/40"
+            style={{ mixBlendMode: "difference" }}
+          >
+            {t("scrollDown")}
+          </p>
+        )}
+
         {!landing && (
           <button
             type="button"
             onClick={handleSkip}
             className="absolute bottom-6 left-1/2 z-[102] -translate-x-1/2 text-xs font-semibold tracking-wide text-white/50 transition hover:text-white"
+            style={{ mixBlendMode: "difference" }}
           >
             {t("skip")}
           </button>

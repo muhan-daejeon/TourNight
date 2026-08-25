@@ -209,7 +209,7 @@ export default function Header() {
           (불투명도를 낮추면 오히려 뒤가 비쳐 옅어진다 — 진하게 보이려면 반대로
           높여야 한다) */}
       {menuOpen && (
-        <div className="absolute inset-x-0 top-full z-40 border-t border-white/10 bg-slate-950/90">
+        <div className="absolute inset-x-0 top-full z-40 border-t border-white/10 bg-slate-950/70">
           <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-6 py-10">
             {MENU_ROWS.map((row, i) => (
               <div

@@ -51,11 +51,6 @@ export default function SignupForm() {
       // 둘러보기(온보딩)까지 그 언어로 보이게 된다. 국가를 안 고른 경우에만
       // 지금까지 보던 언어(브라우저 감지값)를 유지한다.
       const target = country ? localeForCountry(country) : locale;
-      // 비로그인 상태로 홈을 이미 봤다면(=인트로도 이미 봤다면) 가입 직후
-      // 한 번 더 보여준다 — 이번엔 "내 계정"으로 들어왔다는 걸 각인시키는 의미
-      try {
-        localStorage.setItem("tn_intro_replay", "1");
-      } catch {}
       // 로그인과 같은 이유로 전체 이동해야 한다. 헤더의 홈 링크를 Next가 미리
       // 받아두는데, 가입 화면에서는 아직 비로그인이라 그 응답이 로그인 페이지로의
       // 리다이렉트다. router.push("/")는 그 캐시를 그대로 써서 방금 가입했는데도

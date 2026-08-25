@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
 
-const TRANSITION_MS = 600;
+const TRANSITION_MS = 300;
 
 /** 이 정도 어긋나 있으면 "그 화면 맨 위"로 본다 (휠 델타 한 틱 정도의 여유) */
 const EDGE_EPSILON = 4;

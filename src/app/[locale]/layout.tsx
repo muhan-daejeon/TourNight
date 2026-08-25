@@ -54,20 +54,8 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      // 아래 인라인 스크립트가 하이드레이션 전에 심는 data-intro-seen 속성은
-      // 서버가 알 수 없어 항상 불일치로 잡힌다 — 의도된 값이므로 경고를 끈다
-      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
-        {/* 인트로를 이미 봤으면(재생 예약이 없는 한) 첫 페인트 전에 CSS로 숨긴다.
-            리액트가 하이드레이션을 마치기 전까지는 서버가 항상 재생 상태로 그리므로,
-            이 스크립트 없이는 새로고침할 때마다 짧게 인트로가 번쩍인다. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "try{var r=localStorage.getItem('tn_intro_replay')==='1';var s=localStorage.getItem('tn_intro_seen')==='1';if(s&&!r)document.documentElement.setAttribute('data-intro-seen','1');}catch(e){}",
-          }}
-        />
         <NextIntlClientProvider>
           <Header />
           <main className="flex-1">{children}</main>
