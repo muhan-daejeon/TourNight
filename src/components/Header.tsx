@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Menu, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import LocaleSwitcher from "./LocaleSwitcher";
 import AuthNav from "./AuthNav";
 
-/** 상단 탭 */
+/** MENU를 열면 나오는 탭 (href의 출처) */
 const NAV_ITEMS = [
   { href: "/", key: "home" },
   { href: "/spots", key: "spots" },
@@ -33,15 +34,45 @@ const TOUR_KEY: Record<string, string> = {
   community: "community",
 };
 
-/**
- * 전체 메뉴에만 두는 항목. 상단에서 뺐다고 갈 길까지 없애면 주소를 직접 치지
- * 않는 한 못 들어가므로, 여기에 남겨 둔다.
- */
+/** 상단 탭에서 뺐다고 갈 길까지 없애면 주소를 직접 치지 않는 한 못 들어가므로,
+ * MENU 안에는 남겨 둔다. */
 const MENU_EXTRAS = [
   { href: "/food", key: "food" },
   { href: "/stay", key: "stay" },
   { href: "/shopping", key: "shopping" },
 ] as const;
+
+/** MENU를 열면 보이는 순서 — 홈은 좌측 상단 로고가 대신하므로 뺀다 */
+const MENU_ROWS: readonly (readonly string[])[] = [
+  ["spots", "festivals", "courses"],
+  ["personality", "etiquette", "phrases", "community"],
+  ["food", "stay", "shopping"],
+];
+
+function findNavItem(key: string) {
+  return [...NAV_ITEMS, ...MENU_EXTRAS].find((item) => item.key === key)!;
+}
+
+/**
+ * MENU가 기본으로 닫혀 있으니, 둘러보기가 헤더 탭을 밝혀야 하는 단계(예: /spots)에
+ * 와 있으면 대신 열어 준다 — 안 그러면 하이라이트 대상 자체가 화면에 없다.
+ * useSearchParams는 프리렌더 중 Suspense 경계가 필요해 따로 뺐다.
+ */
+function TourMenuSync({ onNeedOpen }: { onNeedOpen: () => void }) {
+  const pathname = usePathname();
+  const tourStep = useSearchParams().get("tour");
+
+  useLayoutEffect(() => {
+    if (!tourStep) return;
+    const active = NAV_ITEMS.some(
+      ({ href, key }) =>
+        TOUR_KEY[key] && (href === "/" ? pathname === "/" : pathname.startsWith(href)),
+    );
+    if (active) onNeedOpen();
+  }, [tourStep, pathname, onNeedOpen]);
+
+  return null;
+}
 
 export default function Header() {
   const t = useTranslations();
@@ -51,6 +82,20 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  // 로고+메뉴 행의 실제 높이를 --header-h로 남겨, 이 행 위 여백과 슬라이드
+  // 배너 상단 여백이 실제 헤더 높이에 맞춰 함께 커지고 줄어들게 한다
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    const set = () =>
+      document.documentElement.style.setProperty("--header-h", `${el.offsetHeight}px`);
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // 페이지를 옮기면 열려 있던 메뉴·검색창은 닫는다. 효과가 아니라 렌더 중에
   // 정리하는 이유는, 효과로 하면 이전 경로의 열린 메뉴가 한 프레임 깜빡이기 때문
@@ -78,37 +123,38 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-slate-950/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+      <Suspense fallback={null}>
+        <TourMenuSync onNeedOpen={() => setMenuOpen(true)} />
+      </Suspense>
+      {/* 로고+메뉴 행 위 여백 — 행 자신의 높이만큼, 스크롤해도 유지된다 */}
+      <div aria-hidden style={{ height: "var(--header-h, 0px)" }} />
+      <div ref={rowRef} className="flex w-full items-center gap-4 px-6 py-3">
         {/* 브랜드 워드마크는 번역하지 않는다 — 로고이자 서비스 고유명 */}
-        <Link href="/" className="flex shrink-0 flex-col leading-none">
-          <span className="text-[17px] font-extrabold tracking-tight text-white">
-            Tour<span className="text-indigo-400">Night</span>
+        <Link href="/" className="ml-10 flex shrink-0 flex-col leading-none">
+          <span
+            data-header-logo
+            className="text-[34px] font-extrabold tracking-tight text-white"
+          >
+            Tour<span className="text-amber-400">Night</span>
           </span>
           <span className="mt-1 text-[10px] tracking-tight text-slate-500">
             {t("site.tagline")}
           </span>
         </Link>
 
-        <nav className="mx-auto hidden items-center gap-6 text-sm text-slate-300 lg:flex">
-          {NAV_ITEMS.map(({ href, key }) => (
-            <Link
-              key={href}
-              href={href}
-              // 둘러보기에서 이 탭도 함께 밝힌다 (어느 메뉴 얘기인지 보이도록)
-              data-tour-nav={TOUR_KEY[key]}
-              className={linkClass(isActive(href))}
-            >
-              {t(`nav.${key}`)}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="ml-auto flex shrink-0 items-center gap-2 lg:ml-0">
-          {/* 시안에는 없지만 전 페이지가 로그인 필요라 로그아웃 경로가 늘 보여야 한다.
-              좁은 화면에서는 자리가 없어 햄버거 메뉴 안으로 들어간다 */}
-          <div className="hidden lg:block">
-            <AuthNav />
-          </div>
+        <div className="ml-auto mr-20 flex shrink-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label={t("nav.menu")}
+            aria-expanded={menuOpen}
+            className={`mr-16 text-xs font-bold tracking-[0.2em] transition ${
+              menuOpen ? "text-amber-300" : "text-slate-300 hover:text-amber-300"
+            }`}
+          >
+            MENU
+          </button>
+          <AuthNav />
           <button
             type="button"
             onClick={() => {
@@ -123,15 +169,6 @@ export default function Header() {
             <Search size={18} />
           </button>
           <LocaleSwitcher />
-          <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label={t("nav.menu")}
-            aria-expanded={menuOpen}
-            className="rounded-full p-2 text-slate-300 transition hover:bg-white/5 hover:text-white"
-          >
-            {menuOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
         </div>
       </div>
 
@@ -140,7 +177,7 @@ export default function Header() {
           onSubmit={submitSearch}
           className="border-t border-white/[0.06] bg-slate-950/95"
         >
-          <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3">
+          <div className="flex w-full items-center gap-2 px-6 py-3">
             <Search size={16} className="shrink-0 text-slate-500" />
             <input
               ref={searchRef}
@@ -168,23 +205,33 @@ export default function Header() {
         </form>
       )}
 
+      {/* MENU — 문서 흐름을 밀어내지 않는 오버레이. 거의 다 채운 검정에 가깝게
+          (불투명도를 낮추면 오히려 뒤가 비쳐 옅어진다 — 진하게 보이려면 반대로
+          높여야 한다) */}
       {menuOpen && (
-        <div className="border-t border-white/[0.06] bg-slate-950/95">
-          <div className="mx-auto max-w-6xl px-4 py-4">
-            <nav className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-slate-300 sm:grid-cols-3">
-              {[...NAV_ITEMS, ...MENU_EXTRAS].map(({ href, key }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={linkClass(isActive(href))}
-                >
-                  {t(`nav.${key}`)}
-                </Link>
-              ))}
-            </nav>
-            <div className="mt-4 flex items-center justify-end border-t border-white/[0.06] pt-4 lg:hidden">
-              <AuthNav />
-            </div>
+        <div className="absolute inset-x-0 top-full z-40 border-t border-white/10 bg-slate-950/90">
+          <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-6 py-10">
+            {MENU_ROWS.map((row, i) => (
+              <div
+                key={i}
+                className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4"
+              >
+                {row.map((key) => {
+                  const item = findNavItem(key);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      // 둘러보기에서 이 탭도 함께 밝힌다 (어느 메뉴 얘기인지 보이도록)
+                      data-tour-nav={TOUR_KEY[key]}
+                      className={`text-xl ${linkClass(isActive(item.href))}`}
+                    >
+                      {t(`nav.${key}`)}
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       )}

@@ -21,6 +21,8 @@ import {
   X,
   MessageCircle,
   ChevronRight,
+  ChevronLeft,
+  ImageOff,
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -185,30 +187,22 @@ export default function NightEtiquette({
         <div className="mt-6 space-y-4">
           <p className="text-sm leading-relaxed text-slate-400">{guide.intro}</p>
 
-          {/* Do / Don't */}
+          {/* Do / Don't — 항목마다 사진 한 장 + 설명, 화살표로 한 장씩 넘겨 본다 */}
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.05] p-5">
-              <p className="mb-3 text-sm font-bold text-emerald-300">{t("dos")}</p>
-              <ul className="space-y-2.5">
-                {guide.dos.map((d, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-slate-200">
-                    <Check size={15} className="mt-0.5 shrink-0 text-emerald-400" />
-                    {d}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-rose-400/20 bg-rose-400/[0.05] p-5">
-              <p className="mb-3 text-sm font-bold text-rose-300">{t("donts")}</p>
-              <ul className="space-y-2.5">
-                {guide.donts.map((d, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-slate-200">
-                    <X size={15} className="mt-0.5 shrink-0 text-rose-400" />
-                    {d}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <DoDontSlider
+              key={`dos-${selected}`}
+              title={t("dos")}
+              items={guide.dos}
+              tone="emerald"
+              Icon={Check}
+            />
+            <DoDontSlider
+              key={`donts-${selected}`}
+              title={t("donts")}
+              items={guide.donts}
+              tone="rose"
+              Icon={X}
+            />
           </div>
 
           {/* 상황 표현 — 기본(외워 쓰는 짧은 말) / 심화(요청·양해를 구하는 말) */}
@@ -285,6 +279,74 @@ export default function NightEtiquette({
               </div>
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const TONE = {
+  emerald: { border: "border-emerald-400/20", bg: "bg-emerald-400/[0.05]", text: "text-emerald-300", icon: "text-emerald-400" },
+  rose: { border: "border-rose-400/20", bg: "bg-rose-400/[0.05]", text: "text-rose-300", icon: "text-rose-400" },
+} as const;
+
+/**
+ * 항목 하나(사진 + 설명)씩 화살표로 넘겨 보는 Do/Don't 카드.
+ * 사진은 나중에 채워 넣을 자리만 잡아 둔다 — 지금은 빈 칸(자리 표시자)이다.
+ */
+function DoDontSlider({
+  title,
+  items,
+  tone,
+  Icon,
+}: {
+  title: string;
+  items: string[];
+  tone: keyof typeof TONE;
+  Icon: LucideIcon;
+}) {
+  const t = useTranslations("etiquette");
+  const [index, setIndex] = useState(0);
+  const c = TONE[tone];
+
+  if (items.length === 0) return null;
+  const current = Math.min(index, items.length - 1);
+
+  return (
+    <div className={`rounded-2xl border p-5 ${c.border} ${c.bg}`}>
+      <p className={`mb-3 text-sm font-bold ${c.text}`}>{title}</p>
+
+      {/* 사진 자리 — 항목별 사진은 추후 채워 넣는다 */}
+      <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl bg-slate-800/60">
+        <ImageOff size={26} strokeWidth={1.3} className="text-white/15" />
+      </div>
+
+      <p className="mt-3 flex gap-2 text-sm text-slate-200">
+        <Icon size={15} className={`mt-0.5 shrink-0 ${c.icon}`} />
+        {items[current]}
+      </p>
+
+      {items.length > 1 && (
+        <div className="mt-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setIndex((i) => (i - 1 + items.length) % items.length)}
+            aria-label={t("prevItem")}
+            className="rounded-full p-1.5 text-slate-400 transition hover:bg-white/5 hover:text-white"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span className="text-xs tabular-nums text-slate-500">
+            {current + 1} / {items.length}
+          </span>
+          <button
+            type="button"
+            onClick={() => setIndex((i) => (i + 1) % items.length)}
+            aria-label={t("nextItem")}
+            className="rounded-full p-1.5 text-slate-400 transition hover:bg-white/5 hover:text-white"
+          >
+            <ChevronRight size={16} />
+          </button>
         </div>
       )}
     </div>

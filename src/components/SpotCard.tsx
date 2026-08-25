@@ -79,7 +79,7 @@ export default function SpotCard({ spot }: { spot: NightSpot }) {
           <h3 className="truncate text-[15px] font-bold text-white group-hover:text-amber-300">
             {spot.title}
           </h3>
-          <p className="mt-1.5 flex gap-2 text-[11px] font-semibold text-indigo-300">
+          <p className="mt-1.5 flex gap-2 text-[11px] font-semibold text-amber-300">
             <span>#{t(`categories.${spot.category}`)}</span>
             {gu && <span>#{gu}</span>}
           </p>
