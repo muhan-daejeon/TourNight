@@ -620,7 +620,7 @@ function PostItem({
                   <button
                     type="button"
                     onClick={() => photoInputRef.current?.click()}
-                    disabled={submitting}
+                    disabled={!me || submitting}
                     aria-label={t("photoAdd")}
                     className="shrink-0 rounded-lg border border-white/15 px-2.5 py-2 text-slate-300 transition hover:border-white/30 hover:text-white disabled:opacity-40"
                   >
@@ -656,11 +656,14 @@ function PostItem({
 
 export default function CommunityBoard({
   initialPosts,
+  initialMe,
   canAttach,
   mailFrom,
 }: {
   /** 서버에서 렌더링한 글 목록 — 첫 화면부터 보이도록 초기값으로 쓴다 */
   initialPosts: Post[];
+  /** 서버에서 읽은 로그인 정보 — 글쓰기 영역이 첫 화면부터 제대로 그려진다 */
+  initialMe: Me | null;
   /** 스토리지 미설정 서버면 false → 첨부 UI 자체를 숨긴다 */
   canAttach: boolean;
   /** 인증 메일 발신 주소 (미설정이면 null) — 수신 허용 안내에 쓴다 */
@@ -672,7 +675,9 @@ export default function CommunityBoard({
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   // undefined = 로딩, null = 비로그인, Me = 로그인
-  const [me, setMe] = useState<Me | null | undefined>(undefined);
+  // 서버가 이미 알려줬으므로 물어볼 필요가 없다 (undefined 상태가 아예 없다).
+  // setter는 남겨 둔다 — 글을 올리다 세션이 만료되면(401) 로그인 유도로 바꾼다.
+  const [me, setMe] = useState<Me | null>(initialMe);
   const [quota, setQuota] = useState<Quota | null>(null);
   // canAttach는 서버에서 내려받는다 (스토리지 키 유무는 서버만 안다)
   const {
@@ -688,21 +693,6 @@ export default function CommunityBoard({
   });
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) =>
-        setMe(
-          data.user
-            ? {
-                id: data.user.id,
-                nickname: data.user.nickname,
-                emailVerified: !!data.user.emailVerified,
-              }
-            : null,
-        ),
-      )
-      .catch(() => setMe(null));
-
     // 남은 작성 횟수 — 비로그인이면 401이라 그냥 비워둔다
     fetch("/api/community/quota")
       .then((res) => (res.ok ? res.json() : null))
@@ -770,27 +760,45 @@ export default function CommunityBoard({
       <VerifyResultBanner />
 
       {/* 작성 영역 — 로그인만 하면 쓸 수 있고, 미인증이면 한도가 낮다는 안내만 얹는다 */}
+      {/*
+        누가 보고 있는지는 브라우저에서 /api/auth/me로 물어봐야 안다. 예전에는 그
+        답이 오기 전까지 높이 112px짜리 회색 상자만 두고 그 뒤에 진짜 입력창(183px)을
+        끼워 넣었는데, 답이 오는 데 800ms가 걸려 목록이 그만큼 아래로 밀렸다
+        (실측 CLS 0.097 — 구글이 '양호'로 보는 0.1 바로 아래).
+
+        그래서 입력창 자체는 처음부터 그려 두고, 아직 모르는 동안에는 입력만 막아
+        둔다. 닉네임 줄은 같은 높이의 자리 표시로 채워 글자가 들어와도 높이가
+        변하지 않는다. 로그아웃 상태로 판명되면(me === null) 그때 로그인 안내로
+        바꾼다 — 이 화면은 로그인해야 들어올 수 있어 드문 경우다.
+      */}
       <div data-tour="community">
-      {me === undefined ? (
-        <div className="h-28 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
-      ) : me ? (
+      {me === null ? (
+        <LoginPrompt text={t("loginToPost")} />
+      ) : (
         <div className="space-y-3">
-        {!me.emailVerified && <VerifyPrompt mailFrom={mailFrom} />}
+        {me && !me.emailVerified && <VerifyPrompt mailFrom={mailFrom} />}
         <form
           onSubmit={handleSubmit}
           className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur"
         >
           <p className="mb-2 text-xs text-slate-500">
-            {t("postingAs")} ·{" "}
-            <span className="text-amber-300/90">{me.nickname}</span>
+            {me ? (
+              <>
+                {t("postingAs")} ·{" "}
+                <span className="text-amber-300/90">{me.nickname}</span>
+              </>
+            ) : (
+              <span className="inline-block h-3 w-32 animate-pulse rounded bg-white/10 align-middle" />
+            )}
           </p>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            disabled={!me}
             maxLength={BODY_MAX}
             rows={2}
             placeholder={t("bodyPlaceholder")}
-            className="w-full resize-none rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60"
+            className="w-full resize-none rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60 disabled:opacity-60"
           />
           {/* 첨부 미리보기 */}
           {photo && (
@@ -844,7 +852,7 @@ export default function CommunityBoard({
             </div>
             <button
               type="submit"
-              disabled={!body.trim() || submitting}
+              disabled={!me || !body.trim() || submitting}
               className="flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Send size={14} />
@@ -853,8 +861,6 @@ export default function CommunityBoard({
           </div>
         </form>
         </div>
-      ) : (
-        <LoginPrompt text={t("loginToPost")} />
       )}
       </div>
 
