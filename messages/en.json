@@ -2,7 +2,8 @@
   "site": {
     "title": "TourNight",
     "tagline": "Travel the Night of Daejeon",
-    "description": "Science, nature, and night — your guide to Daejeon after dark"
+    "description": "Science, nature, and night — your guide to Daejeon after dark",
+    "loading": "Loading"
   },
   "intro": {
     "tagline": "Daejeon nights,\nfind your own color",
