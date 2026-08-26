@@ -136,6 +136,10 @@ export default function IntroSequence() {
   // 클릭으로 앞당긴 만큼의 "가상 스크롤" 거리(px). 실제 scrollY에 이 값을 더해서
   // progress를 구하므로, 클릭 이후에도 진짜 스크롤이 그 위에 자연스럽게 이어진다
   const clickOffsetRef = useRef(0);
+  // 더블클릭은 브라우저가 'click'을 두 번 쏘고 나서 dblclick을 보낸다 — 한 번
+  // 누른다고 생각한 클릭이 실제로는 두세 번 잡혀 단계를 몇 개씩 건너뛰던 걸
+  // 막는다 (마지막 처리로부터 이 시간 안의 추가 클릭은 무시)
+  const lastAdvanceAtRef = useRef(0);
 
   // 타이핑이 다 끝났는지는 별도 상태 없이 글자 수로 그때그때 판단한다
   const phase0Done = typedCount >= WORD.length;
@@ -240,6 +244,9 @@ export default function IntroSequence() {
   // 앞당긴 지점부터 자연스럽게 계속되게 한다
   const handleAdvance = useCallback(() => {
     if (!phase0Done || landedRef.current) return;
+    const now = Date.now();
+    if (now - lastAdvanceAtRef.current < 500) return;
+    lastAdvanceAtRef.current = now;
     const boundaries = [STAGE_A_END, STAGE_B_END, STAGE_D_END, 1];
     const next = boundaries.find((b) => b > rawProgressRef.current + 0.001) ?? 1;
     const max = window.innerHeight * (SPACER_VH / 100) - window.innerHeight;
