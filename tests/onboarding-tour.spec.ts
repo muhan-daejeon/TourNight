@@ -24,7 +24,8 @@ const STEPS = [
   { path: "/community", nav: "커뮤니티" },
 ] as const;
 
-/** 실제로 그려진 하이라이트 테두리 수 (본문 + 헤더 탭) */
+/** 실제로 그려진 하이라이트 테두리 수 (본문 영역). 헤더 쪽은 Header.tsx가
+ * 자체 표시(노란 테두리 + 대시 라벨)를 쓰고 이 링 시스템에 안 잡힌다 */
 function holeCount(page: Page) {
   return page.evaluate(
     () =>
@@ -63,15 +64,15 @@ test("가입하면 둘러보기가 뜨고 5단계를 돌 수 있다", async ({ p
       await expect(box).toBeVisible();
       await expect(box).toContainText(`${i + 1} / ${STEPS.length}`);
 
-      // 구멍은 본문 하나 + 그 단계의 헤더 탭 하나가 최소값이다.
-      // 스크롤·측정이 멎을 때까지 잠깐 기다린다 (늦게 붙는 대상이 있다).
+      // 구멍은 본문 하나가 최소값이다. 스크롤·측정이 멎을 때까지 잠깐
+      // 기다린다 (늦게 붙는 대상이 있다).
       await expect
         .poll(() => holeCount(page), { timeout: 15_000 })
-        .toBeGreaterThanOrEqual(2);
+        .toBeGreaterThanOrEqual(1);
 
-      // 헤더에서 이 단계에 해당하는 탭이 밝혀져 있어야 한다
+      // 헤더에서 이 단계에 해당하는 탭 이름이 노란 라벨로 밝혀져 있어야 한다
       await expect(
-        page.locator(`[data-tour-nav]`).filter({ hasText: step.nav }),
+        page.locator(`[data-tour-target]`).filter({ hasText: step.nav }),
       ).toHaveCount(1);
     }
 

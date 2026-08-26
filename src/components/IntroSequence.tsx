@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -24,6 +25,10 @@ import { useTranslations } from "next-intl";
  * (스크롤 하이재킹 없음), 매 스크롤 이벤트 값을 그대로 쓰지 않고 rAF 루프로
  * 계속 완만하게 뒤쫓아가며(lerp) 적용해 트랙패드·휠 입력이 뚝뚝 끊겨도 매끄럽다.
  *
+ * 화면을 클릭해도(스크롤 대신/추가로) 다음 단계 경계까지 진행된다 — 실제
+ * scrollY는 그대로 두고 "가상 오프셋"만 늘려서, 클릭 이후 이어지는 진짜
+ * 스크롤도 그 앞당겨진 지점부터 자연스럽게 계속된다.
+ *
  * 재생 조건: 진짜로(브라우저가 문서를 새로) 홈에 들어올 때만 재생한다. 다른 메뉴를
  * 보다가 라우터로(클라이언트 사이드 내비게이션) 홈에 돌아온 것은 "새로 접속"이
  * 아니므로 건너뛴다 — moduleAlreadyRan이 그 구분자다: 새로고침/새 탭처럼 이 모듈이
@@ -34,7 +39,7 @@ import { useTranslations } from "next-intl";
 const WORD = "TourNight";
 const TOUR_LEN = 4; // "Tour"
 const TYPE_INTERVAL_MS = 130;
-const SPACER_VH = 480;
+const SPACER_VH = 800;
 const SMOOTH_FACTOR = 0.12; // 클수록 즉각적, 작을수록 느긋하게 뒤쫓는다
 
 const STAGE_A_END = 0.16; // 글자 낙하 소멸
@@ -128,6 +133,9 @@ export default function IntroSequence() {
   const logoRef = useRef<HTMLSpanElement>(null);
   const rawProgressRef = useRef(0);
   const smoothProgressRef = useRef(0);
+  // 클릭으로 앞당긴 만큼의 "가상 스크롤" 거리(px). 실제 scrollY에 이 값을 더해서
+  // progress를 구하므로, 클릭 이후에도 진짜 스크롤이 그 위에 자연스럽게 이어진다
+  const clickOffsetRef = useRef(0);
 
   // 타이핑이 다 끝났는지는 별도 상태 없이 글자 수로 그때그때 판단한다
   const phase0Done = typedCount >= WORD.length;
@@ -177,6 +185,19 @@ export default function IntroSequence() {
     triggerEnd();
   }, [triggerEnd]);
 
+  // 새로고침 등으로 브라우저가 이전 스크롤 위치를 되살려 놓으면, 인트로가 이미
+  // 스크롤한 것처럼 중간부터 시작해 버린다. 뜨기 전에 맨 위로 되돌리고, 떠
+  // 있는 동안은 브라우저가 다시 되살리지 못하게 막는다 (끝나면 원래대로 복구)
+  useLayoutEffect(() => {
+    if (done) return;
+    const prevRestoration = "scrollRestoration" in history ? history.scrollRestoration : null;
+    if (prevRestoration) history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+    return () => {
+      if (prevRestoration) history.scrollRestoration = prevRestoration;
+    };
+  }, [done]);
+
   // 실제 뷰포트 크기로 갱신 (마운트 후 1회 + 크기 변경 시)
   useEffect(() => {
     const update = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
@@ -193,7 +214,7 @@ export default function IntroSequence() {
   }, [typedCount, done]);
 
   // 스크롤 → 목표 progress (ref에만 반영, 리렌더 없음). 타이핑이 끝나기 전에는
-  // 스크롤해도 0으로 묶어 둔다
+  // 스크롤해도 0으로 묶어 둔다. clickOffsetRef만큼 "미리 스크롤한 셈" 쳐서 더한다
   useEffect(() => {
     if (done) return;
     const onScroll = () => {
@@ -202,12 +223,30 @@ export default function IntroSequence() {
         return;
       }
       const max = window.innerHeight * (SPACER_VH / 100) - window.innerHeight;
-      rawProgressRef.current = max > 0 ? clamp01(window.scrollY / max) : 1;
+      // max가 0 이하로 잡히는 건 뷰포트를 순간적으로 잘못 잰 것뿐이지 "끝까지
+      // 스크롤했다"는 뜻이 아니다. 예전엔 이럴 때 무조건 1(=완료)로 떨어뜨려서,
+      // 그 순간이 한 번만 스쳐도 스크롤 한 번에 인트로가 통째로 끝나 버렸다
+      if (max <= 0) return;
+      const virtual = window.scrollY + clickOffsetRef.current;
+      rawProgressRef.current = clamp01(virtual / max);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, [done, phase0Done]);
+
+  // 화면을 클릭하면 스크롤 없이도 다음 단계(경계값)까지 밀어준다. 실제 scrollY는
+  // 그대로 두고 clickOffsetRef만 늘려서, 그 뒤에 이어지는 진짜 스크롤이 이
+  // 앞당긴 지점부터 자연스럽게 계속되게 한다
+  const handleAdvance = useCallback(() => {
+    if (!phase0Done || landedRef.current) return;
+    const boundaries = [STAGE_A_END, STAGE_B_END, STAGE_D_END, 1];
+    const next = boundaries.find((b) => b > rawProgressRef.current + 0.001) ?? 1;
+    const max = window.innerHeight * (SPACER_VH / 100) - window.innerHeight;
+    if (max <= 0) return; // 뷰포트를 순간적으로 잘못 잰 경우 — onScroll과 같은 이유로 무시
+    clickOffsetRef.current = next * max - window.scrollY;
+    rawProgressRef.current = next;
+  }, [phase0Done]);
 
   // 목표 progress를 매 프레임 완만하게 뒤쫓는다 — 스크롤 이벤트가 듬성듬성 와도
   // 화면은 끊기지 않고 계속 움직인다
@@ -263,7 +302,11 @@ export default function IntroSequence() {
       {/* 스크롤로 이 시퀀스를 밀고 지나갈 유효 구간 */}
       <div aria-hidden style={{ height: `${SPACER_VH}vh` }} />
 
-      <div className="fixed inset-0 z-[100] overflow-hidden" style={{ backgroundColor: bgColor }}>
+      <div
+        className="fixed inset-0 z-[100] overflow-hidden"
+        style={{ backgroundColor: bgColor }}
+        onClick={handleAdvance}
+      >
         {/* 0 / A — TourNight 타이핑 후 낙하 소멸 */}
         <div className="absolute inset-0 flex items-center justify-center px-4">
           <p className="flex text-5xl font-extrabold tracking-tight sm:text-7xl">
@@ -355,7 +398,11 @@ export default function IntroSequence() {
         {!landing && (
           <button
             type="button"
-            onClick={handleSkip}
+            onClick={(e) => {
+              // 바깥 div의 onClick(handleAdvance)까지 겹쳐 실행되지 않도록 막는다
+              e.stopPropagation();
+              handleSkip();
+            }}
             className="absolute bottom-6 left-1/2 z-[102] -translate-x-1/2 text-xs font-semibold tracking-wide text-white/50 transition hover:text-white"
             style={{ mixBlendMode: "difference" }}
           >
