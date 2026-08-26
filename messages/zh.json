@@ -2,7 +2,8 @@
   "site": {
     "title": "夜游大田",
     "tagline": "畅游大田之夜",
-    "description": "科学、自然与夜晚 — 大田夜间观光综合指南"
+    "description": "科学、自然与夜晚 — 大田夜间观光综合指南",
+    "loading": "加载中"
   },
   "intro": {
     "tagline": "大田的夜晚，\n寻找专属你的色彩",
