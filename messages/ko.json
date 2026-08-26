@@ -20,6 +20,10 @@
     "stay": "숙박",
     "shopping": "쇼핑",
     "menu": "전체 메뉴",
+    "groupExplore": "야간 탐색 · 게임",
+    "groupGuide": "여행 팁 · 가이드",
+    "groupLocal": "로컬 인프라 · 스팟",
+    "groupCommunity": "소통 · 후기",
     "home": "홈",
     "personality": "성향 테스트"
   },

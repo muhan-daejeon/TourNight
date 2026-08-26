@@ -10,7 +10,6 @@ import HeroCarousel, { type HeroSlide } from "@/components/HeroCarousel";
 import IntroSequence from "@/components/IntroSequence";
 import ScrollDownHint from "@/components/ScrollDownHint";
 import GuidebookBanner from "@/components/GuidebookBanner";
-import SnapScreens from "@/components/SnapScreens";
 
 // 야간 검증 스팟·커뮤니티 인기글 기준, 1시간 주기로 재생성
 export const revalidate = 3600;
@@ -28,9 +27,9 @@ export default async function HomePage({
   // 서로 의존하지 않으므로 한 번에 — 순차로 돌리면 홈 생성이 그만큼 늦어진다
   const [spots, popular] = await Promise.all([
     getVerifiedNightSpots(locale),
-    listPopularPosts(3),
+    listPopularPosts(4),
   ]);
-  const notices = listNotices(locale).slice(0, 2);
+  const notices = listNotices(locale);
   const photoSpots = spots.filter((s) => s.imageUrl);
 
   // 배너 배경 사진 — 등록된 명소 사진을 순서대로 돌려 쓴다. 무작위로 뽑으면
@@ -55,7 +54,7 @@ export default async function HomePage({
       ctaLabel: t("heroPersonaCta"),
       href: "/personality",
       gradient: "from-indigo-950 via-purple-950 to-slate-950",
-      image: nthPhoto(1),
+      image: "/slides/slide-1.jpg",
     },
     // 축제 명소 — 특정 축제 데이터가 아니라 축제&행사 탭으로 안내하는 고정 배너
     {
@@ -96,9 +95,7 @@ export default async function HomePage({
     <div className="mx-auto max-w-6xl px-4 pb-4">
       <IntroSequence />
 
-      {/* 화면 1: 슬라이드 배너 / 화면 2: 소식·인기글·SNS + 가이드북 —
-          휠로 넘길 때 다음 화면으로 전환되는 느낌을 주는 스냅 컨테이너 */}
-      <SnapScreens>
+      <>
         <section className="relative min-h-screen">
           {/* 슬라이드는 (헤더 밑) 화면 정중앙 — 가로·세로 모두.
               --header-h는 로고+메뉴 "행" 자신의 높이만 담고 있고, 실제 헤더는
@@ -121,12 +118,12 @@ export default async function HomePage({
             <div className="absolute inset-x-0 bottom-4 flex flex-col items-center gap-2 px-4">
               {/* 오늘 밤 정보 — 천문연구원 일몰·월령 */}
               <NightInfo />
-              <ScrollDownHint />
+              <ScrollDownHint targetId="content" />
             </div>
           </div>
         </section>
 
-        <section id="content" className="pt-10">
+        <section id="content" className="pt-16">
           <div
             id="news"
             className="grid scroll-mt-24 gap-10 lg:grid-cols-[1.5fr_1fr_1fr]"
@@ -275,7 +272,7 @@ export default async function HomePage({
             </span>
           </p>
           <div className="grid grid-cols-3 gap-2">
-            {photoSpots.slice(0, 3).map((s) => (
+            {photoSpots.slice(0, 6).map((s) => (
               <Link
                 key={s.contentId}
                 href={`/spots/${s.contentId}`}
@@ -303,11 +300,11 @@ export default async function HomePage({
           </div>
 
           {/* ── 가이드북 배너 ── */}
-          <div className="mt-14">
+          <div className="mt-20">
             <GuidebookBanner />
           </div>
         </section>
-      </SnapScreens>
+      </>
     </div>
   );
 }

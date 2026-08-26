@@ -8,7 +8,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import LocaleSwitcher from "./LocaleSwitcher";
 import AuthNav from "./AuthNav";
 
-/** MENU를 열면 나오는 탭 (href의 출처) */
+/** 탭의 href 출처 */
 const NAV_ITEMS = [
   { href: "/", key: "home" },
   { href: "/spots", key: "spots" },
@@ -34,42 +34,61 @@ const TOUR_KEY: Record<string, string> = {
   community: "community",
 };
 
-/** 상단 탭에서 뺐다고 갈 길까지 없애면 주소를 직접 치지 않는 한 못 들어가므로,
- * MENU 안에는 남겨 둔다. */
+/** 상단 카테고리에서 뺐다고 갈 길까지 없애면 주소를 직접 치지 않는 한 못 들어가므로,
+ * "로컬 인프라 · 스팟" 그룹 안에 남겨 둔다. */
 const MENU_EXTRAS = [
   { href: "/food", key: "food" },
   { href: "/stay", key: "stay" },
   { href: "/shopping", key: "shopping" },
 ] as const;
 
-/** MENU를 열면 보이는 순서 — 홈은 좌측 상단 로고가 대신하므로 뺀다 */
-const MENU_ROWS: readonly (readonly string[])[] = [
-  ["spots", "festivals", "courses"],
-  ["personality", "etiquette", "phrases", "community"],
-  ["food", "stay", "shopping"],
-];
+/** 상단에 늘 보이는 4개 카테고리와 그 아래 묶인 탭들 — 홈은 좌측 로고가 대신한다 */
+const MENU_GROUPS = [
+  { id: "explore", labelKey: "groupExplore", items: ["spots", "festivals", "courses", "personality"] },
+  { id: "guide", labelKey: "groupGuide", items: ["etiquette", "phrases"] },
+  { id: "local", labelKey: "groupLocal", items: ["food", "stay", "shopping"] },
+  { id: "community", labelKey: "groupCommunity", items: ["community"] },
+] as const;
 
 function findNavItem(key: string) {
   return [...NAV_ITEMS, ...MENU_EXTRAS].find((item) => item.key === key)!;
 }
 
+function isActiveHref(pathname: string, href: string) {
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
+
+interface TourTarget {
+  groupId: string;
+  itemKey: string;
+}
+
 /**
- * MENU가 기본으로 닫혀 있으니, 둘러보기가 헤더 탭을 밝혀야 하는 단계(예: /spots)에
- * 와 있으면 대신 열어 준다 — 안 그러면 하이라이트 대상 자체가 화면에 없다.
+ * 둘러보기 중에는 카테고리를 펼쳐 보여주는 대신(펼치면 그 목록이 화면 위에
+ * 그대로 겹쳐 보였다), 그 탭이 속한 카테고리 자체를 노란 테두리로 밝히고
+ * 옆에 "— 탭이름"을 노란 글자로 붙인다. 나머지 카테고리는 흐리게 죽인다.
  * useSearchParams는 프리렌더 중 Suspense 경계가 필요해 따로 뺐다.
  */
-function TourMenuSync({ onNeedOpen }: { onNeedOpen: () => void }) {
+function TourMenuSync({ onChange }: { onChange: (target: TourTarget | null) => void }) {
   const pathname = usePathname();
   const tourStep = useSearchParams().get("tour");
 
   useLayoutEffect(() => {
-    if (!tourStep) return;
-    const active = NAV_ITEMS.some(
-      ({ href, key }) =>
-        TOUR_KEY[key] && (href === "/" ? pathname === "/" : pathname.startsWith(href)),
-    );
-    if (active) onNeedOpen();
-  }, [tourStep, pathname, onNeedOpen]);
+    if (!tourStep) {
+      onChange(null);
+      return;
+    }
+    for (const group of MENU_GROUPS) {
+      const itemKey = group.items.find(
+        (key) => TOUR_KEY[key] && isActiveHref(pathname, findNavItem(key).href),
+      );
+      if (itemKey) {
+        onChange({ groupId: group.id, itemKey });
+        return;
+      }
+    }
+    onChange(null);
+  }, [tourStep, pathname, onChange]);
 
   return null;
 }
@@ -79,12 +98,39 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [tourTarget, setTourTarget] = useState<TourTarget | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
+  const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const colRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  // 로고+메뉴 행의 실제 높이를 --header-h로 남겨, 이 행 위 여백과 슬라이드
+  // 자식 목록 각각을 그 위 부모 버튼의 실제 가로 중앙에 맞춘다. 부모들은
+  // gap-x-20으로 벌어져 있고 자식 목록마다 폭이 달라(커뮤니티는 1개, 야간
+  // 탐색은 4개) 같은 간격의 flex로는 절대 안 맞길래, 버튼 위치를 직접 재서
+  // 자식 목록에 옮겨 붙인다. absolute로 두는 만큼 패널 높이도 직접 정해 준다
+  useLayoutEffect(() => {
+    if (!menuOpen) return;
+    const align = () => {
+      let maxH = 0;
+      for (const group of MENU_GROUPS) {
+        const btn = btnRefs.current[group.id];
+        const col = colRefs.current[group.id];
+        if (!btn || !col) continue;
+        const r = btn.getBoundingClientRect();
+        col.style.left = `${r.left + r.width / 2}px`;
+        maxH = Math.max(maxH, col.offsetHeight);
+      }
+      if (panelRef.current) panelRef.current.style.height = `${maxH + 64}px`;
+    };
+    align();
+    window.addEventListener("resize", align);
+    return () => window.removeEventListener("resize", align);
+  }, [menuOpen]);
+
+  // 로고+카테고리 행의 실제 높이를 --header-h로 남겨, 이 행 위 여백과 슬라이드
   // 배너 상단 여백이 실제 헤더 높이에 맞춰 함께 커지고 줄어들게 한다
   useEffect(() => {
     const el = rowRef.current;
@@ -97,8 +143,8 @@ export default function Header() {
     return () => ro.disconnect();
   }, []);
 
-  // 페이지를 옮기면 열려 있던 메뉴·검색창은 닫는다. 효과가 아니라 렌더 중에
-  // 정리하는 이유는, 효과로 하면 이전 경로의 열린 메뉴가 한 프레임 깜빡이기 때문
+  // 페이지를 옮기면 열려 있던 카테고리·검색창은 닫는다. 효과가 아니라 렌더 중에
+  // 정리하는 이유는, 효과로 하면 이전 경로의 열린 목록이 한 프레임 깜빡이기 때문
   const [seenPath, setSeenPath] = useState(pathname);
   if (seenPath !== pathname) {
     setSeenPath(pathname);
@@ -112,8 +158,7 @@ export default function Header() {
     }`;
 
   // "/"는 startsWith로 보면 모든 경로에 걸리므로 정확히 일치할 때만 현재 탭이다
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isActive = (href: string) => isActiveHref(pathname, href);
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,13 +167,16 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-slate-950/80 backdrop-blur-md">
+    // 온보딩 투어의 흐림막(z-[55])보다 위에 둔다 — 안 그러면 투어 중 헤더 전체가
+    // backdrop-blur에 걸려 부모 메뉴 글자까지 흐릿해진다. 켜져 있지 않을 때도
+    // z-50이던 걸 z-[56]으로만 올린 것뿐이라 다른 겹침에는 영향이 없다
+    <header className="sticky top-0 z-[56] border-b border-white/[0.06] bg-slate-950/80 backdrop-blur-md">
       <Suspense fallback={null}>
-        <TourMenuSync onNeedOpen={() => setMenuOpen(true)} />
+        <TourMenuSync onChange={setTourTarget} />
       </Suspense>
-      {/* 로고+메뉴 행 위 여백 — 행 자신의 높이만큼, 스크롤해도 유지된다 */}
+      {/* 로고+카테고리 행 위 여백 — 행 자신의 높이만큼, 스크롤해도 유지된다 */}
       <div aria-hidden style={{ height: "var(--header-h, 0px)" }} />
-      <div ref={rowRef} className="flex w-full items-center gap-4 px-6 py-3">
+      <div ref={rowRef} className="relative flex w-full items-center gap-4 px-6 py-3">
         {/* 브랜드 워드마크는 번역하지 않는다 — 로고이자 서비스 고유명 */}
         <Link href="/" className="ml-10 flex shrink-0 flex-col leading-none">
           <span
@@ -142,18 +190,54 @@ export default function Header() {
           </span>
         </Link>
 
+        {/* 4개 카테고리 — 화면 정중앙에 절대 위치시켜 로고·오른쪽 묶음의 폭과
+            무관하게 가운데 온다. 각각 누르면 바로 밑에 세로로 탭이 펼쳐진다 */}
+        <nav className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-wrap items-center justify-center gap-x-20 gap-y-3">
+          {MENU_GROUPS.map((group) => {
+            const groupActive = group.items.some((key) => isActive(findNavItem(key).href));
+            const isTourTarget = tourTarget?.groupId === group.id;
+            const dimmedByTour = !!tourTarget && !isTourTarget;
+
+            return (
+              <div key={group.id} className="flex items-center gap-2">
+                <button
+                  ref={(el) => {
+                    btnRefs.current[group.id] = el;
+                  }}
+                  type="button"
+                  onClick={() => setMenuOpen((v) => !v)}
+                  aria-expanded={menuOpen}
+                  className={`whitespace-nowrap text-base tracking-wide transition ${
+                    isTourTarget
+                      ? "rounded-lg border-2 border-amber-400 px-3 py-1 font-semibold text-amber-300"
+                      : dimmedByTour
+                        ? "font-light text-slate-600"
+                        : groupActive
+                          ? "font-light text-amber-300"
+                          : "font-light text-slate-200 hover:text-amber-300"
+                  }`}
+                >
+                  {t(`nav.${group.labelKey}`)}
+                </button>
+
+                {/* 둘러보기 중엔 그 카테고리 오른쪽에 "— 탭이름"을 작은 노란 글자로 붙인다.
+                    data-tour-target은 테스트 전용 표식이다 — OnboardingTour의 링 표시는
+                    [data-tour-nav]만 찾으므로 이름을 다르게 둬 여기엔 테두리가 안 붙는다 */}
+                {isTourTarget && (
+                  <span
+                    data-tour-target={TOUR_KEY[tourTarget.itemKey]}
+                    className="flex items-center gap-1.5 whitespace-nowrap text-[13px] font-light text-amber-300"
+                  >
+                    <span aria-hidden>—</span>
+                    {t(`nav.${tourTarget.itemKey}`)}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+
         <div className="ml-auto mr-20 flex shrink-0 items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label={t("nav.menu")}
-            aria-expanded={menuOpen}
-            className={`mr-16 text-xs font-bold tracking-[0.2em] transition ${
-              menuOpen ? "text-amber-300" : "text-slate-300 hover:text-amber-300"
-            }`}
-          >
-            MENU
-          </button>
           <AuthNav />
           <button
             type="button"
@@ -171,6 +255,38 @@ export default function Header() {
           <LocaleSwitcher />
         </div>
       </div>
+
+      {menuOpen && (
+        <div
+          ref={panelRef}
+          className="absolute inset-x-0 top-full z-40 overflow-hidden border-t border-white/10 bg-slate-950"
+        >
+          {/* 부모 이름은 되풀이하지 않는다 — 각 목록을 그 위 부모 버튼의 실제
+              가로 중앙에 맞춰 옮겨 붙이므로 어느 부모 것인지는 위치로 보인다 */}
+          {MENU_GROUPS.map((group) => (
+            <div
+              key={group.id}
+              ref={(el) => {
+                colRefs.current[group.id] = el;
+              }}
+              className="absolute top-8 flex -translate-x-1/2 flex-col items-center gap-1"
+            >
+              {group.items.map((key) => {
+                const item = findNavItem(key);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`whitespace-nowrap rounded-lg px-2 py-1.5 text-center text-base transition ${linkClass(isActive(item.href))}`}
+                  >
+                    {t(`nav.${key}`)}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      )}
 
       {searchOpen && (
         <form
@@ -203,37 +319,6 @@ export default function Header() {
             </button>
           </div>
         </form>
-      )}
-
-      {/* MENU — 문서 흐름을 밀어내지 않는 오버레이. 거의 다 채운 검정에 가깝게
-          (불투명도를 낮추면 오히려 뒤가 비쳐 옅어진다 — 진하게 보이려면 반대로
-          높여야 한다) */}
-      {menuOpen && (
-        <div className="absolute inset-x-0 top-full z-40 border-t border-white/10 bg-slate-950/70">
-          <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-6 py-10">
-            {MENU_ROWS.map((row, i) => (
-              <div
-                key={i}
-                className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4"
-              >
-                {row.map((key) => {
-                  const item = findNavItem(key);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      // 둘러보기에서 이 탭도 함께 밝힌다 (어느 메뉴 얘기인지 보이도록)
-                      data-tour-nav={TOUR_KEY[key]}
-                      className={`text-xl ${linkClass(isActive(item.href))}`}
-                    >
-                      {t(`nav.${key}`)}
-                    </Link>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
       )}
     </header>
   );
