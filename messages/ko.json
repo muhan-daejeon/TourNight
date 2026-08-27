@@ -2,7 +2,13 @@
   "site": {
     "title": "투어나잇",
     "tagline": "대전의 밤을 여행하다",
-    "description": "과학, 자연, 그리고 밤 — 대전 야간관광 통합 안내"
+    "description": "과학, 자연, 그리고 밤 — 대전 야간관광 통합 안내",
+    "loading": "불러오는 중"
+  },
+  "intro": {
+    "tagline": "대전의 밤,\n당신만의 색깔을 찾아서",
+    "skip": "건너뛰기",
+    "scrollDown": "SCROLL DOWN"
   },
   "nav": {
     "spots": "야간 명소",
@@ -11,10 +17,14 @@
     "community": "커뮤니티",
     "phrases": "서바이벌 한국어",
     "festivals": "축제&행사",
-    "food": "맛집",
-    "stay": "숙박",
-    "shopping": "쇼핑",
+    "food": "야식 맛집",
+    "stay": "오늘 밤 숙소",
+    "shopping": "야시장 · 쇼핑",
     "menu": "전체 메뉴",
+    "groupExplore": "둘러보기",
+    "groupGuide": "여행 가이드",
+    "groupLocal": "나이트 라이프",
+    "groupCommunity": "커뮤니티",
     "home": "홈",
     "personality": "성향 테스트"
   },
@@ -37,7 +47,10 @@
       "science": "과학",
       "nature": "자연",
       "festival": "축제",
-      "city": "도심"
+      "city": "도심",
+      "food": "맛집",
+      "stay": "숙소",
+      "shopping": "쇼핑"
     },
     "ctaSpots": "야간 명소 보기",
     "ctaGuide": "나이트 에티켓",
@@ -49,7 +62,10 @@
     "scrollPrev": "이전으로",
     "scrollNext": "다음으로",
     "heroFestivalOverline": "지금, 대전의 밤은 특별합니다",
+    "heroFestivalTitle": "대전의 밤을 채우는 축제 명소",
+    "heroFestivalSubtitle": "현재 진행 중인 축제만 모아봤어요",
     "heroFestivalCta": "자세히 보기",
+    "scrollDown": "SCROLL DOWN",
     "heroAiOverline": "AI 코스 추천",
     "heroAiTitle": "밤을 거니는 가장 스마트한 방법",
     "heroAiHighlight": "가장 스마트한",
@@ -205,12 +221,132 @@
     },
     "dos": "이렇게 하세요",
     "donts": "피하세요",
+    "prevItem": "이전 항목",
+    "nextItem": "다음 항목",
     "saySection": "이럴 때 이렇게 말해요",
     "level": {
       "basic": "기본",
       "advanced": "심화"
     },
-    "relatedSpots": "관련 야간 명소"
+    "relatedSpots": "관련 야간 명소",
+    "items": {
+      "streets": {
+        "dos": [
+          "우측통행을 지켜주세요.",
+          "포장마차 근처에서 음식을 먹고 쓰레기통에 버려주세요."
+        ],
+        "donts": [
+          "집 주변에서 시끄럽게 하지 마세요."
+        ]
+      },
+      "parks": {
+        "dos": [
+          "반려동물과 산책 시 목줄은 짧게 잡고 배변봉투를 사용해주세요.",
+          "자전거나 킥보드는 전용 도로를 사용해주세요.",
+          "피크닉 후 자리를 정돈해 주세요."
+        ],
+        "donts": [
+          "광장에서 시끄럽게 해서 주변 사람들에게 피해를 주지 마세요.",
+          "이용시간을 어기지 말아주세요."
+        ]
+      },
+      "views": {
+        "dos": [
+          "다른 사람이 사진을 찍을 때 방해하지 마세요.",
+          "명소에 가기 전에 이용시간과 휴무일을 확인해주세요."
+        ],
+        "donts": [
+          "야경을 보며 난간에 기대지 마세요.",
+          "통행로를 삼각대로 막지 마세요."
+        ]
+      },
+      "nature": {
+        "dos": [
+          "랜턴은 바닥을 향해 비춰주세요."
+        ],
+        "donts": [
+          "야생동물에게 랜턴을 비추지 마세요.",
+          "통행로가 아닌 곳은 가지 마세요."
+        ]
+      },
+      "oncheon": {
+        "dos": [
+          "족욕탕 이용 전에 발을 먼저 씻어주세요.",
+          "찜질방에서는 찜질복을 입어주세요."
+        ],
+        "donts": [
+          "목욕탕에서 뛰거나 수영하지 마세요.",
+          "수건은 몸을 닦는 용도로만 사용해주세요."
+        ]
+      },
+      "pojangmacha": {
+        "dos": [
+          "포장마차에서 다양한 음식을 시켜 나눠드세요."
+        ],
+        "donts": [
+          "가격을 흥정하지 마세요.",
+          "포장마차에 외부음식을 반입하지 말아주세요."
+        ]
+      },
+      "dining": {
+        "dos": [
+          "어른께 술을 받을 땐 두 손으로 받으세요."
+        ],
+        "donts": [
+          "잔이 비어도 직접 따르지 마세요."
+        ]
+      },
+      "noraebang": {
+        "dos": [
+          "마이크 커버를 사용해주세요.",
+          "함께 탬버린을 치며 노래방을 즐겨보세요."
+        ],
+        "donts": [
+          "마이크에 입을 너무 가까이 대지 말아주세요."
+        ]
+      },
+      "festival": {
+        "dos": [
+          "줄 서기 문화를 지켜주세요."
+        ],
+        "donts": [
+          "길을 막고 사진찍지 마세요."
+        ]
+      },
+      "latefood": {
+        "dos": [
+          "치킨과 맥주를 함께 즐기는 치맥 문화를 경험해 보세요."
+        ],
+        "donts": []
+      },
+      "convenience": {
+        "dos": [
+          "티머니 교통카드를 충전해 대중교통을 이용하세요.",
+          "편의점 사용 후 쓰레기를 잘 버려주세요."
+        ],
+        "donts": [
+          "편의점을 이용한 후 쓰레기를 놓고 가지 마세요."
+        ]
+      },
+      "transport": {
+        "dos": [
+          "대중교통이 끊겼으면 역 근처 택시 승강장을 이용해보세요.",
+          "버스 운행 시간을 확인하세요.",
+          "음주 시 대리운전 서비스를 이용해주세요."
+        ],
+        "donts": [
+          "어두운 골목길을 혼자 걷지 마세요."
+        ]
+      },
+      "safety": {
+        "dos": [
+          "위급 상황에는 112 또는 119로 전화주세요."
+        ],
+        "donts": [
+          "낯선 사람이 건네는 음료를 받지 마세요."
+        ]
+      }
+    }
   },
   "community": {
     "title": "야간 커뮤니티",
@@ -266,7 +402,28 @@
       "other": "기타"
     },
     "quotaToday": "오늘 {used}/{limit}",
-    "quotaHint": "하루 작성 한도입니다. 이메일 인증을 마치면 늘어납니다."
+    "quotaHint": "하루 작성 한도입니다. 이메일 인증을 마치면 늘어납니다.",
+    "view": {
+      "latest": "최신",
+      "popular": "인기",
+      "photos": "사진"
+    },
+    "emptyPhotos": "사진이 있는 글이 아직 없어요",
+    "sidebar": {
+      "popular": "인기글",
+      "popularEmpty": "아직 인기글이 없어요",
+      "thisWeek": "이번 주",
+      "statPosts": "글",
+      "statComments": "댓글",
+      "statPhotos": "사진",
+      "statAuthors": "참여",
+      "mentioned": "자주 언급된 명소",
+      "mentionCount": "{n}회",
+      "guideTitle": "커뮤니티 가이드",
+      "guide1": "밤에 다녀온 곳의 후기와 팁을 나눠요",
+      "guide2": "명소 이름을 적으면 옆에 모아 보여드려요",
+      "guide3": "사진은 직접 찍은 것만 올려 주세요"
+    }
   },
   "spot": {
     "back": "목록으로",
@@ -768,5 +925,55 @@
       "foodie": "미식",
       "trendsetter": "자기표현"
     }
+  },
+  "local": {
+    "food": {
+      "title": "밤에 가는 맛집",
+      "subtitle": "한국관광공사에 등록된 대전 음식점 {count}곳. 영업시간을 확인하고 밤 일정에 맞춰 보세요.",
+      "hours": "영업시간",
+      "menu": "대표 메뉴"
+    },
+    "stay": {
+      "title": "오늘 밤 묵을 곳",
+      "subtitle": "대전 숙소 {count}곳. 체크인 시간과 근처 야간 명소를 함께 확인하세요.",
+      "hours": "체크인 · 체크아웃",
+      "menu": "객실 유형"
+    },
+    "shopping": {
+      "title": "밤 쇼핑",
+      "subtitle": "대전 시장·쇼핑 명소 {count}곳. 늦게까지 여는 곳을 골라 보세요.",
+      "hours": "영업시간",
+      "menu": "판매 품목"
+    },
+    "restDay": "휴무일",
+    "parking": "주차",
+    "contact": "문의",
+    "infoTitle": "이용 정보",
+    "noInfo": "등록된 이용 정보가 없습니다",
+    "directions": "카카오맵 길찾기",
+    "nearbySpots": "근처 야간 명소",
+    "backToList": "목록으로",
+    "empty": "등록된 곳이 없습니다",
+    "source": "정보 출처: ⓒ한국관광공사 (요청 시점에 실시간으로 받아옵니다)",
+    "filterAll": "전체",
+    "sortAccess": "야경 접근성순",
+    "withinKm": "1km 안 야간 명소 {n}곳",
+    "nearestSpot": "가까운 야간 명소",
+    "planNearby": "이 근처 코스",
+    "areas": {
+      "yuseong": "유성온천",
+      "dunsan": "둔산 · 시청",
+      "expo": "엑스포 · 갑천",
+      "downtown": "원도심 (은행동 · 대전역)",
+      "other": "그 외 동네"
+    },
+    "areaDesc": {
+      "yuseong": "족욕하고 늦게까지 먹는 밤",
+      "dunsan": "도심 야경과 함께하는 저녁",
+      "expo": "한빛탑·엑스포다리 야경 옆",
+      "downtown": "야시장과 골목이 살아 있는 밤",
+      "other": "조금 벗어나면 만나는 곳들"
+    },
+    "areaSpots": "이 동네 야경"
   }
 }

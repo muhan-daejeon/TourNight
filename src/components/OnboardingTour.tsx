@@ -36,13 +36,12 @@ const STEPS: { key: string; href: string; Icon: LucideIcon }[] = [
 
 /**
  * 하이라이트 대상 표식.
- * - data-tour     : 그 페이지의 본문 영역. 이 위치로 스크롤한다.
- * - data-tour-nav : 헤더의 해당 탭. 위치가 고정이라 구멍만 뚫고 스크롤 계산에선 뺀다.
+ * - data-tour : 그 페이지의 본문 영역. 이 위치로 스크롤하고 구멍을 뚫는다.
+ *
+ * 헤더 쪽은 여기서 다루지 않는다 — Header.tsx가 자체적으로(노란 테두리 +
+ * 대시 라벨) 표시하고, 헤더 자체를 흐림막보다 위에 둬(z-[56]) 아예 안 가린다.
  */
 const targetOf = (key: string) => `[data-tour="${key}"]`;
-
-/** 지금 단계에 해당하는 헤더 탭만 함께 밝힌다 (어느 메뉴 얘기인지 보이도록) */
-const navTargetOf = (key: string) => `[data-tour-nav="${key}"]`;
 
 /** 구멍 주위 여백 */
 const PAD = 8;
@@ -96,34 +95,26 @@ function TourBox() {
   // 어느 단계에서 잰 값인지 함께 담는다 — 단계가 바뀐 직후 옛 구멍이 한 프레임
   // 남는 걸 막는다 (효과 안에서 굳이 null로 비우지 않아도 된다)
   const [hole, setHole] = useState<{ phase: number; boxes: Box[] } | null>(null);
-  // 아직 본 적 없는 계정이면 홈에 도착했을 때 저절로 시작한다
-  const [autoStart, setAutoStart] = useState(false);
   const [closed, setClosed] = useState(false);
 
-  useEffect(() => {
-    if (urlPhase || closed || pathname !== "/") return;
-    let cancelled = false;
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!cancelled && data.user && !data.user.tourCompleted) {
-          setAutoStart(true);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [urlPhase, closed, pathname]);
+  // 가이드북 버튼·"둘러보기 다시보기"는 ?tour=start로 이동시켜 다시 띄우는데,
+  // 헤더처럼 이 컴포넌트도 레이아웃에 상주해 페이지를 옮겨도 다시 마운트되지
+  // 않는다. 한 번 닫아 closed=true가 된 뒤로는 이 값이 그대로 남아 있어, 명시적으로
+  // ?tour=... 를 달고 다시 온 경우엔 그 낡은 값을 지워 준다. 렌더 중에 정리하는
+  // 이유는 Header.tsx의 seenPath와 같다 — 효과로 하면 옛 값으로 한 프레임 그려진다
+  const [seenUrlPhase, setSeenUrlPhase] = useState(urlPhase);
+  if (seenUrlPhase !== urlPhase) {
+    setSeenUrlPhase(urlPhase);
+    if (urlPhase) setClosed(false);
+  }
 
-  const phase: Phase | null = urlPhase ?? (autoStart ? "start" : null);
+  const phase: Phase | null = urlPhase;
   const visible = phase !== null && !closed && !EXCLUDED.includes(pathname);
 
   /** 본 것으로 기록하고 상자를 닫는다 (완료·건너뛰기 공통) */
   const finish = useCallback(
     (goHome: boolean) => {
       setClosed(true);
-      setAutoStart(false);
       fetch("/api/auth/tour", { method: "POST" }).catch(() => {});
       if (goHome) router.push("/");
     },
@@ -132,7 +123,6 @@ function TourBox() {
 
   const goTo = useCallback(
     (next: Phase) => {
-      setAutoStart(false);
       if (next === "done") {
         router.push("/?tour=done");
         return;
@@ -145,6 +135,21 @@ function TourBox() {
     },
     [router],
   );
+
+  // '준비 끝' 화면은 ?tour=done URL로 뜬다 — 버튼을 눌러야만 완료로 기록되던
+  // 전에는, 다 보고 나서 아무것도 안 누른 채 그 URL 그대로 새로고침만 해도
+  // 매번 다시 떴다. 뜨는 순간 곧바로 완료로 기록하고 URL의 파라미터도 지워서,
+  // 다음 새로고침부터는 아무것도 자동으로 뜨지 않게 한다 (화면 자체는 이번
+  // 렌더에서 계속 보인다 — closed는 건드리지 않는다).
+  // ref로 한 번만 실행되게 막는다 — router.replace 이후 재실행돼도(의존성이
+  // 다시 잡혀도) 또 replace를 부르면 리렌더가 리렌더를 부르는 루프가 된다
+  const handledDoneRef = useRef(false);
+  useEffect(() => {
+    if (urlPhase !== "done" || handledDoneRef.current) return;
+    handledDoneRef.current = true;
+    fetch("/api/auth/tour", { method: "POST" }).catch(() => {});
+    router.replace("/");
+  }, [urlPhase, router]);
 
   const prev = useCallback(() => {
     if (typeof phase !== "number") {
@@ -193,11 +198,10 @@ function TourBox() {
         .filter((r) => r.width > 0 && r.height > 0)
         .map((r) => ({ top: r.top, left: r.left, width: r.width, height: r.height }));
 
-    /** 본문 대상 + 헤더 탭을 모아 각각의 구멍으로 쓴다 */
     const measure = () => {
       const content = rectsOf(targetOf(key));
       if (!content.length) return null;
-      return { content, all: [...content, ...rectsOf(navTargetOf(key))] };
+      return { content, all: content };
     };
 
     const tick = () => {

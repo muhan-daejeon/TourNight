@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -25,6 +26,7 @@ import SpotGuide from "@/components/SpotGuide";
 import CongestionForecast from "@/components/CongestionForecast";
 import AreaVisitors from "@/components/AreaVisitors";
 import { TransitCard } from "@/components/TransitInfo";
+import Skeleton from "@/components/Skeleton";
 import { getSpotTransit } from "@/lib/transit";
 
 const CATEGORY_ICON: Record<string, LucideIcon> = {
@@ -90,6 +92,26 @@ function NearbyCard({ spot }: { spot: NearbySpot }) {
   );
 }
 
+/**
+ * 혼잡도만 따로 불러온다.
+ *
+ * 이 값 하나가 페이지 전체를 5초 넘게 붙잡고 있었다 — 대전 5개 구의 집중률을
+ * 공사에서 한 구씩 받아 오느라 HTTP 25회가 줄줄이 이어진다(실측 6초). 사진·이름·
+ * 주소·막차는 즉시 준비되는데 그것까지 같이 기다리게 할 이유가 없다.
+ *
+ * Suspense 안에 두면 나머지 화면이 먼저 그려지고 이 칸만 나중에 채워진다.
+ */
+async function CongestionSection({
+  contentId,
+  locale,
+}: {
+  contentId: string;
+  locale: string;
+}) {
+  const days = await getCongestion(contentId);
+  return <CongestionForecast days={days} locale={locale} />;
+}
+
 export default async function SpotPage({
   params,
 }: {
@@ -106,13 +128,13 @@ export default async function SpotPage({
   const home = await getTranslations("home");
   const Icon = CATEGORY_ICON[spot.category];
 
-  const [natureNearby, nearby, stays, congestion, transit] = await Promise.all([
+  // 혼잡도·방문객 통계는 여기서 기다리지 않는다 (아래 Suspense에서 따로 채운다)
+  const [natureNearby, nearby, stays, transit] = await Promise.all([
     spot.category === "nature"
       ? Promise.resolve([])
       : getNearbySpots(contentId, { category: "nature", limit: 3, locale }),
     getNearbySpots(contentId, { limit: 4, locale }),
     fetchNearbyStays(spot.mapX, spot.mapY),
-    getCongestion(contentId),
     getSpotTransit(contentId),
   ]);
 
@@ -192,10 +214,18 @@ export default async function SpotPage({
             <TransitCard transit={transit} />
 
             {/* 혼잡도 예측 — KT 이동통신 데이터 기반 (데이터 있는 스팟만) */}
-            <CongestionForecast days={congestion} locale={locale} />
+            <Suspense
+              fallback={<Skeleton className="h-40 w-full rounded-2xl" />}
+            >
+              <CongestionSection contentId={contentId} locale={locale} />
+            </Suspense>
 
             {/* 지역 방문객 규모 — KTO 빅데이터 (구 단위 실측) */}
-            <AreaVisitors addr={spot.addrKo ?? spot.addr} />
+            <Suspense
+              fallback={<Skeleton className="h-14 w-full rounded-2xl" />}
+            >
+              <AreaVisitors addr={spot.addrKo ?? spot.addr} />
+            </Suspense>
 
             {/* 근처 자연 야경 (대전 차별점: 도심 → 자연 연계) */}
             {natureNearby.length > 0 && (

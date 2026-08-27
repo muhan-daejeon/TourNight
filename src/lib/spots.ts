@@ -2,6 +2,9 @@ import { sql } from "./db";
 import { MOCK_NIGHT_SPOTS, type NightSpot } from "./kto";
 import { getKtoSpots, getKtoOverview, type KtoSpot } from "./kto-live";
 import { getCongestionRows, normName } from "./kto-stats";
+import { routing } from "@/i18n/routing";
+
+const SUPPORTED = new Set<string>(routing.locales);
 
 /**
  * 야간 명소 조회 — KTO 원천 정보는 실시간, 우리 판단은 DB.
@@ -145,6 +148,11 @@ const filling = new Set<string>();
 
 function fillMissingTitles(spots: NightSpot[], locale: string): void {
   if (locale === "ko" || filling.has(locale)) return;
+  // /robots.txt 같은 요청도 [locale] 라우트로 들어와 엉뚱한 로케일로 저장된 적이 있다
+  if (!SUPPORTED.has(locale)) return;
+  // 빌드 중에는 부르지 않는다. 페이지를 만드는 워커가 Gemini 응답을 기다리다
+  // 60초를 넘겨 재시도에 걸린다. 초기 채움은 배치(npm run i18n:titles)가 맡는다.
+  if (process.env.NEXT_PHASE === "phase-production-build") return;
   const missing = spots.filter((s) => /[가-힣]/.test(s.title));
   if (missing.length === 0) return;
 
@@ -213,7 +221,7 @@ const R = 6371000;
 const rad = (d: number) => (d * Math.PI) / 180;
 
 /** 두 좌표 사이 거리(m) — PostGIS 대신 메모리에서 계산한다 */
-function distanceM(
+export function distanceM(
   a: { mapX: number; mapY: number },
   b: { mapX: number; mapY: number },
 ): number {

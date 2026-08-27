@@ -1,12 +1,13 @@
-import { setRequestLocale } from "next-intl/server";
-import ComingSoon from "@/components/ComingSoon";
+import LocalSpotPage from "@/components/LocalSpotPage";
 
-export default async function StayPage({
+// 한국관광공사 실시간 목록 — 1시간 주기 재생성
+export const revalidate = 3600;
+
+export default async function Page({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  setRequestLocale(locale);
-  return <ComingSoon titleKey="stay" />;
+  return <LocalSpotPage kind="stay" locale={locale} />;
 }

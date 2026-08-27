@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
   Footprints,
@@ -19,11 +19,11 @@ import {
   ShieldAlert,
   Check,
   X,
-  MessageCircle,
   ChevronRight,
+  ChevronLeft,
   type LucideIcon,
 } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { ETIQUETTE_ITEMS, type EtiquetteItem } from "@/lib/etiquette-items";
 
 // 그룹 구성: 예절 6 + 실용 정보 4 (서버 ETIQUETTE_TOPICS와 일치)
 const GROUPS: { key: "places" | "culture"; topics: string[] }[] = [
@@ -56,26 +56,6 @@ const TOPIC_ICONS: Record<string, LucideIcon> = {
   safety: ShieldAlert,
 };
 
-interface Phrase {
-  korean: string;
-  roman: string;
-  meaning: string;
-}
-
-interface Guide {
-  intro: string;
-  dos: string[];
-  donts: string[];
-  phrases: Phrase[];
-  phrasesAdvanced?: Phrase[];
-  spots: {
-    contentId: string;
-    title: string;
-    imageUrl: string | null;
-    category: string;
-  }[];
-}
-
 export default function NightEtiquette({
   topicImages = {},
 }: {
@@ -83,32 +63,12 @@ export default function NightEtiquette({
   topicImages?: Record<string, string>;
 }) {
   const t = useTranslations("etiquette");
-  const locale = useLocale();
   const [selected, setSelected] = useState<string | null>(null);
-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
-  const [guide, setGuide] = useState<Guide | null>(null);
-  const [level, setLevel] = useState<"basic" | "advanced">("basic");
-
-  async function loadTopic(topicId: string) {
-    setSelected(topicId);
-    setStatus("loading");
-    setGuide(null);
-    setLevel("basic");
-    try {
-      const res = await fetch(`/api/etiquette?topic=${topicId}&locale=${locale}`);
-      if (!res.ok) throw new Error();
-      setGuide(await res.json());
-      setStatus("idle");
-    } catch {
-      setStatus("error");
-    }
-  }
-
-  const hasAdvanced = (guide?.phrasesAdvanced?.length ?? 0) > 0;
-  const phrases =
-    level === "advanced" && hasAdvanced
-      ? guide!.phrasesAdvanced!
-      : (guide?.phrases ?? []);
+  const images = selected ? ETIQUETTE_ITEMS[selected] : undefined;
+  // 사진은 언어와 무관(공용 매니페스트), 설명 문구만 로케일별 번역을 index로 맞춰 쓴다
+  const captions = selected
+    ? (t.raw(`items.${selected}`) as { dos: string[]; donts: string[] })
+    : undefined;
 
   return (
     <div className="mt-8" data-tour="etiquette">
@@ -123,7 +83,7 @@ export default function NightEtiquette({
               return (
                 <button
                   key={id}
-                  onClick={() => loadTopic(id)}
+                  onClick={() => setSelected(id)}
                   className={`group relative h-28 overflow-hidden rounded-2xl border text-left transition sm:h-32 ${
                     selected === id
                       ? "border-amber-400/70 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
@@ -173,118 +133,104 @@ export default function NightEtiquette({
         </div>
       ))}
 
-      {status === "loading" && (
-        <p className="mt-6 flex items-center gap-2 text-sm text-amber-300/90">
-          <Sparkles size={14} className="animate-pulse" />
-          {t("generating")}
-        </p>
-      )}
-      {status === "error" && <p className="mt-6 text-red-400">{t("error")}</p>}
-
-      {status === "idle" && guide && (
-        <div className="mt-6 space-y-4">
-          <p className="text-sm leading-relaxed text-slate-400">{guide.intro}</p>
-
-          {/* Do / Don't */}
+      {images && captions && (
+        <div className="mt-6">
+          {/* Do / Don't — 항목마다 사진 한 장 + 설명, 화살표로 한 장씩 넘겨 본다 */}
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.05] p-5">
-              <p className="mb-3 text-sm font-bold text-emerald-300">{t("dos")}</p>
-              <ul className="space-y-2.5">
-                {guide.dos.map((d, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-slate-200">
-                    <Check size={15} className="mt-0.5 shrink-0 text-emerald-400" />
-                    {d}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-rose-400/20 bg-rose-400/[0.05] p-5">
-              <p className="mb-3 text-sm font-bold text-rose-300">{t("donts")}</p>
-              <ul className="space-y-2.5">
-                {guide.donts.map((d, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-slate-200">
-                    <X size={15} className="mt-0.5 shrink-0 text-rose-400" />
-                    {d}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <DoDontSlider
+              key={`dos-${selected}`}
+              title={t("dos")}
+              images={images.dos}
+              captions={captions.dos}
+              tone="emerald"
+              Icon={Check}
+            />
+            <DoDontSlider
+              key={`donts-${selected}`}
+              title={t("donts")}
+              images={images.donts}
+              captions={captions.donts}
+              tone="rose"
+              Icon={X}
+            />
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
-          {/* 상황 표현 — 기본(외워 쓰는 짧은 말) / 심화(요청·양해를 구하는 말) */}
-          {phrases.length > 0 && (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-              <div className="mb-3 flex flex-wrap items-center gap-3">
-                <p className="flex items-center gap-1.5 text-sm font-bold text-amber-300">
-                  <MessageCircle size={14} />
-                  {t("saySection")}
-                </p>
-                {hasAdvanced && (
-                  <div className="ml-auto flex gap-1 rounded-full border border-white/10 bg-white/5 p-0.5">
-                    {(["basic", "advanced"] as const).map((lv) => (
-                      <button
-                        key={lv}
-                        type="button"
-                        onClick={() => setLevel(lv)}
-                        className={`rounded-full px-3 py-1 text-xs font-bold transition ${
-                          level === lv
-                            ? "bg-amber-400 text-slate-950"
-                            : "text-slate-400 hover:text-white"
-                        }`}
-                      >
-                        {t(`level.${lv}`)}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <ul className="space-y-3">
-                {phrases.map((p, i) => (
-                  <li key={i} className="flex flex-col gap-0.5">
-                    <span className="font-semibold text-slate-100">{p.korean}</span>
-                    <span className="text-xs text-amber-300/80">{p.roman}</span>
-                    <span className="text-sm text-slate-400">{p.meaning}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+const TONE = {
+  emerald: { border: "border-emerald-400/20", bg: "bg-emerald-400/[0.05]", text: "text-emerald-300", icon: "text-emerald-400" },
+  rose: { border: "border-rose-400/20", bg: "bg-rose-400/[0.05]", text: "text-rose-300", icon: "text-rose-400" },
+} as const;
 
-          {/* 관련 야간 명소 */}
-          {guide.spots.length > 0 && (
-            <div>
-              <p className="mb-2.5 text-sm font-bold text-slate-300">
-                {t("relatedSpots")}
-              </p>
-              <div className="grid gap-2.5 sm:grid-cols-3">
-                {guide.spots.map((s) => (
-                  <Link
-                    key={s.contentId}
-                    href={`/spots/${s.contentId}`}
-                    className="glass-card group overflow-hidden rounded-xl"
-                  >
-                    <div className="relative h-32 bg-slate-800">
-                      {s.imageUrl && (
-                        <Image
-                          src={s.imageUrl}
-                          alt={s.title}
-                          fill
-                          sizes="(min-width: 640px) 33vw, 100vw"
-                          className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                        />
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 p-2.5">
-                      <span className="truncate text-[13px] font-semibold text-slate-100 group-hover:text-amber-300">
-                        {s.title}
-                      </span>
-                      <ChevronRight size={13} className="ml-auto shrink-0 text-slate-600" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+/**
+ * 항목 하나(사진 + 설명)씩 화살표로 넘겨 보는 Do/Don't 카드.
+ * 사진(images)은 로케일과 무관한 공용 자산이고, 설명(captions)만 번역별로
+ * 갈라져 있어 같은 index끼리 짝지어 쓴다 — 둘의 길이가 항상 같다고 가정한다
+ * (messages/*.json의 etiquette.items가 이 매니페스트와 같은 순서로 채워져 있어야 함).
+ */
+function DoDontSlider({
+  title,
+  images,
+  captions,
+  tone,
+  Icon,
+}: {
+  title: string;
+  images: EtiquetteItem[];
+  captions: string[];
+  tone: keyof typeof TONE;
+  Icon: LucideIcon;
+}) {
+  const t = useTranslations("etiquette");
+  const [index, setIndex] = useState(0);
+  const c = TONE[tone];
+
+  if (images.length === 0) return null;
+  const current = Math.min(index, images.length - 1);
+
+  return (
+    <div className={`rounded-2xl border p-5 ${c.border} ${c.bg}`}>
+      <p className={`mb-3 text-sm font-bold ${c.text}`}>{title}</p>
+
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-800/60">
+        <Image
+          src={images[current].image}
+          alt=""
+          fill
+          sizes="(min-width: 640px) 50vw, 100vw"
+          className="object-cover"
+        />
+      </div>
+
+      <p className="mt-3 flex gap-2 text-sm text-slate-200">
+        <Icon size={15} className={`mt-0.5 shrink-0 ${c.icon}`} />
+        {captions[current] ?? images[current].caption}
+      </p>
+
+      {images.length > 1 && (
+        <div className="mt-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}
+            aria-label={t("prevItem")}
+            className="rounded-full p-1.5 text-slate-400 transition hover:bg-white/5 hover:text-white"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span className="text-xs tabular-nums text-slate-500">
+            {current + 1} / {images.length}
+          </span>
+          <button
+            type="button"
+            onClick={() => setIndex((i) => (i + 1) % images.length)}
+            aria-label={t("nextItem")}
+            className="rounded-full p-1.5 text-slate-400 transition hover:bg-white/5 hover:text-white"
+          >
+            <ChevronRight size={16} />
+          </button>
         </div>
       )}
     </div>

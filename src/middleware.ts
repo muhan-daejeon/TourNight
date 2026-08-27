@@ -6,7 +6,9 @@ import { SESSION_COOKIE, verifySession } from "./lib/session-core";
 const intlMiddleware = createMiddleware(routing);
 
 // 로그인 없이 접근 가능한 경로(로케일 접두사 제거 후 기준). 그 외는 전부 로그인 필요.
-const PUBLIC_PATHS = ["/login", "/signup"];
+// "/"(홈)는 인트로 연출을 비로그인 방문자에게도 보여주기 위해 공개한다 — 홈 자체는
+// 로그인 전용 데이터를 쓰지 않는다. 홈 안의 다른 탭 링크는 여전히 로그인이 필요하다.
+const PUBLIC_PATHS = ["/login", "/signup", "/"];
 
 function stripLocale(pathname: string): { locale: string | null; rest: string } {
   const segments = pathname.split("/"); // "/ko/login" → ["", "ko", "login"]

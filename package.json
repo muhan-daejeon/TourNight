@@ -9,6 +9,8 @@
     "lint": "eslint",
     "db:setup": "node --env-file=.env.local db/setup.mjs",
     "etiquette:pregen": "node --env-file=.env.local db/pregen-etiquette.mjs",
+    "etiquette:images": "node db/process-etiquette-images.mjs",
+    "persona:images": "node db/process-persona-images.mjs",
     "db:sync": "node --env-file=.env.local db/sync-kto.mjs",
     "db:classify": "node --env-file=.env.local db/classify-night.mjs",
     "i18n:titles": "node --env-file=.env.local db/fill-titles.mjs",
@@ -36,6 +38,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

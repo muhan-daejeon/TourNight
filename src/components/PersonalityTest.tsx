@@ -31,6 +31,7 @@ import {
   type OptionKey,
   type PersonalityType,
 } from "@/lib/personality-test";
+import { PERSONA_INTRO_IMAGE, PERSONA_QUESTION_IMAGES } from "@/lib/persona-images";
 import PersonalityRadar from "./PersonalityRadar";
 
 type Phase = "intro" | "quiz" | "analyzing" | "result";
@@ -115,10 +116,21 @@ export default function PersonalityTest() {
               ))}
             </div>
           </div>
-          {/* 마스코트 자리표시자 — 이미지 준비되면 교체 */}
-          <div className="relative flex min-h-[180px] items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600/25 via-purple-700/20 to-slate-900">
-            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_50%_40%,rgba(165,180,252,0.35),transparent_70%)]" />
-            <Sparkles size={48} className="relative text-indigo-200/80" />
+          <div className="relative flex min-h-[180px] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600/25 via-purple-700/20 to-slate-900">
+            {PERSONA_INTRO_IMAGE ? (
+              <Image
+                src={PERSONA_INTRO_IMAGE}
+                alt=""
+                fill
+                sizes="(min-width: 640px) 40vw, 100vw"
+                className="object-cover"
+              />
+            ) : (
+              <>
+                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_50%_40%,rgba(165,180,252,0.35),transparent_70%)]" />
+                <Sparkles size={48} className="relative text-indigo-200/80" />
+              </>
+            )}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 border-t border-white/10 bg-slate-950/40 px-8 py-5 sm:px-11">
@@ -167,6 +179,9 @@ export default function PersonalityTest() {
   const selected = answers[q.id];
   const progress = ((index + 1) / QUESTIONS.length) * 100;
   const isLast = index === QUESTIONS.length - 1;
+  // q.id는 "q1".."q12" — 사진은 앞의 몇 문항만 있고(persona:images 스크립트로
+  // 생성), 없는 문항은 기존 아이콘 자리표시자로 자연히 대체된다
+  const qOptionImages = PERSONA_QUESTION_IMAGES[q.id.replace(/^q/, "")];
 
   const goNext = () => {
     if (!selected) return;
@@ -203,6 +218,7 @@ export default function PersonalityTest() {
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           {OPTION_KEYS.map((key) => {
             const on = selected === key;
+            const optionImage = qOptionImages?.[key];
             return (
               <button
                 key={key}
@@ -214,9 +230,18 @@ export default function PersonalityTest() {
                     : "border-white/10 bg-slate-950/40 hover:border-indigo-300/50"
                 }`}
               >
-                {/* 선택지 일러스트 자리표시자 — 이미지 준비되면 교체 */}
-                <div className="relative flex h-24 items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
-                  <ImageIcon size={22} className="text-slate-600" />
+                <div className="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900">
+                  {optionImage ? (
+                    <Image
+                      src={optionImage}
+                      alt=""
+                      fill
+                      sizes="(min-width: 640px) 25vw, 50vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <ImageIcon size={22} className="text-slate-600" />
+                  )}
                   <span
                     className={`absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold uppercase ${
                       on ? "bg-indigo-500 text-white" : "bg-slate-950/70 text-slate-300"
