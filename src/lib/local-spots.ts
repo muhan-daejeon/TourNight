@@ -15,7 +15,19 @@ export async function getLocalSpotsTranslated(
   kind: LocalKind,
   locale: string,
 ): Promise<LocalSpot[]> {
-  const spots = await getLocalSpots(kind, locale);
+  // 키가 없거나 공사가 응답하지 않으면 빈 목록으로 — 명소 탭이 목 데이터로 버티듯
+  // 이 탭은 '등록된 곳이 없습니다'로 버틴다. CI는 시크릿 없이 빌드하므로 여기서
+  // 던지면 정적 생성이 통째로 죽는다.
+  let spots: LocalSpot[];
+  try {
+    spots = await getLocalSpots(kind, locale);
+  } catch (err) {
+    console.warn(
+      `[local] ${kind} 목록 조회 실패 — 빈 목록으로 진행합니다:`,
+      err instanceof Error ? err.message : err,
+    );
+    return [];
+  }
   if (locale === "ko") return spots;
 
   const untranslated = (t: string) => /[가-힣]/.test(t);

@@ -28,8 +28,11 @@ export default async function LocalSpotDetail({
   const spot = spots.find((s) => s.contentId === contentId);
   if (!spot) notFound();
 
+  // 상세 정보는 부가 정보 — 공사 응답이 없어도 페이지는 뜬다
   const [detail, nearby] = await Promise.all([
-    getLocalDetail(kind, contentId, locale),
+    getLocalDetail(kind, contentId, locale).catch(() => ({
+      hours: null, restDay: null, parking: null, menu: null, contact: null,
+    })),
     getSpotsNearPoint(spot.mapX, spot.mapY, { limit: 4, locale }),
   ]);
 
