@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { SERVICE_NAME } from "./kto";
+import { readApiCache, writeApiCache } from "./api-cache";
 
 /**
  * KTO 관광정보 실시간 조회 레이어.
@@ -95,22 +96,36 @@ async function call(
   extra: Record<string, string>,
 ): Promise<ListItem[]> {
   const url = `${BASE}/${service}/${operation}?${params(extra)}`;
+  // 보관 키에는 인증키를 넣지 않는다 — 키를 바꿔도 보관분이 이어진다
+  const cacheKey = `${service}/${operation}?${new URLSearchParams(extra)}`;
   const init = {
     signal: AbortSignal.timeout(TIMEOUT_MS),
     // 응답을 Next 데이터 캐시(파일)에 둔다. 빌드는 워커를 11개 띄우는데
     // 메모리 캐시는 프로세스마다 따로라 워커 수만큼 같은 호출을 반복했다.
     next: { revalidate: 3600, tags: ["kto-spots"] },
   };
-  // 한 번은 다시 묻는다 — 공사 응답이 간헐적으로 늦어 첫 시도만 믿으면 목록이 통째로 빈다
-  let res = await fetch(url, init).catch(() => null);
-  if (!res || res.status >= 500) {
-    await new Promise((r) => setTimeout(r, 800));
-    res = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+  try {
+    // 한 번은 다시 묻는다 — 공사 응답이 간헐적으로 늦어 첫 시도만 믿으면 목록이 통째로 빈다
+    let res = await fetch(url, init).catch(() => null);
+    if (!res || res.status >= 500) {
+      await new Promise((r) => setTimeout(r, 800));
+      res = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+    }
+    if (!res.ok) throw new Error(`KTO ${service}/${operation} ${res.status}`);
+    const body = (await res.json())?.response?.body;
+    const item = body?.items?.item;
+    const items: ListItem[] = Array.isArray(item) ? item : item ? [item] : [];
+    writeApiCache(cacheKey, items);
+    return items;
+  } catch (err) {
+    // 한도 초과·타임아웃이면 마지막 성공분으로 — 화면이 비거나 목 데이터로 가는 것보다 낫다
+    const cached = await readApiCache<ListItem[]>(cacheKey);
+    if (cached) {
+      console.warn(`[kto] ${service}/${operation} 실패 → 보관분 사용:`, err instanceof Error ? err.message : err);
+      return cached;
+    }
+    throw err;
   }
-  if (!res.ok) throw new Error(`KTO ${service}/${operation} ${res.status}`);
-  const body = (await res.json())?.response?.body;
-  const item = body?.items?.item;
-  return Array.isArray(item) ? item : item ? [item] : [];
 }
 
 const toSpot = (i: ListItem): KtoSpot => ({
