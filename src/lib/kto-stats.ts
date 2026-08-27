@@ -69,16 +69,19 @@ export interface CongestionRow {
 }
 
 async function fetchCongestion(): Promise<CongestionRow[]> {
-  const out: CongestionRow[] = [];
-  for (const signguCd of SIGNGU_CODES) {
-    out.push(
-      ...(await callAll<CongestionRow>(
-        "TatsCnctrRateService/tatsCnctrRatedList",
-        { areaCd: AREA_CD, signguCd },
-      )),
-    );
-  }
-  return out;
+  // 구를 하나씩 훑으면 HTTP 25회가 줄줄이 이어져 6초가 걸린다(실측). 구끼리는
+  // 서로를 기다릴 이유가 없어 다섯을 동시에 부른다 — 구 안의 페이지 넘김만
+  // 순차로 남는다. 동시 호출을 다섯으로 묶어 두는 건 공사 쪽 호출 한도를
+  // 건드리지 않기 위해서다.
+  const perGu = await Promise.all(
+    SIGNGU_CODES.map((signguCd) =>
+      callAll<CongestionRow>("TatsCnctrRateService/tatsCnctrRatedList", {
+        areaCd: AREA_CD,
+        signguCd,
+      }),
+    ),
+  );
+  return perGu.flat();
 }
 
 /** 대전 전체 집중률 (6시간 캐시 — 일 단위로만 바뀐다) */

@@ -62,7 +62,7 @@ async function translate(titles, locale) {
   ].join("\n");
 
   // 429(한도)면 잠깐 쉬었다 다시, 그래도 막히면 가벼운 모델로 넘어간다
-  const models = [GEMINI_MODEL, "gemini-flash-lite-latest"];
+  const models = [GEMINI_MODEL, "gemini-3.1-flash-lite"];
   for (const model of models) {
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       const res = await fetch(
@@ -86,7 +86,8 @@ async function translate(titles, locale) {
         );
       }
       if (res.status !== 429 && res.status < 500) {
-        throw new Error(`Gemini ${res.status}`);
+        // 왜 거절됐는지 알아야 고친다 — 본문 앞부분을 같이 남긴다
+        throw new Error(`Gemini ${res.status}: ${(await res.text()).slice(0, 300)}`);
       }
       console.log(`  ${model} ${res.status} — ${attempt * 20}초 후 재시도`);
       await sleep(attempt * 20000);
@@ -100,12 +101,16 @@ try {
     select content_id from night_spots
     where night_verified = true and content_id not like 'mock-%'
   `;
-  const ids = new Set(verified.map((r) => r.content_id));
   const ko = await list("KorService2", ["12", "14", "15"]);
-  console.log(`검수 통과 ${ids.size}곳 / 국문 목록 ${ko.size}건`);
+  // 맛집(39)·숙박(32)·쇼핑(38)은 검수 없이 전부 보여주므로 목록 전체가 대상이다
+  const local = await list("KorService2", ["39", "32", "38"]);
+  const ids = new Set([...verified.map((r) => r.content_id), ...local.keys()]);
+  for (const [id, title] of local) ko.set(id, title);
+  console.log(`명소 ${verified.length}곳 + 맛집·숙박·쇼핑 ${local.size}곳 / 국문 목록 ${ko.size}건`);
 
   for (const [locale, service] of Object.entries(SERVICE)) {
-    const translated = await list(service, ["76", "78", "85"]);
+    // 다국어 분류: 명소 76·78·85, 맛집 82, 숙박 80, 쇼핑 79
+    const translated = await list(service, ["76", "78", "85", "82", "80", "79"]);
     const official = new Set(
       [...translated.values()].map((t) => koreanIn(t)).filter(Boolean).map(key),
     );
