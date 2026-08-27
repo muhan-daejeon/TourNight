@@ -15,7 +15,7 @@ import { SERVICE_NAME } from "./kto";
 const BASE = "https://apis.data.go.kr/B551011";
 const AREA_CD = "30"; // 대전
 const SIGNGU_CODES = ["30110", "30140", "30170", "30200", "30230"]; // 동·중·서·유성·대덕
-const TIMEOUT_MS = 8000;
+const TIMEOUT_MS = 20000;
 
 /** 이름 매칭용 정규화 — 공백·괄호·가운뎃점을 지우고 소문자로 */
 export const normName = (s: string) =>
