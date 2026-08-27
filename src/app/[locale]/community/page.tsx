@@ -1,6 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import CommunityBoard from "@/components/CommunityBoard";
-import { listPosts } from "@/lib/community";
+import { listPosts, listPopularPosts } from "@/lib/community";
+import { getVerifiedNightSpots } from "@/lib/spots";
+import CommunitySidebar from "@/components/CommunitySidebar";
 import { isStorageConfigured } from "@/lib/storage";
 import { mailFrom } from "@/lib/mail";
 import { getActiveSessionUser } from "@/lib/session";
@@ -25,8 +27,10 @@ export default async function CommunityPage({
   setRequestLocale(locale);
   const t = await getTranslations("community");
   const session = await getActiveSessionUser();
-  const [posts, verified] = await Promise.all([
+  const [posts, popular, spots, verified] = await Promise.all([
     listPosts(),
+    listPopularPosts(5),
+    getVerifiedNightSpots(locale),
     session ? isEmailVerified(session.userId) : Promise.resolve(false),
   ]);
   const me = session
@@ -37,20 +41,23 @@ export default async function CommunityPage({
     <>
       <PageHero
         image="/spots/jungangro-night.jpg"
-        width="narrow"
         overline="Night Talk"
         title={t("title")}
         subtitle={t("subtitle")}
       />
-      <PageBody width="narrow">
-        <CommunityBoard
-          initialPosts={posts}
-          initialMe={me}
-          canAttach={isStorageConfigured()}
-          // 인증 메일 발신 주소 — 수신 허용 목록에 넣으라고 화면에 띄운다.
-          // 중국·일본 메일함이 모르는 발신자를 잘 거르기 때문에 필요하다
-          mailFrom={mailFrom()}
-        />
+      <PageBody>
+        {/* 피드 + 사이드바. 글만 나열하면 볼 게 없어 인기글·통계·언급 명소를 옆에 둔다 */}
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <CommunityBoard
+            initialPosts={posts}
+            initialMe={me}
+            canAttach={isStorageConfigured()}
+            // 인증 메일 발신 주소 — 수신 허용 목록에 넣으라고 화면에 띄운다.
+            // 중국·일본 메일함이 모르는 발신자를 잘 거르기 때문에 필요하다
+            mailFrom={mailFrom()}
+          />
+          <CommunitySidebar popular={popular} posts={posts} spots={spots} />
+        </div>
       </PageBody>
     </>
   );

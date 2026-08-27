@@ -2,14 +2,16 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { getVerifiedNightSpots } from "@/lib/spots";
+import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
 import { listNotices } from "@/lib/notices";
 import { listPopularPosts, type CommunityPost } from "@/lib/community";
 import NightInfo from "@/components/NightInfo";
 import HeroCarousel, { type HeroSlide } from "@/components/HeroCarousel";
 import IntroSequence from "@/components/IntroSequence";
-import ScrollDownHint from "@/components/ScrollDownHint";
 import GuidebookBanner from "@/components/GuidebookBanner";
+import ScrollRail from "@/components/ScrollRail";
+import SpotCard from "@/components/SpotCard";
+import FestivalPoster from "@/components/FestivalPoster";
 
 // 야간 검증 스팟·커뮤니티 인기글 기준, 1시간 주기로 재생성
 export const revalidate = 3600;
@@ -31,6 +33,7 @@ export default async function HomePage({
   ]);
   const notices = listNotices(locale);
   const photoSpots = spots.filter((s) => s.imageUrl);
+  const festivals = pickFestivals(spots);
 
   // 배너 배경 사진 — 등록된 명소 사진을 순서대로 돌려 쓴다. 무작위로 뽑으면
   // 정적 생성 결과가 매번 달라져 배포마다 배너가 바뀐다
@@ -96,7 +99,7 @@ export default async function HomePage({
       <IntroSequence />
 
       <>
-        <section className="relative min-h-screen">
+        <section className="relative h-[calc(100vh-var(--header-h,0px))] lg:h-[calc(100vh-var(--header-h,0px)*2)]">
           {/* 슬라이드는 (헤더 밑) 화면 정중앙 — 가로·세로 모두.
               --header-h는 로고+메뉴 "행" 자신의 높이만 담고 있고, 실제 헤더는
               그 위에 같은 높이의 여백까지 더해 총 2배 높이를 차지한다 — 그래서
@@ -106,24 +109,62 @@ export default async function HomePage({
               화살표는 그 박스 맨 아래에 겹쳐 띄워, 슬라이드 자체의 중앙 계산엔
               끼어들지 않는다 — 다만 화면이 낮으면 그 둘이 슬라이드 아래쪽과
               부딪혀서, 슬라이드를 정중앙보다 살짝 위로 올려 여유를 둔다 */}
-          <div
-            className="absolute inset-x-0 top-0"
-            style={{ height: "calc(100vh - (var(--header-h, 0px) * 2))" }}
-          >
+          <div className="absolute inset-x-0 top-0 h-[calc(100vh-var(--header-h,0px))] lg:h-[calc(100vh-var(--header-h,0px)*2)]">
             <div className="absolute inset-0 flex items-center justify-center px-4">
-              <div style={{ transform: "translateY(-40px)" }}>
+              <div className="w-full max-w-5xl" style={{ transform: "translateY(-40px)" }}>
                 <HeroCarousel slides={slides} />
               </div>
-            </div>
-            <div className="absolute inset-x-0 bottom-4 flex flex-col items-center gap-2 px-4">
-              {/* 오늘 밤 정보 — 천문연구원 일몰·월령 */}
-              <NightInfo />
-              <ScrollDownHint targetId="content" />
             </div>
           </div>
         </section>
 
-        <section id="content" className="pt-16">
+        {/* ── 오늘 밤 — 일몰·월령 + 지금 갈 만한 곳 ──
+            히어로 아래가 소식 그리드까지 비어 있었다. 일몰·월령은 "그래서 오늘 밤
+            어디 가지"로 이어져야 뜻이 있으므로, 명소·축제와 한 묶음으로 둔다. */}
+        <section id="content" className="pt-4">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="overline-label">Tonight</p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight">{t("spotsSection")}</h2>
+              <p className="mt-1.5 text-sm text-slate-400">{t("spotsSectionSub")}</p>
+            </div>
+            {/* 오늘 밤 정보 — 천문연구원 일몰·월령 */}
+            <NightInfo />
+          </div>
+          {spots.length > 0 && (
+            <ScrollRail label={t("spotsSection")}>
+              {spots.slice(0, 10).map((spot) => (
+                <div key={spot.contentId} className="w-[250px] shrink-0 snap-start sm:w-[264px]">
+                  <SpotCard spot={spot} />
+                </div>
+              ))}
+            </ScrollRail>
+          )}
+          <div className="mt-3 flex justify-end">
+            <Link href="/spots" className="flex items-center gap-1.5 text-sm font-semibold text-slate-400 transition hover:text-amber-300">
+              {t("spotsViewAll")}<ArrowRight size={15} />
+            </Link>
+          </div>
+
+          {festivals.length > 0 && (
+            <div className="mt-14">
+              <div className="mb-6 flex items-end justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold tracking-tight">{t("festivalsSection")}</h2>
+                  <p className="mt-1.5 text-sm text-slate-400">{t("festivalsSectionSub")}</p>
+                </div>
+                <Link href="/festivals" className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-slate-400 transition hover:text-amber-300">
+                  {t("festivalsViewAll")}<ArrowRight size={15} />
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {festivals.slice(0, 4).map((f) => <FestivalPoster key={f.contentId} spot={f} />)}
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="pt-16">
           <div
             id="news"
             className="grid scroll-mt-24 gap-10 lg:grid-cols-[1.5fr_1fr_1fr]"
