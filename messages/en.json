@@ -502,8 +502,12 @@
   "festivals": {
     "title": "Festivals & events",
     "subtitle": "Festival venues registered on TourNight",
-    "scheduleNote": "Dates change from year to year. We list only where each festival is held — please check the organiser’s official notice for the schedule.",
-    "empty": "No festival venues registered yet."
+    "scheduleNote": "Dates come from Korea Tourism Organization records and may change by the organizer.",
+    "empty": "No festival venues registered yet.",
+    "ongoing": "On now",
+    "upcoming": "Upcoming",
+    "ended": "Ended",
+    "dday": "D-{n}"
   },
   "comingSoon": {
     "short": "Coming soon",

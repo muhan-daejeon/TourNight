@@ -368,3 +368,33 @@ export const getLocalDetail = (kind: LocalKind, contentId: string, locale: strin
     ["kto-local-detail", kind, contentId, locale],
     { revalidate: 3600, tags: ["kto-spots"] },
   )();
+
+
+/* ── 축제 기간 ─────────────────────────────────────────────── */
+
+export interface FestivalPeriod {
+  start: string; // YYYYMMDD
+  end: string; // YYYYMMDD
+}
+
+/**
+ * 축제 개최 기간. 목록(areaBasedList2)에는 날짜가 없고 상세(detailIntro2)에만 있다.
+ * 날짜는 언어와 무관하므로 항상 국문 상세로 묻는다 — 언어 서비스는 축제 등재가
+ * 거의 없어(영문 1곳) 짝을 못 찾고, 언어마다 따로 물으면 호출만 4배다.
+ * 하루에 바뀔 일이 없어 24시간 캐시.
+ */
+export const getFestivalPeriod = (contentId: string) =>
+  unstable_cache(
+    async (): Promise<FestivalPeriod | null> => {
+      const rows = await call(SERVICE.ko, "detailIntro2", {
+        contentId,
+        contentTypeId: "15",
+      });
+      const r = (rows[0] ?? {}) as unknown as Record<string, string>;
+      const start = (r.eventstartdate ?? "").trim();
+      const end = (r.eventenddate ?? "").trim();
+      return /^\d{8}$/.test(start) && /^\d{8}$/.test(end) ? { start, end } : null;
+    },
+    ["kto-festival-period", contentId],
+    { revalidate: 86400, tags: ["kto-spots"] },
+  )();

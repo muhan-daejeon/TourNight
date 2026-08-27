@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
+import { withPeriods } from "@/lib/festivals";
 import { listNotices } from "@/lib/notices";
 import { listPopularPosts, type CommunityPost } from "@/lib/community";
 import NightInfo from "@/components/NightInfo";
@@ -33,7 +34,8 @@ export default async function HomePage({
   ]);
   const notices = listNotices(locale);
   const photoSpots = spots.filter((s) => s.imageUrl);
-  const festivals = pickFestivals(spots);
+  // 축제는 기간을 붙여 진행 중·예정이 앞에 오게 한다
+  const festivals = await withPeriods(pickFestivals(spots));
 
   // 배너 배경 사진 — 등록된 명소 사진을 순서대로 돌려 쓴다. 무작위로 뽑으면
   // 정적 생성 결과가 매번 달라져 배포마다 배너가 바뀐다
