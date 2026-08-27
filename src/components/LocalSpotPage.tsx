@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import PageHero, { PageBody } from "@/components/PageHero";
-import LocalExplorer from "@/components/LocalExplorer";
+import NightLifeExplorer from "@/components/NightLifeExplorer";
 import { type LocalKind } from "@/lib/kto-live";
 import { getLocalSpotsWithContext } from "@/lib/local-spots";
 
@@ -26,7 +26,7 @@ export default async function LocalSpotPage({
 }) {
   setRequestLocale(locale);
   const t = await getTranslations("local");
-  const { spots } = await getLocalSpotsWithContext(kind, locale);
+  const { spots, nightSpots } = await getLocalSpotsWithContext(kind, locale);
 
   return (
     <>
@@ -37,7 +37,7 @@ export default async function LocalSpotPage({
         subtitle={t(`${kind}.subtitle`, { count: spots.length })}
       />
       <PageBody>
-        <LocalExplorer kind={kind} spots={spots} />
+        <NightLifeExplorer kind={kind} spots={spots} nightSpots={nightSpots} />
         <p className="mt-8 text-[11px] text-slate-600">{t("source")}</p>
       </PageBody>
     </>

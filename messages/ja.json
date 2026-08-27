@@ -959,6 +959,21 @@
     "sortAccess": "夜景アクセス順",
     "withinKm": "1km以内に夜の名所{n}か所",
     "nearestSpot": "最寄りの夜の名所",
-    "planNearby": "この近くでコース"
+    "planNearby": "この近くでコース",
+    "areas": {
+      "yuseong": "儒城温泉",
+      "dunsan": "屯山・市庁",
+      "expo": "エキスポ・甲川",
+      "downtown": "旧市街（銀杏洞・大田駅）",
+      "other": "その他"
+    },
+    "areaDesc": {
+      "yuseong": "足湯と遅くまでの食事",
+      "dunsan": "都心の夜景とともに",
+      "expo": "ハンビッ塔・エキスポ橋の隣",
+      "downtown": "夜市と路地が生きる夜",
+      "other": "少し離れた場所"
+    },
+    "areaSpots": "この街の夜景"
   }
 }

@@ -959,6 +959,21 @@
     "sortAccess": "按夜景可达性",
     "withinKm": "1km内夜间景点{n}处",
     "nearestSpot": "最近的夜间景点",
-    "planNearby": "在附近规划路线"
+    "planNearby": "在附近规划路线",
+    "areas": {
+      "yuseong": "儒城温泉",
+      "dunsan": "屯山 · 市厅",
+      "expo": "世博 · 甲川",
+      "downtown": "老城区（银杏洞 · 大田站）",
+      "other": "其他"
+    },
+    "areaDesc": {
+      "yuseong": "泡脚与深夜美食",
+      "dunsan": "伴着都市夜景的晚餐",
+      "expo": "韩光塔 · 世博桥旁",
+      "downtown": "夜市与小巷的夜晚",
+      "other": "稍远一些的地方"
+    },
+    "areaSpots": "这里的夜景"
   }
 }

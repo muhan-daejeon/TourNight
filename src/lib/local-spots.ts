@@ -115,3 +115,5 @@ export async function getLocalSpotsWithContext(
   });
   return { spots: withContext, nightSpots };
 }
+
+export { NIGHT_AREAS, areaOf, type NightAreaId } from "./night-areas";

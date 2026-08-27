@@ -959,6 +959,21 @@
     "sortAccess": "야경 접근성순",
     "withinKm": "1km 안 야간 명소 {n}곳",
     "nearestSpot": "가까운 야간 명소",
-    "planNearby": "이 근처 코스"
+    "planNearby": "이 근처 코스",
+    "areas": {
+      "yuseong": "유성온천",
+      "dunsan": "둔산 · 시청",
+      "expo": "엑스포 · 갑천",
+      "downtown": "원도심 (은행동 · 대전역)",
+      "other": "그 외 동네"
+    },
+    "areaDesc": {
+      "yuseong": "족욕하고 늦게까지 먹는 밤",
+      "dunsan": "도심 야경과 함께하는 저녁",
+      "expo": "한빛탑·엑스포다리 야경 옆",
+      "downtown": "야시장과 골목이 살아 있는 밤",
+      "other": "조금 벗어나면 만나는 곳들"
+    },
+    "areaSpots": "이 동네 야경"
   }
 }

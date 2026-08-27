@@ -959,6 +959,21 @@
     "sortAccess": "Closest to night spots",
     "withinKm": "{n} night spots within 1km",
     "nearestSpot": "Nearest night spot",
-    "planNearby": "Plan a course here"
+    "planNearby": "Plan a course here",
+    "areas": {
+      "yuseong": "Yuseong Hot Springs",
+      "dunsan": "Dunsan · City Hall",
+      "expo": "Expo · Gapcheon",
+      "downtown": "Old Downtown (Eunhaeng-dong · Station)",
+      "other": "Elsewhere"
+    },
+    "areaDesc": {
+      "yuseong": "Foot baths and late dinners",
+      "dunsan": "Evenings with the city skyline",
+      "expo": "Beside Hanbit Tower and Expo Bridge",
+      "downtown": "Night markets and alleys alive",
+      "other": "A little off the beaten path"
+    },
+    "areaSpots": "Night views here"
   }
 }
