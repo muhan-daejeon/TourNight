@@ -15,7 +15,7 @@ import { SERVICE_NAME } from "./kto";
 
 const BASE = "https://apis.data.go.kr/B551011";
 const DAEJEON = "3"; // 대전 areaCode
-const TIMEOUT_MS = 8000;
+const TIMEOUT_MS = 20000; // 미국 리전에서 호출될 때 8초는 자주 끊겼다
 
 /** 언어별 관광정보 서비스 — 공식 번역을 그대로 쓴다 */
 const SERVICE: Record<string, string> = {
@@ -94,15 +94,19 @@ async function call(
   operation: string,
   extra: Record<string, string>,
 ): Promise<ListItem[]> {
-  const res = await fetch(
-    `${BASE}/${service}/${operation}?${params(extra)}`,
-    {
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-      // 응답을 Next 데이터 캐시(파일)에 둔다. 빌드는 워커를 11개 띄우는데
-      // 메모리 캐시는 프로세스마다 따로라 워커 수만큼 같은 호출을 반복했다.
-      next: { revalidate: 3600, tags: ["kto-spots"] },
-    },
-  );
+  const url = `${BASE}/${service}/${operation}?${params(extra)}`;
+  const init = {
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+    // 응답을 Next 데이터 캐시(파일)에 둔다. 빌드는 워커를 11개 띄우는데
+    // 메모리 캐시는 프로세스마다 따로라 워커 수만큼 같은 호출을 반복했다.
+    next: { revalidate: 3600, tags: ["kto-spots"] },
+  };
+  // 한 번은 다시 묻는다 — 공사 응답이 간헐적으로 늦어 첫 시도만 믿으면 목록이 통째로 빈다
+  let res = await fetch(url, init).catch(() => null);
+  if (!res || res.status >= 500) {
+    await new Promise((r) => setTimeout(r, 800));
+    res = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+  }
   if (!res.ok) throw new Error(`KTO ${service}/${operation} ${res.status}`);
   const body = (await res.json())?.response?.body;
   const item = body?.items?.item;

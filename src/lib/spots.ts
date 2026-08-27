@@ -98,6 +98,9 @@ const merge = (k: KtoSpot, v: Verdict, addrKo: string, locale: string): NightSpo
  * 검수를 통과한 야간 명소 (홈·지도·코스의 공통 데이터 소스).
  * KTO 실시간 목록과 우리 검수 결과를 맞춰, 통과 + 사진 있는 곳만 돌려준다.
  */
+/** 언어별로 마지막에 성공한 목록 — 공사가 잠깐 늦어도 화면이 목 데이터로 갈아끼워지지 않게 */
+const lastGood = new Map<string, NightSpot[]>();
+
 export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]> {
   try {
     // 자치구를 뽑아 쓰는 곳(방문객 통계·해시태그)이 한글 주소를 정규식으로 찾으므로
@@ -127,14 +130,25 @@ export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]>
     fillMissingTitles(out, locale);
 
     out.sort((a, b) => a.category.localeCompare(b.category) || a.title.localeCompare(b.title));
+    if (out.length > 0) lastGood.set(locale, out);
     return out;
   } catch (err) {
-    // KTO 장애·DB 장애 시 큐레이션 목 데이터로 폴백 (화면이 비지 않게)
-    console.warn(
-      "[spots] 실시간 조회 실패 — 목 데이터로 폴백합니다:",
-      err instanceof Error ? err.message : err,
-    );
-    return MOCK_NIGHT_SPOTS;
+    const message = err instanceof Error ? err.message : String(err);
+    // 같은 프로세스에서 한 번이라도 받아 둔 게 있으면 그걸 쓴다
+    const cached = lastGood.get(locale);
+    if (cached) {
+      console.warn("[spots] 실시간 조회 실패 — 마지막 성공분을 씁니다:", message);
+      return cached;
+    }
+    // 빌드 단계(키 없는 CI 포함)에서는 목 데이터로 버텨 빌드를 살린다.
+    if (process.env.NEXT_PHASE === "phase-production-build") {
+      console.warn("[spots] 빌드 중 실시간 조회 실패 — 목 데이터로 폴백합니다:", message);
+      return MOCK_NIGHT_SPOTS;
+    }
+    // 운영 중 재생성(ISR)에서 실패하면 던진다. 그러면 Next가 마지막으로 성공한
+    // 페이지를 그대로 내보낸다. 목 데이터로 갈아끼우면 명소 6곳짜리 화면이
+    // 한 시간 동안 걸려 있게 된다 — 실제로 그 상태가 배포본에 떴다.
+    throw new Error(`[spots] 실시간 조회 실패: ${message}`);
   }
 }
 
