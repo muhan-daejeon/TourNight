@@ -30,7 +30,7 @@ export default async function CommunityPage({
   const [posts, popular, spots, verified] = await Promise.all([
     listPosts(),
     listPopularPosts(5),
-    getVerifiedNightSpots(locale),
+    getVerifiedNightSpots(locale).catch(() => []), // 명소는 사이드바 부가 정보 — 실패해도 글은 뜬다
     session ? isEmailVerified(session.userId) : Promise.resolve(false),
   ]);
   const me = session

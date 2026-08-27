@@ -140,15 +140,10 @@ export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]>
       console.warn("[spots] 실시간 조회 실패 — 마지막 성공분을 씁니다:", message);
       return cached;
     }
-    // 빌드 단계(키 없는 CI 포함)에서는 목 데이터로 버텨 빌드를 살린다.
-    if (process.env.NEXT_PHASE === "phase-production-build") {
-      console.warn("[spots] 빌드 중 실시간 조회 실패 — 목 데이터로 폴백합니다:", message);
-      return MOCK_NIGHT_SPOTS;
-    }
-    // 운영 중 재생성(ISR)에서 실패하면 던진다. 그러면 Next가 마지막으로 성공한
-    // 페이지를 그대로 내보낸다. 목 데이터로 갈아끼우면 명소 6곳짜리 화면이
-    // 한 시간 동안 걸려 있게 된다 — 실제로 그 상태가 배포본에 떴다.
-    throw new Error(`[spots] 실시간 조회 실패: ${message}`);
+    // 마지막 성공분도 없으면 목 데이터로 버틴다. 던지면 커뮤니티·상세처럼 매 요청마다
+    // 새로 그리는 화면은 유지할 이전 페이지가 없어 그대로 500이 난다 — 실제로 났다.
+    console.warn("[spots] 실시간 조회 실패 — 목 데이터로 폴백합니다:", message);
+    return MOCK_NIGHT_SPOTS;
   }
 }
 
