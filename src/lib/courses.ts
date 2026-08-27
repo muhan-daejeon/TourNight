@@ -167,7 +167,11 @@ function orderRoute(spots: CourseStop[], start?: CourseStop): CourseStop[] {
   const remaining = [...spots];
   let current =
     start ?? remaining.reduce((a, b) => (b.mapX < a.mapX ? b : a));
-  remaining.splice(remaining.indexOf(current), 1);
+  // 같은 곳을 가리켜도 start는 목록과 다른 객체일 수 있다. indexOf로 찾으면 -1이
+  // 나오고 splice(-1,1)이 엉뚱한 마지막 명소를 지운다 — 그러면 시작 명소가 코스에
+  // 두 번 등장하고 다른 한 곳이 사라진다. 그래서 id로 찾는다.
+  const startIdx = remaining.findIndex((s) => s.contentId === current.contentId);
+  if (startIdx >= 0) remaining.splice(startIdx, 1);
   const path = [current];
   while (remaining.length) {
     let nearest = remaining[0];
