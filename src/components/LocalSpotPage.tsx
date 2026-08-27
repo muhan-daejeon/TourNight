@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import PageHero, { PageBody } from "@/components/PageHero";
-import LocalSpotList from "@/components/LocalSpotList";
+import LocalExplorer from "@/components/LocalExplorer";
 import { type LocalKind } from "@/lib/kto-live";
-import { getLocalSpotsTranslated } from "@/lib/local-spots";
+import { getLocalSpotsWithContext } from "@/lib/local-spots";
 
 const IMAGE: Record<LocalKind, string> = {
   food: "/etiquette/latefood.jpg",
@@ -26,7 +26,7 @@ export default async function LocalSpotPage({
 }) {
   setRequestLocale(locale);
   const t = await getTranslations("local");
-  const spots = await getLocalSpotsTranslated(kind, locale);
+  const { spots } = await getLocalSpotsWithContext(kind, locale);
 
   return (
     <>
@@ -37,7 +37,7 @@ export default async function LocalSpotPage({
         subtitle={t(`${kind}.subtitle`, { count: spots.length })}
       />
       <PageBody>
-        <LocalSpotList kind={kind} spots={spots} />
+        <LocalExplorer kind={kind} spots={spots} />
         <p className="mt-8 text-[11px] text-slate-600">{t("source")}</p>
       </PageBody>
     </>

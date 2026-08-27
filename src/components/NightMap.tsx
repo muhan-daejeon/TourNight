@@ -13,6 +13,10 @@ const PIN_COLOR: Record<string, string> = {
   nature: "#34d399",
   festival: "#f472b6",
   city: "#fbbf24",
+  // 나이트 라이프 탭 — 명소와 구분되는 색
+  food: "#fb7185",
+  stay: "#a78bfa",
+  shopping: "#34d399",
 };
 
 /** 오버레이는 문자열 HTML로 만들어지므로 스팟 텍스트는 이스케이프해서 넣는다 */
@@ -52,6 +56,7 @@ export default function NightMap({
   selectedId = null,
   onSelect,
   onPlanCourse,
+  detailPath = "spots",
 }: {
   spots: NightSpot[];
   visibleIds?: Set<string>;
@@ -59,6 +64,8 @@ export default function NightMap({
   onSelect?: (contentId: string | null) => void;
   /** 주면 선택 오버레이에 '코스 짜기' 버튼이 붙는다 */
   onPlanCourse?: (contentId: string) => void;
+  /** 오버레이 '자세히' 링크가 갈 경로 — 명소는 spots, 맛집·숙박·쇼핑은 각 탭 */
+  detailPath?: string;
 }) {
   const t = useTranslations("home");
   const locale = useLocale();
@@ -193,7 +200,7 @@ export default function NightMap({
       : "";
     // 목록형 지도(홈)에서만 상세·코스 액션을 노출 (상세 페이지의 단일 스팟 지도는 제외)
     const showActions = spots.length > 1;
-    const detailBtn = `<a data-detail href="/${locale}/spots/${encodeURIComponent(spot.contentId)}" style="flex:1;padding:6px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:700;color:#e2e8f0;text-align:center;text-decoration:none;cursor:pointer">${t("viewDetail")}</a>`;
+    const detailBtn = `<a data-detail href="/${locale}/${detailPath}/${encodeURIComponent(spot.contentId)}" style="flex:1;padding:6px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:700;color:#e2e8f0;text-align:center;text-decoration:none;cursor:pointer">${t("viewDetail")}</a>`;
     const planBtn = onPlanCourseRef.current
       ? `<button data-plan type="button" style="flex:1;padding:6px 8px;border-radius:999px;border:0;background:#fbbf24;font-size:12px;font-weight:800;color:#0f172a;cursor:pointer">${t("planCourse")}</button>`
       : "";

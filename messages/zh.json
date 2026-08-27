@@ -17,13 +17,13 @@
     "community": "社区",
     "phrases": "生存韩语",
     "festivals": "庆典·活动",
-    "food": "美食",
-    "stay": "住宿",
-    "shopping": "购物",
+    "food": "深夜美食",
+    "stay": "今晚住宿",
+    "shopping": "夜市 · 购物",
     "menu": "全部菜单",
     "groupExplore": "探索",
     "groupGuide": "旅行指南",
-    "groupLocal": "美食 · 住宿 · 购物",
+    "groupLocal": "夜生活",
     "groupCommunity": "社区",
     "home": "首页",
     "personality": "性格测试"
@@ -47,7 +47,10 @@
       "science": "科学",
       "nature": "自然",
       "festival": "庆典",
-      "city": "市区"
+      "city": "市区",
+      "food": "美食",
+      "stay": "住宿",
+      "shopping": "购物"
     },
     "ctaSpots": "探索夜间景点",
     "ctaGuide": "夜间礼仪",
@@ -951,6 +954,11 @@
     "nearbySpots": "附近的夜间景点",
     "backToList": "返回列表",
     "empty": "暂无登记地点",
-    "source": "信息来源：ⓒ韩国观光公社（请求时实时获取）"
+    "source": "信息来源：ⓒ韩国观光公社（请求时实时获取）",
+    "filterAll": "全部",
+    "sortAccess": "按夜景可达性",
+    "withinKm": "1km内夜间景点{n}处",
+    "nearestSpot": "最近的夜间景点",
+    "planNearby": "在附近规划路线"
   }
 }

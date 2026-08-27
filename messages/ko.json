@@ -17,13 +17,13 @@
     "community": "커뮤니티",
     "phrases": "서바이벌 한국어",
     "festivals": "축제&행사",
-    "food": "맛집",
-    "stay": "숙박",
-    "shopping": "쇼핑",
+    "food": "야식 맛집",
+    "stay": "오늘 밤 숙소",
+    "shopping": "야시장 · 쇼핑",
     "menu": "전체 메뉴",
     "groupExplore": "둘러보기",
     "groupGuide": "여행 가이드",
-    "groupLocal": "맛집 · 숙박 · 쇼핑",
+    "groupLocal": "나이트 라이프",
     "groupCommunity": "커뮤니티",
     "home": "홈",
     "personality": "성향 테스트"
@@ -47,7 +47,10 @@
       "science": "과학",
       "nature": "자연",
       "festival": "축제",
-      "city": "도심"
+      "city": "도심",
+      "food": "맛집",
+      "stay": "숙소",
+      "shopping": "쇼핑"
     },
     "ctaSpots": "야간 명소 보기",
     "ctaGuide": "나이트 에티켓",
@@ -951,6 +954,11 @@
     "nearbySpots": "근처 야간 명소",
     "backToList": "목록으로",
     "empty": "등록된 곳이 없습니다",
-    "source": "정보 출처: ⓒ한국관광공사 (요청 시점에 실시간으로 받아옵니다)"
+    "source": "정보 출처: ⓒ한국관광공사 (요청 시점에 실시간으로 받아옵니다)",
+    "filterAll": "전체",
+    "sortAccess": "야경 접근성순",
+    "withinKm": "1km 안 야간 명소 {n}곳",
+    "nearestSpot": "가까운 야간 명소",
+    "planNearby": "이 근처 코스"
   }
 }

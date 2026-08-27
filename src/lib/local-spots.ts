@@ -77,3 +77,41 @@ function fillMissing(spots: LocalSpot[], locale: string): void {
     }
   })();
 }
+
+import { getVerifiedNightSpots, distanceM } from "./spots";
+import type { NightSpot } from "./kto";
+
+/** 목록 카드에 붙일 야간 명소 연관 정보 */
+export interface LocalSpotWithContext extends LocalSpot {
+  /** 가장 가까운 야간 명소 (없으면 null) */
+  nearest: { contentId: string; title: string; distanceM: number } | null;
+  /** 1km 안 야간 명소 수 — 숙소의 '야경 접근성'으로 쓴다 */
+  nearbyCount: number;
+}
+
+/**
+ * 맛집·숙박·쇼핑을 야간 명소와 이어 준다. 그냥 나열하면 우리 서비스에서 이 탭이
+ * 왜 있는지 보이지 않는다 — "여기서 먹고 어디 갈까"가 카드에서 바로 읽혀야 한다.
+ */
+export async function getLocalSpotsWithContext(
+  kind: LocalKind,
+  locale: string,
+): Promise<{ spots: LocalSpotWithContext[]; nightSpots: NightSpot[] }> {
+  const [spots, nightSpots] = await Promise.all([
+    getLocalSpotsTranslated(kind, locale),
+    getVerifiedNightSpots(locale),
+  ]);
+  const withContext = spots.map((s) => {
+    let nearest: LocalSpotWithContext["nearest"] = null;
+    let nearbyCount = 0;
+    for (const n of nightSpots) {
+      const d = distanceM(s, n);
+      if (d <= 1000) nearbyCount += 1;
+      if (!nearest || d < nearest.distanceM) {
+        nearest = { contentId: n.contentId, title: n.title, distanceM: Math.round(d) };
+      }
+    }
+    return { ...s, nearest, nearbyCount };
+  });
+  return { spots: withContext, nightSpots };
+}

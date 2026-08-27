@@ -17,13 +17,13 @@
     "community": "コミュニティ",
     "phrases": "サバイバル韓国語",
     "festivals": "祭り・イベント",
-    "food": "グルメ",
-    "stay": "宿泊",
-    "shopping": "ショッピング",
+    "food": "夜食グルメ",
+    "stay": "今夜の宿",
+    "shopping": "夜市・買い物",
     "menu": "メニュー一覧",
     "groupExplore": "見どころ",
     "groupGuide": "旅のガイド",
-    "groupLocal": "グルメ・宿・買い物",
+    "groupLocal": "ナイトライフ",
     "groupCommunity": "コミュニティ",
     "home": "ホーム",
     "personality": "性格診断"
@@ -47,7 +47,10 @@
       "science": "科学",
       "nature": "自然",
       "festival": "祭り",
-      "city": "都心"
+      "city": "都心",
+      "food": "グルメ",
+      "stay": "宿",
+      "shopping": "買い物"
     },
     "ctaSpots": "夜の名所を見る",
     "ctaGuide": "ナイトエチケット",
@@ -951,6 +954,11 @@
     "nearbySpots": "近くの夜の名所",
     "backToList": "一覧へ",
     "empty": "登録された場所がありません",
-    "source": "情報提供: ⓒ韓国観光公社（リクエスト時にリアルタイム取得）"
+    "source": "情報提供: ⓒ韓国観光公社（リクエスト時にリアルタイム取得）",
+    "filterAll": "すべて",
+    "sortAccess": "夜景アクセス順",
+    "withinKm": "1km以内に夜の名所{n}か所",
+    "nearestSpot": "最寄りの夜の名所",
+    "planNearby": "この近くでコース"
   }
 }

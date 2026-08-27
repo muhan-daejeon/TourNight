@@ -17,13 +17,13 @@
     "community": "Community",
     "phrases": "Survival Korean",
     "festivals": "Festivals",
-    "food": "Food",
-    "stay": "Stay",
-    "shopping": "Shopping",
+    "food": "Late-night Eats",
+    "stay": "Tonight's Stay",
+    "shopping": "Night Markets",
     "menu": "All menu",
     "groupExplore": "Explore",
     "groupGuide": "Travel Guide",
-    "groupLocal": "Eat · Stay · Shop",
+    "groupLocal": "Night Life",
     "groupCommunity": "Community",
     "home": "Home",
     "personality": "Persona Test"
@@ -47,7 +47,10 @@
       "science": "Science",
       "nature": "Nature",
       "festival": "Festival",
-      "city": "City"
+      "city": "City",
+      "food": "Eat",
+      "stay": "Stay",
+      "shopping": "Shop"
     },
     "ctaSpots": "Explore Night Spots",
     "ctaGuide": "Night Etiquette",
@@ -951,6 +954,11 @@
     "nearbySpots": "Night spots nearby",
     "backToList": "Back to list",
     "empty": "Nothing listed yet",
-    "source": "Source: ⓒ Korea Tourism Organization (fetched live on request)"
+    "source": "Source: ⓒ Korea Tourism Organization (fetched live on request)",
+    "filterAll": "All",
+    "sortAccess": "Closest to night spots",
+    "withinKm": "{n} night spots within 1km",
+    "nearestSpot": "Nearest night spot",
+    "planNearby": "Plan a course here"
   }
 }

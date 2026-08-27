@@ -221,7 +221,7 @@ const R = 6371000;
 const rad = (d: number) => (d * Math.PI) / 180;
 
 /** 두 좌표 사이 거리(m) — PostGIS 대신 메모리에서 계산한다 */
-function distanceM(
+export function distanceM(
   a: { mapX: number; mapY: number },
   b: { mapX: number; mapY: number },
 ): number {

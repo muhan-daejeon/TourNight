@@ -238,6 +238,8 @@ const LOCAL_TYPE: Record<LocalKind, { ko: string; other: string }> = {
 
 export interface LocalSpot extends KtoSpot {
   tel: string | null;
+  /** 한글 원문 주소 — 자치구 필터가 정규식으로 한글을 찾는다 */
+  addrKo: string;
 }
 
 /**
@@ -249,6 +251,7 @@ async function fetchLocal(kind: LocalKind, locale: string): Promise<LocalSpot[]>
   const withTel = (i: ListItem & { tel?: string }): LocalSpot => ({
     ...toSpot(i),
     tel: i.tel?.trim() || null,
+    addrKo: i.addr1 ?? "",
   });
 
   const base = (await fetchServiceRaw(SERVICE.ko, [LOCAL_TYPE[kind].ko]))
