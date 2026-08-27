@@ -95,25 +95,7 @@ function TourBox() {
   // 어느 단계에서 잰 값인지 함께 담는다 — 단계가 바뀐 직후 옛 구멍이 한 프레임
   // 남는 걸 막는다 (효과 안에서 굳이 null로 비우지 않아도 된다)
   const [hole, setHole] = useState<{ phase: number; boxes: Box[] } | null>(null);
-  // 아직 본 적 없는 계정이면 홈에 도착했을 때 저절로 시작한다
-  const [autoStart, setAutoStart] = useState(false);
   const [closed, setClosed] = useState(false);
-
-  useEffect(() => {
-    if (urlPhase || closed || pathname !== "/") return;
-    let cancelled = false;
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!cancelled && data.user && !data.user.tourCompleted) {
-          setAutoStart(true);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [urlPhase, closed, pathname]);
 
   // 가이드북 버튼·"둘러보기 다시보기"는 ?tour=start로 이동시켜 다시 띄우는데,
   // 헤더처럼 이 컴포넌트도 레이아웃에 상주해 페이지를 옮겨도 다시 마운트되지
@@ -126,14 +108,13 @@ function TourBox() {
     if (urlPhase) setClosed(false);
   }
 
-  const phase: Phase | null = urlPhase ?? (autoStart ? "start" : null);
+  const phase: Phase | null = urlPhase;
   const visible = phase !== null && !closed && !EXCLUDED.includes(pathname);
 
   /** 본 것으로 기록하고 상자를 닫는다 (완료·건너뛰기 공통) */
   const finish = useCallback(
     (goHome: boolean) => {
       setClosed(true);
-      setAutoStart(false);
       fetch("/api/auth/tour", { method: "POST" }).catch(() => {});
       if (goHome) router.push("/");
     },
@@ -142,7 +123,6 @@ function TourBox() {
 
   const goTo = useCallback(
     (next: Phase) => {
-      setAutoStart(false);
       if (next === "done") {
         router.push("/?tour=done");
         return;
