@@ -98,14 +98,29 @@ export default function NightLifeExplorer({
           const chips = areaSpots.get(id) ?? [];
           return (
             <section key={id}>
-              {/* 동네 헤더 — 이 동네의 야경이 먼저, 그다음 먹고·자고·사는 곳 */}
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 px-6 py-6 sm:px-8">
-                <div className={`pointer-events-none absolute inset-0 bg-gradient-to-r ${accent.glow} via-transparent to-transparent`} />
-                <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              {/* 동네 헤더 — 이 동네의 야경이 먼저, 그다음 먹고·자고·사는 곳.
+                  '전체'에서는 여러 동네가 이어지므로 구분 제목 정도로만 낮춘다. 큰 카드로
+                  두면 위 칩에서 그 동네를 고른 것처럼 읽힌다. */}
+              <div
+                className={
+                  area === "all"
+                    ? "flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-end sm:justify-between"
+                    : "relative overflow-hidden rounded-3xl border border-white/10 px-6 py-6 sm:px-8"
+                }
+              >
+                {area !== "all" && (
+                  <div className={`pointer-events-none absolute inset-0 bg-gradient-to-r ${accent.glow} via-transparent to-transparent`} />
+                )}
+                <div className={area === "all" ? "contents" : "relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"}>
                   <div>
-                    <p className={`text-[11px] font-bold tracking-[0.2em] ${accent.text}`}>NIGHT AREA</p>
-                    <h2 className="mt-1 text-2xl font-extrabold tracking-tight">{t(`areas.${id}`)}</h2>
-                    <p className="mt-1 text-sm text-slate-400">{t(`areaDesc.${id}`)}</p>
+                    {area !== "all" && (
+                      <p className={`text-[11px] font-bold tracking-[0.2em] ${accent.text}`}>NIGHT AREA</p>
+                    )}
+                    <h2 className={area === "all" ? "flex items-baseline gap-2 text-lg font-bold tracking-tight" : "mt-1 text-2xl font-extrabold tracking-tight"}>
+                      {t(`areas.${id}`)}
+                      {area === "all" && <span className="text-xs font-semibold text-slate-500">{list.length}</span>}
+                    </h2>
+                    <p className={area === "all" ? "mt-0.5 text-xs text-slate-500" : "mt-1 text-sm text-slate-400"}>{t(`areaDesc.${id}`)}</p>
                   </div>
                   {chips.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
