@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { SERVICE_NAME } from "./kto";
+import { readApiCache, writeApiCache } from "./api-cache";
 
 /**
  * KTO 관광통계 실시간 조회 레이어.
@@ -37,6 +38,26 @@ async function callAll<T>(
   path: string,
   extra: Record<string, string>,
   maxPages = 5,
+): Promise<T[]> {
+  const cacheKey = `${path}?${new URLSearchParams(extra)}`;
+  try {
+    const out = await callAllPages<T>(path, extra, maxPages);
+    writeApiCache(cacheKey, out);
+    return out;
+  } catch (err) {
+    const cached = await readApiCache<T[]>(cacheKey);
+    if (cached) {
+      console.warn(`[kto-stats] ${path} 실패 → 보관분 사용:`, err instanceof Error ? err.message : err);
+      return cached;
+    }
+    throw err;
+  }
+}
+
+async function callAllPages<T>(
+  path: string,
+  extra: Record<string, string>,
+  maxPages: number,
 ): Promise<T[]> {
   const out: T[] = [];
   let total = Infinity;

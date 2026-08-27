@@ -302,3 +302,11 @@ create table if not exists activity_log (
 );
 create index if not exists activity_log_created_idx on activity_log (created_at desc);
 create index if not exists activity_log_user_idx on activity_log (user_id, created_at desc);
+
+-- 외부 API 응답의 마지막 성공분. 실시간 호출이 실패했을 때만 읽는다 (src/lib/api-cache.ts).
+-- 원천을 대체하는 적재가 아니라 응답 캐시다 — 한도가 막힌 날에도 화면이 비지 않게.
+create table if not exists api_cache (
+  cache_key text primary key,      -- 서비스/오퍼레이션?파라미터 (인증키 제외)
+  payload jsonb not null,
+  fetched_at timestamptz not null default now()
+);
