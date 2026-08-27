@@ -44,8 +44,9 @@ const MENU_EXTRAS = [
 
 /** 상단에 늘 보이는 4개 카테고리와 그 아래 묶인 탭들 — 홈은 좌측 로고가 대신한다 */
 const MENU_GROUPS = [
-  { id: "explore", labelKey: "groupExplore", items: ["spots", "festivals", "courses", "personality"] },
-  { id: "guide", labelKey: "groupGuide", items: ["etiquette", "phrases"] },
+  { id: "explore", labelKey: "groupExplore", items: ["spots", "festivals", "courses"] },
+  // 성향 테스트는 놀이가 아니라 여행 준비 도구라 가이드 쪽에 둔다
+  { id: "guide", labelKey: "groupGuide", items: ["personality", "etiquette", "phrases"] },
   { id: "local", labelKey: "groupLocal", items: ["food", "stay", "shopping"] },
   { id: "community", labelKey: "groupCommunity", items: ["community"] },
 ] as const;
@@ -174,14 +175,15 @@ export default function Header() {
       <Suspense fallback={null}>
         <TourMenuSync onChange={setTourTarget} />
       </Suspense>
-      {/* 로고+카테고리 행 위 여백 — 행 자신의 높이만큼, 스크롤해도 유지된다 */}
-      <div aria-hidden style={{ height: "var(--header-h, 0px)" }} />
-      <div ref={rowRef} className="relative flex w-full items-center gap-4 px-6 py-3">
+      {/* 로고+카테고리 행 위 여백 — 행 자신의 높이만큼, 스크롤해도 유지된다.
+          좁은 화면은 행이 두 줄로 늘어나 이 여백까지 커지므로 두지 않는다 */}
+      <div aria-hidden className="hidden lg:block" style={{ height: "var(--header-h, 0px)" }} />
+      <div ref={rowRef} className="relative flex w-full flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 lg:flex-nowrap lg:px-6">
         {/* 브랜드 워드마크는 번역하지 않는다 — 로고이자 서비스 고유명 */}
-        <Link href="/" className="ml-10 flex shrink-0 flex-col leading-none">
+        <Link href="/" className="flex shrink-0 flex-col leading-none lg:ml-10">
           <span
             data-header-logo
-            className="text-[34px] font-extrabold tracking-tight text-white"
+            className="text-[26px] font-extrabold tracking-tight text-white lg:text-[34px]"
           >
             Tour<span className="text-amber-400">Night</span>
           </span>
@@ -192,7 +194,7 @@ export default function Header() {
 
         {/* 4개 카테고리 — 화면 정중앙에 절대 위치시켜 로고·오른쪽 묶음의 폭과
             무관하게 가운데 온다. 각각 누르면 바로 밑에 세로로 탭이 펼쳐진다 */}
-        <nav className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-wrap items-center justify-center gap-x-20 gap-y-3">
+        <nav className="order-last flex basis-full flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:absolute lg:left-1/2 lg:top-1/2 lg:order-none lg:basis-auto lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-x-20 lg:gap-y-3">
           {MENU_GROUPS.map((group) => {
             const groupActive = group.items.some((key) => isActive(findNavItem(key).href));
             const isTourTarget = tourTarget?.groupId === group.id;
@@ -237,7 +239,7 @@ export default function Header() {
           })}
         </nav>
 
-        <div className="ml-auto mr-20 flex shrink-0 items-center gap-3">
+        <div className="ml-auto flex shrink-0 items-center gap-3 lg:mr-20">
           <AuthNav />
           <button
             type="button"

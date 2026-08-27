@@ -672,6 +672,14 @@ export default function CommunityBoard({
   const t = useTranslations("community");
 
   const [posts, setPosts] = useState<Post[]>(initialPosts);
+  // 보기 방식 — 최신순이 기본, 인기는 댓글 많은 순, 사진은 첨부 있는 글만
+  const [view, setView] = useState<"latest" | "popular" | "photos">("latest");
+  const visible =
+    view === "popular"
+      ? [...posts].sort((a, b) => b.commentCount - a.commentCount || b.id - a.id)
+      : view === "photos"
+        ? posts.filter((p) => p.mediaUrl)
+        : posts;
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   // undefined = 로딩, null = 비로그인, Me = 로그인
@@ -866,14 +874,33 @@ export default function CommunityBoard({
 
       {/* 목록 — 서버에서 채워 오므로 로딩 상태가 없다.
           조회에 실패하면 listPosts가 빈 배열을 주고 아래 빈 상태로 표시된다 */}
-      {posts.length === 0 ? (
+      {posts.length > 0 && (
+        <div role="tablist" className="flex gap-1 border-b border-white/10">
+          {(["latest", "popular", "photos"] as const).map((v) => (
+            <button
+              key={v}
+              role="tab"
+              aria-selected={view === v}
+              onClick={() => setView(v)}
+              className={`-mb-px border-b-2 px-3.5 py-2.5 text-sm font-semibold transition ${
+                view === v
+                  ? "border-amber-400 text-amber-300"
+                  : "border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              {t(`view.${v}`)}
+            </button>
+          ))}
+        </div>
+      )}
+      {visible.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-14 text-center">
           <MessageSquare size={30} strokeWidth={1.5} className="text-slate-600" />
-          <p className="text-sm text-slate-500">{t("empty")}</p>
+          <p className="text-sm text-slate-500">{t(view === "photos" ? "emptyPhotos" : "empty")}</p>
         </div>
       ) : (
         <ul className="space-y-3">
-          {posts.map((post) => (
+          {visible.map((post) => (
             <PostItem
               key={post.id}
               post={post}

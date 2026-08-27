@@ -60,6 +60,7 @@ interface ListItem {
   contenttypeid?: string;
   cat1?: string;
   cat3?: string;
+  tel?: string;
 }
 
 /** KTO 원천 명소 한 건 — DB에 저장하지 않고 요청 때마다 받는다 */
@@ -125,11 +126,12 @@ const toSpot = (i: ListItem): KtoSpot => ({
  * 대전 전체 명소를 언어별로 조회한다 (관광지 12 + 문화시설 14 + 축제 15).
  * 페이지당 100건씩, 응답이 빈 페이지가 나오면 멈춘다.
  */
-async function fetchService(
+/** 좌표가 멀쩡한 원본 항목만 모은다 (분류별 페이지 끝까지) */
+async function fetchServiceRaw(
   service: string,
   contentTypes: string[],
-): Promise<KtoSpot[]> {
-  const out = new Map<string, KtoSpot>();
+): Promise<ListItem[]> {
+  const out = new Map<string, ListItem>();
   for (const contentTypeId of contentTypes) {
     for (let page = 1; page <= 5; page++) {
       const items = await call(service, "areaBasedList2", {
@@ -138,16 +140,20 @@ async function fetchService(
         areaCode: DAEJEON,
         contentTypeId,
       });
-      items.filter((i) => i.mapx && i.mapy).forEach((i) => {
-        const s = toSpot(i);
-        if (Number.isFinite(s.mapX) && Number.isFinite(s.mapY)) {
-          out.set(s.contentId, s);
-        }
-      });
+      items
+        .filter((i) => i.mapx && i.mapy && Number.isFinite(Number(i.mapx)))
+        .forEach((i) => out.set(i.contentid, i));
       if (items.length < 100) break;
     }
   }
   return [...out.values()];
+}
+
+async function fetchService(
+  service: string,
+  contentTypes: string[],
+): Promise<KtoSpot[]> {
+  return (await fetchServiceRaw(service, contentTypes)).map(toSpot);
 }
 
 /**
@@ -212,5 +218,131 @@ export const getKtoOverview = (contentId: string, locale: string) =>
       return raw.replace(/<[^>]+>/g, "").trim();
     },
     ["kto-overview", contentId, locale],
+    { revalidate: 3600, tags: ["kto-spots"] },
+  )();
+
+
+/* ── 맛집·숙박·쇼핑 (로컬 스팟) ─────────────────────────────── */
+
+export type LocalKind = "food" | "stay" | "shopping";
+
+/**
+ * 분류 코드. 국문과 다국어 서비스가 다른 것은 명소와 같다.
+ * 국문 39 음식점 · 32 숙박 · 38 쇼핑 = 다국어 82 · 80 · 79
+ */
+const LOCAL_TYPE: Record<LocalKind, { ko: string; other: string }> = {
+  food: { ko: "39", other: "82" },
+  stay: { ko: "32", other: "80" },
+  shopping: { ko: "38", other: "79" },
+};
+
+export interface LocalSpot extends KtoSpot {
+  tel: string | null;
+}
+
+/**
+ * 맛집·숙박·쇼핑 목록. 명소와 같은 방식 — 국문 목록이 뼈대, 다른 언어는
+ * 괄호 안 한글 원문으로 짝을 찾아 이름·주소만 공식 번역으로 바꾼다.
+ * 사진 없는 곳은 뺀다 (목록 카드가 사진 위주라 빈 카드가 된다).
+ */
+async function fetchLocal(kind: LocalKind, locale: string): Promise<LocalSpot[]> {
+  const withTel = (i: ListItem & { tel?: string }): LocalSpot => ({
+    ...toSpot(i),
+    tel: i.tel?.trim() || null,
+  });
+
+  const base = (await fetchServiceRaw(SERVICE.ko, [LOCAL_TYPE[kind].ko]))
+    .map(withTel)
+    .filter((s) => s.imageUrl);
+  if (locale === "ko" || !SERVICE[locale]) return base;
+
+  const translated = (
+    await fetchServiceRaw(SERVICE[locale], [LOCAL_TYPE[kind].other])
+  ).map(withTel);
+  const byKorean = new Map<string, LocalSpot>();
+  for (const t of translated) {
+    const ko = koreanInTitle(t.title);
+    if (ko) byKorean.set(matchKey(ko), t);
+  }
+  return base.map((s) => {
+    const t = byKorean.get(matchKey(s.title));
+    if (!t) return s;
+    return {
+      ...s,
+      title: t.title.replace(/[（(]\s*[^（()）]*[가-힣][^（()）]*?\s*[）)]/g, "").trim(),
+      addr: t.addr || s.addr,
+      langContentId: t.contentId,
+    };
+  });
+}
+
+/** 언어별 맛집·숙박·쇼핑 목록 (1시간 캐시) */
+export const getLocalSpots = (kind: LocalKind, locale: string) =>
+  unstable_cache(
+    () => fetchLocal(kind, locale),
+    ["kto-local", kind, locale],
+    { revalidate: 3600, tags: ["kto-spots"] },
+  )();
+
+/** 야간 이용에 필요한 상세 — 영업시간·대표메뉴·체크인 등 (분류마다 필드명이 다르다) */
+export interface LocalDetail {
+  hours: string | null; // 영업시간 / 체크인·아웃 / 개장시간
+  restDay: string | null;
+  parking: string | null;
+  menu: string | null; // 대표메뉴 / 객실유형 / 판매품목
+  contact: string | null;
+}
+
+const strip = (v: unknown) =>
+  String(v ?? "")
+    .replace(/<br\s*\/?>/gi, " · ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim() || null;
+
+export const getLocalDetail = (kind: LocalKind, contentId: string, locale: string) =>
+  unstable_cache(
+    async (): Promise<LocalDetail> => {
+      // 상세는 언어 서비스의 contentId로 물어야 한다
+      const langId =
+        locale === "ko"
+          ? contentId
+          : (await getLocalSpots(kind, locale)).find((s) => s.contentId === contentId)
+              ?.langContentId;
+      if (!langId) return { hours: null, restDay: null, parking: null, menu: null, contact: null };
+
+      const service = SERVICE[locale] ?? SERVICE.ko;
+      const type = locale === "ko" ? LOCAL_TYPE[kind].ko : LOCAL_TYPE[kind].other;
+      const rows = await call(service, "detailIntro2", { contentId: langId, contentTypeId: type });
+      const r = (rows[0] ?? {}) as unknown as Record<string, unknown>;
+
+      if (kind === "food")
+        return {
+          hours: strip(r.opentimefood),
+          restDay: strip(r.restdatefood),
+          parking: strip(r.parkingfood),
+          menu: strip(r.firstmenu) ?? strip(r.treatmenu),
+          contact: strip(r.infocenterfood),
+        };
+      if (kind === "stay")
+        return {
+          hours:
+            r.checkintime || r.checkouttime
+              ? `${strip(r.checkintime) ?? "?"} ~ ${strip(r.checkouttime) ?? "?"}`
+              : null,
+          restDay: null,
+          parking: strip(r.parkinglodging),
+          menu: strip(r.roomtype),
+          contact: strip(r.infocenterlodging),
+        };
+      return {
+        hours: strip(r.opentime),
+        restDay: strip(r.restdateshopping),
+        parking: strip(r.parkingshopping),
+        menu: strip(r.saleitem),
+        contact: strip(r.infocentershopping),
+      };
+    },
+    ["kto-local-detail", kind, contentId, locale],
     { revalidate: 3600, tags: ["kto-spots"] },
   )();
