@@ -95,6 +95,7 @@ async function call(
   operation: string,
   extra: Record<string, string>,
 ): Promise<ListItem[]> {
+  if (!process.env.KTO_API_KEY) throw new Error("KTO_API_KEY 없음 — 호출 생략");
   const url = `${BASE}/${service}/${operation}?${params(extra)}`;
   // 보관 키에는 인증키를 넣지 않는다 — 키를 바꿔도 보관분이 이어진다
   const cacheKey = `${service}/${operation}?${new URLSearchParams(extra)}`;
