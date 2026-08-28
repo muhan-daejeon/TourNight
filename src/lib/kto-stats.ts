@@ -39,6 +39,7 @@ async function callAll<T>(
   extra: Record<string, string>,
   maxPages = 5,
 ): Promise<T[]> {
+  if (!process.env.KTO_API_KEY) throw new Error("KTO_API_KEY 없음 — 호출 생략");
   const cacheKey = `${path}?${new URLSearchParams(extra)}`;
   try {
     const out = await callAllPages<T>(path, extra, maxPages);
