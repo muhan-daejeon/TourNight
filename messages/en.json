@@ -507,7 +507,9 @@
     "ongoing": "On now",
     "upcoming": "Upcoming",
     "ended": "Ended",
-    "dday": "D-{n}"
+    "dday": "D-{n}",
+    "past": "Annual",
+    "lastYear": "Last year"
   },
   "comingSoon": {
     "short": "Coming soon",

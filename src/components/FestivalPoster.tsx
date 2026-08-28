@@ -41,6 +41,7 @@ export default function FestivalPoster({
     ongoing: "bg-emerald-400 text-slate-950",
     upcoming: "bg-amber-400 text-slate-950",
     ended: "bg-slate-700/80 text-slate-300",
+    past: "bg-white/10 text-slate-200",
   };
 
   return (
@@ -79,6 +80,7 @@ export default function FestivalPoster({
         </h3>
         {period && (
           <p className="mt-1.5 text-[12px] font-bold text-amber-300">
+            {status === "past" && <span className="mr-1 text-slate-400">{tf("lastYear")}</span>}
             {md(period.start)} – {md(period.end)}
           </p>
         )}

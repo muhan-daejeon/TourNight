@@ -507,7 +507,9 @@
     "ongoing": "进行中",
     "upcoming": "即将举办",
     "ended": "已结束",
-    "dday": "还有{n}天"
+    "dday": "还有{n}天",
+    "past": "每年举办",
+    "lastYear": "去年"
   },
   "comingSoon": {
     "short": "筹备中",

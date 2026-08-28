@@ -507,7 +507,9 @@
     "ongoing": "진행 중",
     "upcoming": "예정",
     "ended": "종료",
-    "dday": "D-{n}"
+    "dday": "D-{n}",
+    "past": "매년 개최",
+    "lastYear": "작년"
   },
   "comingSoon": {
     "short": "준비 중",
