@@ -9,7 +9,11 @@ import { sql } from "./db";
  *
  * DB가 없거나(키 없는 CI 빌드) 쓰기가 실패해도 호출부는 영향받지 않는다.
  */
+/** DB 설정이 없으면(키 없는 CI 빌드) 접속 대기 없이 바로 건너뛴다 — 30초씩 기다리다 빌드가 죽었다 */
+const hasDb = () => !!process.env.DATABASE_URL;
+
 export async function readApiCache<T>(key: string): Promise<T | null> {
+  if (!hasDb()) return null;
   try {
     const rows = await sql<{ payload: T }[]>`
       select payload from api_cache where cache_key = ${key}
@@ -21,6 +25,7 @@ export async function readApiCache<T>(key: string): Promise<T | null> {
 }
 
 export function writeApiCache(key: string, payload: unknown): void {
+  if (!hasDb()) return;
   void sql`
     insert into api_cache (cache_key, payload, fetched_at)
     values (${key}, ${sql.json(payload as never)}, now())

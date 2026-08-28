@@ -502,8 +502,14 @@
   "festivals": {
     "title": "庆典 & 活动",
     "subtitle": "TourNight 收录的大田庆典场地",
-    "scheduleNote": "举办日期每年不同。此处仅提供举办场地信息，具体日程请查询主办方官方公告。",
-    "empty": "暂无已收录的庆典场地。"
+    "scheduleNote": "举办日期以韩国观光公社登记信息为准，可能因主办方原因变动。",
+    "empty": "暂无已收录的庆典场地。",
+    "ongoing": "进行中",
+    "upcoming": "即将举办",
+    "ended": "已结束",
+    "dday": "还有{n}天",
+    "past": "每年举办",
+    "lastYear": "去年"
   },
   "comingSoon": {
     "short": "筹备中",

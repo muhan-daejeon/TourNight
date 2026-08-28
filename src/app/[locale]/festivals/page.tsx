@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
+import { withPeriods } from "@/lib/festivals";
 import FestivalPoster from "@/components/FestivalPoster";
 import PageHero, { PageBody } from "@/components/PageHero";
 
@@ -18,7 +19,7 @@ export default async function FestivalsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("festivals");
-  const festivals = pickFestivals(await getVerifiedNightSpots(locale));
+  const festivals = await withPeriods(pickFestivals(await getVerifiedNightSpots(locale)));
 
   return (
     <>
