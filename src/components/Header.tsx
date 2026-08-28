@@ -175,9 +175,6 @@ export default function Header() {
       <Suspense fallback={null}>
         <TourMenuSync onChange={setTourTarget} />
       </Suspense>
-      {/* 로고+카테고리 행 위 여백 — 행 자신의 높이만큼, 스크롤해도 유지된다.
-          좁은 화면은 행이 두 줄로 늘어나 이 여백까지 커지므로 두지 않는다 */}
-      <div aria-hidden className="hidden lg:block" style={{ height: "var(--header-h, 0px)" }} />
       <div ref={rowRef} className="relative flex w-full flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 lg:flex-nowrap lg:px-6">
         {/* 브랜드 워드마크는 번역하지 않는다 — 로고이자 서비스 고유명 */}
         <Link href="/" className="flex shrink-0 flex-col leading-none lg:ml-10">

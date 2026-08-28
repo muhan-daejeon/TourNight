@@ -101,17 +101,15 @@ export default async function HomePage({
       <IntroSequence />
 
       <>
-        <section className="relative h-[calc(100vh-var(--header-h,0px))] lg:h-[calc(100vh-var(--header-h,0px)*2)]">
+        <section className="relative h-[calc(100vh-var(--header-h,0px))]">
           {/* 슬라이드는 (헤더 밑) 화면 정중앙 — 가로·세로 모두.
-              --header-h는 로고+메뉴 "행" 자신의 높이만 담고 있고, 실제 헤더는
-              그 위에 같은 높이의 여백까지 더해 총 2배 높이를 차지한다 — 그래서
-              여기서도 2배를 뺀다. 이 section 자체는 이미 헤더 바로 아래에서
+              --header-h는 로고+메뉴 행의 높이다. 이 section 자체는 이미 헤더 바로 아래에서
               시작하므로, 안쪽 박스는 거기서부터 "보이는 화면 높이"만큼만 잡아야
               가운데가 실제로 보이는 영역의 가운데와 맞는다. 오늘 밤 정보·스크롤
               화살표는 그 박스 맨 아래에 겹쳐 띄워, 슬라이드 자체의 중앙 계산엔
               끼어들지 않는다 — 다만 화면이 낮으면 그 둘이 슬라이드 아래쪽과
               부딪혀서, 슬라이드를 정중앙보다 살짝 위로 올려 여유를 둔다 */}
-          <div className="absolute inset-x-0 top-0 h-[calc(100vh-var(--header-h,0px))] lg:h-[calc(100vh-var(--header-h,0px)*2)]">
+          <div className="absolute inset-x-0 top-0 h-[calc(100vh-var(--header-h,0px))]">
             <div className="absolute inset-0 flex items-center justify-center px-4">
               <div className="w-full max-w-5xl" style={{ transform: "translateY(-40px)" }}>
                 <HeroCarousel slides={slides} />
