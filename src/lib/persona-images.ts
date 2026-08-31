@@ -3,7 +3,7 @@
 /** 성향 테스트 인트로 화면 우측에 쓰는 사진 (없으면 null) */
 export const PERSONA_INTRO_IMAGE: string | null = "/persona/persona-0.jpg";
 
-/** 문항 번호("1"~"6") → 선택지(a~d) → 사진 경로. 사진이 없는 문항은 키가 없다 */
+/** 문항 번호 → 선택지(a~d) → 사진 경로. 사진이 없는 문항은 키가 없다 */
 export const PERSONA_QUESTION_IMAGES: Record<string, Partial<Record<"a" | "b" | "c" | "d", string>>> = {
   "1": {
     "a": "/persona/persona-q1-a.jpg",
@@ -40,5 +40,41 @@ export const PERSONA_QUESTION_IMAGES: Record<string, Partial<Record<"a" | "b" | 
     "b": "/persona/persona-q6-b.jpg",
     "c": "/persona/persona-q6-c.jpg",
     "d": "/persona/persona-q6-d.jpg"
+  },
+  "7": {
+    "a": "/persona/persona-q7-a.jpg",
+    "b": "/persona/persona-q7-b.jpg",
+    "c": "/persona/persona-q7-c.jpg",
+    "d": "/persona/persona-q7-d.jpg"
+  },
+  "8": {
+    "a": "/persona/persona-q8-a.jpg",
+    "b": "/persona/persona-q8-b.jpg",
+    "c": "/persona/persona-q8-c.jpg",
+    "d": "/persona/persona-q8-d.jpg"
+  },
+  "9": {
+    "a": "/persona/persona-q9-a.jpg",
+    "b": "/persona/persona-q9-b.jpg",
+    "c": "/persona/persona-q9-c.jpg",
+    "d": "/persona/persona-q9-d.jpg"
+  },
+  "10": {
+    "a": "/persona/persona-q10-a.jpg",
+    "b": "/persona/persona-q10-b.jpg",
+    "c": "/persona/persona-q10-c.jpg",
+    "d": "/persona/persona-q10-d.jpg"
+  },
+  "11": {
+    "a": "/persona/persona-q11-a.jpg",
+    "b": "/persona/persona-q11-b.jpg",
+    "c": "/persona/persona-q11-c.jpg",
+    "d": "/persona/persona-q11-d.jpg"
+  },
+  "12": {
+    "a": "/persona/persona-q12-a.jpg",
+    "b": "/persona/persona-q12-b.jpg",
+    "c": "/persona/persona-q12-c.jpg",
+    "d": "/persona/persona-q12-d.jpg"
   }
 };
