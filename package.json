@@ -13,6 +13,7 @@
     "persona:images": "node db/process-persona-images.mjs",
     "mascot:images": "node db/process-mascot-images.mjs",
     "menu:icons": "node db/process-menu-icons.mjs",
+    "collage:frame": "node db/process-collage-template.mjs",
     "db:sync": "node --env-file=.env.local db/sync-kto.mjs",
     "db:classify": "node --env-file=.env.local db/classify-night.mjs",
     "i18n:titles": "node --env-file=.env.local db/fill-titles.mjs",
