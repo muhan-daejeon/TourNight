@@ -114,7 +114,12 @@ function Slide({
         <p className="text-xs font-semibold tracking-[0.18em] text-slate-300 sm:text-sm">
           {slide.overline}
         </p>
-        <h1 className="mt-4 line-clamp-2 max-w-xl text-3xl font-extrabold leading-[1.22] tracking-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.8)] sm:text-5xl">
+        {/* sm 이상에서 5xl을 썼었는데, 영어(다른 로케일도)는 같은 문구가 한국어보다
+            훨씬 길어서 2줄을 꽉 채우면 고정 높이 박스 안에서 부제와 겹쳤다
+            (박스는 일부러 고정 높이라 로케일마다 캐러셀 키가 달라지지 않게
+            해 둔 것 — HeroCarousel 위 주석·페이지 히어로~본문 간격 계산 참고).
+            4xl로 낮춰 2줄이어도 여유 있게 들어가게 한다 */}
+        <h1 className="mt-4 line-clamp-2 max-w-xl text-3xl font-extrabold leading-[1.22] tracking-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.8)] sm:text-4xl">
           <TitleWithHighlight title={slide.title} highlight={slide.highlight} />
         </h1>
         <p className="mt-5 line-clamp-3 max-w-md text-sm leading-relaxed text-slate-300 sm:text-base">
