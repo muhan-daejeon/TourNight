@@ -51,7 +51,8 @@ export default function LoginForm({
       // 다시 보인다 (하드 새로고침해야 풀리던 증상).
       // router.refresh()는 "현재 라우트"의 캐시만 지우므로 이동 대상에는 소용없다.
       // 전체 이동으로 미들웨어를 새로 태우고 캐시를 우회한다.
-      window.location.assign(`/${locale}`);
+      // ?skipIntro=1 — 로그인 직후엔 인트로가 다시 뜨지 않아야 한다 (IntroSequence 참고)
+      window.location.assign(`/${locale}?skipIntro=1`);
     } catch {
       setError(errorText("generic"));
     } finally {

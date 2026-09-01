@@ -37,8 +37,9 @@ export default function AuthNav() {
     await fetch("/api/auth/logout", { method: "POST" });
     // 로그인과 같은 이유로 전체 이동. 클라이언트 캐시에는 로그인 상태로 받아둔
     // 페이지들이 남아 있어, router.push로 옮기면 로그아웃했는데도 이전 화면이
-    // 그대로 보일 수 있다.
-    window.location.assign(`/${locale}`);
+    // 그대로 보일 수 있다. ?skipIntro=1 — 로그아웃 직후에도 인트로가 다시 뜨지
+    // 않아야 한다 (IntroSequence 참고)
+    window.location.assign(`/${locale}?skipIntro=1`);
   }
 
   if (user === undefined) {

@@ -60,8 +60,9 @@ export async function GET(request: NextRequest) {
       nickname: user.nickname,
       sessionVersion,
     });
-    // 신규 가입자는 프로필로 보내 국가 입력을 유도(?welcome=1). 기존 유저는 홈으로.
-    const dest = isNew ? `/${locale}/profile?welcome=1` : `/${locale}`;
+    // 신규 가입자는 프로필로 보내 국가 입력을 유도(?welcome=1). 기존 유저는 홈으로
+    // — 이때도 로그인 직후라 인트로는 다시 뜨면 안 된다 (IntroSequence 참고).
+    const dest = isNew ? `/${locale}/profile?welcome=1` : `/${locale}?skipIntro=1`;
     const res = NextResponse.redirect(new URL(dest, origin));
     res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
     res.cookies.delete(STATE_COOKIE);

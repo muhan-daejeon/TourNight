@@ -55,7 +55,8 @@ export default function SignupForm() {
       // 받아두는데, 가입 화면에서는 아직 비로그인이라 그 응답이 로그인 페이지로의
       // 리다이렉트다. router.push("/")는 그 캐시를 그대로 써서 방금 가입했는데도
       // 로그인 화면이 뜬다. router.refresh()는 "현재 라우트"의 캐시만 지운다.
-      window.location.assign(`/${target}`);
+      // ?skipIntro=1 — 가입 직후엔 인트로가 다시 뜨지 않아야 한다 (IntroSequence 참고)
+      window.location.assign(`/${target}?skipIntro=1`);
     } catch {
       setError(errorText("generic"));
     } finally {

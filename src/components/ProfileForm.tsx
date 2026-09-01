@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Compass, LogIn } from "lucide-react";
+import { Compass, LogIn, Sparkles } from "lucide-react";
 import { COUNTRIES } from "@/lib/countries";
 import { Link, useRouter } from "@/i18n/navigation";
+import PersonaResultModal from "./PersonaResultModal";
 
 interface User {
   id: number;
@@ -19,6 +20,7 @@ const fieldClass =
 export default function ProfileForm({ welcome = false }: { welcome?: boolean }) {
   const t = useTranslations("auth");
   const tTour = useTranslations("tour");
+  const tPersonality = useTranslations("personality");
   const router = useRouter();
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [nickname, setNickname] = useState("");
@@ -26,6 +28,7 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPersonaResult, setShowPersonaResult] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -66,8 +69,9 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
       setSaved(true);
       router.refresh(); // 헤더 닉네임 갱신
       // 가입 직후 국가 입력(welcome)은 여기서 끝 — 프로필에 머무르지 않고 메인으로 보낸다.
-      // replace라 뒤로가기로 가입 플로우에 다시 갇히지 않는다.
-      if (welcome) router.replace("/");
+      // replace라 뒤로가기로 가입 플로우에 다시 갇히지 않는다. ?skipIntro=1은 가입
+      // 직후 인트로가 다시 뜨지 않게 하는 표식 (IntroSequence 참고)
+      if (welcome) router.replace("/?skipIntro=1");
     } catch {
       setError(errorText("generic"));
     } finally {
@@ -174,11 +178,27 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
         </button>
       )}
 
+      {/* 가장 최근 성향 테스트 결과를 팝업으로 다시 본다 (없으면 팝업 안에서 안내) */}
+      {!welcome && (
+        <button
+          type="button"
+          onClick={() => setShowPersonaResult(true)}
+          className="flex w-full items-center justify-center gap-1.5 rounded-full border border-white/15 py-2.5 text-sm font-semibold text-slate-300 transition hover:border-amber-400/50 hover:text-amber-300"
+        >
+          <Sparkles size={15} />
+          {tPersonality("myResultCta")}
+        </button>
+      )}
+
+      {showPersonaResult && (
+        <PersonaResultModal onClose={() => setShowPersonaResult(false)} />
+      )}
+
       {/* 국가는 선택 사항이라, 입력 없이도 가입 흐름을 끝낼 수 있어야 한다 */}
       {welcome && (
         <button
           type="button"
-          onClick={() => router.replace("/")}
+          onClick={() => router.replace("/?skipIntro=1")}
           className="w-full py-1 text-center text-sm text-slate-400 transition hover:text-slate-200"
         >
           {t("skipForNow")}

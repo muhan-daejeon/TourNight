@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
@@ -70,6 +70,19 @@ export default function NightEtiquette({
     ? (t.raw(`items.${selected}`) as { dos: string[]; donts: string[] })
     : undefined;
 
+  // 주제를 고르면 이렇게 하세요/피하세요 칸이 아래에 새로 생기는데, 위에서는
+  // 안 보여서 매번 스크롤을 따로 내려야 했다. 고른 순간 그 칸이 화면 중앙
+  // 높이쯤 오도록 자동으로 내려준다
+  const resultRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!selected) return;
+    const el = resultRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const target = window.scrollY + rect.top + rect.height / 2 - window.innerHeight / 2;
+    window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+  }, [selected]);
+
   return (
     <div className="mt-8" data-tour="etiquette">
       {GROUPS.map((group) => (
@@ -134,7 +147,7 @@ export default function NightEtiquette({
       ))}
 
       {images && captions && (
-        <div className="mt-6">
+        <div ref={resultRef} className="mt-6">
           {/* Do / Don't — 항목마다 사진 한 장 + 설명, 화살표로 한 장씩 넘겨 본다 */}
           <div className="grid gap-3 sm:grid-cols-2">
             <DoDontSlider
