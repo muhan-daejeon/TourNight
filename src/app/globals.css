@@ -22,6 +22,11 @@
 
 html {
   scroll-behavior: smooth;
+  /* 전체적으로 글자가 작다는 요청 — rem 기준값을 120%로 올려 text-* 유틸리티
+     (와 대부분의 여백·크기 유틸리티)가 전부 같은 비율로 커지게 한다. 개별
+     컴포넌트를 하나씩 손대지 않아도 되고, --header-h처럼 JS로 실측해 맞추는
+     값들도 자동으로 커진 만큼 반영된다(Header의 ResizeObserver 참고) */
+  font-size: 120%;
 }
 
 body {

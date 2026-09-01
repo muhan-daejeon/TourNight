@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Search, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { markAppCommitted } from "@/lib/app-boot";
@@ -43,13 +44,23 @@ const MENU_EXTRAS = [
   { href: "/shopping", key: "shopping" },
 ] as const;
 
-/** 상단에 늘 보이는 4개 카테고리와 그 아래 묶인 탭들 — 홈은 좌측 로고가 대신한다 */
+/** 상단에 늘 보이는 4개 카테고리와 그 아래 묶인 탭들 — 홈은 좌측 로고가 대신한다.
+ * 순서가 MENU_ICONS와 1:1로 짝지어지므로(첫 번째 = menu1 …) 순서를 바꾸면
+ * 아이콘도 같이 밀린다 */
 const MENU_GROUPS = [
   { id: "explore", labelKey: "groupExplore", items: ["spots", "festivals", "courses"] },
   // 성향 테스트는 놀이가 아니라 여행 준비 도구라 가이드 쪽에 둔다
   { id: "guide", labelKey: "groupGuide", items: ["personality", "etiquette", "phrases"] },
   { id: "local", labelKey: "groupLocal", items: ["food", "stay", "shopping"] },
   { id: "community", labelKey: "groupCommunity", items: ["community"] },
+] as const;
+
+/** 카테고리에 마우스를 올렸을 때 왼쪽에 뜨는 마스코트 아이콘 — MENU_GROUPS와 같은 순서 */
+const MENU_ICONS = [
+  "/menu-icons/menu1.png",
+  "/menu-icons/menu2.png",
+  "/menu-icons/menu3.png",
+  "/menu-icons/menu4.png",
 ] as const;
 
 function findNavItem(key: string) {
@@ -128,8 +139,15 @@ export default function Header() {
       if (panelRef.current) panelRef.current.style.height = `${maxH + 64}px`;
     };
     align();
+    // 호버로 밀려 있던 카테고리를 클릭해 열었다면, 그 순간엔 아직 밀린 자리
+    // 그대로 잰다(밀림이 꺼지는 트랜지션이 막 시작된 참이라). 트랜지션이
+    // 끝날 때쯤 한 번 더 재서, 제자리로 돌아온 버튼 밑에 다시 맞춘다
+    const settle = window.setTimeout(align, 220);
     window.addEventListener("resize", align);
-    return () => window.removeEventListener("resize", align);
+    return () => {
+      window.clearTimeout(settle);
+      window.removeEventListener("resize", align);
+    };
   }, [menuOpen]);
 
   // 로고+카테고리 행의 실제 높이를 --header-h로 남겨, 이 행 위 여백과 슬라이드
@@ -200,32 +218,54 @@ export default function Header() {
         {/* 4개 카테고리 — 화면 정중앙에 절대 위치시켜 로고·오른쪽 묶음의 폭과
             무관하게 가운데 온다. 각각 누르면 바로 밑에 세로로 탭이 펼쳐진다 */}
         <nav className="order-last flex basis-full flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:absolute lg:left-1/2 lg:top-1/2 lg:order-none lg:basis-auto lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-x-20 lg:gap-y-3">
-          {MENU_GROUPS.map((group) => {
+          {MENU_GROUPS.map((group, i) => {
             const groupActive = group.items.some((key) => isActive(findNavItem(key).href));
             const isTourTarget = tourTarget?.groupId === group.id;
             const dimmedByTour = !!tourTarget && !isTourTarget;
 
             return (
               <div key={group.id} className="flex items-center gap-2">
-                <button
-                  ref={(el) => {
-                    btnRefs.current[group.id] = el;
-                  }}
-                  type="button"
-                  onClick={() => setMenuOpen((v) => !v)}
-                  aria-expanded={menuOpen}
-                  className={`whitespace-nowrap text-base tracking-wide transition ${
-                    isTourTarget
-                      ? "rounded-lg border-2 border-amber-400 px-3 py-1 font-semibold text-amber-300"
-                      : dimmedByTour
-                        ? "font-light text-slate-600"
-                        : groupActive
-                          ? "font-light text-amber-300"
-                          : "font-light text-slate-200 hover:text-amber-300"
+                {/* 마우스를 올리면 이 카테고리만 오른쪽으로 밀리면서 왼쪽에
+                    마스코트 아이콘이 드러난다. 메뉴가 열려 있을 때는 밀림을
+                    끈다 — 열어 둔 채로 밀리면 드롭다운 칸(btnRefs로 잰 위치)이
+                    버튼 자리와 순간 어긋나 보인다 */}
+                <div
+                  className={`group flex items-center transition-transform duration-200 ${
+                    menuOpen ? "" : "hover:translate-x-[8px]"
                   }`}
                 >
-                  {t(`nav.${group.labelKey}`)}
-                </button>
+                  <span
+                    aria-hidden
+                    className="w-0 shrink-0 overflow-hidden opacity-0 transition-all duration-200 group-hover:mr-1.5 group-hover:w-7 group-hover:opacity-100"
+                  >
+                    <Image
+                      src={MENU_ICONS[i]}
+                      alt=""
+                      width={28}
+                      height={28}
+                      className="h-7 w-7 object-contain"
+                    />
+                  </span>
+                  <button
+                    ref={(el) => {
+                      btnRefs.current[group.id] = el;
+                    }}
+                    type="button"
+                    onClick={() => setMenuOpen((v) => !v)}
+                    aria-expanded={menuOpen}
+                    className={`whitespace-nowrap text-base tracking-wide transition ${
+                      isTourTarget
+                        ? "rounded-lg border-2 border-amber-400 px-3 py-1 font-semibold text-amber-300"
+                        : dimmedByTour
+                          ? "font-light text-slate-600"
+                          : groupActive
+                            ? "font-light text-amber-300"
+                            : "font-light text-slate-200 hover:text-amber-300"
+                    }`}
+                  >
+                    {t(`nav.${group.labelKey}`)}
+                  </button>
+                </div>
 
                 {/* 둘러보기 중엔 그 카테고리 오른쪽에 "— 탭이름"을 작은 노란 글자로 붙인다.
                     data-tour-target은 테스트 전용 표식이다 — OnboardingTour의 링 표시는
