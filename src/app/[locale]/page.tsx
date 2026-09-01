@@ -114,10 +114,10 @@ export default async function HomePage({
               가운데가 실제로 보이는 영역의 가운데와 맞는다. 오늘 밤 정보·스크롤
               화살표는 그 박스 맨 아래에 겹쳐 띄워, 슬라이드 자체의 중앙 계산엔
               끼어들지 않는다 — 다만 화면이 낮으면 그 둘이 슬라이드 아래쪽과
-              부딪혀서, 슬라이드를 정중앙보다 살짝 위로 올려 여유를 둔다 */}
+              부딪혀서, 슬라이드를 정중앙보다 위로 올려 여유를 둔다 */}
           <div className="absolute inset-x-0 top-0 h-[calc(100vh-var(--header-h,0px))]">
             <div className="absolute inset-0 flex items-center justify-center px-4">
-              <div className="w-full max-w-5xl" style={{ transform: "translateY(-40px)" }}>
+              <div className="w-full max-w-5xl" style={{ transform: "translateY(-55px)" }}>
                 <HeroCarousel slides={slides} />
               </div>
             </div>
@@ -126,8 +126,25 @@ export default async function HomePage({
 
         {/* ── 오늘 밤 — 일몰·월령 + 지금 갈 만한 곳 ──
             히어로 아래가 소식 그리드까지 비어 있었다. 일몰·월령은 "그래서 오늘 밤
-            어디 가지"로 이어져야 뜻이 있으므로, 명소·축제와 한 묶음으로 둔다. */}
-        <section id="content" className="pt-4">
+            어디 가지"로 이어져야 뜻이 있으므로, 명소·축제와 한 묶음으로 둔다.
+
+            히어로 section은 뷰포트 높이만큼 잡아 두고 그 안에서 슬라이드만
+            중앙(보다 위, translateY(-55px))에 앉혀서, 슬라이드 아래로 뷰포트
+            높이에 비례해 빈 공간이 남는다. 그 빈 공간을 음수 margin으로 당겨
+            올려, 슬라이드~이 섹션 간격이 이 섹션 밑의 "오늘 밤...~대전 축제&행사"
+            간격(mt-14, 56px)과 같아지게 맞춘다. 뷰포트 높이(vh)가 화면마다
+            달라 고정 px로는 화면이 낮으면 슬라이드와 겹쳐 버려서, calc()로
+            직접 뷰포트 높이·헤더 높이·슬라이드 높이(캐러셀의 h-[408px]/
+            sm:h-[504px]와 맞춰 반응형으로 둘)를 반영한다. 식 자체가 이미
+            음수라(-50vh + …) mt-를 그대로 쓴다 — Tailwind의 -mt-[…]는
+            대괄호 안 값을 다시 -1배 하므로, 이미 음수인 값에 붙이면 부호가
+            도로 뒤집힌다.
+            margin-top = -(뷰포트 절반 - 헤더 절반 - 슬라이드 절반 - 55px 위로 올린 만큼
+                          + 이 섹션 자체의 pt-4 - 목표 간격 56px) */}
+        <section
+          id="content"
+          className="mt-[calc(-50vh_+_var(--header-h,0px)/2_+_197px)] pt-4 sm:mt-[calc(-50vh_+_var(--header-h,0px)/2_+_245px)]"
+        >
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="overline-label">Tonight</p>
