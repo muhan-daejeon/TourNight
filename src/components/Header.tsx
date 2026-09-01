@@ -4,11 +4,12 @@ import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Search, X } from "lucide-react";
+import { Camera, Search, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { markAppCommitted } from "@/lib/app-boot";
 import LocaleSwitcher from "./LocaleSwitcher";
 import AuthNav from "./AuthNav";
+import CollageModal from "./CollageModal";
 
 /** 탭의 href 출처 */
 const NAV_ITEMS = [
@@ -113,10 +114,12 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [tourTarget, setTourTarget] = useState<TourTarget | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [collageOpen, setCollageOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
-  const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  // 버튼이 아니라 그 바깥(호버 밀림의 영향을 안 받는) div를 담는다 — 아래 렌더 참고
+  const btnRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const colRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -224,19 +227,35 @@ export default function Header() {
             const dimmedByTour = !!tourTarget && !isTourTarget;
 
             return (
-              <div key={group.id} className="flex items-center gap-2">
+              <div
+                key={group.id}
+                ref={(el) => {
+                  btnRefs.current[group.id] = el;
+                }}
+                className="flex items-center gap-2"
+              >
                 {/* 마우스를 올리면 이 카테고리만 오른쪽으로 밀리면서 왼쪽에
-                    마스코트 아이콘이 드러난다. 메뉴가 열려 있을 때는 밀림을
-                    끈다 — 열어 둔 채로 밀리면 드롭다운 칸(btnRefs로 잰 위치)이
-                    버튼 자리와 순간 어긋나 보인다 */}
+                    마스코트 아이콘이 드러난다. 아이콘은 absolute라 폭이
+                    0→28px로 바뀌어도 이 안의 어떤 레이아웃도 넓어지지 않는다
+                    — 처음엔 폭 변화(w-0→w-7)로 만들었는데, 그러면 4개 메뉴를
+                    담은 nav가 justify-center라 아이콘 하나 넓어질 때마다
+                    "메뉴 전체 폭"이 바뀌어서 4개 메뉴 전부가 재중앙 정렬되며
+                    옆으로 밀렸다(호버 안 한 메뉴까지도!). absolute로 폭 변화를
+                    없애 nav의 전체 폭 자체가 호버와 무관하게 늘 같게 만들어
+                    막는다. 메뉴가 열려 있을 때는 밀림(translate)을 끈다 —
+                    안 그러면 클릭 순간 마우스가 아직 버튼 위에 있어(=계속
+                    hover 상태라) 드롭다운 칸(btnRefs로 잰 위치)이 버튼 자리와
+                    순간 어긋나 보인다. btnRefs는 버튼이 아니라 이 바깥 div를
+                    잰다 — translate는 자기 좌표만 바꾸고 부모 위치엔 영향이
+                    없어 이중으로 안전하다 */}
                 <div
-                  className={`group flex items-center transition-transform duration-200 ${
+                  className={`group relative flex items-center transition-transform duration-200 ${
                     menuOpen ? "" : "hover:translate-x-[8px]"
                   }`}
                 >
                   <span
                     aria-hidden
-                    className="w-0 shrink-0 overflow-hidden opacity-0 transition-all duration-200 group-hover:mr-1.5 group-hover:w-7 group-hover:opacity-100"
+                    className="pointer-events-none absolute right-full top-1/2 mr-1.5 h-7 w-7 -translate-y-1/2 scale-75 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100"
                   >
                     <Image
                       src={MENU_ICONS[i]}
@@ -247,9 +266,6 @@ export default function Header() {
                     />
                   </span>
                   <button
-                    ref={(el) => {
-                      btnRefs.current[group.id] = el;
-                    }}
                     type="button"
                     onClick={() => setMenuOpen((v) => !v)}
                     aria-expanded={menuOpen}
@@ -285,6 +301,23 @@ export default function Header() {
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-3 lg:mr-20">
+          {/* 사진 4장으로 "꿈돌이와 심야 여행" 콜라주를 만드는 기능 — 로그인
+              버튼 바로 왼쪽, 노란 네온사인처럼 마우스를 올리면 빛이 번진다 */}
+          <button
+            type="button"
+            onClick={() => setCollageOpen(true)}
+            aria-label="꿈돌이와 심야 여행 콜라주 만들기"
+            className="group relative shrink-0 rounded-full p-2 text-amber-400 transition-colors duration-300 hover:text-amber-300"
+          >
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-amber-400 opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-70"
+            />
+            <Camera
+              size={24}
+              className="relative drop-shadow-[0_0_0px_rgba(251,191,36,0)] transition-[filter] duration-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.9)]"
+            />
+          </button>
           <AuthNav />
           <button
             type="button"
@@ -367,6 +400,8 @@ export default function Header() {
           </div>
         </form>
       )}
+
+      {collageOpen && <CollageModal onClose={() => setCollageOpen(false)} />}
     </header>
   );
 }
