@@ -19,11 +19,17 @@ export const revalidate = 3600;
 
 export default async function HomePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // 로그인·가입 직후 여기로 돌아올 때만 붙는 표식 — 서버가 URL을 보고 처음부터
+  // 인트로를 뺀 HTML을 내려주므로(클라이언트에서 나중에 지우는 게 아니라),
+  // 노란 화면이 한 프레임 그려졌다 사라지는 깜빡임이 없다
+  const skipIntro = (await searchParams).skipIntro === "1";
   const t = await getTranslations("home");
   const site = await getTranslations("site");
 
@@ -98,7 +104,7 @@ export default async function HomePage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-4">
-      <IntroSequence />
+      <IntroSequence skipIntro={skipIntro} />
 
       <>
         <section className="relative h-[calc(100vh-var(--header-h,0px))]">

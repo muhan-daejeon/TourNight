@@ -10,6 +10,7 @@ import {
   type CSSProperties,
 } from "react";
 import { useTranslations } from "next-intl";
+import { appAlreadyCommitted } from "@/lib/app-boot";
 
 /**
  * 홈 진입 스크롤 시네마틱.
@@ -29,11 +30,24 @@ import { useTranslations } from "next-intl";
  * scrollY는 그대로 두고 "가상 오프셋"만 늘려서, 클릭 이후 이어지는 진짜
  * 스크롤도 그 앞당겨진 지점부터 자연스럽게 계속된다.
  *
- * 재생 조건: 진짜로(브라우저가 문서를 새로) 홈에 들어올 때만 재생한다. 다른 메뉴를
- * 보다가 라우터로(클라이언트 사이드 내비게이션) 홈에 돌아온 것은 "새로 접속"이
- * 아니므로 건너뛴다 — moduleAlreadyRan이 그 구분자다: 새로고침/새 탭처럼 이 모듈이
- * 처음부터 다시 평가될 때만 false로 시작하고, 라우터 이동으로는 리셋되지 않는다.
- * '동작 줄이기'를 켠 경우에도 건너뛴다.
+ * 재생 조건: 이 문서를 "진짜로" 새로 열 때만 재생한다 — 새로고침·새 탭·주소
+ * 직접 입력. 세 가지는 재생하지 않는다:
+ *   1. 로그인·가입·로그아웃 직후 — 그 리다이렉트들만 홈 URL에 ?skipIntro=1을
+ *      붙이고, page.tsx(서버 컴포넌트)가 그 쿼리를 보고 skipIntro prop을 내려준다.
+ *      서버가 처음부터 판단해 내려주므로 클라이언트가 나중에 "사실 껐어야
+ *      했다"며 지우는 과정이 없어 노란 화면이 한 프레임 그려졌다 사라지는
+ *      깜빡임도 없다.
+ *   2. 로고 클릭 등 같은 문서 안에서 라우터로(SPA 이동) 홈에 온 경우 — 다른
+ *      페이지에서 출발했든, 그 페이지가 마침 홈이었지만 라우터로 다시 돌아온
+ *      것이든 상관없다. lib/app-boot.ts의 appAlreadyCommitted가 그 구분자다:
+ *      "이 문서에서 뭔가 한 번이라도 커밋된 적 있는지"를 모든 페이지에 있는
+ *      Header가 표시해 둔다. 진짜 처음 여는 하이드레이션의 그 첫 커밋 "안"에서는
+ *      아직 아무것도 커밋 전이라 인트로도 false를 보고(서버가 렌더한 값과 같아
+ *      깜빡임 없음), 그 뒤 라우터로 홈에 올 때만(이미 커밋이 끝난 뒤이므로)
+ *      true를 본다. localStorage처럼 "본 적 있음"을 영구히 남기지는 않는다 —
+ *      그러면 다음 새로고침부터도 안 뜨게 되어 버려서, 딱 이 문서가 열려 있는
+ *      동안만 기억한다.
+ *   3. '동작 줄이기'를 켠 경우.
  */
 
 const WORD = "TourNight";
@@ -52,35 +66,6 @@ const BLACK: [number, number, number] = [0, 0, 0];
 const GRAY: [number, number, number] = [156, 163, 175];
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
-
-// 브라우저 쪽 모듈 스코프 — 진짜 새 문서 로드(새로고침·새 탭·주소 직접 입력)에서만
-// 다시 false로 초기화된다. 같은 로드 안에서 라우터로 페이지를 옮겨 다녀도 이 값은
-// 그대로 살아있어, 홈으로 되돌아와도 재생하지 않는다.
-//
-// 이 값은 오직 클라이언트(useSyncExternalStore의 getSnapshot)에서만 읽고 쓴다.
-// getServerSnapshot에서 건드리면 안 된다 — 서버 렌더는 (개발 서버가 오래 떠
-// 있는 동안) 여러 요청이 같은 Node 모듈 인스턴스를 공유해서, 한 번이라도
-// 여기서 true로 바뀌면 그 뒤 모든 사용자의 첫 방문까지 인트로가 안 뜨게 된다.
-let moduleAlreadyRan = false;
-
-/** 이 마운트가 "새 문서 로드에서의 첫 마운트"인지 — 라우터로 돌아온 재마운트면 true */
-function useIsSpaRevisit() {
-  const capturedRef = useRef<boolean | undefined>(undefined);
-  return useSyncExternalStore(
-    () => () => {},
-    () => {
-      // useSyncExternalStore는 같은 렌더 안에서 getSnapshot을 여러 번 부를 수 있어
-      // (tearing 감지) 매번 새로 읽고 쓰면 두 번째 호출부터 값이 달라져 버린다 —
-      // ref로 한 번만 확정한다
-      if (capturedRef.current === undefined) {
-        capturedRef.current = moduleAlreadyRan;
-        moduleAlreadyRan = true;
-      }
-      return capturedRef.current;
-    },
-    () => false,
-  );
-}
 
 /** OS의 '동작 줄이기' 설정 — HeroCarousel과 동일한 패턴 */
 function useReducedMotion() {
@@ -111,9 +96,12 @@ function staggerLocal(globalP: number, total: number, i: number) {
   return clamp01(globalP * total - i);
 }
 
-export default function IntroSequence() {
+export default function IntroSequence({ skipIntro }: { skipIntro: boolean }) {
   const reducedMotion = useReducedMotion();
-  const isSpaRevisit = useIsSpaRevisit();
+  // 렌더 중 한 번만 읽어 고정한다(StrictMode가 두 번 불러도 순수한 읽기라 무해하다).
+  // 마운트 이후 다른 페이지에서 커밋이 일어나 값이 바뀌어도 이미 재생 중인 이
+  // 인스턴스의 판단은 바뀌지 않는다 — 그럴 필요도 없다
+  const [isSpaRevisit] = useState(() => appAlreadyCommitted);
   const t = useTranslations("intro");
 
   const [finished, setFinished] = useState(false);
@@ -143,7 +131,17 @@ export default function IntroSequence() {
 
   // 타이핑이 다 끝났는지는 별도 상태 없이 글자 수로 그때그때 판단한다
   const phase0Done = typedCount >= WORD.length;
-  const done = finished || reducedMotion || isSpaRevisit;
+  const done = finished || reducedMotion || skipIntro || isSpaRevisit;
+
+  // 로그인·가입 리다이렉트를 표시하던 쿼리는 한 번 쓰고 지운다 — 안 지우면 이
+  // 주소 그대로 새로고침할 때도 계속 인트로가 안 뜬다("새로고침하면 뜬다"는
+  // 요청과 어긋난다). 화면에 보이는 것과는 무관해 주소만 조용히 바꾼다
+  useEffect(() => {
+    if (!skipIntro) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("skipIntro");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }, [skipIntro]);
 
   const finish = useCallback(() => {
     // 스크롤로 여기까지 밀고 온 거리(스페이서)가 이 순간 통째로 사라지므로,

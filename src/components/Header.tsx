@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { markAppCommitted } from "@/lib/app-boot";
 import LocaleSwitcher from "./LocaleSwitcher";
 import AuthNav from "./AuthNav";
 
@@ -142,6 +143,13 @@ export default function Header() {
     const ro = new ResizeObserver(set);
     ro.observe(el);
     return () => ro.disconnect();
+  }, []);
+
+  // 헤더는 모든 페이지에 있다 — 이 문서에서 뭔가 한 번 커밋됐다는 표시를 여기서
+  // 남긴다. IntroSequence가 "이 문서를 정말 처음 여는 순간인지"를 판단하는 데
+  // 쓴다 (자세한 이유는 lib/app-boot.ts 참고)
+  useEffect(() => {
+    markAppCommitted();
   }, []);
 
   // 페이지를 옮기면 열려 있던 카테고리·검색창은 닫는다. 효과가 아니라 렌더 중에

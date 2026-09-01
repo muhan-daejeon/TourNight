@@ -12,6 +12,7 @@ import {
   Eye,
   ImageIcon,
   Flag,
+  UserRound,
 } from "lucide-react";
 import { sql } from "@/lib/db";
 import { getVerifiedNightSpots } from "@/lib/spots";
@@ -46,6 +47,7 @@ const ACTION_META: Record<
   community_comment: { label: "커뮤니티 댓글", icon: MessageCircle },
   community_report: { label: "커뮤니티 신고", icon: Flag },
   course_survey: { label: "맞춤 코스 설문", icon: Sparkles },
+  personality_test: { label: "성향 테스트", icon: UserRound },
 };
 
 interface LogRow {
@@ -80,6 +82,8 @@ function describe(row: LogRow, titles: Map<string, string>): string {
       return d.hasPhoto ? "사진 포함 글 작성" : "글 작성";
     case "community_comment":
       return `댓글 작성 (#${d.postId})`;
+    case "personality_test":
+      return `${d.primary}${d.secondary ? ` / ${d.secondary}` : ""}`;
     default:
       return "";
   }

@@ -10,7 +10,8 @@ export type ActivityAction =
   | "community_comment"
   | "community_report"
   | "course_survey"
-  | "spot_view";
+  | "spot_view"
+  | "personality_test";
 
 /**
  * 사용자 활동 한 건 기록 — 관리자 페이지의 이용 흐름 파악용.
