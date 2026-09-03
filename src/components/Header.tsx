@@ -113,6 +113,17 @@ export default function Header() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [tourTarget, setTourTarget] = useState<TourTarget | null>(null);
+  // 마우스가 있는 기기(hover 가능)에서는 카테고리에 포인터만 올려도 메뉴가
+  // 열린다 — 클릭해야만 열리는 건 탐색이 번거롭다는 피드백. 터치 기기는
+  // mouseenter가 탭과 뒤섞여 오작동하므로 기존 클릭 토글을 유지한다
+  const [canHover, setCanHover] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const sync = () => setCanHover(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
   const [searchOpen, setSearchOpen] = useState(false);
   const [collageOpen, setCollageOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -200,7 +211,11 @@ export default function Header() {
     // 온보딩 투어의 흐림막(z-[55])보다 위에 둔다 — 안 그러면 투어 중 헤더 전체가
     // backdrop-blur에 걸려 부모 메뉴 글자까지 흐릿해진다. 켜져 있지 않을 때도
     // z-50이던 걸 z-[56]으로만 올린 것뿐이라 다른 겹침에는 영향이 없다
-    <header className="sticky top-0 z-[56] border-b border-white/[0.06] bg-slate-950/80 backdrop-blur-md">
+    <header
+      className="sticky top-0 z-[56] border-b border-white/[0.06] bg-slate-950/80 backdrop-blur-md"
+      // 호버로 연 메뉴는 헤더(패널 포함) 밖으로 마우스가 나가면 닫는다
+      onMouseLeave={() => canHover && setMenuOpen(false)}
+    >
       <Suspense fallback={null}>
         <TourMenuSync onChange={setTourTarget} />
       </Suspense>
@@ -270,7 +285,11 @@ export default function Header() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => setMenuOpen((v) => !v)}
+                    // hover 기기: 포인터를 올리면 열리고(아래 onMouseEnter) 클릭은
+                    // 열림 유지만 한다 — 토글이면 '올려서 열림→클릭→닫힘'이 된다.
+                    // 터치 기기: 기존대로 탭이 토글.
+                    onClick={() => setMenuOpen((v) => (canHover ? true : !v))}
+                    onMouseEnter={() => canHover && setMenuOpen(true)}
                     aria-expanded={menuOpen}
                     className={`whitespace-nowrap text-base tracking-wide transition ${
                       isTourTarget

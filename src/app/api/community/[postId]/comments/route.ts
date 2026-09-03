@@ -1,21 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listComments, createComment, BODY_MAX } from "@/lib/community";
+import {
+  listComments,
+  listCommentsTranslated,
+  createComment,
+  BODY_MAX,
+} from "@/lib/community";
+import { routing } from "@/i18n/routing";
 import { getActiveSessionUser } from "@/lib/session";
 import { guardCommunityWrite } from "@/lib/community-guard";
 import { prepareMedia, readCommunityInput } from "@/lib/community-media";
 import { deleteCommunityMedia } from "@/lib/storage";
 import { logActivity } from "@/lib/activity";
 
-/** 특정 글의 댓글 목록 (읽기는 로그인 불필요) */
+/**
+ * 특정 글의 댓글 목록 (읽기는 로그인 불필요).
+ * ?locale=을 주면 보는 사람 언어로의 자동 번역(translatedBody)이 함께 온다.
+ */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   ctx: { params: Promise<{ postId: string }> },
 ) {
   const postId = Number((await ctx.params).postId);
   if (!Number.isInteger(postId) || postId <= 0) {
     return NextResponse.json({ error: "invalid post id" }, { status: 400 });
   }
-  const comments = await listComments(postId);
+  const locale = request.nextUrl.searchParams.get("locale");
+  const comments = routing.locales.includes(locale as never)
+    ? await listCommentsTranslated(postId, locale!)
+    : await listComments(postId);
   return NextResponse.json({ comments });
 }
 
