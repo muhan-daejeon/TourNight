@@ -497,7 +497,11 @@
     "sunset": "今日日落",
     "moonAge": "月龄{age}",
     "starNight": "适合观星的夜晚",
-    "fullMoon": "适合赏月的夜晚"
+    "fullMoon": "适合赏月的夜晚",
+    "tempNow": "大田现在",
+    "rain": "雨夜",
+    "snow": "雪夜",
+    "rainSnow": "雨夹雪"
   },
   "festivals": {
     "title": "庆典 & 活动",

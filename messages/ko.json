@@ -497,7 +497,11 @@
     "sunset": "오늘 일몰",
     "moonAge": "월령 {age}일",
     "starNight": "별 보기 좋은 밤",
-    "fullMoon": "달맞이 좋은 밤"
+    "fullMoon": "달맞이 좋은 밤",
+    "tempNow": "대전 지금",
+    "rain": "비 오는 밤",
+    "snow": "눈 오는 밤",
+    "rainSnow": "진눈깨비"
   },
   "festivals": {
     "title": "축제 & 행사",
