@@ -30,6 +30,8 @@ export interface CommunityComment {
   mediaType: MediaKind | null;
   /** 작성자가 메일 인증을 마쳤는지 */
   authorVerified: boolean;
+  /** 보는 사람 언어로의 번역 (원문과 같거나 번역 실패면 없음) */
+  translatedBody?: string;
 }
 
 /** 입력 제한 */
@@ -190,6 +192,63 @@ export async function listComments(postId: number): Promise<CommunityComment[]> 
       err instanceof Error ? err.message : err,
     );
     return [];
+  }
+}
+
+/**
+ * 댓글 목록 + 보는 사람 언어로의 자동 번역.
+ *
+ * 언어가 다른 여행자들이 한 게시판에서 소통해야 하므로, 댓글을 보는 사람의
+ * 언어로 옮겨 함께 내려준다. 번역은 community_comment_translations에 캐시돼
+ * 같은 댓글·같은 언어는 Gemini를 한 번만 거친다. 번역이 원문과 같으면(이미
+ * 그 언어) translatedBody를 붙이지 않고, Gemini 실패 시에도 원문만 내려간다 —
+ * 번역은 부가 정보라 목록 조회를 막지 않는다.
+ */
+export async function listCommentsTranslated(
+  postId: number,
+  locale: string,
+): Promise<CommunityComment[]> {
+  const comments = await listComments(postId);
+  if (comments.length === 0) return comments;
+
+  try {
+    const ids = comments.map((c) => c.id);
+    const cached = await sql<{ comment_id: number; body: string }[]>`
+      select comment_id, body from community_comment_translations
+      where locale = ${locale} and comment_id = any(${ids})
+    `;
+    const byId = new Map(cached.map((r) => [Number(r.comment_id), r.body]));
+
+    const missing = comments.filter((c) => !byId.has(c.id));
+    if (missing.length > 0) {
+      const { translateCommunityTexts } = await import("./gemini");
+      const fresh = await translateCommunityTexts(
+        missing.map((c) => ({ id: c.id, body: c.body })),
+        locale,
+      );
+      for (const [idStr, body] of Object.entries(fresh)) {
+        const id = Number(idStr);
+        byId.set(id, body);
+        // 캐시 저장 실패는 무시 — 다음 조회 때 다시 번역하면 된다
+        void sql`
+          insert into community_comment_translations (comment_id, locale, body)
+          values (${id}, ${locale}, ${body})
+          on conflict (comment_id, locale) do nothing
+        `.catch(() => {});
+      }
+    }
+
+    return comments.map((c) => {
+      const tr = byId.get(c.id);
+      // 원문과 같으면(이미 그 언어로 쓰인 댓글) 번역 표시가 소음이라 붙이지 않는다
+      return tr && tr !== c.body ? { ...c, translatedBody: tr } : c;
+    });
+  } catch (err) {
+    console.warn(
+      "[community] 댓글 번역 실패 — 원문만 내려갑니다:",
+      err instanceof Error ? err.message : err,
+    );
+    return comments;
   }
 }
 

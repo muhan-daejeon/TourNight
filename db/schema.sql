@@ -310,3 +310,14 @@ create table if not exists api_cache (
   payload jsonb not null,
   fetched_at timestamptz not null default now()
 );
+
+-- 커뮤니티 댓글 번역 캐시 — 보는 사람의 언어로 댓글을 자동 번역해 보여준다
+-- (Gemini). 같은 댓글·같은 언어는 한 번만 번역하고 여기 저장분을 재사용한다.
+-- 댓글이 지워지면 번역도 함께 지워진다 (cascade).
+create table if not exists community_comment_translations (
+  comment_id bigint not null references community_comments(id) on delete cascade,
+  locale text not null,
+  body text not null,
+  created_at timestamptz not null default now(),
+  primary key (comment_id, locale)
+);

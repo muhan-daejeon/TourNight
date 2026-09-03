@@ -14,6 +14,7 @@ import {
   BadgeCheck,
   Trash2,
   ImagePlus,
+  Languages,
   X,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -40,6 +41,8 @@ interface Comment {
   mediaUrl: string | null;
   mediaType: "image" | "video" | null;
   authorVerified: boolean;
+  /** 보는 사람 언어로의 자동 번역 (원문이 이미 그 언어면 없음) */
+  translatedBody?: string;
 }
 
 interface Me {
@@ -349,7 +352,7 @@ function PostItem({
     setExpanded(next);
     if (next && comments === null) {
       setStatus("loading");
-      fetch(`/api/community/${post.id}/comments`)
+      fetch(`/api/community/${post.id}/comments?locale=${locale}`)
         .then((res) => {
           if (!res.ok) throw new Error();
           return res.json();
@@ -552,8 +555,16 @@ function PostItem({
                     </div>
                   </div>
                   <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-slate-300">
-                    {c.body}
+                    {c.translatedBody ?? c.body}
                   </p>
+                  {/* 자동 번역된 댓글은 원문도 함께 — 뉘앙스 확인용. 댓글은
+                      200자 제한이라 둘을 겹쳐 보여도 부담이 없다 */}
+                  {c.translatedBody && (
+                    <p className="mt-1 flex items-start gap-1 whitespace-pre-wrap break-words text-[11px] leading-relaxed text-slate-500">
+                      <Languages size={11} className="mt-0.5 shrink-0" aria-hidden />
+                      {c.body}
+                    </p>
+                  )}
                   {c.mediaUrl && c.mediaType === "image" && (
                     <a
                       href={c.mediaUrl}

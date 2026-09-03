@@ -194,6 +194,60 @@ export async function translatePhrase(
 }
 
 /**
+ * 커뮤니티 댓글 배치 번역 — 보는 사람의 언어로.
+ *
+ * 어떤 언어로 쓰였는지 모르는 짧은 글들을 한 번의 호출로 대상 언어로 옮긴다.
+ * 이미 대상 언어인 글은 그대로 돌려받는다(호출부가 원문과 같으면 번역 표시를
+ * 생략한다). 결과는 community_comment_translations에 캐시되므로 같은 댓글은
+ * 언어당 한 번만 여기를 거친다.
+ */
+export async function translateCommunityTexts(
+  items: { id: number; body: string }[],
+  locale: string,
+): Promise<Record<number, string>> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || items.length === 0) return {};
+
+  const language = LOCALE_LANGUAGE[locale] ?? "English";
+  // 댓글은 200자 제한이지만 혹시 모를 폭주 대비 — 한 번에 30개·각 400자까지
+  const batch = items.slice(0, 30).map((it) => ({
+    id: it.id,
+    text: it.body.slice(0, 400),
+  }));
+
+  const prompt = [
+    `These are short comments from travelers on a night-tourism community board for Daejeon, Korea.`,
+    `Translate each comment into natural, casual ${language} (the tone of a friendly traveler).`,
+    `If a comment is already in ${language}, return it unchanged.`,
+    `Do not add explanations. Keep emojis and hashtags as-is.`,
+    `Return JSON: {"<id>": "<translated text>"} for every input id.`,
+    `Comments: ${JSON.stringify(batch)}`,
+    `Respond with ONLY the JSON.`,
+  ].join("\n");
+
+  const res = await geminiFetch(`${BASE_URL}/models/${MODEL}:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json", ...NO_THINKING },
+    }),
+  });
+  if (!res.ok) throw new Error(`Gemini API 오류: ${res.status}`);
+  const data = await res.json();
+  const parsed = JSON.parse(
+    data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}",
+  ) as Record<string, unknown>;
+
+  const out: Record<number, string> = {};
+  for (const it of batch) {
+    const tr = String(parsed[String(it.id)] ?? "").trim();
+    if (tr) out[it.id] = tr;
+  }
+  return out;
+}
+
+/**
  * 명소 이름 번역 (KTO 다국어 서비스에 없는 곳 전용).
  *
  * 공사에 영문·일문·중문판이 있는 곳은 공식 표기를 실시간으로 받아 쓴다.
