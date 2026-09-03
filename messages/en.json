@@ -497,7 +497,11 @@
     "sunset": "Sunset today",
     "moonAge": "Moon age {age}",
     "starNight": "Great night for stargazing",
-    "fullMoon": "Full-moon night"
+    "fullMoon": "Full-moon night",
+    "tempNow": "Daejeon now",
+    "rain": "Rainy night",
+    "snow": "Snowy night",
+    "rainSnow": "Sleet"
   },
   "festivals": {
     "title": "Festivals & events",

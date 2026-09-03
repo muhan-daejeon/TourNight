@@ -497,7 +497,11 @@
     "sunset": "今日の日没",
     "moonAge": "月齢{age}",
     "starNight": "星空観察に良い夜",
-    "fullMoon": "お月見に良い夜"
+    "fullMoon": "お月見に良い夜",
+    "tempNow": "大田の現在",
+    "rain": "雨の夜",
+    "snow": "雪の夜",
+    "rainSnow": "みぞれ"
   },
   "festivals": {
     "title": "祭り・イベント",
