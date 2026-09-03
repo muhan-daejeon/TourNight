@@ -3,7 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Camera, Download, X } from "lucide-react";
-import { COLLAGE_BOXES, renderCollage } from "@/lib/collage";
+import { COLLAGE_BOXES, COLLAGE_SIZE, renderCollage } from "@/lib/collage";
+
+/** 칸 좌표(px, 788×1123 기준)를 미리보기 컨테이너의 % 위치로 환산 */
+function boxStyle(box: (typeof COLLAGE_BOXES)[number]) {
+  return {
+    left: `${(box.x / COLLAGE_SIZE.width) * 100}%`,
+    top: `${(box.y / COLLAGE_SIZE.height) * 100}%`,
+    width: `${(box.w / COLLAGE_SIZE.width) * 100}%`,
+    height: `${(box.h / COLLAGE_SIZE.height) * 100}%`,
+  } as const;
+}
 
 const SLOT_LABELS = ["왼쪽 위", "오른쪽 위", "왼쪽 아래", "오른쪽 아래"];
 
@@ -99,25 +109,54 @@ export default function CollageModal({ onClose }: { onClose: () => void }) {
 
         <h2 className="text-lg font-bold text-white">꿈돌이와 심야 여행 콜라주</h2>
         <p className="mt-1 text-sm text-slate-400">
-          사진을 칸에 맞게 넣으면 대전 밤여행 콜라주로 만들어 드려요.
+          사진을 칸에 맞게 넣으면 대전 밤여행 콜라주로 만들어 드려요. 아래가 그대로
+          완성본이에요 — 제목·꿈돌이 스티커까지 미리 보면서 채우세요.
         </p>
 
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        {/* 완성본과 동일한 실시간 미리보기.
+            renderCollage와 같은 겹침 순서다: 흰 바탕 → 사진(칸 위치) → 프레임
+            (제목·스티커·마스코트가 담긴 collage-frame.png, 칸만 투명) → 맨 위에
+            투명한 클릭 슬롯. 사진을 고르는 즉시 완성본 모습 그대로 갱신된다 */}
+        <div
+          className="relative mt-5 overflow-hidden rounded-xl bg-white"
+          style={{ aspectRatio: `${COLLAGE_SIZE.width} / ${COLLAGE_SIZE.height}` }}
+        >
+          {COLLAGE_BOXES.map(
+            (box, i) =>
+              previews[i] && (
+                // eslint-disable-next-line @next/next/no-img-element -- 로컬 blob URL이라 next/image 로더가 다루지 못한다
+                <img
+                  key={i}
+                  src={previews[i]!}
+                  alt=""
+                  className="absolute object-cover"
+                  style={boxStyle(box)}
+                />
+              ),
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element -- 캔버스 합성과 1:1로 같은 원본을 그대로 쓴다 */}
+          <img
+            src="/collage-frame.png"
+            alt=""
+            className="pointer-events-none absolute inset-0 h-full w-full"
+          />
           {COLLAGE_BOXES.map((box, i) => (
             <button
               key={i}
               type="button"
               onClick={() => inputRefs.current[i]?.click()}
-              style={{ aspectRatio: `${box.w} / ${box.h}` }}
-              className="group relative overflow-hidden rounded-xl border-2 border-dashed border-white/15 bg-slate-950/40 transition hover:border-amber-400/50"
+              aria-label={`${SLOT_LABELS[i]} 사진 선택`}
+              className={`group absolute rounded-lg transition ${
+                previews[i]
+                  ? "hover:ring-2 hover:ring-amber-400/70"
+                  : "border-2 border-dashed border-slate-400/60 hover:border-amber-500"
+              }`}
+              style={boxStyle(box)}
             >
-              {previews[i] ? (
-                // eslint-disable-next-line @next/next/no-img-element -- 로컬 blob URL이라 next/image 로더가 다루지 못한다
-                <img src={previews[i]!} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <span className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-slate-500 group-hover:text-slate-400">
-                  <Camera size={22} />
-                  <span className="text-xs font-semibold">{SLOT_LABELS[i]}</span>
+              {!previews[i] && (
+                <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-slate-500 transition group-hover:text-slate-700">
+                  <Camera size={20} />
+                  <span className="text-[11px] font-semibold">{SLOT_LABELS[i]}</span>
                 </span>
               )}
               <input

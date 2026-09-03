@@ -27,9 +27,10 @@ export default function GuidebookBanner() {
         alt=""
         fill
         sizes="(min-width: 1152px) 1120px, 100vw"
-        className="object-cover opacity-30"
+        className="object-cover opacity-50"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-indigo-950/70" />
+      {/* 텍스트가 왼쪽에 있으므로 오른쪽은 일찍 풀어 야경 색이 보이게 한다 */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/70 to-indigo-950/40" />
       <div className="relative flex-1">
         <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-slate-400">
           <BookOpen size={15} className="text-amber-300" />

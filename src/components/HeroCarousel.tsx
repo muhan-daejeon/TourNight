@@ -82,10 +82,19 @@ function Slide({
   priority: boolean;
 }) {
   return (
+    // 바깥 칸은 트랙 이동 단위(= 뷰포트 래퍼 폭), 안쪽이 실제 카드.
+    // 칸에 px를 줘서 카드 사이 간격을 만든다 — 양옆으로 엿보이는 이웃 장과
+    // 붙어 보이지 않게. 참고 시안(휘어진 3D 캐러셀)과 달리 카드는 일자(평면)다.
+    // 비활성 장은 화면 양옆에 보이지만 조작 대상은 아니다 — 클릭은 화살표로 넘긴 뒤에
     <div
       aria-hidden={!active}
-      className={`relative w-full shrink-0 bg-gradient-to-br ${slide.gradient}`}
+      className={`w-full shrink-0 px-2 sm:px-4 ${active ? "" : "pointer-events-none"}`}
     >
+      <div
+        className={`relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br sm:rounded-3xl ${slide.gradient} transition-[opacity,transform] duration-700 ${
+          active ? "opacity-100 scale-100" : "opacity-40 scale-[0.97]"
+        }`}
+      >
       {slide.image && (
         <Image
           src={slide.image}
@@ -96,15 +105,18 @@ function Slide({
           // 처음 넘어올 때 사진이 비어 있다가 뒤늦게 뜬다 → 미리 받아 둔다
           loading={priority ? undefined : "eager"}
           sizes="100vw"
-          className="object-cover opacity-45"
+          // 45%는 사진 색을 다 죽여 화면이 칙칙했다 — 왼쪽 텍스트 가독은
+          // 아래 가로 그라데이션이 담당하므로 사진 자체는 더 살린다
+          className="object-cover opacity-70"
         />
       )}
       {/* 사진이 없는 슬라이드는 오른쪽에 빛무리를 둬 시안의 우측 이미지 자리를 채운다 */}
       {!slide.image && (
         <div className="pointer-events-none absolute -right-24 top-1/2 hidden size-[420px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(165,180,252,0.35),transparent_65%)] sm:block" />
       )}
-      {/* 왼쪽 텍스트가 사진 위에서도 읽히도록 왼쪽을 더 어둡게 깐다 */}
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-transparent" />
+      {/* 왼쪽 텍스트가 사진 위에서도 읽히도록 왼쪽을 더 어둡게 깐다.
+          텍스트가 없는 오른쪽 절반은 일찍 투명해져 사진 색이 그대로 보인다 */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/35 to-transparent" />
 
       {/* 높이를 min-height가 아니라 고정 height로 둔다 — 번역마다 글 길이가 달라
           (특히 영어가 한국어보다 꽤 길다) min-height면 그 장의 텍스트가 줄바꿈되는
@@ -135,6 +147,7 @@ function Slide({
             <ArrowRight size={16} />
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );
@@ -208,33 +221,40 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   if (!count) return null;
 
   return (
+    // 풀블리드 — 섹션이 화면 양끝까지 차지하고, 가운데 래퍼(한 장 폭)를 넘어가는
+    // 이웃 장들이 양옆에 평면으로 엿보인다(서울의 밤 포털처럼 꽉 찬 느낌).
+    // 래퍼 밖으로 넘친 장은 이 섹션의 overflow-hidden이 화면 끝에서 자른다.
     <section
-      className="relative overflow-hidden rounded-3xl border border-white/10"
+      className="relative overflow-hidden"
       aria-roledescription="carousel"
       aria-label={t("heroCarousel")}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div
-        className="flex"
-        onTransitionEnd={handleTransitionEnd}
-        style={{
-          transform: `translateX(-${pos * 100}%)`,
-          transition:
-            jumping || reducedMotion
-              ? "none"
-              : `transform ${SLIDE_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`,
-        }}
-      >
-        {track.map((slide, i) => (
-          <Slide
-            key={`${slide.id}-${i}`}
-            slide={slide}
-            active={i === pos}
-            // 처음 보이는 장만 미리 받는다 (looped면 1번 칸이 첫 장)
-            priority={i === (looped ? 1 : 0)}
-          />
-        ))}
+      {/* 트랙 이동 단위가 되는 "한 장 폭" 래퍼 — 모바일은 이웃이 살짝만,
+          데스크톱은 12vw씩 보이도록 폭을 잡는다 */}
+      <div className="mx-auto w-[88vw] max-w-[1280px] sm:w-[76vw]">
+        <div
+          className="flex"
+          onTransitionEnd={handleTransitionEnd}
+          style={{
+            transform: `translateX(-${pos * 100}%)`,
+            transition:
+              jumping || reducedMotion
+                ? "none"
+                : `transform ${SLIDE_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`,
+          }}
+        >
+          {track.map((slide, i) => (
+            <Slide
+              key={`${slide.id}-${i}`}
+              slide={slide}
+              active={i === pos}
+              // 처음 보이는 장만 미리 받는다 (looped면 1번 칸이 첫 장)
+              priority={i === (looped ? 1 : 0)}
+            />
+          ))}
+        </div>
       </div>
 
       {looped && (
