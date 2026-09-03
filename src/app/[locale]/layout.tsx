@@ -55,7 +55,9 @@ export default async function LocaleLayout({
       lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
+      {/* 배경색·밤하늘 글로우·별은 globals.css의 html/body::before가 담당한다 —
+          body에 배경을 깔면 그 뒤(z -1)에 둔 별 레이어가 가려진다 */}
+      <body className="min-h-full flex flex-col text-slate-100">
         <NextIntlClientProvider>
           <Header />
           <main className="flex-1">{children}</main>

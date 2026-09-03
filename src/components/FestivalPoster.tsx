@@ -59,7 +59,7 @@ export default function FestivalPoster({
         />
       )}
       {/* 사진 위 글씨가 읽히도록 아래를 짙게 깐다 */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-slate-950/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
 
       <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-slate-950/70 px-2.5 py-1 text-[10px] font-bold text-pink-300 backdrop-blur">
         <Sparkles size={10} strokeWidth={2.6} />

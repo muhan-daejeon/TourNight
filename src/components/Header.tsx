@@ -204,9 +204,9 @@ export default function Header() {
       <Suspense fallback={null}>
         <TourMenuSync onChange={setTourTarget} />
       </Suspense>
-      <div ref={rowRef} className="relative flex w-full flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 lg:flex-nowrap lg:px-6">
+      <div ref={rowRef} className="relative flex w-full flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 lg:px-6 xl:flex-nowrap">
         {/* 브랜드 워드마크는 번역하지 않는다 — 로고이자 서비스 고유명 */}
-        <Link href="/" className="flex shrink-0 flex-col leading-none lg:ml-10">
+        <Link href="/" className="flex shrink-0 flex-col leading-none xl:ml-10">
           <span
             data-header-logo
             className="text-[26px] font-extrabold tracking-tight text-white lg:text-[34px]"
@@ -218,9 +218,12 @@ export default function Header() {
           </span>
         </Link>
 
-        {/* 4개 카테고리 — 화면 정중앙에 절대 위치시켜 로고·오른쪽 묶음의 폭과
-            무관하게 가운데 온다. 각각 누르면 바로 밑에 세로로 탭이 펼쳐진다 */}
-        <nav className="order-last flex basis-full flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:absolute lg:left-1/2 lg:top-1/2 lg:order-none lg:basis-auto lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-x-20 lg:gap-y-3">
+        {/* 4개 카테고리 — 전에는 화면 정중앙에 절대 위치시켰는데, 그러면 중간 폭
+            (창을 좀 줄인 데스크톱)에서 오른쪽 로그인·회원가입 묶음과 물리적으로
+            겹쳤다. 일반 플로우에서 mx-auto로 남은 공간의 중앙에 두면 겹칠 수가
+            없고, 한 줄에 안 들어가는 폭(xl 미만)에서는 모바일처럼 둘째 줄로
+            내려간다. 각각 누르면 바로 밑에 세로로 탭이 펼쳐진다 */}
+        <nav className="order-last flex basis-full flex-wrap items-center justify-center gap-x-5 gap-y-2 xl:order-none xl:mx-auto xl:basis-auto xl:gap-x-10 2xl:gap-x-16">
           {MENU_GROUPS.map((group, i) => {
             const groupActive = group.items.some((key) => isActive(findNavItem(key).href));
             const isTourTarget = tourTarget?.groupId === group.id;
@@ -300,7 +303,9 @@ export default function Header() {
           })}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-3 lg:mr-20">
+        {/* xl 한 줄 배치에서는 nav의 mx-auto가 중앙을 잡으므로 ml-auto를 꺼서
+            남는 공간이 nav 양옆에만 배분되게 한다 (둘 다 auto면 중앙이 틀어진다) */}
+        <div className="ml-auto flex shrink-0 items-center gap-3 xl:ml-0 xl:mr-6 2xl:mr-10">
           {/* 사진 4장으로 "꿈돌이와 심야 여행" 콜라주를 만드는 기능 — 로그인
               버튼 바로 왼쪽, 노란 네온사인처럼 마우스를 올리면 빛이 번진다 */}
           <button
