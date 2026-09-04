@@ -24,9 +24,10 @@ export const COLLAGE_BOXES = [
 
 const FRAME_SRC = "/collage-frame.png";
 
-function loadImage(src: string): Promise<HTMLImageElement> {
+function loadImage(src: string, crossOrigin?: "anonymous"): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    if (crossOrigin) img.crossOrigin = crossOrigin;
     img.onload = () => resolve(img);
     img.onerror = () => reject(new Error(`이미지를 불러오지 못했습니다: ${src}`));
     img.src = src;
@@ -88,6 +89,45 @@ export async function renderCollage(
     const file = photos[i];
     if (!file) continue;
     const img = await loadImageFromFile(file);
+    drawCover(ctx, img, COLLAGE_BOXES[i]);
+  }
+
+  const frame = await loadImage(FRAME_SRC);
+  ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("이미지 생성에 실패했습니다"))),
+      "image/png",
+    );
+  });
+}
+
+/**
+ * 도장투어 with 꿈돌이 — 4곳에서 찍어 이미 서버에 올라간 인증사진 URL로
+ * 같은 콜라주를 만든다. renderCollage와 프레임·칸 배치를 그대로 공유한다
+ * (같은 "꿈돌이와 심야 여행" 기능을 재사용하는 것뿐, 사진 출처만 다르다).
+ *
+ * 원격 이미지라 crossOrigin="anonymous"로 불러온다 — Supabase Storage의
+ * public 버킷 객체는 CORS를 허용하므로 캔버스가 "오염"되지 않는다. 이게 안
+ * 되는 스토리지로 바뀌면 toBlob이 SecurityError로 막힌다.
+ */
+export async function renderCollageFromUrls(
+  photoUrls: readonly (string | null)[],
+): Promise<Blob> {
+  const canvas = document.createElement("canvas");
+  canvas.width = COLLAGE_SIZE.width;
+  canvas.height = COLLAGE_SIZE.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas 2d context를 만들지 못했습니다");
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < COLLAGE_BOXES.length; i++) {
+    const src = photoUrls[i];
+    if (!src) continue;
+    const img = await loadImage(src, "anonymous");
     drawCover(ctx, img, COLLAGE_BOXES[i]);
   }
 

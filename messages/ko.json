@@ -24,11 +24,12 @@
     "groupExplore": "둘러보기",
     "groupGuide": "여행 가이드",
     "groupLocal": "나이트 라이프",
-    "groupCommunity": "커뮤니티",
+    "groupCommunity": "참여",
     "home": "홈",
     "personality": "성향 테스트",
-    "klife": "K-Life 가이드"
-  },
+    "klife": "K-Life 가이드",
+    "stampTour": "도장투어",
+    "stampTourWith": "with 꿈돌이"  },
   "home": {
     "heroTitle": "대전의 밤은 낮보다 빛난다",
     "heroSubtitle": "과학도시 대전의 야경, 별빛, 축제를 한곳에서",
@@ -397,6 +398,11 @@
     "reportDone": "신고가 접수됐습니다. 확인 후 조치하겠습니다.",
     "reportAlready": "이미 신고하신 내용입니다.",
     "reportedLabel": "신고함",
+    "translate": "번역",
+    "translating": "번역 중…",
+    "translateShowOriginal": "원문 보기",
+    "translateShowTranslated": "번역 보기",
+    "translateError": "번역에 실패했어요",
     "reportReasons": {
       "spam": "스팸·광고",
       "abuse": "욕설·혐오",
@@ -426,6 +432,56 @@
       "guide1": "밤에 다녀온 곳의 후기와 팁을 나눠요",
       "guide2": "명소 이름을 적으면 옆에 모아 보여드려요",
       "guide3": "사진은 직접 찍은 것만 올려 주세요"
+    }
+  },
+  "stampTour": {
+    "overline": "STAMP TOUR",
+    "introTitle": "도장투어 with 꿈돌이",
+    "introSubtitle": "직접 고른 명소 4곳을 돌며 도장을 찍고, 나만의 꿈돌네컷을 완성해보세요.",
+    "reselect": "관광지 다시 선택하기",
+    "consent": {
+      "title": "위치 정보 수집에 동의하십니까?",
+      "body": "도장을 찍을 때 실제로 그 장소에 계신지 확인하기 위해 위치 정보를 써요. 확인하는 그 순간에만 쓰이고 사진에 남거나 서버에 저장되지 않아요.",
+      "agree": "동의하고 시작하기",
+      "cancel": "취소",
+      "denied": "위치 정보 접근이 거부됐어요. 브라우저 설정에서 위치 권한을 허용한 뒤 다시 시도해주세요."
+    },
+    "picker": {
+      "title": "가고 싶은 네 가지 장소를 골라보세요!",
+      "selectedCount": "{count}/4 선택됨",
+      "searchPlaceholder": "장소 이름으로 검색",
+      "searchButton": "검색",
+      "searching": "검색 중…",
+      "searchEmpty": "검색 결과가 없어요",
+      "searchError": "검색에 실패했어요. 잠시 후 다시 시도해주세요.",
+      "saveError": "저장하지 못했어요. 잠시 후 다시 시도해주세요.",
+      "select": "선택",
+      "selectedListTitle": "선택한 장소",
+      "selectedEmpty": "아직 고른 장소가 없어요",
+      "remove": "빼기",
+      "complete": "선택 완료",
+      "needFour": "4개의 장소를 골라주세요.",
+      "alreadyFour": "이미 4곳을 다 골랐어요. 하나를 뺀 뒤 다시 골라주세요.",
+      "alreadyPicked": "이미 고른 장소예요."
+    },
+    "road": {
+      "stampLabel": "{n}번째 도장",
+      "tapToStamp": "눌러서 도장 찍기",
+      "verifying": "위치 확인 중…",
+      "tooFar": "\"{name}\"에서 좀 떨어져 있어요. 장소에 도착한 뒤 다시 시도해주세요.",
+      "gpsError": "위치 정보를 가져오지 못했어요. 다시 시도해주세요.",
+      "uploading": "올리는 중…",
+      "uploadError": "사진을 올리지 못했어요. 다시 시도해주세요.",
+      "photoRejected": "올릴 수 없는 사진이에요. 다른 사진을 선택해주세요.",
+      "stamped": "도장 완료"
+    },
+    "collage": {
+      "title": "꿈돌네컷",
+      "hint": "도장을 찍을 때마다 한 칸씩 채워져요",
+      "download": "다운로드",
+      "downloading": "만드는 중…",
+      "incomplete": "안내: 도장을 다 찍으면 이용할 수 있습니다.",
+      "downloadError": "이미지를 만들지 못했어요. 다시 시도해 주세요."
     }
   },
   "spot": {

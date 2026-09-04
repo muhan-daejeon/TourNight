@@ -24,11 +24,12 @@
     "groupExplore": "Explore",
     "groupGuide": "Travel Guide",
     "groupLocal": "Night Life",
-    "groupCommunity": "Community",
+    "groupCommunity": "Participate",
     "home": "Home",
     "personality": "Persona Test",
-    "klife": "K-Life Guide"
-  },
+    "klife": "K-Life Guide",
+    "stampTour": "도장투어",
+    "stampTourWith": "with 꿈돌이"  },
   "home": {
     "heroTitle": "Daejeon Shines Brighter at Night",
     "heroSubtitle": "Night views, starlight, and festivals of Korea's science city — all in one place",
@@ -397,6 +398,11 @@
     "reportDone": "Thanks — your report has been received.",
     "reportAlready": "You have already reported this.",
     "reportedLabel": "Reported",
+    "translate": "Translate",
+    "translating": "Translating…",
+    "translateShowOriginal": "Show original",
+    "translateShowTranslated": "Show translation",
+    "translateError": "Translation failed",
     "reportReasons": {
       "spam": "Spam or ads",
       "abuse": "Abuse or hate",
@@ -426,6 +432,56 @@
       "guide1": "Share tips and reviews from your night out",
       "guide2": "Mention a spot by name and it shows up here",
       "guide3": "Please post only photos you took yourself"
+    }
+  },
+  "stampTour": {
+    "overline": "STAMP TOUR",
+    "introTitle": "도장투어 with 꿈돌이",
+    "introSubtitle": "Pick 4 spots of your own, collect a stamp at each, and complete your own Ggumdol four-cut photo.",
+    "reselect": "Pick places again",
+    "consent": {
+      "title": "Allow location access?",
+      "body": "We use your location only to confirm you're actually at the spot when you stamp it — it's checked in that moment only, never saved with your photo or on our servers.",
+      "agree": "Agree & start",
+      "cancel": "Cancel",
+      "denied": "Location access was denied. Please allow location in your browser settings and try again."
+    },
+    "picker": {
+      "title": "Pick 4 places you'd like to visit!",
+      "selectedCount": "{count}/4 selected",
+      "searchPlaceholder": "Search by place name",
+      "searchButton": "Search",
+      "searching": "Searching…",
+      "searchEmpty": "No results found",
+      "searchError": "Search failed. Please try again in a moment.",
+      "saveError": "Couldn't save your picks. Please try again in a moment.",
+      "select": "Select",
+      "selectedListTitle": "Selected places",
+      "selectedEmpty": "No places selected yet",
+      "remove": "Remove",
+      "complete": "Done selecting",
+      "needFour": "Please choose 4 places.",
+      "alreadyFour": "You've already picked 4. Remove one to pick another.",
+      "alreadyPicked": "Already selected."
+    },
+    "road": {
+      "stampLabel": "Stamp {n}",
+      "tapToStamp": "Tap to stamp",
+      "verifying": "Checking your location…",
+      "tooFar": "You seem to be away from \"{name}\". Try again once you arrive.",
+      "gpsError": "Couldn't get your location. Please try again.",
+      "uploading": "Uploading…",
+      "uploadError": "Couldn't upload the photo. Please try again.",
+      "photoRejected": "This photo can't be uploaded. Please choose another.",
+      "stamped": "Stamped"
+    },
+    "collage": {
+      "title": "Ggumdol Four-Cut",
+      "hint": "Each stamp fills in one frame",
+      "download": "Download",
+      "downloading": "Preparing…",
+      "incomplete": "Note: available once you've collected all 4 stamps.",
+      "downloadError": "Couldn't create the image. Please try again."
     }
   },
   "spot": {

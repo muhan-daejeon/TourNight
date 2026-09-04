@@ -328,6 +328,50 @@ export async function deleteComment(
   return "ok";
 }
 
+/** 번역 대상 원문 조회 — 글/댓글 공용. 없으면 null */
+export async function getContentBody(
+  targetType: "post" | "comment",
+  targetId: number,
+): Promise<string | null> {
+  const rows =
+    targetType === "post"
+      ? await sql<{ body: string }[]>`
+          select body from community_posts where id = ${targetId}
+        `
+      : await sql<{ body: string }[]>`
+          select body from community_comments where id = ${targetId}
+        `;
+  return rows[0]?.body ?? null;
+}
+
+/** 번역 캐시 조회 — 글/댓글 + 언어당 1건 */
+export async function getCachedTranslation(
+  targetType: "post" | "comment",
+  targetId: number,
+  locale: string,
+): Promise<string | null> {
+  const rows = await sql<{ body: string }[]>`
+    select body from community_translation_cache
+    where target_type = ${targetType} and target_id = ${targetId} and locale = ${locale}
+  `;
+  return rows[0]?.body ?? null;
+}
+
+/** 번역 캐시 저장 (덮어쓰기) */
+export async function setCachedTranslation(
+  targetType: "post" | "comment",
+  targetId: number,
+  locale: string,
+  body: string,
+): Promise<void> {
+  await sql`
+    insert into community_translation_cache (target_type, target_id, locale, body)
+    values (${targetType}, ${targetId}, ${locale}, ${body})
+    on conflict (target_type, target_id, locale)
+    do update set body = excluded.body, updated_at = now()
+  `;
+}
+
 export type ReportTarget = "post" | "comment";
 
 /** 신고 사유 — 자유 입력은 받지 않는다 (개인정보·욕설이 그대로 들어올 수 있다) */
