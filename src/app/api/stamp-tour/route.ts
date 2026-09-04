@@ -18,20 +18,25 @@ interface PlaceInput {
   lng?: unknown;
 }
 
-/** 장소 4곳 확정 — 최초 1회만 의미 있고, 이미 골랐으면 기존 것을 그대로 돌려준다 */
+/**
+ * 장소 4곳 확정 — 기본은 최초 1회만 의미 있고, 이미 골랐으면 기존 것을 그대로
+ * 돌려준다. reset:true면 "관광지 다시 선택하기"에서 온 것 — 기존 4곳(과 그동안
+ * 찍은 인증사진)을 지우고 새로 고른 4곳으로 덮어쓴다.
+ */
 export async function POST(request: NextRequest) {
   const session = await getActiveSessionUser();
   if (!session) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
   }
 
-  let payload: { places?: PlaceInput[] };
+  let payload: { places?: PlaceInput[]; reset?: unknown };
   try {
     payload = await request.json();
   } catch {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
 
+  const reset = payload.reset === true;
   const raw = Array.isArray(payload.places) ? payload.places : [];
   if (raw.length !== STOP_COUNT) {
     return NextResponse.json({ error: "need_exactly_four" }, { status: 400 });
@@ -49,7 +54,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const tour = await createStampTour(session.userId, places);
+    const tour = await createStampTour(session.userId, places, { reset });
     return NextResponse.json({ tour }, { status: 201 });
   } catch (err) {
     console.error(

@@ -45,18 +45,29 @@ export async function getStampTour(userId: number): Promise<StampTour | null> {
 }
 
 /**
- * 장소 4곳 확정 — 최초 1회. 이미 골라둔 계정이 다시 호출하면 기존 것을 그대로
+ * 장소 4곳 확정.
+ *
+ * 기본은 최초 1회용 — 이미 골라둔 계정이 다시 호출하면 기존 것을 그대로
  * 돌려준다(덮어써서 이미 찍은 도장 사진을 날리지 않는다).
+ *
+ * opts.reset이 true면 "관광지 다시 선택하기"에서 온 것 — 기존 4곳을 새
+ * 장소로 완전히 덮어쓰고, 그때까지 찍어 둔 인증사진 파일도 함께 지운다
+ * (다른 장소 사진이 새 장소 밑에 그대로 남아 있으면 안 되므로).
  */
 export async function createStampTour(
   userId: number,
   places: { name: string; lat: number; lng: number }[],
+  opts: { reset?: boolean } = {},
 ): Promise<StampTour> {
   if (places.length !== STOP_COUNT) {
     throw new Error(`장소는 정확히 ${STOP_COUNT}곳이어야 합니다`);
   }
-  const existing = await getStampTour(userId);
-  if (existing) return existing;
+
+  const existingRows = await sql<{ stops: StopRow[] }[]>`
+    select stops from stamp_tours where user_id = ${userId}
+  `;
+  const existing = existingRows[0]?.stops ?? null;
+  if (existing && !opts.reset) return toStampTour(existing);
 
   const stops: StopRow[] = places.map((p) => ({
     name: p.name,
@@ -64,12 +75,23 @@ export async function createStampTour(
     lng: p.lng,
     photoPath: null,
   }));
-  const rows = await sql<{ stops: StopRow[] }[]>`
-    insert into stamp_tours (user_id, stops)
-    values (${userId}, ${sql.json(stops as unknown as Parameters<typeof sql.json>[0])})
-    returning stops
-  `;
-  return toStampTour(rows[0].stops);
+
+  if (existing) {
+    await sql`
+      update stamp_tours
+      set stops = ${sql.json(stops as unknown as Parameters<typeof sql.json>[0])}, updated_at = now()
+      where user_id = ${userId}
+    `;
+    for (const s of existing) {
+      if (s.photoPath) await deleteCommunityMedia(s.photoPath);
+    }
+  } else {
+    await sql`
+      insert into stamp_tours (user_id, stops)
+      values (${userId}, ${sql.json(stops as unknown as Parameters<typeof sql.json>[0])})
+    `;
+  }
+  return toStampTour(stops);
 }
 
 export type StampPhotoResult =
