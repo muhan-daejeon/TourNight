@@ -10,6 +10,7 @@ import {
   Download,
   Loader2,
   MapPin,
+  RotateCcw,
   Stamp as StampIcon,
   X,
 } from "lucide-react";
@@ -405,14 +406,16 @@ function StampRoad({
   }
 
   // 4칸의 자리(0~100 기준 %) — 왼쪽·오른쪽을 번갈아 두어 구불구불한 인상을 준다.
-  // 아래 path는 이 네 점을 곡선으로 잇는다. 하나를 옮기면 path도 함께 손봐야 한다
+  // 아래 path는 이 네 점을 곡선으로 잇는다. 하나를 옮기면 path도 함께 손봐야 한다.
+  // 1번은 원래 y:10이라 위 장소명 라벨이 카드 위로 잘려 보였고(→16으로 내림),
+  // 4번은 원래 y:85라 아래 "눌러서 도장 찍기" 문구가 카드 바닥에 바짝 붙었다(→78로 올림)
   const NODES = [
-    { x: 20, y: 10 },
+    { x: 20, y: 16 },
     { x: 78, y: 30 },
     { x: 18, y: 58 },
-    { x: 74, y: 85 },
+    { x: 74, y: 78 },
   ];
-  const PATH = "M20,10 C55,6 85,16 78,30 C72,48 26,44 18,58 C12,72 56,78 74,85";
+  const PATH = "M20,16 C55,12 85,20 78,30 C72,48 26,44 18,58 C12,70 56,74 74,78";
 
   return (
     <div className="relative mt-6 aspect-[3/4] w-full overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 sm:aspect-[16/9]">
@@ -630,11 +633,15 @@ export default function StampTour() {
   }
 
   async function handlePickerComplete(places: PickedPlace[]) {
+    // 이미 tour가 있는 상태에서 다시 이 화면으로 왔다면 "관광지 다시 선택하기"
+    // 흐름이다 — 서버에 reset을 같이 보내 기존 4곳(과 찍었던 사진)을 지우고
+    // 새로 고른 4곳으로 덮어쓰게 한다
+    const reset = tour !== null;
     try {
       const res = await fetch("/api/stamp-tour", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ places }),
+        body: JSON.stringify({ places, reset }),
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
@@ -656,7 +663,16 @@ export default function StampTour() {
 
       {phase === "main" && tour && (
         <div>
-          <h2 className="text-xl font-bold text-white sm:text-2xl">{t("mainTitle")}</h2>
+          {/* 원래 여기 있던 안내 문장 대신, 다시 고를 수 있는 버튼을 둔다 —
+              지금 카드들의 네이비 배경(slate-900)보다 옅게 비치는 톤으로 */}
+          <button
+            type="button"
+            onClick={() => setPhase("picker")}
+            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-2.5 text-sm font-semibold text-slate-200 backdrop-blur transition hover:bg-slate-900/70"
+          >
+            <RotateCcw size={15} />
+            {t("reselect")}
+          </button>
           <StampRoad tour={tour} onUpdate={setTour} />
           <CollageSection tour={tour} />
         </div>
@@ -671,7 +687,12 @@ export default function StampTour() {
         />
       )}
       {phase === "picker" && (
-        <PlacePickerModal onComplete={handlePickerComplete} onClose={() => router.push("/")} />
+        <PlacePickerModal
+          onComplete={handlePickerComplete}
+          // 이미 골라 둔 게 있으면 "다시 선택하기"에서 들어온 것 — 닫으면 원래
+          // 보던 길 화면으로 돌아간다. 처음 고르는 중이면 여전히 홈으로 나간다
+          onClose={() => (tour ? setPhase("main") : router.push("/"))}
+        />
       )}
     </>
   );
