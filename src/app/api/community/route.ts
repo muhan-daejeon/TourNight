@@ -51,6 +51,9 @@ export async function POST(request: NextRequest) {
       body: input.body,
       media,
       verified: guard.verified,
+      // 클라이언트가 명소 목록에서 고른 값들 — 라이브 KTO 검증은 하지 않는다(지연·쿼터).
+      // 잘못된 id는 렌더 시 명소 목록에서 안 풀려 무시될 뿐이라 무해하다.
+      contentIds: input.contentIds,
     });
     if (!post) {
       // 글 저장이 무산되면 방금 올린 파일은 고아가 되므로 되돌린다

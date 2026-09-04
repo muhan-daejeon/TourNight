@@ -42,18 +42,24 @@ export function usePhotoAttach(t: {
     }
   }
 
-  /** 사진이 있으면 multipart, 없으면 JSON — fetch 옵션을 만들어 준다 */
-  function requestInit(body: string): RequestInit {
+  /**
+   * 사진이 있으면 multipart, 없으면 JSON — fetch 옵션을 만들어 준다.
+   * contentIds는 글 작성에서 고른 방문 명소들(있을 때만 실린다). 댓글은 넘기지 않는다.
+   */
+  function requestInit(body: string, contentIds?: string[]): RequestInit {
+    const ids = contentIds?.filter(Boolean) ?? [];
     if (!photo) {
       return {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body }),
+        body: JSON.stringify(ids.length ? { body, contentIds: ids } : { body }),
       };
     }
     const form = new FormData();
     form.set("body", body);
     form.set("media", photo.file);
+    // 여러 명소는 같은 키로 반복 append (서버는 form.getAll로 읽는다)
+    for (const id of ids) form.append("contentIds", id);
     return { method: "POST", body: form };
   }
 

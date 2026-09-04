@@ -55,6 +55,8 @@ export default async function CommunityPage({
             // 인증 메일 발신 주소 — 수신 허용 목록에 넣으라고 화면에 띄운다.
             // 중국·일본 메일함이 모르는 발신자를 잘 거르기 때문에 필요하다
             mailFrom={mailFrom()}
+            // 글쓰기 모달의 명소 검색 + 글에 붙은 명소 이름 해석에 쓴다 (사이드바와 같은 배열)
+            spots={spots}
           />
           <CommunitySidebar popular={popular} posts={posts} spots={spots} />
         </div>

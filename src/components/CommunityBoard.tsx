@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
@@ -15,8 +15,13 @@ import {
   Trash2,
   ImagePlus,
   X,
+  PenLine,
+  MapPin,
+  Search,
+  Languages,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import type { NightSpot } from "@/lib/kto";
 import { photoErrorMessage, usePhotoAttach } from "./usePhotoAttach";
 
 interface Post {
@@ -29,6 +34,8 @@ interface Post {
   mediaUrl: string | null;
   mediaType: "image" | "video" | null;
   authorVerified: boolean;
+  /** 작성자가 고른 방문 명소 content_id들 (자유글이면 빈 배열) */
+  contentIds: string[];
 }
 
 interface Comment {
@@ -50,6 +57,8 @@ interface Me {
 }
 
 const BODY_MAX = 200;
+/** 글 하나에 붙일 수 있는 방문 명소 수 — 서버 POST_SPOTS_MAX와 맞춘다 */
+const SPOTS_MAX = 5;
 
 interface Quota {
   post: { used: number; limit: number };
@@ -95,6 +104,121 @@ function formatRelative(iso: string, locale: string, justNow: string): string {
 
 const inputClass =
   "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 text-xs text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
+
+/**
+ * 방문한 명소 검색·다중 선택 — 자유글이면 안 골라도 된다.
+ * 명소 목록은 이미 페이지가 받아 둔 것(getVerifiedNightSpots)을 그대로 쓰므로 조회가 없다.
+ * 고른 명소는 칩으로 쌓이고, 상한(max)까지 계속 추가할 수 있다.
+ */
+function SpotPicker({
+  spots,
+  value,
+  onChange,
+  max,
+}: {
+  spots: NightSpot[];
+  value: string[];
+  onChange: (ids: string[]) => void;
+  max: number;
+}) {
+  const t = useTranslations("community");
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const spotById = useMemo(
+    () => new Map(spots.map((s) => [s.contentId, s])),
+    [spots],
+  );
+  const selected = value
+    .map((id) => spotById.get(id))
+    .filter((s): s is NightSpot => Boolean(s));
+  const full = value.length >= max;
+
+  const q = query.trim().toLowerCase();
+  const matches = q
+    ? spots
+        .filter(
+          (s) => !value.includes(s.contentId) && s.title.toLowerCase().includes(q),
+        )
+        .slice(0, 6)
+    : [];
+
+  const add = (id: string) => {
+    if (!value.includes(id) && value.length < max) onChange([...value, id]);
+    setQuery("");
+    setOpen(false);
+  };
+  const remove = (id: string) => onChange(value.filter((v) => v !== id));
+
+  return (
+    <div className="space-y-2">
+      {/* 고른 명소 칩들 */}
+      {selected.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {selected.map((s) => (
+            <span
+              key={s.contentId}
+              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold text-emerald-200"
+            >
+              <MapPin size={13} />
+              <span className="max-w-[10rem] truncate">{s.title}</span>
+              <button
+                type="button"
+                onClick={() => remove(s.contentId)}
+                aria-label={t("spotClear")}
+                className="ml-0.5 text-emerald-200/70 transition hover:text-white"
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* 검색 입력 — 상한에 도달하면 안내만 */}
+      {full ? (
+        <p className="text-[11px] text-slate-500">{t("spotMax", { max })}</p>
+      ) : (
+        <div className="relative">
+          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 transition focus-within:border-amber-300/60">
+            <Search size={14} className="shrink-0 text-slate-500" />
+            <input
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setOpen(true);
+              }}
+              onFocus={() => setOpen(true)}
+              placeholder={t("spotSearchPlaceholder")}
+              className="w-full bg-transparent text-xs text-slate-100 outline-none placeholder:text-slate-500"
+            />
+          </div>
+          {open && matches.length > 0 && (
+            <ul className="absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-xl border border-white/15 bg-slate-900 shadow-xl">
+              {matches.map((s) => (
+                <li key={s.contentId}>
+                  <button
+                    type="button"
+                    onClick={() => add(s.contentId)}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-slate-200 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <MapPin size={12} className="shrink-0 text-emerald-300" />
+                    <span className="truncate">{s.title}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {open && q && matches.length === 0 && (
+            <p className="absolute z-30 mt-1 w-full rounded-xl border border-white/15 bg-slate-900 px-3 py-2 text-xs text-slate-500 shadow-xl">
+              {t("spotNoResult")}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** 메일 인증을 마친 작성자 표시 — 신원 보증이 아니라 '연락 가능한 계정'이라는 뜻 */
 function VerifiedBadge() {
@@ -302,7 +426,9 @@ function PostItem({
   post,
   me,
   canAttach,
+  translatedBody,
   commentQuota,
+  spots,
   onQuotaUsed,
   onQuotaExhausted,
   onDeleted,
@@ -310,8 +436,12 @@ function PostItem({
   post: Post;
   me: Me | null | undefined;
   canAttach: boolean;
+  /** 접속 언어로 번역한 본문 (아직 안 왔거나 같은 언어면 undefined) */
+  translatedBody?: string;
   /** 오늘 댓글 사용량 (모르면 null) */
   commentQuota: { used: number; limit: number } | null;
+  /** 글에 연결된 방문 명소들 (content_id로 해석됨) */
+  spots: NightSpot[];
   onQuotaUsed: () => void;
   onQuotaExhausted: (limit: number) => void;
   onDeleted: () => void;
@@ -325,6 +455,11 @@ function PostItem({
     "idle",
   );
   const [count, setCount] = useState(post.commentCount);
+  // 접속 언어로 번역한 댓글 { comment_id → 번역문 } + 원문을 펼쳐 본 댓글들
+  const [translations, setTranslations] = useState<Record<number, string>>({});
+  const [showOriginal, setShowOriginal] = useState<Set<number>>(new Set());
+  // 글 본문 — 번역이 원문과 다를 때만 토글을 노출, 기본은 번역문
+  const [showOriginalPost, setShowOriginalPost] = useState(false);
   const [replyBody, setReplyBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -344,6 +479,23 @@ function PostItem({
 
   const ownsPost = post.userId != null && post.userId === me?.id;
 
+  /**
+   * 댓글을 접속 언어로 번역해 온다. 외국인이 섞여 쓰는 게시판이라 다른 언어로 쓴
+   * 댓글을 읽으려면 번역이 필요하다. 이미 접속 언어인 댓글은 서버가 원문을 그대로
+   * 돌려주고, 클라이언트는 원문과 다른 경우에만 '원문 보기' 토글을 붙인다.
+   * 실패하면 조용히 원문만 보여준다.
+   */
+  function fetchTranslations() {
+    fetch(`/api/community/${post.id}/comments/translate`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ locale }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data && setTranslations(data.translations ?? {}))
+      .catch(() => {});
+  }
+
   function toggle() {
     const next = !expanded;
     setExpanded(next);
@@ -357,10 +509,20 @@ function PostItem({
         .then((data) => {
           setComments(data.comments);
           setStatus("done");
+          // 펼치면서 바로 접속 언어로 번역 (댓글이 있을 때만)
+          if (data.comments.length > 0) fetchTranslations();
         })
         .catch(() => setStatus("error"));
     }
   }
+
+  const toggleOriginal = (id: number) =>
+    setShowOriginal((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   async function submitReply(e: React.FormEvent) {
     e.preventDefault();
@@ -461,9 +623,48 @@ function PostItem({
           )}
         </div>
       </div>
-      <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-200">
-        {post.body}
-      </p>
+      {/* 작성자가 고른 방문 명소들 — 눌러 상세로. content_id가 명소 목록에서 풀린 것만 */}
+      {spots.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {spots.map((s) => (
+            <Link
+              key={s.contentId}
+              href={`/spots/${s.contentId}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-emerald-200 transition hover:border-emerald-300/50 hover:text-emerald-100"
+            >
+              <MapPin size={12} />
+              <span className="max-w-[14rem] truncate">{s.title}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {(() => {
+        // 번역이 원문과 다를 때만 번역/토글을 노출 (같은 언어면 원문 그대로)
+        const hasTranslation = Boolean(translatedBody && translatedBody !== post.body);
+        const displayBody =
+          hasTranslation && !showOriginalPost ? translatedBody : post.body;
+        return (
+          <>
+            <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-200">
+              {displayBody}
+            </p>
+            {hasTranslation && (
+              <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+                <Languages size={11} className="shrink-0 text-sky-400/70" />
+                <span>{showOriginalPost ? t("original") : t("translatedByAI")}</span>
+                <button
+                  type="button"
+                  onClick={() => setShowOriginalPost((v) => !v)}
+                  className="font-semibold text-sky-400/80 transition hover:text-sky-300"
+                >
+                  {showOriginalPost ? t("showTranslation") : t("showOriginal")}
+                </button>
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       {/* 첨부 사진 — 눌러서 원본 크기로 */}
       {post.mediaUrl && post.mediaType === "image" && (
@@ -525,7 +726,14 @@ function PostItem({
             <p className="text-xs text-slate-500">{t("error")}</p>
           ) : comments && comments.length > 0 ? (
             <ul className="space-y-2">
-              {comments.map((c) => (
+              {comments.map((c) => {
+                const translated = translations[c.id];
+                // 번역이 원문과 다를 때만 번역/토글을 노출 (같은 언어면 원문 그대로)
+                const hasTranslation = Boolean(translated && translated !== c.body);
+                const original = showOriginal.has(c.id);
+                const displayBody =
+                  hasTranslation && !original ? translated : c.body;
+                return (
                 <li key={c.id} className="rounded-lg bg-white/[0.03] px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="flex min-w-0 items-center gap-1 text-xs font-semibold text-slate-300">
@@ -552,8 +760,21 @@ function PostItem({
                     </div>
                   </div>
                   <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-slate-300">
-                    {c.body}
+                    {displayBody}
                   </p>
+                  {hasTranslation && (
+                    <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+                      <Languages size={11} className="shrink-0 text-sky-400/70" />
+                      <span>{original ? t("original") : t("translatedByAI")}</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleOriginal(c.id)}
+                        className="font-semibold text-sky-400/80 transition hover:text-sky-300"
+                      >
+                        {original ? t("showTranslation") : t("showOriginal")}
+                      </button>
+                    </div>
+                  )}
                   {c.mediaUrl && c.mediaType === "image" && (
                     <a
                       href={c.mediaUrl}
@@ -572,7 +793,8 @@ function PostItem({
                     </a>
                   )}
                 </li>
-              ))}
+                );
+              })}
             </ul>
           ) : (
             <p className="text-xs text-slate-500">{t("commentEmpty")}</p>
@@ -659,6 +881,7 @@ export default function CommunityBoard({
   initialMe,
   canAttach,
   mailFrom,
+  spots,
 }: {
   /** 서버에서 렌더링한 글 목록 — 첫 화면부터 보이도록 초기값으로 쓴다 */
   initialPosts: Post[];
@@ -668,10 +891,23 @@ export default function CommunityBoard({
   canAttach: boolean;
   /** 인증 메일 발신 주소 (미설정이면 null) — 수신 허용 안내에 쓴다 */
   mailFrom: string | null;
+  /** 야간 명소 목록 — 글쓰기 모달의 검색 + 글에 붙은 content_id를 이름으로 해석 */
+  spots: NightSpot[];
 }) {
   const t = useTranslations("community");
+  const locale = useLocale();
 
   const [posts, setPosts] = useState<Post[]>(initialPosts);
+  // 접속 언어로 번역한 글 본문 { post_id → 번역문 }. 목록이 뜨면 바로 채운다
+  const [postTranslations, setPostTranslations] = useState<Record<number, string>>({});
+  // content_id → 명소. 글 카드의 명소 태그를 이름으로 그릴 때 쓴다
+  const spotById = useMemo(
+    () => new Map(spots.map((s) => [s.contentId, s])),
+    [spots],
+  );
+  // 글쓰기 모달 열림 + 모달에서 고른 방문 명소들
+  const [composing, setComposing] = useState(false);
+  const [spotIds, setSpotIds] = useState<string[]>([]);
   // 보기 방식 — 최신순이 기본, 인기는 댓글 많은 순, 사진은 첨부 있는 글만
   const [view, setView] = useState<"latest" | "popular" | "photos">("latest");
   const visible =
@@ -708,6 +944,30 @@ export default function CommunityBoard({
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    // 목록의 글 본문을 접속 언어로 바로 번역해 온다. 원문은 이미 그려져 있으니
+    // 도착하는 대로 번역문으로 바꿔 준다(이미 접속 언어인 글은 원문 그대로 온다).
+    // 실패하면 원문을 그대로 둔다. 언어가 바뀌면 다시 받는다.
+    fetch("/api/community/translate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ locale }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data && setPostTranslations(data.translations ?? {}))
+      .catch(() => {});
+  }, [locale]);
+
+  // 모달이 열려 있을 때만 Esc로 닫는다
+  useEffect(() => {
+    if (!composing) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setComposing(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [composing]);
+
   /** 글·댓글을 하나 쓰면 표시를 즉시 올린다 (서버 재조회 없이) */
   const consumeQuota = (kind: "post" | "comment") =>
     setQuota((q) =>
@@ -726,7 +986,10 @@ export default function CommunityBoard({
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/community", photoRequestInit(trimmedBody));
+      const res = await fetch(
+        "/api/community",
+        photoRequestInit(trimmedBody, spotIds),
+      );
       if (res.status === 401) {
         setMe(null); // 세션 만료 → 로그인 유도로 전환
         return;
@@ -755,6 +1018,8 @@ export default function CommunityBoard({
       consumeQuota("post");
       setBody("");
       clearPhoto();
+      setSpotIds([]);
+      setComposing(false); // 등록되면 모달을 닫는다
     } catch {
       alert(t("submitError"));
     } finally {
@@ -767,110 +1032,161 @@ export default function CommunityBoard({
       {/* 메일 인증 링크를 타고 돌아왔을 때의 결과 안내 */}
       <VerifyResultBanner />
 
-      {/* 작성 영역 — 로그인만 하면 쓸 수 있고, 미인증이면 한도가 낮다는 안내만 얹는다 */}
-      {/*
-        누가 보고 있는지는 브라우저에서 /api/auth/me로 물어봐야 안다. 예전에는 그
-        답이 오기 전까지 높이 112px짜리 회색 상자만 두고 그 뒤에 진짜 입력창(183px)을
-        끼워 넣었는데, 답이 오는 데 800ms가 걸려 목록이 그만큼 아래로 밀렸다
-        (실측 CLS 0.097 — 구글이 '양호'로 보는 0.1 바로 아래).
-
-        그래서 입력창 자체는 처음부터 그려 두고, 아직 모르는 동안에는 입력만 막아
-        둔다. 닉네임 줄은 같은 높이의 자리 표시로 채워 글자가 들어와도 높이가
-        변하지 않는다. 로그아웃 상태로 판명되면(me === null) 그때 로그인 안내로
-        바꾼다 — 이 화면은 로그인해야 들어올 수 있어 드문 경우다.
-      */}
+      {/* 작성 진입 — 예전엔 폼이 늘 펼쳐져 화면을 눌렀다. 이제 버튼 하나만 두고
+          실제 작성(명소 검색·본문·첨부)은 모달에서 한다. 로그인 여부는 서버가
+          initialMe로 내려줘 즉시 알 수 있으므로 로딩 자리 표시가 필요 없다. */}
       <div data-tour="community">
-      {me === null ? (
-        <LoginPrompt text={t("loginToPost")} />
-      ) : (
-        <div className="space-y-3">
-        {me && !me.emailVerified && <VerifyPrompt mailFrom={mailFrom} />}
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur"
+        {me === null ? (
+          <LoginPrompt text={t("loginToPost")} />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setComposing(true)}
+            className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-left transition hover:border-amber-300/40 hover:bg-white/[0.05]"
+          >
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-400/15 text-amber-300">
+              <PenLine size={16} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-slate-100">
+                {t("writeButton")}
+              </span>
+              <span className="block truncate text-xs text-slate-500">
+                {t("bodyPlaceholder")}
+              </span>
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* 글쓰기 모달 — 배경을 누르거나 Esc로 닫힌다. 모바일은 하단 시트로 뜬다 */}
+      {composing && me && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setComposing(false)}
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 backdrop-blur-sm sm:items-center sm:p-4"
         >
-          <p className="mb-2 text-xs text-slate-500">
-            {me ? (
-              <>
-                {t("postingAs")} ·{" "}
-                <span className="text-amber-300/90">{me.nickname}</span>
-              </>
-            ) : (
-              <span className="inline-block h-3 w-32 animate-pulse rounded bg-white/10 align-middle" />
-            )}
-          </p>
-          <textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            disabled={!me}
-            maxLength={BODY_MAX}
-            rows={2}
-            placeholder={t("bodyPlaceholder")}
-            className="w-full resize-none rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60 disabled:opacity-60"
-          />
-          {/* 첨부 미리보기 */}
-          {photo && (
-            <div className="relative mt-3 w-fit">
-              {/* 로컬 objectURL이라 next/image 대신 img 사용 */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.preview}
-                alt=""
-                className="max-h-44 rounded-lg border border-white/10"
-              />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-white/10 bg-slate-900 p-5 sm:rounded-2xl"
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-sm font-bold text-slate-100">
+                <PenLine size={15} className="text-amber-300" />
+                {t("composeTitle")}
+              </h2>
               <button
                 type="button"
-                onClick={clearPhoto}
-                aria-label={t("photoRemove")}
-                className="absolute -right-2 -top-2 rounded-full bg-slate-900 p-1.5 text-slate-300 shadow-lg ring-1 ring-white/15 transition hover:text-white"
+                onClick={() => setComposing(false)}
+                aria-label={t("photoClose")}
+                className="rounded-full p-1 text-slate-400 transition hover:bg-white/10 hover:text-white"
               >
-                <X size={13} />
+                <X size={18} />
               </button>
             </div>
-          )}
 
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              {canAttach && (
-                <>
-                  <input
-                    ref={photoInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={pickPhoto}
-                    className="hidden"
+            {!me.emailVerified && (
+              <div className="mb-3">
+                <VerifyPrompt mailFrom={mailFrom} />
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <p className="text-xs text-slate-500">
+                {t("postingAs")} ·{" "}
+                <span className="text-amber-300/90">{me.nickname}</span>
+              </p>
+
+              {/* 방문한 명소 (선택) — 고르면 글에 태그로 붙고 집계에 잡힌다 */}
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-slate-400">
+                  {t("spotSelectLabel")}
+                  <span className="ml-1 font-normal text-slate-600">
+                    {t("spotOptional")}
+                  </span>
+                </label>
+                <SpotPicker
+                  spots={spots}
+                  value={spotIds}
+                  onChange={setSpotIds}
+                  max={SPOTS_MAX}
+                />
+              </div>
+
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                maxLength={BODY_MAX}
+                rows={4}
+                autoFocus
+                placeholder={t("bodyPlaceholder")}
+                className="w-full resize-none rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60"
+              />
+
+              {/* 첨부 미리보기 */}
+              {photo && (
+                <div className="relative w-fit">
+                  {/* 로컬 objectURL이라 next/image 대신 img 사용 */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.preview}
+                    alt=""
+                    className="max-h-44 rounded-lg border border-white/10"
                   />
                   <button
                     type="button"
-                    onClick={() => photoInputRef.current?.click()}
-                    disabled={submitting}
-                    className="flex items-center gap-1.5 rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/30 hover:text-white disabled:opacity-40"
+                    onClick={clearPhoto}
+                    aria-label={t("photoRemove")}
+                    className="absolute -right-2 -top-2 rounded-full bg-slate-900 p-1.5 text-slate-300 shadow-lg ring-1 ring-white/15 transition hover:text-white"
                   >
-                    <ImagePlus size={14} />
-                    {t("photoAdd")}
+                    <X size={13} />
                   </button>
-                </>
+                </div>
               )}
-              <span className="text-xs text-slate-500">
-                {body.length}/{BODY_MAX}
-              </span>
-              {quota && (
-                <QuotaLabel used={quota.post.used} limit={quota.post.limit} />
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={!me || !body.trim() || submitting}
-              className="flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Send size={14} />
-              {t("submit")}
-            </button>
+
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  {canAttach && (
+                    <>
+                      <input
+                        ref={photoInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={pickPhoto}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => photoInputRef.current?.click()}
+                        disabled={submitting}
+                        className="flex items-center gap-1.5 rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/30 hover:text-white disabled:opacity-40"
+                      >
+                        <ImagePlus size={14} />
+                        {t("photoAdd")}
+                      </button>
+                    </>
+                  )}
+                  <span className="text-xs text-slate-500">
+                    {body.length}/{BODY_MAX}
+                  </span>
+                  {quota && (
+                    <QuotaLabel used={quota.post.used} limit={quota.post.limit} />
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={!body.trim() || submitting}
+                  className="flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Send size={14} />
+                  {t("submit")}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
         </div>
       )}
-      </div>
 
       {/* 목록 — 서버에서 채워 오므로 로딩 상태가 없다.
           조회에 실패하면 listPosts가 빈 배열을 주고 아래 빈 상태로 표시된다 */}
@@ -906,7 +1222,11 @@ export default function CommunityBoard({
               post={post}
               me={me}
               canAttach={canAttach}
+              translatedBody={postTranslations[post.id]}
               commentQuota={quota?.comment ?? null}
+              spots={post.contentIds
+                .map((id) => spotById.get(id))
+                .filter((s): s is NightSpot => Boolean(s))}
               onQuotaUsed={() => consumeQuota("comment")}
               onQuotaExhausted={(limit) => exhaustQuota("comment", limit)}
               onDeleted={() =>

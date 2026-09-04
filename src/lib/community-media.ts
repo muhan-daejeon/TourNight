@@ -16,6 +16,16 @@ import {
 export interface CommunityInput {
   body: string;
   file: File | null;
+  /** 작성자가 고른 방문 명소 content_id들 (없으면 빈 배열) — 글에만 쓰이고 댓글은 무시한다.
+   *  개수·길이·중복 정리는 저장 단계(normalizeContentIds)에서 한 번 더 한다 */
+  contentIds: string[];
+}
+
+/** FormData·문자열 목록에서 비지 않은 문자열만 추린다 */
+function toStringList(values: (FormDataEntryValue | unknown)[]): string[] {
+  return values.filter(
+    (v): v is string => typeof v === "string" && v.trim() !== "",
+  );
 }
 
 /** 요청에서 본문과 첨부를 꺼낸다. 형식이 깨졌으면 null */
@@ -33,14 +43,19 @@ export async function readCommunityInput(
     return {
       body: typeof form.get("body") === "string" ? String(form.get("body")) : "",
       file: attached instanceof File && attached.size > 0 ? attached : null,
+      // 클라이언트가 contentIds를 여러 번 실어 보낸다 (form.append)
+      contentIds: toStringList(form.getAll("contentIds")),
     };
   }
 
   try {
-    const payload: { body?: unknown } = await request.json();
+    const payload: { body?: unknown; contentIds?: unknown } = await request.json();
     return {
       body: typeof payload.body === "string" ? payload.body : "",
       file: null,
+      contentIds: Array.isArray(payload.contentIds)
+        ? toStringList(payload.contentIds)
+        : [],
     };
   } catch {
     return null;

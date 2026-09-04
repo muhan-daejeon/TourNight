@@ -69,14 +69,18 @@ create table if not exists spot_guide (
 );
 
 
--- 커뮤니티 한줄 후기/질문 (로그인 없이 이름만 입력, 스팟 연동은 content_id로 선택)
+-- 커뮤니티 한줄 후기/질문 (로그인 없이 이름만 입력, 방문 명소는 content_ids로 여러 개 선택)
 create table if not exists community_posts (
   id bigint generated always as identity primary key,
-  content_id text,                      -- 연관 스팟(night_spots.content_id) — null이면 자유글
+  content_ids text[] not null default '{}',  -- 연관 스팟들(night_spots.content_id) — 빈 배열이면 자유글
   author text not null,                 -- 작성자 표시 이름 (로그인 대체)
   body text not null,                   -- 본문 (한줄 후기/질문)
   created_at timestamptz not null default now()
 );
+
+-- 이미 배포된 DB 보강: 단일 content_id(초기안)에서 다중 content_ids로 전환.
+-- 집계는 애플리케이션(JS)에서 하므로 배열 컬럼에 별도 인덱스는 두지 않는다.
+alter table community_posts add column if not exists content_ids text[] not null default '{}';
 
 create index if not exists community_posts_created_idx on community_posts (created_at desc);
 
@@ -285,6 +289,29 @@ alter table community_posts add column if not exists media_path text;
 alter table community_posts add column if not exists media_type text
   check (media_type is null or media_type in ('image', 'video'));
 alter table community_comments add column if not exists user_id bigint references users(id) on delete set null;
+
+-- 글·댓글 자동 번역 캐시 — 접속 언어로 번역해 외국인끼리 소통을 돕는다.
+-- 본문은 변하지 않으므로 (target, locale)당 1건만 두고 재요청 시 재사용해
+-- Gemini 재호출을 막는다 (phrase_search_cache와 같은 방식). 원본이 지워지면 함께 삭제.
+create table if not exists community_comment_translations (
+  comment_id bigint not null references community_comments(id) on delete cascade,
+  locale text not null,
+  body text not null,
+  updated_at timestamptz not null default now(),
+  primary key (comment_id, locale)
+);
+
+create table if not exists community_post_translations (
+  post_id bigint not null references community_posts(id) on delete cascade,
+  locale text not null,
+  body text not null,
+  updated_at timestamptz not null default now(),
+  primary key (post_id, locale)
+);
+
+-- 초기안으로 먼저 만들어진 DB는 updated_at가 없을 수 있어 보강한다 (upsert가 참조).
+alter table community_comment_translations add column if not exists updated_at timestamptz not null default now();
+alter table community_post_translations add column if not exists updated_at timestamptz not null default now();
 
 -- 관리자/일반 역할 구분 — 관리자는 코스 생성 한도 없이 쓰고 /admin에 들어갈 수 있다.
 -- 지정: update users set role='admin' where email='...';

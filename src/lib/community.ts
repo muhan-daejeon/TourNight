@@ -17,6 +17,8 @@ export interface CommunityPost {
   mediaType: MediaKind | null;
   /** 작성자가 메일 인증을 마쳤는지 — 목록에 배지로 표시한다 */
   authorVerified: boolean;
+  /** 작성자가 고른 방문 명소들(night_spots.content_id) — 자유글이면 빈 배열. 이름은 클라이언트가 명소 목록으로 해석한다 */
+  contentIds: string[];
 }
 
 export interface CommunityComment {
@@ -35,6 +37,22 @@ export interface CommunityComment {
 /** 입력 제한 */
 export const AUTHOR_MAX = 20;
 export const BODY_MAX = 200;
+/** KTO content_id는 숫자 문자열이라 넉넉히 32자면 충분 — 그 이상은 잘라 버린다 */
+export const CONTENT_ID_MAX = 32;
+/** 글 하나에 붙일 수 있는 방문 명소 수 상한 */
+export const POST_SPOTS_MAX = 5;
+
+/** 명소 id 배열을 정리한다 — 공백 제거·길이 제한·중복 제거·개수 상한 */
+export function normalizeContentIds(ids: unknown): string[] {
+  if (!Array.isArray(ids)) return [];
+  const seen = new Set<string>();
+  for (const raw of ids) {
+    const id = typeof raw === "string" ? raw.trim().slice(0, CONTENT_ID_MAX) : "";
+    if (id) seen.add(id);
+    if (seen.size >= POST_SPOTS_MAX) break;
+  }
+  return [...seen];
+}
 
 interface PostRow {
   id: string;
@@ -46,6 +64,7 @@ interface PostRow {
   media_path?: string | null;
   media_type?: string | null;
   author_verified?: boolean;
+  content_ids?: string[] | null;
 }
 
 interface CommentRow {
@@ -70,6 +89,7 @@ function toPost(r: PostRow): CommunityPost {
     mediaUrl: r.media_path ? mediaPublicUrl(r.media_path) : null,
     mediaType: (r.media_type as MediaKind | null) ?? null,
     authorVerified: !!r.author_verified,
+    contentIds: r.content_ids ?? [],
   };
 }
 
@@ -93,7 +113,7 @@ export async function listPosts(limit = 100): Promise<CommunityPost[]> {
   try {
     const rows = await sql<PostRow[]>`
       select p.id, p.user_id, p.author, p.body, p.created_at,
-             p.media_path, p.media_type,
+             p.media_path, p.media_type, p.content_ids,
              bool_or(u.email_verified_at is not null) as author_verified,
              count(c.id) as comment_count
       from community_posts p
@@ -125,7 +145,7 @@ export async function listPopularPosts(limit = 4): Promise<CommunityPost[]> {
   try {
     const rows = await sql<PostRow[]>`
       select p.id, p.user_id, p.author, p.body, p.created_at,
-             p.media_path, p.media_type,
+             p.media_path, p.media_type, p.content_ids,
              bool_or(u.email_verified_at is not null) as author_verified,
              count(c.id) as comment_count
       from community_posts p
@@ -157,16 +177,19 @@ export async function createPost(input: {
   media?: { path: string; kind: MediaKind } | null;
   /** 관문에서 이미 확인한 값 — 방금 쓴 글에도 배지가 바로 붙게 한다 */
   verified: boolean;
+  /** 작성자가 고른 방문 명소 content_id들 (자유글이면 빈 배열/미지정) */
+  contentIds?: string[];
 }): Promise<CommunityPost | null> {
   const author = input.author?.trim().slice(0, AUTHOR_MAX) ?? "";
   const body = input.body?.trim().slice(0, BODY_MAX) ?? "";
   if (!author || !body) return null;
+  const contentIds = normalizeContentIds(input.contentIds);
 
   const rows = await sql<PostRow[]>`
-    insert into community_posts (user_id, author, body, media_path, media_type)
+    insert into community_posts (user_id, author, body, media_path, media_type, content_ids)
     values (${input.userId}, ${author}, ${body},
-            ${input.media?.path ?? null}, ${input.media?.kind ?? null})
-    returning id, user_id, author, body, created_at, media_path, media_type
+            ${input.media?.path ?? null}, ${input.media?.kind ?? null}, ${contentIds})
+    returning id, user_id, author, body, created_at, media_path, media_type, content_ids
   `;
   return toPost({ ...rows[0], author_verified: input.verified });
 }
@@ -190,6 +213,90 @@ export async function listComments(postId: number): Promise<CommunityComment[]> 
       err instanceof Error ? err.message : err,
     );
     return [];
+  }
+}
+
+/** 특정 글의 댓글 (id·본문만) — 번역 대상 목록을 뽑을 때 쓴다 */
+export async function listCommentBodies(
+  postId: number,
+): Promise<{ id: number; body: string }[]> {
+  const rows = await sql<{ id: string; body: string }[]>`
+    select id, body from community_comments
+    where post_id = ${postId}
+    order by created_at asc, id asc
+  `;
+  return rows.map((r) => ({ id: Number(r.id), body: r.body }));
+}
+
+/** 이미 캐시된 댓글 번역 { comment_id → 번역문 } — 없는 것은 빠진다 */
+export async function getCachedCommentTranslations(
+  commentIds: number[],
+  locale: string,
+): Promise<Record<number, string>> {
+  if (commentIds.length === 0) return {};
+  const rows = await sql<{ comment_id: string; body: string }[]>`
+    select comment_id, body from community_comment_translations
+    where locale = ${locale} and comment_id = any(${commentIds})
+  `;
+  const out: Record<number, string> = {};
+  for (const r of rows) out[Number(r.comment_id)] = r.body;
+  return out;
+}
+
+/** 새로 번역한 댓글들을 캐시에 저장 (댓글은 불변이라 재요청 시 재사용) */
+export async function saveCommentTranslations(
+  locale: string,
+  translations: { id: number; body: string }[],
+): Promise<void> {
+  for (const t of translations) {
+    await sql`
+      insert into community_comment_translations (comment_id, locale, body)
+      values (${t.id}, ${locale}, ${t.body})
+      on conflict (comment_id, locale)
+      do update set body = excluded.body, updated_at = now()
+    `;
+  }
+}
+
+/** 최신 글 (id·본문만) — 본문 번역 대상 목록. listPosts와 같은 정렬·상한 */
+export async function listPostBodies(
+  limit = 100,
+): Promise<{ id: number; body: string }[]> {
+  const rows = await sql<{ id: string; body: string }[]>`
+    select id, body from community_posts
+    order by created_at desc, id desc
+    limit ${limit}
+  `;
+  return rows.map((r) => ({ id: Number(r.id), body: r.body }));
+}
+
+/** 이미 캐시된 글 번역 { post_id → 번역문 } */
+export async function getCachedPostTranslations(
+  postIds: number[],
+  locale: string,
+): Promise<Record<number, string>> {
+  if (postIds.length === 0) return {};
+  const rows = await sql<{ post_id: string; body: string }[]>`
+    select post_id, body from community_post_translations
+    where locale = ${locale} and post_id = any(${postIds})
+  `;
+  const out: Record<number, string> = {};
+  for (const r of rows) out[Number(r.post_id)] = r.body;
+  return out;
+}
+
+/** 새로 번역한 글들을 캐시에 저장 */
+export async function savePostTranslations(
+  locale: string,
+  translations: { id: number; body: string }[],
+): Promise<void> {
+  for (const t of translations) {
+    await sql`
+      insert into community_post_translations (post_id, locale, body)
+      values (${t.id}, ${locale}, ${t.body})
+      on conflict (post_id, locale)
+      do update set body = excluded.body, updated_at = now()
+    `;
   }
 }
 

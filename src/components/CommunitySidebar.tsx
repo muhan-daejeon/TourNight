@@ -33,11 +33,18 @@ export default async function CommunitySidebar({
   const t = await getTranslations("community.sidebar");
   const stats = weekStats(posts);
 
-  // 본문에 명소 이름이 들어간 횟수 — 짧은 이름(2자)은 오탐이 많아 뺀다
-  const mentioned = spots
-    .filter((s) => s.title.length >= 3)
-    .map((s) => ({ spot: s, n: posts.filter((p) => p.body.includes(s.title)).length }))
-    .filter((m) => m.n > 0)
+  // 글이 고른 방문 명소(content_id) 기준 집계 — 이름 문자열 매칭보다 정확하다.
+  // 자유글(content_id 없음)이나 명소 목록에서 안 풀리는 id는 자연히 빠진다.
+  const spotById = new Map(spots.map((s) => [s.contentId, s]));
+  const counts = new Map<string, number>();
+  for (const p of posts) {
+    for (const id of p.contentIds) {
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+  }
+  const mentioned = [...counts.entries()]
+    .map(([id, n]) => ({ spot: spotById.get(id), n }))
+    .filter((m): m is { spot: NightSpot; n: number } => Boolean(m.spot))
     .sort((a, b) => b.n - a.n)
     .slice(0, 5);
 
