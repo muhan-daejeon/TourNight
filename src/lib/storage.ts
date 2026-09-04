@@ -53,11 +53,10 @@ export function mediaPublicUrl(path: string): string {
   return `${url}/storage/v1/object/public/${BUCKET}/${path}`;
 }
 
-/**
- * 커뮤니티 첨부 업로드. 파일명은 UUID라 URL 추측·나열이 불가능하다
- * (public 버킷이므로 경로가 곧 접근 권한이다).
- */
-export async function uploadCommunityMedia(
+/** 버킷 안 경로 prefix 하나에 대한 업로드 공통 로직 — 파일명은 UUID라
+ * URL 추측·나열이 불가능하다(public 버킷이므로 경로가 곧 접근 권한이다). */
+async function uploadObject(
+  pathPrefix: string,
   bytes: ArrayBuffer,
   mimeType: string,
 ): Promise<{ path: string; kind: MediaKind }> {
@@ -68,7 +67,7 @@ export async function uploadCommunityMedia(
   }
 
   const { url, key } = config();
-  const path = `posts/${crypto.randomUUID()}.${spec.ext}`;
+  const path = `${pathPrefix}/${crypto.randomUUID()}.${spec.ext}`;
   const res = await fetch(`${url}/storage/v1/object/${BUCKET}/${path}`, {
     method: "POST",
     headers: {
@@ -86,6 +85,27 @@ export async function uploadCommunityMedia(
     throw new Error(`업로드 실패 ${res.status}: ${(await res.text()).slice(0, 200)}`);
   }
   return { path, kind: spec.kind };
+}
+
+/** 커뮤니티 글/댓글 첨부 업로드 */
+export async function uploadCommunityMedia(
+  bytes: ArrayBuffer,
+  mimeType: string,
+): Promise<{ path: string; kind: MediaKind }> {
+  return uploadObject("posts", bytes, mimeType);
+}
+
+/** 도장투어 인증사진 업로드 — 이미지만 허용(영상 없음) */
+export async function uploadStampPhoto(
+  bytes: ArrayBuffer,
+  mimeType: string,
+): Promise<{ path: string }> {
+  const spec = ALLOWED_MEDIA[mimeType];
+  if (!spec || spec.kind !== "image") {
+    throw new Error(`허용되지 않는 형식: ${mimeType}`);
+  }
+  const { path } = await uploadObject("stamps", bytes, mimeType);
+  return { path };
 }
 
 /**

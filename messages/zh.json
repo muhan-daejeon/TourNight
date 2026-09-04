@@ -24,9 +24,11 @@
     "groupExplore": "探索",
     "groupGuide": "旅行指南",
     "groupLocal": "夜生活",
-    "groupCommunity": "社区",
+    "groupCommunity": "参与",
     "home": "首页",
-    "personality": "性格测试"
+    "personality": "性格测试",
+    "stampTour": "도장투어",
+    "stampTourWith": "with 꿈돌이"
   },
   "home": {
     "heroTitle": "大田的夜晚比白天更璀璨",
@@ -394,6 +396,11 @@
     "reportDone": "举报已受理，我们会尽快核实处理。",
     "reportAlready": "您已举报过该内容。",
     "reportedLabel": "已举报",
+    "translate": "翻译",
+    "translating": "翻译中…",
+    "translateShowOriginal": "查看原文",
+    "translateShowTranslated": "查看翻译",
+    "translateError": "翻译失败",
     "reportReasons": {
       "spam": "垃圾信息·广告",
       "abuse": "辱骂·仇恨",
@@ -423,6 +430,56 @@
       "guide1": "分享夜游去过的地方的心得和小贴士",
       "guide2": "写上景点名称，就会在这里汇总",
       "guide3": "请只上传自己拍摄的照片"
+    }
+  },
+  "stampTour": {
+    "overline": "STAMP TOUR",
+    "introTitle": "도장투어 with 꿈돌이",
+    "introSubtitle": "走遍自己挑选的4个景点集章，完成专属于你的梦多尔四格照吧。",
+    "mainTitle": "在选好的景点盖章打卡，拍下你的梦多尔四格照吧！",
+    "consent": {
+      "title": "是否同意收集位置信息？",
+      "body": "盖章时，我们会使用您的位置信息确认您是否真的在该地点——仅在确认的那一刻使用，不会随照片保存，也不会存储在服务器上。",
+      "agree": "同意并开始",
+      "cancel": "取消",
+      "denied": "位置权限被拒绝。请在浏览器设置中允许位置访问后重试。"
+    },
+    "picker": {
+      "title": "挑选4个你想去的地方吧！",
+      "selectedCount": "已选 {count}/4",
+      "searchPlaceholder": "按地点名称搜索",
+      "searchButton": "搜索",
+      "searching": "搜索中…",
+      "searchEmpty": "没有搜索结果",
+      "searchError": "搜索失败，请稍后重试。",
+      "saveError": "保存失败，请稍后重试。",
+      "select": "选择",
+      "selectedListTitle": "已选地点",
+      "selectedEmpty": "还没有选择地点",
+      "remove": "移除",
+      "complete": "选择完成",
+      "needFour": "请选择4个地点。",
+      "alreadyFour": "已经选满4个地点了，请先移除一个再选。",
+      "alreadyPicked": "已经选过这个地点了。"
+    },
+    "road": {
+      "stampLabel": "第{n}个印章",
+      "tapToStamp": "点击盖章",
+      "verifying": "正在确认位置…",
+      "tooFar": "您似乎离「{name}」有点远，到达后再试一次吧。",
+      "gpsError": "无法获取您的位置，请重试。",
+      "uploading": "上传中…",
+      "uploadError": "照片上传失败，请重试。",
+      "photoRejected": "这张照片无法上传，请选择其他照片。",
+      "stamped": "已盖章"
+    },
+    "collage": {
+      "title": "梦多尔四格照",
+      "hint": "每盖一个章就会填满一格",
+      "download": "下载",
+      "downloading": "生成中…",
+      "incomplete": "提示：集齐全部印章后即可使用。",
+      "downloadError": "图片生成失败，请重试。"
     }
   },
   "spot": {

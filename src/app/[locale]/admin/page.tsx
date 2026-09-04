@@ -13,6 +13,8 @@ import {
   ImageIcon,
   Flag,
   UserRound,
+  Languages,
+  Stamp,
 } from "lucide-react";
 import { sql } from "@/lib/db";
 import { getVerifiedNightSpots } from "@/lib/spots";
@@ -46,8 +48,10 @@ const ACTION_META: Record<
   community_post: { label: "커뮤니티 글", icon: MessageCircle },
   community_comment: { label: "커뮤니티 댓글", icon: MessageCircle },
   community_report: { label: "커뮤니티 신고", icon: Flag },
+  community_translate: { label: "커뮤니티 번역", icon: Languages },
   course_survey: { label: "맞춤 코스 설문", icon: Sparkles },
   personality_test: { label: "성향 테스트", icon: UserRound },
+  stamp_tour_photo: { label: "도장투어 인증사진", icon: Stamp },
 };
 
 interface LogRow {
