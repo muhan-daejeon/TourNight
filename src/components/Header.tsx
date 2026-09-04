@@ -4,7 +4,7 @@ import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Search, X } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { markAppCommitted } from "@/lib/app-boot";
 import LocaleSwitcher from "./LocaleSwitcher";
@@ -125,6 +125,9 @@ export default function Header() {
     return () => mq.removeEventListener("change", sync);
   }, []);
   const [searchOpen, setSearchOpen] = useState(false);
+  // lg 미만에서는 가로로 늘어놓던 4개 카테고리 대신 햄버거 버튼 하나만 두고,
+  // 누르면 4개 그룹을 큰제목+작은글씨 목록으로 세로로 펼친다
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -218,6 +221,7 @@ export default function Header() {
     setSeenPath(pathname);
     setMenuOpen(false);
     setSearchOpen(false);
+    setMobileMenuOpen(false);
   }
 
   const linkClass = (active: boolean) =>
@@ -265,11 +269,13 @@ export default function Header() {
         </Link>
 
         {/* 4개 카테고리 — 화면 정중앙에 절대 위치시켜 로고·오른쪽 묶음의 폭과
-            무관하게 가운데 온다. 각각 누르면 바로 밑에 세로로 탭이 펼쳐진다 */}
+            무관하게 가운데 온다. 각각 누르면 바로 밑에 세로로 탭이 펼쳐진다.
+            lg 미만에서는 아예 안 보인다 — 그 화면폭에서는 이 줄 대신 햄버거
+            버튼 하나 + 세로 목록 패널(아래 mobileMenuOpen)로 완전히 갈아탄다 */}
         <nav
           onMouseEnter={openMenu}
           onMouseLeave={scheduleCloseMenu}
-          className="order-last flex basis-full flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:absolute lg:left-1/2 lg:top-1/2 lg:order-none lg:basis-auto lg:flex-nowrap lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-x-40 lg:gap-y-3"
+          className="hidden lg:absolute lg:left-1/2 lg:top-1/2 lg:flex lg:-translate-x-1/2 lg:-translate-y-1/2 lg:flex-nowrap lg:gap-x-40 lg:gap-y-3"
         >
           {MENU_GROUPS.map((group, i) => {
             const groupActive = group.items.some((key) => isActive(findNavItem(key).href));
@@ -377,6 +383,16 @@ export default function Header() {
             <Search size={18} />
           </button>
           <LocaleSwitcher />
+          {/* lg 미만 전용 — 위 4개 카테고리 nav 대신 이 버튼 하나로 메뉴 전체를 연다 */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            aria-label={t("nav.menu")}
+            aria-expanded={mobileMenuOpen}
+            className="rounded-full p-2 text-slate-300 transition hover:bg-white/5 hover:text-white lg:hidden"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </div>
 
@@ -396,14 +412,14 @@ export default function Header() {
             alt=""
             width={480}
             height={226}
-            className="pointer-events-none absolute bottom-0 right-6 hidden h-auto w-40 object-contain xl:block"
+            className="pointer-events-none absolute bottom-0 right-[calc(1.5rem+15px)] hidden h-auto w-32 object-contain xl:block"
           />
           <Image
             src="/menu-panel/ggumdol-space.png"
             alt=""
             width={560}
             height={418}
-            className="pointer-events-none absolute left-[calc(1.5rem+23px)] top-1/2 hidden h-auto w-[11.2rem] -translate-y-1/2 object-contain xl:block"
+            className="pointer-events-none absolute left-[calc(1.5rem+33px)] top-1/2 hidden h-auto w-[11.2rem] -translate-y-1/2 object-contain xl:block"
           />
 
           {/* 부모 이름은 되풀이하지 않는다 — 각 목록을 그 위 부모 버튼의 실제
@@ -437,6 +453,41 @@ export default function Header() {
                   </Link>
                 );
               })}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* lg 미만 전용 — 햄버거를 누르면 4개 그룹을 세로로 쭉 펼친다. 데스크톱
+          드롭다운(위 menuOpen 패널)과 달리 버튼 위치를 재서 맞출 필요가 없어
+          구조가 훨씬 단순하다. 큰제목(그룹명)은 크고 굵게, 그 아래 작은
+          메뉴명들은 작고 가늘게 — 위계가 한눈에 보이게 */}
+      {mobileMenuOpen && (
+        <div className="border-t border-white/10 bg-slate-950 px-5 py-5 lg:hidden">
+          {MENU_GROUPS.map((group) => (
+            <div key={group.id} className="mb-6 last:mb-0">
+              <p className="text-lg font-bold text-white">{t(`nav.${group.labelKey}`)}</p>
+              <div className="mt-2.5 flex flex-col gap-2.5">
+                {group.items.map((key) => {
+                  const item = findNavItem(key);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`block text-sm font-light ${linkClass(isActive(item.href))}`}
+                    >
+                      {key === "stampTour" ? (
+                        <>
+                          {t("nav.stampTour")}{" "}
+                          <span className="text-[0.7em]">{t("nav.stampTourWith")}</span>
+                        </>
+                      ) : (
+                        t(`nav.${key}`)
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </div>
