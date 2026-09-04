@@ -29,7 +29,8 @@
     "personality": "Persona Test",
     "klife": "K-Life Guide",
     "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이"  },
+    "stampTourWith": "with 꿈돌이"
+  },
   "home": {
     "heroTitle": "Daejeon Shines Brighter at Night",
     "heroSubtitle": "Night views, starlight, and festivals of Korea's science city — all in one place",
@@ -1085,6 +1086,9 @@
     "checkTitle": "Did you get the situation?",
     "checkSubtitle": "Not a test — just pick what you would do in real life",
     "myPhrases": "My saved phrases",
-    "myPhrasesEmpty": "Tap Save on any phrase card and it will be collected here — ready to use mid-trip."
+    "myPhrasesEmpty": "Tap Save on any phrase card and it will be collected here — ready to use mid-trip.",
+    "you": "You reply",
+    "otherPhrases": "More ways to say it!",
+    "goCheck": "Check your understanding"
   }
 }
