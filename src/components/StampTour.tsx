@@ -524,7 +524,17 @@ function CollageSection({ tour }: { tour: StampTourData }) {
   const [preview, setPreview] = useState<string | null>(null);
   const [rendering, setRendering] = useState(false);
 
-  const photoUrls = tour.stops.map((s) => s.photoUrl);
+  // 몇 번 도장인지와 무관하게, 찍은 순서대로(=stops 배열에서 사진 있는 것만
+  // 앞으로 모아) 첫 칸부터 채운다 — 4번을 먼저 찍었다고 네컷의 네 번째 칸부터
+  // 채워지면 어색하니, 도장 칸 자체(스탬프 로드)는 그 장소 사진을 그대로
+  // 보여주되 네컷 미리보기만 빈 칸 없이 앞에서부터 채워지게 분리한다
+  const filledUrls = tour.stops
+    .map((s) => s.photoUrl)
+    .filter((url): url is string => url !== null);
+  const photoUrls: (string | null)[] = [
+    ...filledUrls,
+    ...Array(tour.stops.length - filledUrls.length).fill(null),
+  ];
 
   // 도장을 찍을 때마다(사진이 바뀔 때마다) 미리보기를 다시 그린다
   useEffect(() => {
