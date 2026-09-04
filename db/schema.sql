@@ -173,6 +173,18 @@ create index if not exists community_reports_target_idx
   on community_reports (target_type, target_id);
 
 
+-- 도장투어 with 꿈돌이: 사용자가 고른 관광지 4곳 + 각자 찍은 인증사진.
+-- 계정당 1회만 고른다(재선택 없음)고 가정해 user_id를 PK로 둔다. stops는
+-- 항상 4칸짜리 배열 [{name, lat, lng, photoPath}] — 아직 안 찍은 칸은
+-- photoPath가 null. 순서(0~3)가 4컷 콜라주 칸 순서와 그대로 맞는다.
+create table if not exists stamp_tours (
+  user_id bigint primary key references users(id) on delete cascade,
+  stops jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+
 -- 서바이벌 한국어 표현 캐시 (언어당 1회 생성) — v2(phrase_book)로 대체, 호환용 유지
 create table if not exists phrase_cache (
   locale text primary key,
@@ -207,6 +219,16 @@ create table if not exists etiquette_cache (
   primary key (topic_id, locale)
 );
 
+
+-- 커뮤니티 글·댓글 번역 캐시 (같은 글을 여러 사람이 눌러도 Gemini는 한 번만 부른다)
+create table if not exists community_translation_cache (
+  target_type text not null,   -- 'post' | 'comment'
+  target_id bigint not null,
+  locale text not null,        -- 번역 대상 언어(화면 로케일)
+  body text not null,
+  updated_at timestamptz not null default now(),
+  primary key (target_type, target_id, locale)
+);
 
 -- AI 코스 짜기 캐시 (지도에서 스팟 선택 → Gemini가 그 스팟을 거치는 코스 생성).
 -- 스팟·언어당 1건만 두고 재요청 시 재사용한다 (심사/데모 때 실시간 Gemini 의존 축소).
@@ -336,4 +358,15 @@ create table if not exists api_cache (
   cache_key text primary key,      -- 서비스/오퍼레이션?파라미터 (인증키 제외)
   payload jsonb not null,
   fetched_at timestamptz not null default now()
+);
+
+-- 커뮤니티 댓글 번역 캐시 — 보는 사람의 언어로 댓글을 자동 번역해 보여준다
+-- (Gemini). 같은 댓글·같은 언어는 한 번만 번역하고 여기 저장분을 재사용한다.
+-- 댓글이 지워지면 번역도 함께 지워진다 (cascade).
+create table if not exists community_comment_translations (
+  comment_id bigint not null references community_comments(id) on delete cascade,
+  locale text not null,
+  body text not null,
+  created_at timestamptz not null default now(),
+  primary key (comment_id, locale)
 );

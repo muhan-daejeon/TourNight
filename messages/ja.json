@@ -24,9 +24,11 @@
     "groupExplore": "見どころ",
     "groupGuide": "旅のガイド",
     "groupLocal": "ナイトライフ",
-    "groupCommunity": "コミュニティ",
+    "groupCommunity": "参加",
     "home": "ホーム",
-    "personality": "性格診断"
+    "personality": "性格診断",
+    "stampTour": "도장투어",
+    "stampTourWith": "with 꿈돌이"
   },
   "home": {
     "heroTitle": "大田の夜は昼より輝く",
@@ -406,6 +408,11 @@
     "reportDone": "通報を受け付けました。確認のうえ対応します。",
     "reportAlready": "すでに通報済みです。",
     "reportedLabel": "通報済み",
+    "translate": "翻訳",
+    "translating": "翻訳中…",
+    "translateShowOriginal": "原文を見る",
+    "translateShowTranslated": "翻訳を見る",
+    "translateError": "翻訳に失敗しました",
     "reportReasons": {
       "spam": "スパム・宣伝",
       "abuse": "暴言・差別",
@@ -435,6 +442,56 @@
       "guide1": "夜に訪れた場所の感想やコツを共有しましょう",
       "guide2": "投稿時に訪れた名所を選ぶとここにまとまります",
       "guide3": "写真は自分で撮ったものだけ投稿してください"
+    }
+  },
+  "stampTour": {
+    "overline": "STAMP TOUR",
+    "introTitle": "도장투어 with 꿈돌이",
+    "introSubtitle": "自分で選んだ名所4か所を巡ってスタンプを集め、あなただけのクムドル4カット写真を完成させましょう。",
+    "mainTitle": "選んだ観光地でスタンプを押して、クムドル4カットを撮ってみましょう！",
+    "consent": {
+      "title": "位置情報の収集に同意しますか？",
+      "body": "スタンプを押すとき、実際にその場所にいるかを確認するために位置情報を使います。確認のその瞬間だけ使われ、写真やサーバーには保存されません。",
+      "agree": "同意して始める",
+      "cancel": "キャンセル",
+      "denied": "位置情報へのアクセスが拒否されました。ブラウザの設定で位置情報を許可してから、もう一度お試しください。"
+    },
+    "picker": {
+      "title": "行きたい場所を4つ選んでみましょう！",
+      "selectedCount": "{count}/4 選択中",
+      "searchPlaceholder": "場所の名前で検索",
+      "searchButton": "検索",
+      "searching": "検索中…",
+      "searchEmpty": "検索結果がありません",
+      "searchError": "検索に失敗しました。しばらくしてからもう一度お試しください。",
+      "saveError": "保存できませんでした。しばらくしてからもう一度お試しください。",
+      "select": "選択",
+      "selectedListTitle": "選んだ場所",
+      "selectedEmpty": "まだ選んだ場所がありません",
+      "remove": "削除",
+      "complete": "選択完了",
+      "needFour": "4つの場所を選んでください。",
+      "alreadyFour": "すでに4か所選んでいます。1つ削除してから選び直してください。",
+      "alreadyPicked": "すでに選択済みの場所です。"
+    },
+    "road": {
+      "stampLabel": "{n}番目のスタンプ",
+      "tapToStamp": "タップしてスタンプ",
+      "verifying": "位置情報を確認中…",
+      "tooFar": "「{name}」から少し離れているようです。到着してからもう一度お試しください。",
+      "gpsError": "位置情報を取得できませんでした。もう一度お試しください。",
+      "uploading": "アップロード中…",
+      "uploadError": "写真をアップロードできませんでした。もう一度お試しください。",
+      "photoRejected": "アップロードできない写真です。別の写真を選んでください。",
+      "stamped": "スタンプ完了"
+    },
+    "collage": {
+      "title": "クムドル4カット",
+      "hint": "スタンプを押すたびに1コマずつ埋まります",
+      "download": "ダウンロード",
+      "downloading": "作成中…",
+      "incomplete": "お知らせ：すべてのスタンプを集めると利用できます。",
+      "downloadError": "画像を作成できませんでした。もう一度お試しください。"
     }
   },
   "spot": {
@@ -509,7 +566,11 @@
     "sunset": "今日の日没",
     "moonAge": "月齢{age}",
     "starNight": "星空観察に良い夜",
-    "fullMoon": "お月見に良い夜"
+    "fullMoon": "お月見に良い夜",
+    "tempNow": "大田の現在",
+    "rain": "雨の夜",
+    "snow": "雪の夜",
+    "rainSnow": "みぞれ"
   },
   "festivals": {
     "title": "祭り・イベント",

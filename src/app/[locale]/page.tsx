@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
-import { ArrowRight, MessageSquare } from "lucide-react";
+import { ArrowRight, MessageSquare, Moon, Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
 import { withPeriods } from "@/lib/festivals";
@@ -107,48 +107,28 @@ export default async function HomePage({
       <IntroSequence skipIntro={skipIntro} />
 
       <>
-        <section className="relative h-[calc(100vh-var(--header-h,0px))]">
-          {/* 슬라이드는 (헤더 밑) 화면 정중앙 — 가로·세로 모두.
-              --header-h는 로고+메뉴 행의 높이다. 이 section 자체는 이미 헤더 바로 아래에서
-              시작하므로, 안쪽 박스는 거기서부터 "보이는 화면 높이"만큼만 잡아야
-              가운데가 실제로 보이는 영역의 가운데와 맞는다. 오늘 밤 정보·스크롤
-              화살표는 그 박스 맨 아래에 겹쳐 띄워, 슬라이드 자체의 중앙 계산엔
-              끼어들지 않는다 — 다만 화면이 낮으면 그 둘이 슬라이드 아래쪽과
-              부딪혀서, 슬라이드를 정중앙보다 위로 올려 여유를 둔다 */}
-          <div className="absolute inset-x-0 top-0 h-[calc(100vh-var(--header-h,0px))]">
-            <div className="absolute inset-0 flex items-center justify-center px-4">
-              <div className="w-full max-w-5xl" style={{ transform: "translateY(-55px)" }}>
-                <HeroCarousel slides={slides} />
-              </div>
-            </div>
-          </div>
+        {/* 풀블리드 히어로 — 컨테이너(max-w-6xl px-4)를 뚫고 화면 양끝까지 채운다.
+            이전의 100vh 섹션 + 절대배치 + translateY(-55px) 방식은 화면이 낮거나
+            모바일이면 슬라이드가 헤더 밑으로 파고들어 겹쳤다 → 일반 플로우로 두면
+            헤더 바로 아래에서 시작해 어떤 화면 크기에서도 겹치지 않는다.
+            헤더~슬라이드 여백이 좁다는 요청으로 원래(pt-5/pt-8)의 1.5배로 늘렸다 */}
+        <section className="ml-[calc(50%-50vw)] w-screen pt-[1.875rem] sm:pt-12">
+          <HeroCarousel slides={slides} />
         </section>
 
         {/* ── 오늘 밤 — 일몰·월령 + 지금 갈 만한 곳 ──
-            히어로 아래가 소식 그리드까지 비어 있었다. 일몰·월령은 "그래서 오늘 밤
-            어디 가지"로 이어져야 뜻이 있으므로, 명소·축제와 한 묶음으로 둔다.
-
-            히어로 section은 뷰포트 높이만큼 잡아 두고 그 안에서 슬라이드만
-            중앙(보다 위, translateY(-55px))에 앉혀서, 슬라이드 아래로 뷰포트
-            높이에 비례해 빈 공간이 남는다. 그 빈 공간을 음수 margin으로 당겨
-            올려, 슬라이드~이 섹션 간격이 이 섹션 밑의 "오늘 밤...~대전 축제&행사"
-            간격(mt-14, 56px)과 같아지게 맞춘다. 뷰포트 높이(vh)가 화면마다
-            달라 고정 px로는 화면이 낮으면 슬라이드와 겹쳐 버려서, calc()로
-            직접 뷰포트 높이·헤더 높이·슬라이드 높이(캐러셀의 h-[408px]/
-            sm:h-[504px]와 맞춰 반응형으로 둘)를 반영한다. 식 자체가 이미
-            음수라(-50vh + …) mt-를 그대로 쓴다 — Tailwind의 -mt-[…]는
-            대괄호 안 값을 다시 -1배 하므로, 이미 음수인 값에 붙이면 부호가
-            도로 뒤집힌다.
-            margin-top = -(뷰포트 절반 - 헤더 절반 - 슬라이드 절반 - 55px 위로 올린 만큼
-                          + 이 섹션 자체의 pt-4 - 목표 간격 56px) */}
-        <section
-          id="content"
-          className="mt-[calc(-50vh_+_var(--header-h,0px)/2_+_197px)] pt-4 sm:mt-[calc(-50vh_+_var(--header-h,0px)/2_+_245px)]"
-        >
+            일몰·월령은 "그래서 오늘 밤 어디 가지"로 이어져야 뜻이 있으므로,
+            명소·축제와 한 묶음으로 둔다. 히어로가 일반 플로우가 되면서
+            vh 기반 음수 마진 보정은 더 필요 없다 — 고정 간격이면 충분하다 */}
+        <section id="content" className="mt-10 sm:mt-14">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="overline-label">Tonight</p>
-              <h2 className="mt-1 text-2xl font-bold tracking-tight">{t("spotsSection")}</h2>
+              {/* 형광펜 밑줄 + 달 — 밋밋하던 제목에 서울의 밤 포털식 장식을 준다 */}
+              <h2 className="mt-1 flex items-center gap-2 text-2xl font-bold tracking-tight">
+                <span className="marker-underline">{t("spotsSection")}</span>
+                <Moon size={19} className="shrink-0 -rotate-12 fill-amber-300/25 text-amber-300" aria-hidden />
+              </h2>
               <p className="mt-1.5 text-sm text-slate-400">{t("spotsSectionSub")}</p>
             </div>
             {/* 오늘 밤 정보 — 천문연구원 일몰·월령 */}
@@ -173,7 +153,10 @@ export default async function HomePage({
             <div className="mt-14">
               <div className="mb-6 flex items-end justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold tracking-tight">{t("festivalsSection")}</h2>
+                  <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
+                    <span className="marker-underline">{t("festivalsSection")}</span>
+                    <Sparkles size={19} className="shrink-0 text-amber-300" aria-hidden />
+                  </h2>
                   <p className="mt-1.5 text-sm text-slate-400">{t("festivalsSectionSub")}</p>
                 </div>
                 <Link href="/festivals" className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-slate-400 transition hover:text-amber-300">

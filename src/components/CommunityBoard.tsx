@@ -14,14 +14,15 @@ import {
   BadgeCheck,
   Trash2,
   ImagePlus,
+  Languages,
   X,
   PenLine,
   MapPin,
   Search,
-  Languages,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { NightSpot } from "@/lib/kto";
+import { detectTextLocale } from "@/lib/lang-detect";
 import { photoErrorMessage, usePhotoAttach } from "./usePhotoAttach";
 
 interface Post {
@@ -47,6 +48,8 @@ interface Comment {
   mediaUrl: string | null;
   mediaType: "image" | "video" | null;
   authorVerified: boolean;
+  /** 보는 사람 언어로의 자동 번역 (원문이 이미 그 언어면 없음) */
+  translatedBody?: string;
 }
 
 interface Me {
@@ -421,12 +424,86 @@ function VerifyPrompt({ mailFrom }: { mailFrom: string | null }) {
   );
 }
 
+/**
+ * 글·댓글 본문 + 필요하면 옆에 "(번역)" 버튼.
+ *
+ * 본문의 글자 스크립트를 보고(lang-detect) 지금 화면 언어와 다르면 버튼을
+ * 붙인다 — 예: 화면이 중국어인데 글이 일본어로 쓰였으면 그 옆에 버튼이 뜬다.
+ * 누르면 /api/community/translate가 서버에서 원문을 다시 읽어 번역해 오고(글
+ * 위조 방지), 그 결과는 DB에 캐시돼 다음 사람은 바로 받는다. 번역 후에는 같은
+ * 자리에서 원문↔번역을 오갈 수 있다.
+ */
+function TranslatableBody({
+  targetType,
+  targetId,
+  text,
+  className,
+}: {
+  targetType: "post" | "comment";
+  targetId: number;
+  text: string;
+  className?: string;
+}) {
+  const t = useTranslations("community");
+  const locale = useLocale();
+  const [translated, setTranslated] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+
+  const needsTranslate = detectTextLocale(text) !== locale;
+
+  async function translate() {
+    if (loading) return;
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch(
+        `/api/community/translate?targetType=${targetType}&targetId=${targetId}&locale=${locale}`,
+      );
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setTranslated(data.text);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!needsTranslate) {
+    return <p className={className}>{text}</p>;
+  }
+
+  // 버튼은 괄호 없이 "번역"만 — 둥근 사각형(pill)에 연한 노란 배경을 준 배지로,
+  // 문장 옆 텍스트 링크가 아니라 눈에 띄는 하나의 버튼으로 보이게 한다
+  const pillClass =
+    "ml-1.5 inline-flex items-center whitespace-nowrap rounded-full bg-amber-200 px-2.5 py-0.5 align-middle text-[11px] font-bold text-amber-900 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60";
+
+  return (
+    <p className={className}>
+      {translated !== null && !showOriginal ? translated : text}
+      {translated !== null ? (
+        <button type="button" onClick={() => setShowOriginal((v) => !v)} className={pillClass}>
+          {showOriginal ? t("translateShowTranslated") : t("translateShowOriginal")}
+        </button>
+      ) : (
+        <button type="button" onClick={translate} disabled={loading} className={pillClass}>
+          {loading ? t("translating") : t("translate")}
+        </button>
+      )}
+      {error && (
+        <span className="ml-1.5 text-[11px] text-rose-400">{t("translateError")}</span>
+      )}
+    </p>
+  );
+}
+
 /** 글 하나 + 댓글(펼쳐서 지연 로드). me가 없으면 비로그인 */
 function PostItem({
   post,
   me,
   canAttach,
-  translatedBody,
   commentQuota,
   spots,
   onQuotaUsed,
@@ -436,8 +513,6 @@ function PostItem({
   post: Post;
   me: Me | null | undefined;
   canAttach: boolean;
-  /** 접속 언어로 번역한 본문 (아직 안 왔거나 같은 언어면 undefined) */
-  translatedBody?: string;
   /** 오늘 댓글 사용량 (모르면 null) */
   commentQuota: { used: number; limit: number } | null;
   /** 글에 연결된 방문 명소들 (content_id로 해석됨) */
@@ -455,11 +530,6 @@ function PostItem({
     "idle",
   );
   const [count, setCount] = useState(post.commentCount);
-  // 접속 언어로 번역한 댓글 { comment_id → 번역문 } + 원문을 펼쳐 본 댓글들
-  const [translations, setTranslations] = useState<Record<number, string>>({});
-  const [showOriginal, setShowOriginal] = useState<Set<number>>(new Set());
-  // 글 본문 — 번역이 원문과 다를 때만 토글을 노출, 기본은 번역문
-  const [showOriginalPost, setShowOriginalPost] = useState(false);
   const [replyBody, setReplyBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -479,29 +549,13 @@ function PostItem({
 
   const ownsPost = post.userId != null && post.userId === me?.id;
 
-  /**
-   * 댓글을 접속 언어로 번역해 온다. 외국인이 섞여 쓰는 게시판이라 다른 언어로 쓴
-   * 댓글을 읽으려면 번역이 필요하다. 이미 접속 언어인 댓글은 서버가 원문을 그대로
-   * 돌려주고, 클라이언트는 원문과 다른 경우에만 '원문 보기' 토글을 붙인다.
-   * 실패하면 조용히 원문만 보여준다.
-   */
-  function fetchTranslations() {
-    fetch(`/api/community/${post.id}/comments/translate`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ locale }),
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => data && setTranslations(data.translations ?? {}))
-      .catch(() => {});
-  }
-
   function toggle() {
     const next = !expanded;
     setExpanded(next);
     if (next && comments === null) {
       setStatus("loading");
-      fetch(`/api/community/${post.id}/comments`)
+      // ?locale= 을 주면 서버가 보는 사람 언어로 번역한 translatedBody를 함께 준다
+      fetch(`/api/community/${post.id}/comments?locale=${locale}`)
         .then((res) => {
           if (!res.ok) throw new Error();
           return res.json();
@@ -509,20 +563,10 @@ function PostItem({
         .then((data) => {
           setComments(data.comments);
           setStatus("done");
-          // 펼치면서 바로 접속 언어로 번역 (댓글이 있을 때만)
-          if (data.comments.length > 0) fetchTranslations();
         })
         .catch(() => setStatus("error"));
     }
   }
-
-  const toggleOriginal = (id: number) =>
-    setShowOriginal((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   async function submitReply(e: React.FormEvent) {
     e.preventDefault();
@@ -639,32 +683,12 @@ function PostItem({
         </div>
       )}
 
-      {(() => {
-        // 번역이 원문과 다를 때만 번역/토글을 노출 (같은 언어면 원문 그대로)
-        const hasTranslation = Boolean(translatedBody && translatedBody !== post.body);
-        const displayBody =
-          hasTranslation && !showOriginalPost ? translatedBody : post.body;
-        return (
-          <>
-            <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-200">
-              {displayBody}
-            </p>
-            {hasTranslation && (
-              <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
-                <Languages size={11} className="shrink-0 text-sky-400/70" />
-                <span>{showOriginalPost ? t("original") : t("translatedByAI")}</span>
-                <button
-                  type="button"
-                  onClick={() => setShowOriginalPost((v) => !v)}
-                  className="font-semibold text-sky-400/80 transition hover:text-sky-300"
-                >
-                  {showOriginalPost ? t("showTranslation") : t("showOriginal")}
-                </button>
-              </div>
-            )}
-          </>
-        );
-      })()}
+      <TranslatableBody
+        targetType="post"
+        targetId={post.id}
+        text={post.body}
+        className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-200"
+      />
 
       {/* 첨부 사진 — 눌러서 원본 크기로 */}
       {post.mediaUrl && post.mediaType === "image" && (
@@ -726,14 +750,7 @@ function PostItem({
             <p className="text-xs text-slate-500">{t("error")}</p>
           ) : comments && comments.length > 0 ? (
             <ul className="space-y-2">
-              {comments.map((c) => {
-                const translated = translations[c.id];
-                // 번역이 원문과 다를 때만 번역/토글을 노출 (같은 언어면 원문 그대로)
-                const hasTranslation = Boolean(translated && translated !== c.body);
-                const original = showOriginal.has(c.id);
-                const displayBody =
-                  hasTranslation && !original ? translated : c.body;
-                return (
+              {comments.map((c) => (
                 <li key={c.id} className="rounded-lg bg-white/[0.03] px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="flex min-w-0 items-center gap-1 text-xs font-semibold text-slate-300">
@@ -760,20 +777,15 @@ function PostItem({
                     </div>
                   </div>
                   <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-slate-300">
-                    {displayBody}
+                    {c.translatedBody ?? c.body}
                   </p>
-                  {hasTranslation && (
-                    <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
-                      <Languages size={11} className="shrink-0 text-sky-400/70" />
-                      <span>{original ? t("original") : t("translatedByAI")}</span>
-                      <button
-                        type="button"
-                        onClick={() => toggleOriginal(c.id)}
-                        className="font-semibold text-sky-400/80 transition hover:text-sky-300"
-                      >
-                        {original ? t("showTranslation") : t("showOriginal")}
-                      </button>
-                    </div>
+                  {/* 자동 번역된 댓글은 원문도 함께 — 뉘앙스 확인용. 댓글은
+                      200자 제한이라 둘을 겹쳐 보여도 부담이 없다 */}
+                  {c.translatedBody && (
+                    <p className="mt-1 flex items-start gap-1 whitespace-pre-wrap break-words text-[11px] leading-relaxed text-slate-500">
+                      <Languages size={11} className="mt-0.5 shrink-0" aria-hidden />
+                      {c.body}
+                    </p>
                   )}
                   {c.mediaUrl && c.mediaType === "image" && (
                     <a
@@ -793,8 +805,7 @@ function PostItem({
                     </a>
                   )}
                 </li>
-                );
-              })}
+              ))}
             </ul>
           ) : (
             <p className="text-xs text-slate-500">{t("commentEmpty")}</p>
@@ -895,11 +906,8 @@ export default function CommunityBoard({
   spots: NightSpot[];
 }) {
   const t = useTranslations("community");
-  const locale = useLocale();
 
   const [posts, setPosts] = useState<Post[]>(initialPosts);
-  // 접속 언어로 번역한 글 본문 { post_id → 번역문 }. 목록이 뜨면 바로 채운다
-  const [postTranslations, setPostTranslations] = useState<Record<number, string>>({});
   // content_id → 명소. 글 카드의 명소 태그를 이름으로 그릴 때 쓴다
   const spotById = useMemo(
     () => new Map(spots.map((s) => [s.contentId, s])),
@@ -943,20 +951,6 @@ export default function CommunityBoard({
       .then((data) => data && setQuota({ post: data.post, comment: data.comment }))
       .catch(() => {});
   }, []);
-
-  useEffect(() => {
-    // 목록의 글 본문을 접속 언어로 바로 번역해 온다. 원문은 이미 그려져 있으니
-    // 도착하는 대로 번역문으로 바꿔 준다(이미 접속 언어인 글은 원문 그대로 온다).
-    // 실패하면 원문을 그대로 둔다. 언어가 바뀌면 다시 받는다.
-    fetch("/api/community/translate", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ locale }),
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => data && setPostTranslations(data.translations ?? {}))
-      .catch(() => {});
-  }, [locale]);
 
   // 모달이 열려 있을 때만 Esc로 닫는다
   useEffect(() => {
@@ -1222,7 +1216,6 @@ export default function CommunityBoard({
               post={post}
               me={me}
               canAttach={canAttach}
-              translatedBody={postTranslations[post.id]}
               commentQuota={quota?.comment ?? null}
               spots={post.contentIds
                 .map((id) => spotById.get(id))

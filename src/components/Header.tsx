@@ -4,12 +4,11 @@ import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Camera, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { markAppCommitted } from "@/lib/app-boot";
 import LocaleSwitcher from "./LocaleSwitcher";
 import AuthNav from "./AuthNav";
-import CollageModal from "./CollageModal";
 
 /** 탭의 href 출처 */
 const NAV_ITEMS = [
@@ -21,6 +20,7 @@ const NAV_ITEMS = [
   { href: "/etiquette", key: "etiquette" },
   { href: "/phrases", key: "phrases" },
   { href: "/community", key: "community" },
+  { href: "/stamp-tour", key: "stampTour" },
 ] as const;
 
 /**
@@ -53,7 +53,7 @@ const MENU_GROUPS = [
   // 성향 테스트는 놀이가 아니라 여행 준비 도구라 가이드 쪽에 둔다
   { id: "guide", labelKey: "groupGuide", items: ["personality", "etiquette", "phrases"] },
   { id: "local", labelKey: "groupLocal", items: ["food", "stay", "shopping"] },
-  { id: "community", labelKey: "groupCommunity", items: ["community"] },
+  { id: "community", labelKey: "groupCommunity", items: ["community", "stampTour"] },
 ] as const;
 
 /** 카테고리에 마우스를 올렸을 때 왼쪽에 뜨는 마스코트 아이콘 — MENU_GROUPS와 같은 순서 */
@@ -113,8 +113,18 @@ export default function Header() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [tourTarget, setTourTarget] = useState<TourTarget | null>(null);
+  // 마우스가 있는 기기(hover 가능)에서는 카테고리에 포인터만 올려도 메뉴가
+  // 열린다 — 클릭해야만 열리는 건 탐색이 번거롭다는 피드백. 터치 기기는
+  // mouseenter가 탭과 뒤섞여 오작동하므로 기존 클릭 토글을 유지한다
+  const [canHover, setCanHover] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const sync = () => setCanHover(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [collageOpen, setCollageOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -122,6 +132,23 @@ export default function Header() {
   const btnRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const colRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const panelRef = useRef<HTMLDivElement>(null);
+  // 마우스가 nav→패널 사이 빈틈을 지날 때 바로 닫히지 않도록 살짝 늦춰 닫는다
+  const closeTimerRef = useRef<number | null>(null);
+
+  const openMenu = () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setMenuOpen(true);
+  };
+  const scheduleCloseMenu = () => {
+    if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+      setMenuOpen(false);
+    }, 150);
+  };
 
   // 자식 목록 각각을 그 위 부모 버튼의 실제 가로 중앙에 맞춘다. 부모들은
   // gap-x-20으로 벌어져 있고 자식 목록마다 폭이 달라(커뮤니티는 1개, 야간
@@ -153,13 +180,17 @@ export default function Header() {
     };
   }, [menuOpen]);
 
-  // 로고+카테고리 행의 실제 높이를 --header-h로 남겨, 이 행 위 여백과 슬라이드
-  // 배너 상단 여백이 실제 헤더 높이에 맞춰 함께 커지고 줄어들게 한다
+  // 로고+카테고리 행의 실제 높이를 --header-row-h로 남긴다. 그 위에 행 높이의
+  // 절반만큼 여백을 두므로(아래 스페이서), 헤더 전체 높이(--header-h — 홈
+  // 히어로 높이·헤더 위 여백 계산에 쓰인다)는 행 높이의 1.5배가 된다
   useEffect(() => {
     const el = rowRef.current;
     if (!el) return;
-    const set = () =>
-      document.documentElement.style.setProperty("--header-h", `${el.offsetHeight}px`);
+    const set = () => {
+      const rowH = el.offsetHeight;
+      document.documentElement.style.setProperty("--header-row-h", `${rowH}px`);
+      document.documentElement.style.setProperty("--header-h", `${rowH * 1.5}px`);
+    };
     set();
     const ro = new ResizeObserver(set);
     ro.observe(el);
@@ -171,6 +202,13 @@ export default function Header() {
   // 쓴다 (자세한 이유는 lib/app-boot.ts 참고)
   useEffect(() => {
     markAppCommitted();
+  }, []);
+
+  // 닫힘 지연 타이머가 언마운트 뒤까지 살아남지 않게 정리한다
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
+    };
   }, []);
 
   // 페이지를 옮기면 열려 있던 카테고리·검색창은 닫는다. 효과가 아니라 렌더 중에
@@ -200,13 +238,21 @@ export default function Header() {
     // 온보딩 투어의 흐림막(z-[55])보다 위에 둔다 — 안 그러면 투어 중 헤더 전체가
     // backdrop-blur에 걸려 부모 메뉴 글자까지 흐릿해진다. 켜져 있지 않을 때도
     // z-50이던 걸 z-[56]으로만 올린 것뿐이라 다른 겹침에는 영향이 없다
-    <header className="sticky top-0 z-[56] border-b border-white/[0.06] bg-slate-950/80 backdrop-blur-md">
+    <header
+      className="sticky top-0 z-[56] border-b border-white/[0.06] bg-slate-950/80 backdrop-blur-md"
+      // 호버로 연 메뉴는 헤더(패널 포함) 밖으로 마우스가 나가면 닫는다
+      onMouseLeave={() => canHover && setMenuOpen(false)}
+    >
       <Suspense fallback={null}>
         <TourMenuSync onChange={setTourTarget} />
       </Suspense>
+      {/* 로고·메뉴 줄이 화면 맨 위에 바로 붙어 답답해 보인다는 요청 — 줄
+          높이의 절반만큼 여백을 둔다. 헤더 자체(스크롤에도 늘 보이는
+          sticky) 안에 두므로 스크롤해도 이 여백이 유지된다 */}
+      <div aria-hidden style={{ height: "calc(var(--header-row-h, 0px) / 2)" }} />
       <div ref={rowRef} className="relative flex w-full flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 lg:flex-nowrap lg:px-6">
         {/* 브랜드 워드마크는 번역하지 않는다 — 로고이자 서비스 고유명 */}
-        <Link href="/" className="flex shrink-0 flex-col leading-none lg:ml-10">
+        <Link href="/" className="flex shrink-0 flex-col leading-none xl:ml-10">
           <span
             data-header-logo
             className="text-[26px] font-extrabold tracking-tight text-white lg:text-[34px]"
@@ -220,7 +266,11 @@ export default function Header() {
 
         {/* 4개 카테고리 — 화면 정중앙에 절대 위치시켜 로고·오른쪽 묶음의 폭과
             무관하게 가운데 온다. 각각 누르면 바로 밑에 세로로 탭이 펼쳐진다 */}
-        <nav className="order-last flex basis-full flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:absolute lg:left-1/2 lg:top-1/2 lg:order-none lg:basis-auto lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-x-20 lg:gap-y-3">
+        <nav
+          onMouseEnter={openMenu}
+          onMouseLeave={scheduleCloseMenu}
+          className="order-last flex basis-full flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:absolute lg:left-1/2 lg:top-1/2 lg:order-none lg:basis-auto lg:flex-nowrap lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-x-40 lg:gap-y-3"
+        >
           {MENU_GROUPS.map((group, i) => {
             const groupActive = group.items.some((key) => isActive(findNavItem(key).href));
             const isTourTarget = tourTarget?.groupId === group.id;
@@ -267,7 +317,11 @@ export default function Header() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => setMenuOpen((v) => !v)}
+                    // hover 기기: 포인터를 올리면 열리고(아래 onMouseEnter) 클릭은
+                    // 열림 유지만 한다 — 토글이면 '올려서 열림→클릭→닫힘'이 된다.
+                    // 터치 기기: 기존대로 탭이 토글.
+                    onClick={() => setMenuOpen((v) => (canHover ? true : !v))}
+                    onMouseEnter={() => canHover && setMenuOpen(true)}
                     aria-expanded={menuOpen}
                     className={`whitespace-nowrap text-base tracking-wide transition ${
                       isTourTarget
@@ -300,24 +354,14 @@ export default function Header() {
           })}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-3 lg:mr-20">
-          {/* 사진 4장으로 "꿈돌이와 심야 여행" 콜라주를 만드는 기능 — 로그인
-              버튼 바로 왼쪽, 노란 네온사인처럼 마우스를 올리면 빛이 번진다 */}
-          <button
-            type="button"
-            onClick={() => setCollageOpen(true)}
-            aria-label="꿈돌이와 심야 여행 콜라주 만들기"
-            className="group relative shrink-0 rounded-full p-2 text-amber-400 transition-colors duration-300 hover:text-amber-300"
-          >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-amber-400 opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-70"
-            />
-            <Camera
-              size={24}
-              className="relative drop-shadow-[0_0_0px_rgba(251,191,36,0)] transition-[filter] duration-300 group-hover:drop-shadow-[0_0_10px_rgba(251,191,36,0.9)]"
-            />
-          </button>
+        {/* nav는 absolute + left-1/2로 화면 중앙에 스스로 고정되지, 이 그룹의
+            폭과는 무관하다 — 그러니 ml-auto는 모든 폭에서 그대로 둬야
+            이 그룹이 계속 오른쪽 끝에 붙는다. xl 이상에서 ml-auto를 껐더니
+            이 그룹 전체가 로고 바로 옆(왼쪽)으로 붙어버리는 회귀가 있었다 */}
+        <div className="ml-auto flex shrink-0 items-center gap-3 xl:mr-6 2xl:mr-10">
+          {/* 콜라주 만들기(꿈돌이와 한컷)는 도장투어 with 꿈돌이 페이지 하단으로
+              옮겼다 — 자유 업로드 대신 도장 4개를 다 찍은 사진으로 채우는
+              방식으로 바뀌었다. 여기 있던 카메라 버튼은 그래서 없앤다 */}
           <AuthNav />
           <button
             type="button"
@@ -339,8 +383,29 @@ export default function Header() {
       {menuOpen && (
         <div
           ref={panelRef}
+          onMouseEnter={openMenu}
+          onMouseLeave={scheduleCloseMenu}
           className="absolute inset-x-0 top-full z-40 overflow-hidden border-t border-white/10 bg-slate-950"
         >
+          {/* 메뉴 칸은 가운데 쪽에 몰려 있어 패널 양옆이 비는데, 그 자리를
+              채우는 장식 — 실제 메뉴 폭이 넓어지는 lg 이상에서만 보인다.
+              꿈돌X꿈순은 패널 밑면에 딱 붙이고, 우주선 꿈돌이는 왼쪽 가운데에
+              크게 둔다 */}
+          <Image
+            src="/menu-panel/ggumdol-ggumsun.png"
+            alt=""
+            width={480}
+            height={226}
+            className="pointer-events-none absolute bottom-0 right-6 hidden h-auto w-40 object-contain xl:block"
+          />
+          <Image
+            src="/menu-panel/ggumdol-space.png"
+            alt=""
+            width={560}
+            height={418}
+            className="pointer-events-none absolute left-[calc(1.5rem+23px)] top-1/2 hidden h-auto w-[11.2rem] -translate-y-1/2 object-contain xl:block"
+          />
+
           {/* 부모 이름은 되풀이하지 않는다 — 각 목록을 그 위 부모 버튼의 실제
               가로 중앙에 맞춰 옮겨 붙이므로 어느 부모 것인지는 위치로 보인다 */}
           {MENU_GROUPS.map((group) => (
@@ -359,7 +424,16 @@ export default function Header() {
                     href={item.href}
                     className={`whitespace-nowrap rounded-lg px-2 py-1.5 text-center text-base transition ${linkClass(isActive(item.href))}`}
                   >
-                    {t(`nav.${key}`)}
+                    {key === "stampTour" ? (
+                      // "with 꿈돌이"는 브랜드 문구라 번역하지 않고(위 nav 키 참고),
+                      // 메인 메뉴명(text-base)의 0.7배 크기로 작게 붙인다
+                      <>
+                        {t("nav.stampTour")}{" "}
+                        <span className="text-[0.7em]">{t("nav.stampTourWith")}</span>
+                      </>
+                    ) : (
+                      t(`nav.${key}`)
+                    )}
                   </Link>
                 );
               })}
@@ -401,7 +475,6 @@ export default function Header() {
         </form>
       )}
 
-      {collageOpen && <CollageModal onClose={() => setCollageOpen(false)} />}
     </header>
   );
 }

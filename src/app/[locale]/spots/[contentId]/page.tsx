@@ -160,7 +160,7 @@ export default async function SpotPage({
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/20 to-slate-950" />
         <div className="absolute inset-x-0 bottom-0">
-          <div className="mx-auto max-w-4xl px-4 pb-6">
+          <div className="mx-auto max-w-6xl px-4 pb-6">
             <p
               className={`flex items-center gap-1.5 text-sm font-semibold ${CATEGORY_TEXT[spot.category]}`}
             >
@@ -184,7 +184,7 @@ export default async function SpotPage({
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 pb-20">
+      <div className="mx-auto max-w-6xl px-4 pb-20">
         {/* 상단 액션 */}
         <div className="flex items-center justify-between py-5">
           <Link
@@ -205,7 +205,7 @@ export default async function SpotPage({
           </a>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_460px] lg:gap-10">
           <div className="space-y-6">
             {/* AI 야간 가이드 */}
             <SpotGuide contentId={spot.contentId} />
@@ -296,7 +296,7 @@ export default async function SpotPage({
           {/* 위치 지도 */}
           <div>
             <h2 className="mb-3 text-lg font-bold lg:sr-only">{t("map")}</h2>
-            <div className="h-72 lg:sticky lg:top-20 lg:h-96">
+            <div className="h-72 lg:sticky lg:top-20 lg:h-[520px]">
               <NightMap spots={[spot]} selectedId={spot.contentId} />
             </div>
           </div>
