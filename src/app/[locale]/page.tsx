@@ -6,7 +6,7 @@ import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
 import { withPeriods } from "@/lib/festivals";
 import { listNotices } from "@/lib/notices";
 import { listPopularPosts, type CommunityPost } from "@/lib/community";
-import NightInfo from "@/components/NightInfo";
+import TonightBriefing from "@/components/TonightBriefing";
 import HeroCarousel, { type HeroSlide } from "@/components/HeroCarousel";
 import IntroSequence from "@/components/IntroSequence";
 import GuidebookBanner from "@/components/GuidebookBanner";
@@ -116,6 +116,13 @@ export default async function HomePage({
           <HeroCarousel slides={slides} />
         </section>
 
+        {/* 🌙 오늘 밤 브리핑 — 날씨·일몰·월령·막차 + 조건 맞춤 추천을 첫 화면에.
+            흩어져 있던 실시간 데이터를 한 카드로 모아, 정적 관광 포털과의
+            차이("지금에 반응하는 화면")가 홈에서 바로 보이게 한다 */}
+        <div className="mt-8 sm:mt-10">
+          <TonightBriefing spots={spots} />
+        </div>
+
         {/* ── 오늘 밤 — 일몰·월령 + 지금 갈 만한 곳 ──
             일몰·월령은 "그래서 오늘 밤 어디 가지"로 이어져야 뜻이 있으므로,
             명소·축제와 한 묶음으로 둔다. 히어로가 일반 플로우가 되면서
@@ -131,8 +138,6 @@ export default async function HomePage({
               </h2>
               <p className="mt-1.5 text-sm text-slate-400">{t("spotsSectionSub")}</p>
             </div>
-            {/* 오늘 밤 정보 — 천문연구원 일몰·월령 */}
-            <NightInfo />
           </div>
           {spots.length > 0 && (
             <ScrollRail label={t("spotsSection")}>

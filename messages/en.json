@@ -27,9 +27,9 @@
     "groupCommunity": "Participate",
     "home": "Home",
     "personality": "Persona Test",
+    "klife": "K-Life Guide",
     "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이"
-  },
+    "stampTourWith": "with 꿈돌이"  },
   "home": {
     "heroTitle": "Daejeon Shines Brighter at Night",
     "heroSubtitle": "Night views, starlight, and festivals of Korea's science city — all in one place",
@@ -183,7 +183,7 @@
     "subtitle": "How to enjoy Daejeon nights the right way — pick a situation",
     "error": "Please try again later.",
     "phrasesTitle": "Survival Korean",
-    "phrasesSubtitle": "Essential phrases for the night, ready to use",
+    "phrasesSubtitle": "Type what you want to say — we'll give you the Korean for it",
     "emergency": {
       "title": "Emergency",
       "police": "Police",
@@ -348,7 +348,9 @@
           "Please don't accept drinks from strangers."
         ]
       }
-    }
+    },
+    "phrasesMore": "See the full phrasebook below",
+    "situationPhrases": "Korean you can use right now"
   },
   "community": {
     "title": "Night Community",
@@ -1046,5 +1048,43 @@
       "other": "A little off the beaten path"
     },
     "areaSpots": "Night views here"
+  },
+  "briefing": {
+    "overline": "Tonight's Briefing",
+    "mood": {
+      "wet": "Rain tonight — indoors is the move",
+      "stars": "Moonless clear night — perfect for stargazing",
+      "moon": "The moon is full — fancy a moonlit walk?",
+      "clear": "Daejeon's night is open again tonight"
+    },
+    "precip": {
+      "rain": "Rain",
+      "snow": "Snow",
+      "rainSnow": "Sleet"
+    },
+    "sunset": "Sunset",
+    "moonAge": "Moon age {age}d",
+    "starNight": "A great night for stars",
+    "fullMoon": "A great night for moon-viewing",
+    "lastTrainIn": "Last subway in",
+    "lastTrainGone": "Last train has left",
+    "hourMin": "{h}h {m}m",
+    "minOnly": "{m}m"
+  },
+  "klife": {
+    "restaurantTitle": "K-Life Guide · Restaurant",
+    "restaurantSubtitle": "From walking in to walking out — experience the situation in advance and speak on the spot",
+    "inKorea": "IN KOREA · Culture tips",
+    "realKorean": "REAL KOREAN · Phrases that work",
+    "staffSays": "The staff will ask (tap to listen)",
+    "listen": "Listen",
+    "save": "Save",
+    "close": "Close",
+    "prevStep": "Previous",
+    "nextStep": "Next step",
+    "checkTitle": "Did you get the situation?",
+    "checkSubtitle": "Not a test — just pick what you would do in real life",
+    "myPhrases": "My saved phrases",
+    "myPhrasesEmpty": "Tap Save on any phrase card and it will be collected here — ready to use mid-trip."
   }
 }

@@ -27,9 +27,9 @@
     "groupCommunity": "参与",
     "home": "首页",
     "personality": "性格测试",
+    "klife": "K-Life指南",
     "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이"
-  },
+    "stampTourWith": "with 꿈돌이"  },
   "home": {
     "heroTitle": "大田的夜晚比白天更璀璨",
     "heroSubtitle": "科学之城大田的夜景、星空与庆典，尽在一处",
@@ -183,7 +183,7 @@
     "subtitle": "正确畅享大田之夜 — 请选择场景",
     "error": "请稍后再试。",
     "phrasesTitle": "生存韩语",
-    "phrasesSubtitle": "夜间立刻能用的必备表达",
+    "phrasesSubtitle": "搜索你想说的话，我们告诉你对应的韩语表达",
     "emergency": {
       "title": "紧急电话",
       "police": "警察",
@@ -348,7 +348,9 @@
           "请不要接受陌生人递来的饮料。"
         ]
       }
-    }
+    },
+    "phrasesMore": "查看下方完整表达集",
+    "situationPhrases": "这个场景立刻能用的韩语"
   },
   "community": {
     "title": "夜间社区",
@@ -1046,5 +1048,43 @@
       "other": "稍远一些的地方"
     },
     "areaSpots": "这里的夜景"
+  },
+  "briefing": {
+    "overline": "今晚简报",
+    "mood": {
+      "wet": "今晚有雨 — 适合室内行程",
+      "stars": "无月晴夜 — 正适合观星",
+      "moon": "月圆之夜 — 去赏月怎么样?",
+      "clear": "大田的夜晚今天也开场了"
+    },
+    "precip": {
+      "rain": "雨",
+      "snow": "雪",
+      "rainSnow": "雨夹雪"
+    },
+    "sunset": "日落",
+    "moonAge": "月龄{age}天",
+    "starNight": "适合观星的夜晚",
+    "fullMoon": "适合赏月的夜晚",
+    "lastTrainIn": "距地铁末班车",
+    "lastTrainGone": "今日末班车已过",
+    "hourMin": "{h}小时{m}分",
+    "minOnly": "{m}分钟"
+  },
+  "klife": {
+    "restaurantTitle": "K-Life指南 · 餐厅篇",
+    "restaurantSubtitle": "从进店到离店——提前体验情境，现场就能开口",
+    "inKorea": "IN KOREA · 文化贴士",
+    "realKorean": "REAL KOREAN · 实战韩语",
+    "staffSays": "店员会这样问（点击收听）",
+    "listen": "听",
+    "save": "收藏",
+    "close": "关闭",
+    "prevStep": "上一步",
+    "nextStep": "下一步",
+    "checkTitle": "确认一下你是否理解了情境",
+    "checkSubtitle": "这不是考试——选出你在真实场景中会做的",
+    "myPhrases": "我收藏的表达",
+    "myPhrasesEmpty": "点击表达卡上的收藏按钮，它们会汇集在这里——旅途中随时取用。"
   }
 }
