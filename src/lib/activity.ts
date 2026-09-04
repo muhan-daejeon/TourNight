@@ -9,9 +9,11 @@ export type ActivityAction =
   | "community_post"
   | "community_comment"
   | "community_report"
+  | "community_translate"
   | "course_survey"
   | "spot_view"
-  | "personality_test";
+  | "personality_test"
+  | "stamp_tour_photo";
 
 /**
  * 사용자 활동 한 건 기록 — 관리자 페이지의 이용 흐름 파악용.

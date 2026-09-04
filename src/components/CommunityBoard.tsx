@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { detectTextLocale } from "@/lib/lang-detect";
 import { photoErrorMessage, usePhotoAttach } from "./usePhotoAttach";
 
 interface Post {
@@ -300,6 +301,81 @@ function VerifyPrompt({ mailFrom }: { mailFrom: string | null }) {
   );
 }
 
+/**
+ * 글·댓글 본문 + 필요하면 옆에 "(번역)" 버튼.
+ *
+ * 본문의 글자 스크립트를 보고(lang-detect) 지금 화면 언어와 다르면 버튼을
+ * 붙인다 — 예: 화면이 중국어인데 글이 일본어로 쓰였으면 그 옆에 버튼이 뜬다.
+ * 누르면 /api/community/translate가 서버에서 원문을 다시 읽어 번역해 오고(글
+ * 위조 방지), 그 결과는 DB에 캐시돼 다음 사람은 바로 받는다. 번역 후에는 같은
+ * 자리에서 원문↔번역을 오갈 수 있다.
+ */
+function TranslatableBody({
+  targetType,
+  targetId,
+  text,
+  className,
+}: {
+  targetType: "post" | "comment";
+  targetId: number;
+  text: string;
+  className?: string;
+}) {
+  const t = useTranslations("community");
+  const locale = useLocale();
+  const [translated, setTranslated] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+
+  const needsTranslate = detectTextLocale(text) !== locale;
+
+  async function translate() {
+    if (loading) return;
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch(
+        `/api/community/translate?targetType=${targetType}&targetId=${targetId}&locale=${locale}`,
+      );
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setTranslated(data.text);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!needsTranslate) {
+    return <p className={className}>{text}</p>;
+  }
+
+  // 버튼은 괄호 없이 "번역"만 — 둥근 사각형(pill)에 연한 노란 배경을 준 배지로,
+  // 문장 옆 텍스트 링크가 아니라 눈에 띄는 하나의 버튼으로 보이게 한다
+  const pillClass =
+    "ml-1.5 inline-flex items-center whitespace-nowrap rounded-full bg-amber-200 px-2.5 py-0.5 align-middle text-[11px] font-bold text-amber-900 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60";
+
+  return (
+    <p className={className}>
+      {translated !== null && !showOriginal ? translated : text}
+      {translated !== null ? (
+        <button type="button" onClick={() => setShowOriginal((v) => !v)} className={pillClass}>
+          {showOriginal ? t("translateShowTranslated") : t("translateShowOriginal")}
+        </button>
+      ) : (
+        <button type="button" onClick={translate} disabled={loading} className={pillClass}>
+          {loading ? t("translating") : t("translate")}
+        </button>
+      )}
+      {error && (
+        <span className="ml-1.5 text-[11px] text-rose-400">{t("translateError")}</span>
+      )}
+    </p>
+  );
+}
+
 /** 글 하나 + 댓글(펼쳐서 지연 로드). me가 없으면 비로그인 */
 function PostItem({
   post,
@@ -464,9 +540,12 @@ function PostItem({
           )}
         </div>
       </div>
-      <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-200">
-        {post.body}
-      </p>
+      <TranslatableBody
+        targetType="post"
+        targetId={post.id}
+        text={post.body}
+        className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-200"
+      />
 
       {/* 첨부 사진 — 눌러서 원본 크기로 */}
       {post.mediaUrl && post.mediaType === "image" && (

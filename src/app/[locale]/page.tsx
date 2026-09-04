@@ -110,8 +110,9 @@ export default async function HomePage({
         {/* 풀블리드 히어로 — 컨테이너(max-w-6xl px-4)를 뚫고 화면 양끝까지 채운다.
             이전의 100vh 섹션 + 절대배치 + translateY(-55px) 방식은 화면이 낮거나
             모바일이면 슬라이드가 헤더 밑으로 파고들어 겹쳤다 → 일반 플로우로 두면
-            헤더 바로 아래에서 시작해 어떤 화면 크기에서도 겹치지 않는다 */}
-        <section className="ml-[calc(50%-50vw)] w-screen pt-5 sm:pt-8">
+            헤더 바로 아래에서 시작해 어떤 화면 크기에서도 겹치지 않는다.
+            헤더~슬라이드 여백이 좁다는 요청으로 원래(pt-5/pt-8)의 1.5배로 늘렸다 */}
+        <section className="ml-[calc(50%-50vw)] w-screen pt-[1.875rem] sm:pt-12">
           <HeroCarousel slides={slides} />
         </section>
 
