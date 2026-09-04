@@ -29,7 +29,8 @@
     "personality": "性格测试",
     "klife": "K-Life指南",
     "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이"  },
+    "stampTourWith": "with 꿈돌이"
+  },
   "home": {
     "heroTitle": "大田的夜晚比白天更璀璨",
     "heroSubtitle": "科学之城大田的夜景、星空与庆典，尽在一处",
@@ -1085,6 +1086,9 @@
     "checkTitle": "确认一下你是否理解了情境",
     "checkSubtitle": "这不是考试——选出你在真实场景中会做的",
     "myPhrases": "我收藏的表达",
-    "myPhrasesEmpty": "点击表达卡上的收藏按钮，它们会汇集在这里——旅途中随时取用。"
+    "myPhrasesEmpty": "点击表达卡上的收藏按钮，它们会汇集在这里——旅途中随时取用。",
+    "you": "这样回答",
+    "otherPhrases": "还有其他说法！",
+    "goCheck": "检查你的理解"
   }
 }

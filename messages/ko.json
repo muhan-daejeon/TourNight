@@ -29,7 +29,8 @@
     "personality": "성향 테스트",
     "klife": "K-Life 가이드",
     "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이"  },
+    "stampTourWith": "with 꿈돌이"
+  },
   "home": {
     "heroTitle": "대전의 밤은 낮보다 빛난다",
     "heroSubtitle": "과학도시 대전의 야경, 별빛, 축제를 한곳에서",
@@ -1085,6 +1086,9 @@
     "checkTitle": "상황을 이해했는지 확인해봐요",
     "checkSubtitle": "시험이 아니에요 — 실제 상황에서 뭘 할지 골라보세요",
     "myPhrases": "내가 저장한 표현",
-    "myPhrasesEmpty": "표현 카드의 저장 버튼을 누르면 여기에 모여요 — 여행 중 바로 꺼내 쓰세요."
+    "myPhrasesEmpty": "표현 카드의 저장 버튼을 누르면 여기에 모여요 — 여행 중 바로 꺼내 쓰세요.",
+    "you": "이렇게 답해요",
+    "otherPhrases": "다른 표현도 있어요!",
+    "goCheck": "이해했는지 확인하기"
   }
 }
