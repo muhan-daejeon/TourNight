@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import {
   Footprints,
@@ -21,6 +21,8 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
+  Languages,
+  Volume2,
   type LucideIcon,
 } from "lucide-react";
 import { ETIQUETTE_ITEMS, type EtiquetteItem } from "@/lib/etiquette-items";
@@ -39,6 +41,24 @@ const GROUPS: { key: "places" | "culture"; topics: string[] }[] = [
     ],
   },
 ];
+
+/**
+ * 에티켓 주제 → 서바이벌 표현 카테고리(/api/phrases의 book 키) 매핑.
+ *
+ * "이 상황에서 어떻게 행동해야 하나(에티켓)" 바로 아래에 "그 상황에서 뭐라고
+ * 말하나(표현)"를 붙인다 — 따로 보던 두 기능을 한 학습 흐름으로 잇는 통합.
+ * 자연스러운 짝이 없는 주제(공원·야경 등)는 표현 섹션을 생략한다.
+ */
+const TOPIC_PHRASE_CATEGORY: Record<string, string> = {
+  pojangmacha: "bar",
+  dining: "food",
+  latefood: "food",
+  streets: "food",
+  noraebang: "bar",
+  convenience: "store",
+  transport: "taxi",
+  safety: "help",
+};
 
 const TOPIC_ICONS: Record<string, LucideIcon> = {
   streets: Footprints,
@@ -63,8 +83,58 @@ export default function NightEtiquette({
   topicImages?: Record<string, string>;
 }) {
   const t = useTranslations("etiquette");
+  const locale = useLocale();
   const [selected, setSelected] = useState<string | null>(null);
   const images = selected ? ETIQUETTE_ITEMS[selected] : undefined;
+
+  // 상황별 실전 표현 — 표현집(/api/phrases)의 카테고리를 그대로 재사용한다.
+  // 표현집과 같은 이유로 ko는 en으로 폴백(한국어 화자는 뜻풀이가 필요 없지만
+  // 로마자 표기·영문 뜻이 함께 있는 편이 동행 외국인에게 보여주기 좋다).
+  const effectiveLocale = locale === "ko" ? "en" : locale;
+  const [phraseBook, setPhraseBook] = useState<Record<
+    string,
+    { korean: string; roman: string; meaning: string }[]
+  > | null>(null);
+  useEffect(() => {
+    // 주제를 처음 골랐을 때 한 번만 받아 둔다 (book 전체가 와서 이후엔 즉시)
+    if (!selected || phraseBook !== null) return;
+    let cancelled = false;
+    fetch(`/api/phrases?locale=${effectiveLocale}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        if (!cancelled) setPhraseBook(data.book ?? {});
+      })
+      .catch(() => {
+        if (!cancelled) setPhraseBook({});
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selected, phraseBook, effectiveLocale]);
+
+  const phraseCategory = selected ? TOPIC_PHRASE_CATEGORY[selected] : undefined;
+  const phrases = phraseCategory ? phraseBook?.[phraseCategory]?.slice(0, 6) : undefined;
+
+  // 듣기 — K-Life 가이드와 같은 브라우저 TTS(ko-KR). 행동(에티켓) 옆에서 말
+  // (표현)을 바로 소리로 익히게 한다 — "한 페이지에 나눠놓은" 게 아니라
+  // 같은 상황 카드 안에서 학습이 이어지도록.
+  const [speakingKo, setSpeakingKo] = useState<string | null>(null);
+  const speak = useCallback((textKo: string) => {
+    try {
+      const synth = window.speechSynthesis;
+      if (!synth) return;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(textKo);
+      u.lang = "ko-KR";
+      u.rate = 0.85;
+      u.onend = () => setSpeakingKo(null);
+      u.onerror = () => setSpeakingKo(null);
+      setSpeakingKo(textKo);
+      synth.speak(u);
+    } catch {
+      setSpeakingKo(null);
+    }
+  }, []);
   // 사진은 언어와 무관(공용 매니페스트), 설명 문구만 로케일별 번역을 index로 맞춰 쓴다
   const captions = selected
     ? (t.raw(`items.${selected}`) as { dos: string[]; donts: string[] })
@@ -167,6 +237,48 @@ export default function NightEtiquette({
               Icon={X}
             />
           </div>
+
+          {/* 이 상황에서 바로 쓰는 한국어 — 에티켓(행동)과 표현(말)을 한 흐름으로 */}
+          {phraseCategory && phrases && phrases.length > 0 && (
+            <div className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-400/[0.04] p-5">
+              <p className="flex items-center gap-2 text-sm font-bold text-amber-300">
+                <Languages size={15} />
+                {t("situationPhrases")}
+              </p>
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                {phrases.map((p) => (
+                  <li
+                    key={p.korean}
+                    className="flex items-center gap-2 rounded-xl bg-slate-950/40 px-3.5 py-2.5"
+                  >
+                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="font-semibold text-slate-100">{p.korean}</span>
+                      <span className="text-xs text-amber-300/80">{p.roman}</span>
+                      <span className="text-sm text-slate-400">{p.meaning}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => speak(p.korean)}
+                      aria-label={p.korean}
+                      className="shrink-0 rounded-full bg-white/10 p-2.5 text-slate-300 transition hover:bg-white/15 hover:text-white"
+                    >
+                      <Volume2
+                        size={15}
+                        className={speakingKo === p.korean ? "animate-pulse text-amber-300" : ""}
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="#phrasebook"
+                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-400 transition hover:text-amber-300"
+              >
+                {t("phrasesMore")}
+                <ChevronRight size={13} />
+              </a>
+            </div>
+          )}
         </div>
       )}
     </div>

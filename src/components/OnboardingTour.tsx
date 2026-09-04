@@ -30,7 +30,8 @@ const STEPS: { key: string; href: string; Icon: LucideIcon }[] = [
   { key: "spots", href: "/spots", Icon: MapPin },
   { key: "courses", href: "/courses", Icon: Route },
   { key: "etiquette", href: "/etiquette", Icon: Sparkles },
-  { key: "phrases", href: "/phrases", Icon: Languages },
+  // 표현집은 에티켓 페이지로 통합 — 그 페이지의 검색창(data-tour="phrases")을 밝힌다
+  { key: "phrases", href: "/etiquette#phrasebook", Icon: Languages },
   { key: "community", href: "/community", Icon: MessagesSquare },
 ];
 

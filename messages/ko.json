@@ -26,7 +26,8 @@
     "groupLocal": "나이트 라이프",
     "groupCommunity": "커뮤니티",
     "home": "홈",
-    "personality": "성향 테스트"
+    "personality": "성향 테스트",
+    "klife": "K-Life 가이드"
   },
   "home": {
     "heroTitle": "대전의 밤은 낮보다 빛난다",
@@ -181,7 +182,7 @@
     "subtitle": "대전의 밤을 제대로 즐기는 예절 — 상황을 골라보세요",
     "error": "잠시 후 다시 시도해주세요.",
     "phrasesTitle": "서바이벌 한국어",
-    "phrasesSubtitle": "밤에 바로 쓰는 필수 표현",
+    "phrasesSubtitle": "하고 싶은 말을 검색하면 밤 상황에 맞는 한국어로 알려드려요",
     "emergency": {
       "title": "긴급 연락처",
       "police": "경찰",
@@ -346,7 +347,9 @@
           "낯선 사람이 건네는 음료를 받지 마세요."
         ]
       }
-    }
+    },
+    "phrasesMore": "아래 전체 표현집 보기",
+    "situationPhrases": "이 상황에서 바로 쓰는 한국어"
   },
   "community": {
     "title": "야간 커뮤니티",
@@ -989,5 +992,43 @@
       "other": "조금 벗어나면 만나는 곳들"
     },
     "areaSpots": "이 동네 야경"
+  },
+  "briefing": {
+    "overline": "오늘 밤 브리핑",
+    "mood": {
+      "wet": "비 소식이 있는 밤 — 오늘은 실내가 좋겠어요",
+      "stars": "달빛 없는 맑은 밤 — 별 보기 딱 좋아요",
+      "moon": "달이 차오른 밤 — 달맞이 어때요?",
+      "clear": "오늘도 대전의 밤이 열렸어요"
+    },
+    "precip": {
+      "rain": "비",
+      "snow": "눈",
+      "rainSnow": "진눈깨비"
+    },
+    "sunset": "일몰",
+    "moonAge": "월령 {age}일",
+    "starNight": "별 보기 좋은 밤이에요",
+    "fullMoon": "달맞이 좋은 밤이에요",
+    "lastTrainIn": "지하철 막차까지",
+    "lastTrainGone": "오늘 막차 끊김",
+    "hourMin": "{h}시간 {m}분",
+    "minOnly": "{m}분"
+  },
+  "klife": {
+    "restaurantTitle": "K-Life 가이드 · 식당편",
+    "restaurantSubtitle": "한국 식당에 들어가서 나올 때까지 — 상황을 미리 경험하고 그 자리에서 바로 말해보세요",
+    "inKorea": "IN KOREA · 문화 팁",
+    "realKorean": "REAL KOREAN · 실전 한국어",
+    "staffSays": "직원이 이렇게 물어요 (눌러서 듣기)",
+    "listen": "듣기",
+    "save": "저장",
+    "close": "닫기",
+    "prevStep": "이전 단계",
+    "nextStep": "다음 단계",
+    "checkTitle": "상황을 이해했는지 확인해봐요",
+    "checkSubtitle": "시험이 아니에요 — 실제 상황에서 뭘 할지 골라보세요",
+    "myPhrases": "내가 저장한 표현",
+    "myPhrasesEmpty": "표현 카드의 저장 버튼을 누르면 여기에 모여요 — 여행 중 바로 꺼내 쓰세요."
   }
 }

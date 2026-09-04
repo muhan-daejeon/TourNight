@@ -39,8 +39,13 @@ function PhraseRow({ p }: { p: Phrase }) {
   );
 }
 
-/** 서바이벌 한국어 v2 — 검색 번역 + 상황별 표현집. 한국어 사용자에게는 영어판 미리보기 */
-export default function SurvivalPhrases() {
+/**
+ * 서바이벌 한국어 v2 — 검색 번역 + 상황별 표현집. 한국어 사용자에게는 영어판 미리보기.
+ * searchOnly: 상황별 표현이 에티켓 주제 카드 안으로 통합된 뒤로, 에티켓 페이지
+ * 하단에서는 상황에 묶이지 않는 자유 검색만 남긴다 — 카테고리 목록까지 두면
+ * 같은 표현이 두 군데 중복돼 "두 기능을 쌓아놓은" 화면이 된다.
+ */
+export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: boolean }) {
   const t = useTranslations("etiquette");
   const locale = useLocale();
   const effectiveLocale = locale === "ko" ? "en" : locale;
@@ -59,6 +64,7 @@ export default function SurvivalPhrases() {
   } | null>(null);
 
   useEffect(() => {
+    if (searchOnly) return; // 표현집을 안 그리면 받을 필요도 없다
     let cancelled = false;
     fetch(`/api/phrases?locale=${effectiveLocale}`)
       .then((res) => {
@@ -76,7 +82,7 @@ export default function SurvivalPhrases() {
     return () => {
       cancelled = true;
     };
-  }, [effectiveLocale]);
+  }, [effectiveLocale, searchOnly]);
 
   async function search(e: React.FormEvent) {
     e.preventDefault();
@@ -140,7 +146,8 @@ export default function SurvivalPhrases() {
         </div>
       )}
 
-      {/* 상황별 표현집 */}
+      {/* 상황별 표현집 — searchOnly면 생략 (에티켓 주제 카드에 통합됨) */}
+      {!searchOnly && (
       <div className="mt-6 space-y-2.5">
         {status === "loading" &&
           [0, 1, 2].map((i) => (
@@ -181,6 +188,7 @@ export default function SurvivalPhrases() {
             );
           })}
       </div>
+      )}
     </div>
   );
 }

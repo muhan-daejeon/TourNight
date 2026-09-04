@@ -26,7 +26,8 @@
     "groupLocal": "ナイトライフ",
     "groupCommunity": "コミュニティ",
     "home": "ホーム",
-    "personality": "性格診断"
+    "personality": "性格診断",
+    "klife": "K-Lifeガイド"
   },
   "home": {
     "heroTitle": "大田の夜は昼より輝く",
@@ -181,7 +182,7 @@
     "subtitle": "大田の夜を楽しむためのマナー — シーンを選んでください",
     "error": "しばらくしてからもう一度お試しください。",
     "phrasesTitle": "サバイバル韓国語",
-    "phrasesSubtitle": "夜にすぐ使える必須フレーズ",
+    "phrasesSubtitle": "言いたいことを検索すると、その場面の韓国語をお教えします",
     "emergency": {
       "title": "緊急連絡先",
       "police": "警察",
@@ -346,7 +347,9 @@
           "知らない人から渡された飲み物を受け取らないでください。"
         ]
       }
-    }
+    },
+    "phrasesMore": "下の表現集をすべて見る",
+    "situationPhrases": "この場面ですぐ使える韓国語"
   },
   "community": {
     "title": "ナイトコミュニティ",
@@ -989,5 +992,43 @@
       "other": "少し離れた場所"
     },
     "areaSpots": "この街の夜景"
+  },
+  "briefing": {
+    "overline": "今夜のブリーフィング",
+    "mood": {
+      "wet": "雨の気配がする夜 — 今日は屋内がおすすめ",
+      "stars": "月のない晴れた夜 — 星見に最適です",
+      "moon": "月が満ちた夜 — お月見はいかが?",
+      "clear": "今夜も大田の夜が始まりました"
+    },
+    "precip": {
+      "rain": "雨",
+      "snow": "雪",
+      "rainSnow": "みぞれ"
+    },
+    "sunset": "日の入り",
+    "moonAge": "月齢{age}日",
+    "starNight": "星がきれいな夜です",
+    "fullMoon": "お月見日和の夜です",
+    "lastTrainIn": "地下鉄終電まで",
+    "lastTrainGone": "本日の終電は終了",
+    "hourMin": "{h}時間{m}分",
+    "minOnly": "{m}分"
+  },
+  "klife": {
+    "restaurantTitle": "K-Lifeガイド · 食堂編",
+    "restaurantSubtitle": "入店から退店まで — 状況を先に体験して、その場ですぐ話せるように",
+    "inKorea": "IN KOREA · 文化のヒント",
+    "realKorean": "REAL KOREAN · 実践韓国語",
+    "staffSays": "店員はこう聞きます（タップで再生）",
+    "listen": "聞く",
+    "save": "保存",
+    "close": "閉じる",
+    "prevStep": "前のステップ",
+    "nextStep": "次のステップ",
+    "checkTitle": "状況を理解できたか確認",
+    "checkSubtitle": "テストではありません — 実際の場面で何をするか選んでみて",
+    "myPhrases": "保存したフレーズ",
+    "myPhrasesEmpty": "フレーズカードの保存を押すとここに集まります — 旅行中すぐ使えます。"
   }
 }

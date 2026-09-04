@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { href: "/courses", key: "courses" },
   { href: "/personality", key: "personality" },
   { href: "/etiquette", key: "etiquette" },
-  { href: "/phrases", key: "phrases" },
+  { href: "/klife/restaurant", key: "klife" },
   { href: "/community", key: "community" },
 ] as const;
 
@@ -33,7 +33,6 @@ const TOUR_KEY: Record<string, string> = {
   spots: "spots",
   courses: "courses",
   etiquette: "etiquette",
-  phrases: "phrases",
   community: "community",
 };
 
@@ -50,8 +49,10 @@ const MENU_EXTRAS = [
  * 아이콘도 같이 밀린다 */
 const MENU_GROUPS = [
   { id: "explore", labelKey: "groupExplore", items: ["spots", "festivals", "courses"] },
-  // 성향 테스트는 놀이가 아니라 여행 준비 도구라 가이드 쪽에 둔다
-  { id: "guide", labelKey: "groupGuide", items: ["personality", "etiquette", "phrases"] },
+  // 성향 테스트는 놀이가 아니라 여행 준비 도구라 가이드 쪽에 둔다.
+  // 서바이벌 한국어는 나이트 에티켓 페이지에 완전 통합돼 메뉴에서 뺐고,
+  // 상황 시뮬레이션(K-Life 가이드)이 세 번째 자리로 들어왔다
+  { id: "guide", labelKey: "groupGuide", items: ["personality", "etiquette", "klife"] },
   { id: "local", labelKey: "groupLocal", items: ["food", "stay", "shopping"] },
   { id: "community", labelKey: "groupCommunity", items: ["community"] },
 ] as const;
