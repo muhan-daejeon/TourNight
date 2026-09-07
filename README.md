@@ -40,6 +40,7 @@ http://localhost:3000 에서 확인.
 | `KTO_API_KEY` | 한국관광공사 OpenAPI 서비스키 (공공데이터포털 발급) |
 | `NEXT_PUBLIC_KAKAO_MAP_APP_KEY` | 카카오맵 JavaScript 앱 키 |
 | `GEMINI_API_KEY` | Gemini API 키 |
+| `TASHU_API_KEY` | 타슈 API 키 | 
 | `DATABASE_URL` | Supabase PostgreSQL 연결 문자열 |
 
 ## 폴더 구조
