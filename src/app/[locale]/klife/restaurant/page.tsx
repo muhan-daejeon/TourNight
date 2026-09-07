@@ -21,12 +21,11 @@ export default async function KLifeRestaurantPage({
     <>
       <PageHero
         image="/etiquette/dining.jpg"
-        width="narrow"
         overline="K-LIFE GUIDE"
         title={t("restaurantTitle")}
         subtitle={t("restaurantSubtitle")}
       />
-      <PageBody width="narrow">
+      <PageBody>
         <KLifeGuide
           scenario="restaurant"
           steps={RESTAURANT_STEPS}

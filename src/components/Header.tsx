@@ -42,6 +42,7 @@ const MENU_EXTRAS = [
   { href: "/food", key: "food" },
   { href: "/stay", key: "stay" },
   { href: "/shopping", key: "shopping" },
+  { href: "/night-bike", key: "nightBike" },
 ] as const;
 
 /** 상단에 늘 보이는 4개 카테고리와 그 아래 묶인 탭들 — 홈은 좌측 로고가 대신한다.
@@ -53,7 +54,7 @@ const MENU_GROUPS = [
   // 서바이벌 한국어는 나이트 에티켓 페이지에 완전 통합돼 메뉴에서 뺐고,
   // 상황 시뮬레이션(K-Life 가이드)이 세 번째 자리로 들어왔다
   { id: "guide", labelKey: "groupGuide", items: ["personality", "etiquette", "klife"] },
-  { id: "local", labelKey: "groupLocal", items: ["food", "stay", "shopping"] },
+  { id: "local", labelKey: "groupLocal", items: ["food", "stay", "shopping", "nightBike"] },
   { id: "community", labelKey: "groupCommunity", items: ["community", "stampTour"] },
 ] as const;
 

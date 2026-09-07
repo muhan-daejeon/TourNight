@@ -29,7 +29,8 @@
     "personality": "Persona Test",
     "klife": "K-Life Guide",
     "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이"
+    "stampTourWith": "with 꿈돌이",
+    "nightBike": "Late-Night Free Bike Tour"
   },
   "home": {
     "heroTitle": "Daejeon Shines Brighter at Night",
@@ -1072,6 +1073,20 @@
     "hourMin": "{h}h {m}m",
     "minOnly": "{m}m"
   },
+  "nightBike": {
+    "overline": "NIGHT BIKE",
+    "title": "Late-Night Free Bike Tour",
+    "subtitle": "Check real-time bike availability at Tashu stations all over Daejeon, right on the map.",
+    "legendAvailable": "Bikes available",
+    "legendEmpty": "No bikes",
+    "stationCount": "{count} stations",
+    "updatedAt": "As of {time}",
+    "refresh": "Refresh",
+    "loading": "Loading station data…",
+    "error": "Couldn't load Tashu station data. Please try again in a moment.",
+    "available": "{count} bikes available",
+    "promoText": "Download the Tashu app from the app store and ride bikes around Daejeon for free.\nEvery rental is free for up to one hour, with unlimited rentals.\nSo if you return it to a station and rent again before the hour is up, you can keep riding for free."
+  },
   "klife": {
     "restaurantTitle": "K-Life Guide · Restaurant",
     "restaurantSubtitle": "From walking in to walking out — experience the situation in advance and speak on the spot",
@@ -1088,7 +1103,6 @@
     "myPhrases": "My saved phrases",
     "myPhrasesEmpty": "Tap Save on any phrase card and it will be collected here — ready to use mid-trip.",
     "you": "You reply",
-    "otherPhrases": "More ways to say it!",
-    "goCheck": "Check your understanding"
+    "otherPhrases": "More ways to say it!"
   }
 }
