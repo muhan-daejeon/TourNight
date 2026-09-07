@@ -29,7 +29,8 @@
     "personality": "性格診断",
     "klife": "K-Lifeガイド",
     "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이"
+    "stampTourWith": "with 꿈돌이",
+    "nightBike": "深夜無料自転車ツアー"
   },
   "home": {
     "heroTitle": "大田の夜は昼より輝く",
@@ -1072,6 +1073,20 @@
     "hourMin": "{h}時間{m}分",
     "minOnly": "{m}分"
   },
+  "nightBike": {
+    "overline": "NIGHT BIKE",
+    "title": "深夜無料自転車ツアー",
+    "subtitle": "大田各地のタシュ(Tashu)貸出所のリアルタイム自転車台数を地図で確認できます。",
+    "legendAvailable": "利用可能",
+    "legendEmpty": "自転車なし",
+    "stationCount": "貸出所 {count}か所",
+    "updatedAt": "{time} 時点",
+    "refresh": "更新",
+    "loading": "貸出所情報を読み込み中…",
+    "error": "タシュの貸出所情報を読み込めませんでした。しばらくしてからもう一度お試しください。",
+    "available": "利用可能な自転車 {count}台",
+    "promoText": "アプリストアでタシュ（Tashu）アプリをダウンロードして、大田で自転車を無料で利用してみましょう。\nすべてのレンタルは1時間まで無料で、レンタル回数は無制限です。\nそのため、1時間が経つ前に貸出所に返却して再レンタルすれば、ずっと無料で利用できます。"
+  },
   "klife": {
     "restaurantTitle": "K-Lifeガイド · 食堂編",
     "restaurantSubtitle": "入店から退店まで — 状況を先に体験して、その場ですぐ話せるように",
@@ -1088,7 +1103,6 @@
     "myPhrases": "保存したフレーズ",
     "myPhrasesEmpty": "フレーズカードの保存を押すとここに集まります — 旅行中すぐ使えます。",
     "you": "こう答えます",
-    "otherPhrases": "他の言い方もあります！",
-    "goCheck": "理解度をチェック"
+    "otherPhrases": "他の言い方もあります！"
   }
 }

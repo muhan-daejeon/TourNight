@@ -30,6 +30,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { KLocale, KPhrase, KQuiz, KStep } from "@/lib/klife-restaurant";
+import MyPhrases from "./MyPhrases";
 
 /** 단계 아이콘 — 시나리오 공통 id 기준, 없는 id는 기본 아이콘 */
 const STEP_ICONS: Record<string, LucideIcon> = {
@@ -68,8 +69,9 @@ export default function KLifeGuide({
   const [zoom, setZoom] = useState<KPhrase | null>(null);
   // 위저드 컨테이너 맨 위 — 단계가 바뀔 때 여기로 시선을 되돌린다
   const topRef = useRef<HTMLDivElement>(null);
-  // 마지막 단계의 "다음"이 데려가는 곳 (K-LIFE CHECK)
-  const checkRef = useRef<HTMLElement>(null);
+  // K-LIFE CHECK도 이제 별도 섹션이 아니라 마지막(7번째) 단계다
+  const totalSteps = steps.length + 1;
+  const checkIndex = steps.length;
 
   // ── 저장(북마크) — 기기 로컬에만 남는 가벼운 개인화.
   // SSR 첫 그림은 빈 목록(서버 스냅샷), 마운트 후 저장분을 구독한다 —
@@ -108,8 +110,6 @@ export default function KLifeGuide({
     } catch {}
     window.dispatchEvent(new Event("klife-saved"));
   };
-  const allPhrases = steps.flatMap((s) => s.phrases);
-  const savedPhrases = allPhrases.filter((p) => saved.includes(p.ko));
 
   // ── 듣기 — SpeechSynthesis (ko-KR) ──
   const [speaking, setSpeaking] = useState<string | null>(null);
@@ -132,30 +132,45 @@ export default function KLifeGuide({
 
   // ── 단계 전환 — 긴 스크롤 대신 같은 자리에서 내용만 바뀌는 위저드 방식.
   // 스크롤로 단계를 오르내리는 건 불편하다는 피드백. 전환 시 단계 헤더가
-  // 화면 위로 오도록 되돌린다 (긴 단계 하단에서 다음을 눌렀을 때 대비)
-  const firstRender = useRef(true);
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
+  // 화면 위로 오도록 되돌린다 (긴 단계 하단에서 다음을 눌렀을 때 대비).
+  //
+  // 이 스크롤은 goTo(사용자가 스테퍼·이전/다음을 눌렀을 때만 호출) 안에서만
+  // 일으킨다 — 예전엔 `active`가 바뀔 때마다 도는 effect + "첫 렌더는 건너뛴다"
+  // 플래그로 처리했는데, 페이지에 처음 들어왔을 때(01 단계) 스크롤이 실제로
+  // 일어나는 경우가 있었다. 클릭 핸들러 안에서 직접 부르면 마운트 시점엔
+  // 아예 호출될 일이 없어 그 문제 자체가 생기지 않는다
+  const goTo = (idx: number) => {
+    setActive(Math.min(Math.max(idx, 0), totalSteps - 1));
     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [active]);
+  };
 
-  const goTo = (idx: number) =>
-    setActive(Math.min(Math.max(idx, 0), steps.length - 1));
+  // ── K-LIFE CHECK 초기화 — 고른 답이 눈에 보이는 채로 남으면 다음에 이
+  // 페이지에 다시 왔을 때 뭘 골랐었는지 드러난다. 일반적인 클라이언트 쪽
+  // 이동이면 컴포넌트가 새로 마운트되며 QuizCard의 지역 state도 자연히
+  // 비워지지만, 브라우저 뒤로가기(bfcache 복원)는 마운트를 건너뛰고 이전
+  // 상태 그대로를 되살리므로 그 경우까지 확실히 잡아 강제로 다시 그린다
+  const [quizResetKey, setQuizResetKey] = useState(0);
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setQuizResetKey((k) => k + 1);
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   return (
     <div>
       {/* ── 스텝퍼 — 아이콘+제목 카드형(레퍼런스 시안), sticky로 늘 보인다 ── */}
       <div className="sticky top-[calc(var(--header-h,72px)+1px)] z-40 -mx-4 border-b border-white/10 bg-slate-950/90 px-4 py-2.5 backdrop-blur">
         <div className="flex items-stretch gap-1.5 overflow-x-auto no-scrollbar">
-          {steps.map((st, i) => {
-            const Icon = STEP_ICONS[st.id] ?? Lightbulb;
+          {Array.from({ length: totalSteps }, (_, i) => {
+            const isCheck = i === checkIndex;
+            const Icon = isCheck ? CheckCircle2 : (STEP_ICONS[steps[i].id] ?? Lightbulb);
+            const title = isCheck ? t("checkTitle") : steps[i].title[locale];
             const on = active === i;
             return (
               <button
-                key={st.id}
+                key={isCheck ? "check" : steps[i].id}
                 type="button"
                 onClick={() => goTo(i)}
                 aria-current={on ? "step" : undefined}
@@ -183,7 +198,7 @@ export default function KLifeGuide({
                     on ? "text-white" : "text-slate-400"
                   }`}
                 >
-                  {st.title[locale]}
+                  {title}
                 </span>
               </button>
             );
@@ -195,6 +210,33 @@ export default function KLifeGuide({
       <div ref={topRef} className="scroll-mt-32" />
       {(() => {
         const i = active;
+        if (i === checkIndex) {
+          // ── K-LIFE CHECK — 이제 별도 섹션이 아니라 7번째(마지막) 단계.
+          // 헤더 모양은 다른 단계와 맞추고(같은 큰 번호+코드 배지), 내용만 퀴즈로 ──
+          return (
+            <section key="check" className="border-b border-white/[0.06] py-10">
+              <div className="flex items-center gap-3">
+                <span className="text-5xl font-extrabold leading-none text-amber-400 sm:text-6xl">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-bold tracking-wide text-slate-300">
+                  CHECK
+                </span>
+              </div>
+              <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+                {t("checkTitle")}
+              </h2>
+              <p className="mt-1.5 text-sm text-slate-400">{t("checkSubtitle")}</p>
+              <div className="mt-6 space-y-4">
+                {quiz.map((q, qi) => (
+                  // quizResetKey가 바뀌면(뒤로가기로 복원됐을 때) 새로 마운트시켜
+                  // 골랐던 답(QuizCard 내부 state)을 강제로 비운다
+                  <QuizCard key={`${quizResetKey}-${qi}`} q={q} locale={locale} />
+                ))}
+              </div>
+            </section>
+          );
+        }
         const step = steps[i];
         return (
         <section key={step.id} className="border-b border-white/[0.06] py-10">
@@ -212,22 +254,20 @@ export default function KLifeGuide({
           </h2>
           <p className="mt-1.5 text-sm text-slate-400">{step.subtitle[locale]}</p>
 
-          {/* IN KOREA / CULTURE TIP — 팁 하나가 카드 하나 */}
+          {/* IN KOREA / CULTURE TIP — 박스 그리드 대신 한 줄씩 나열하는 목록 */}
           <div className="mt-6">
             <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-amber-300">
               <Lightbulb size={14} />
               {t("inKorea")}
             </p>
-            <div className={`mt-2.5 grid gap-2.5 ${step.tips.length > 1 ? "sm:grid-cols-2" : ""}`}>
+            <ul className="mt-2.5 space-y-2">
               {step.tips.map((tip, j) => (
-                <div
-                  key={j}
-                  className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-4 text-sm leading-relaxed text-slate-300"
-                >
+                <li key={j} className="flex items-start gap-2 text-sm leading-relaxed text-slate-300">
+                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-amber-400/70" aria-hidden />
                   {tip[locale]}
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
 
@@ -364,7 +404,8 @@ export default function KLifeGuide({
       })()}
 
       {/* ── 하단 고정 내비 — 스크롤하지 않아도 늘 눌리는 이전/다음 (핵심 요청).
-          마지막 단계의 다음은 K-LIFE CHECK로 이어져 완주 흐름이 끊기지 않는다 ── */}
+          K-LIFE CHECK가 7번째 단계로 들어오면서 "확인하기"로 따로 빠지던
+          버튼도 없어지고, 다른 단계와 똑같이 다음/이전으로만 오간다 ── */}
       <div className="pointer-events-none sticky bottom-4 z-40 -mx-4 px-4">
         <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-950/90 p-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur">
           <button
@@ -378,78 +419,27 @@ export default function KLifeGuide({
             <span className="hidden sm:inline">{t("prevStep")}</span>
           </button>
           <span className="min-w-0 flex-1 truncate text-center text-xs font-semibold tabular-nums text-slate-400">
-            {String(active + 1).padStart(2, "0")} / {String(steps.length).padStart(2, "0")}
+            {String(active + 1).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
             <span className="ml-2 hidden text-slate-300 sm:inline">
-              {steps[active].title[locale]}
+              {active === checkIndex ? t("checkTitle") : steps[active].title[locale]}
             </span>
           </span>
-          {active < steps.length - 1 ? (
+          {active < totalSteps - 1 && (
             <button
               type="button"
               onClick={() => goTo(active + 1)}
               className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-amber-300"
             >
-              {t("nextStep")} · {String(active + 2).padStart(2, "0")} {steps[active + 1].title[locale]}
-              <ArrowRight size={14} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() =>
-                checkRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-              }
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-amber-300"
-            >
-              {t("goCheck")}
+              {t("nextStep")} · {String(active + 2).padStart(2, "0")}{" "}
+              {active + 1 === checkIndex ? t("checkTitle") : steps[active + 1].title[locale]}
               <ArrowRight size={14} />
             </button>
           )}
         </div>
       </div>
 
-      {/* ── K-LIFE CHECK ── */}
-      <section ref={checkRef} className="scroll-mt-32 border-b border-white/[0.06] py-10">
-        <p className="overline-label">K-LIFE CHECK</p>
-        <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-white">
-          {t("checkTitle")}
-        </h2>
-        <p className="mt-1.5 text-sm text-slate-400">{t("checkSubtitle")}</p>
-        <div className="mt-5 space-y-4">
-          {quiz.map((q, i) => (
-            <QuizCard key={i} q={q} locale={locale} />
-          ))}
-        </div>
-      </section>
-
       {/* ── MY PHRASES ── */}
-      <section className="py-10">
-        <p className="overline-label">MY PHRASES</p>
-        <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-white">
-          {t("myPhrases")}
-        </h2>
-        {savedPhrases.length === 0 ? (
-          <p className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-slate-500">
-            {t("myPhrasesEmpty")}
-          </p>
-        ) : (
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {savedPhrases.map((p) => (
-              <button
-                key={p.ko}
-                type="button"
-                onClick={() => setZoom(p)}
-                className="rounded-2xl border border-amber-400/25 bg-amber-400/[0.05] p-4 text-left transition hover:border-amber-300/60"
-              >
-                <span className="block text-base font-bold text-white">{p.ko}</span>
-                <span className="mt-0.5 block text-xs text-amber-300/80">{p.roman}</span>
-                <span className="mt-1 block text-xs text-slate-400">
-                  {p.meaning[locale]}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
+      <MyPhrases scenarios={[{ scenario, steps }]} />
 
       {/* ── Quick Use 확대 오버레이 — 직원에게 그대로 보여주는 화면 ── */}
       {zoom && (

@@ -29,7 +29,8 @@
     "personality": "性格测试",
     "klife": "K-Life指南",
     "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이"
+    "stampTourWith": "with 꿈돌이",
+    "nightBike": "深夜免费自行车之旅"
   },
   "home": {
     "heroTitle": "大田的夜晚比白天更璀璨",
@@ -1072,6 +1073,20 @@
     "hourMin": "{h}小时{m}分",
     "minOnly": "{m}分钟"
   },
+  "nightBike": {
+    "overline": "NIGHT BIKE",
+    "title": "深夜免费自行车之旅",
+    "subtitle": "在地图上实时查看大田各地Tashu租赁点的自行车数量。",
+    "legendAvailable": "可租借",
+    "legendEmpty": "暂无车辆",
+    "stationCount": "共{count}个站点",
+    "updatedAt": "更新于 {time}",
+    "refresh": "刷新",
+    "loading": "正在加载站点信息…",
+    "error": "无法加载Tashu站点信息，请稍后重试。",
+    "available": "可租借自行车 {count}辆",
+    "promoText": "在应用商店下载Tashu应用，在大田免费骑自行车吧。\n每次租借1小时内免费，且租借次数不限。\n因此在1小时用完前把车还到租赁点再重新租借，就能一直免费使用。"
+  },
   "klife": {
     "restaurantTitle": "K-Life指南 · 餐厅篇",
     "restaurantSubtitle": "从进店到离店——提前体验情境，现场就能开口",
@@ -1088,7 +1103,6 @@
     "myPhrases": "我收藏的表达",
     "myPhrasesEmpty": "点击表达卡上的收藏按钮，它们会汇集在这里——旅途中随时取用。",
     "you": "这样回答",
-    "otherPhrases": "还有其他说法！",
-    "goCheck": "检查你的理解"
+    "otherPhrases": "还有其他说法！"
   }
 }

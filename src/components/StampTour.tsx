@@ -354,37 +354,48 @@ function StampRoad({
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // 파일 선택창은 탭한 그 순간(동기적으로) 열어야 한다 — GPS 확인처럼 비동기
+  // 콜백 안에서 뒤늦게 .click()을 부르면, 모바일 브라우저(특히 iOS/일부
+  // 안드로이드)가 "사용자가 직접 누른 게 아니다"로 보고 조용히 막아버린다.
+  // 에러도 안 나서 겉으론 "눌러도 아무 반응 없음"으로만 보이는 게 이 증상이다.
+  // 그래서 순서를 바꿨다 — 사진 선택창은 즉시 열고, 위치 확인은 사진을
+  // 고른 "뒤"(handleFile)에서 한다. GPS가 안 맞으면 그때 업로드를 취소한다
   function handleStampClick(slot: number) {
     const stop = tour.stops[slot];
     if (stop.photoUrl || checkingSlot !== null || uploadingSlot !== null) return;
+    fileInputRefs.current[slot]?.click();
+  }
+
+  async function handleFile(slot: number, file: File | null) {
+    if (!file) return;
+    const stop = tour.stops[slot];
+
     if (!("geolocation" in navigator)) {
       alert(t("gpsError"));
       return;
     }
     setCheckingSlot(slot);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCheckingSlot(null);
-        const dist = haversineMeters(
-          { lat: pos.coords.latitude, lng: pos.coords.longitude },
-          { lat: stop.lat, lng: stop.lng },
-        );
-        if (dist > STAMP_RADIUS_M) {
-          alert(t("tooFar", { name: stop.name }));
-          return;
-        }
-        fileInputRefs.current[slot]?.click();
-      },
-      () => {
-        setCheckingSlot(null);
-        alert(t("gpsError"));
-      },
-      { enableHighAccuracy: true, timeout: 12000 },
+    const pos = await new Promise<GeolocationPosition | null>((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (p) => resolve(p),
+        () => resolve(null),
+        { enableHighAccuracy: true, timeout: 12000 },
+      );
+    });
+    setCheckingSlot(null);
+    if (!pos) {
+      alert(t("gpsError"));
+      return;
+    }
+    const dist = haversineMeters(
+      { lat: pos.coords.latitude, lng: pos.coords.longitude },
+      { lat: stop.lat, lng: stop.lng },
     );
-  }
+    if (dist > STAMP_RADIUS_M) {
+      alert(t("tooFar", { name: stop.name }));
+      return;
+    }
 
-  async function handleFile(slot: number, file: File | null) {
-    if (!file) return;
     setUploadingSlot(slot);
     try {
       const form = new FormData();
@@ -509,7 +520,13 @@ function StampRoad({
               type="file"
               accept="image/jpeg,image/png,image/webp"
               className="hidden"
-              onChange={(e) => handleFile(i, e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                // 같은 파일을 다시 골라도(예: GPS가 안 맞아 취소된 뒤 재시도)
+                // change 이벤트가 다시 뜨도록 값을 비워 둔다
+                e.target.value = "";
+                handleFile(i, file);
+              }}
             />
           </div>
         );
