@@ -18,7 +18,7 @@
 
 - **프레임워크**: Next.js (App Router, TypeScript, Tailwind CSS)
 - **DB**: Supabase — PostgreSQL + PostGIS
-- **외부 API**: 한국관광공사 TourAPI(OpenAPI), 카카오맵, Gemini
+- **외부 API**: 한국관광공사 TourAPI(OpenAPI), 카카오맵, Gemini, 타슈
 - **배포**: Vercel
 
 ## 시작하기
