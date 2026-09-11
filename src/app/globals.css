@@ -147,6 +147,26 @@ body::before {
   50% { opacity: 0.35; }
 }
 
+/* 네온사인 글로우 — "대전의 밤" 문구가 밝아졌다 옅어졌다를 반복한다 */
+.neon-glow {
+  animation: neon-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes neon-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px rgba(251, 191, 36, 0.55),
+      0 0 10px rgba(251, 191, 36, 0.35),
+      0 0 18px rgba(251, 191, 36, 0.2);
+  }
+  50% {
+    text-shadow:
+      0 0 8px rgba(251, 191, 36, 0.95),
+      0 0 22px rgba(251, 191, 36, 0.7),
+      0 0 38px rgba(251, 191, 36, 0.45);
+  }
+}
+
 /* 지평선 달빛 글로우 */
 .moon-glow {
   position: absolute;
