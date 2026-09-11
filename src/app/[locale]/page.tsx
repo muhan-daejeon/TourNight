@@ -120,7 +120,7 @@ export default async function HomePage({
             흩어져 있던 실시간 데이터를 한 카드로 모아, 정적 관광 포털과의
             차이("지금에 반응하는 화면")가 홈에서 바로 보이게 한다 */}
         <div className="mt-8 sm:mt-10">
-          <TonightBriefing spots={spots} />
+          <TonightBriefing />
         </div>
 
         {/* ── 오늘 밤 — 일몰·월령 + 지금 갈 만한 곳 ──
