@@ -1105,7 +1105,11 @@
     "loading": "正在加载站点信息…",
     "error": "无法加载Tashu站点信息，请稍后重试。",
     "available": "可租借自行车 {count}辆",
-    "promoText": "在应用商店下载Tashu应用，在大田免费骑自行车吧。\n每次租借1小时内免费，且租借次数不限。\n因此在1小时用完前把车还到租赁点再重新租借，就能一直免费使用。"
+    "promoText": "在应用商店下载Tashu应用，在大田免费骑自行车吧。\n每次租借1小时内免费，且租借次数不限。\n因此在1小时用完前把车还到租赁点再重新租借，就能一直免费使用。",
+    "myLocation": "当前位置",
+    "copyName": "复制“타슈”",
+    "copied": "已复制!",
+    "appStoreHint": "iPhone请在App Store搜索“타슈”(Tashu) - 可用上方按钮复制名称。"
   },
   "klife": {
     "restaurantTitle": "K-Life指南 · 餐厅篇",

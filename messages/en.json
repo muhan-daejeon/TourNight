@@ -1105,7 +1105,11 @@
     "loading": "Loading station data…",
     "error": "Couldn't load Tashu station data. Please try again in a moment.",
     "available": "{count} bikes available",
-    "promoText": "Download the Tashu app from the app store and ride bikes around Daejeon for free.\nEvery rental is free for up to one hour, with unlimited rentals.\nSo if you return it to a station and rent again before the hour is up, you can keep riding for free."
+    "promoText": "Download the Tashu app from the app store and ride bikes around Daejeon for free.\nEvery rental is free for up to one hour, with unlimited rentals.\nSo if you return it to a station and rent again before the hour is up, you can keep riding for free.",
+    "myLocation": "You are here",
+    "copyName": "Copy '타슈'",
+    "copied": "Copied!",
+    "appStoreHint": "On iPhone, search for '타슈' (Tashu) in the App Store - copy the name with the button above."
   },
   "klife": {
     "restaurantTitle": "K-Life Guide · Restaurant",

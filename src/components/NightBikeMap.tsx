@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { RefreshCw } from "lucide-react";
+import { Check, Copy, ExternalLink, RefreshCw } from "lucide-react";
 
 const DAEJEON_CENTER = { lat: 36.3504, lng: 127.3845 };
 
@@ -97,6 +97,42 @@ export default function NightBikeMap() {
     return data.stations;
   }
 
+  // 현위치는 한 번만 잡는다 — stations 갱신 때마다 다시 묻지 않게
+  const geoDoneRef = useRef(false);
+  const [copied, setCopied] = useState(false);
+
+  /** 브라우저 위치를 받아 지도를 현위치로 옮기고 빨간 점 + '현위치' 라벨을 찍는다
+      (피드백 11). 대전 밖(아직 여행 전)이면 기본 대전 전경을 유지한다. */
+  function locateUser(kakao: KakaoNS["kakao"]) {
+    if (geoDoneRef.current || !navigator.geolocation) return;
+    geoDoneRef.current = true;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        const inDaejeon = lat > 36.1 && lat < 36.62 && lng > 127.18 && lng < 127.72;
+        const map = mapRef.current;
+        if (!map) return;
+        const here = new kakao.maps.LatLng(lat, lng);
+        new kakao.maps.CustomOverlay({
+          position: here,
+          yAnchor: 1,
+          content:
+            '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;">' +
+            `<span style="background:#fff;border:1px solid #e2e8f0;border-radius:9999px;padding:2px 8px;font-size:11px;font-weight:700;color:#dc2626;box-shadow:0 2px 8px rgba(15,23,42,.15);">${t("myLocation")}</span>` +
+            '<span style="width:14px;height:14px;border-radius:9999px;background:#dc2626;border:3px solid #fff;box-shadow:0 0 0 2px rgba(220,38,38,.35),0 2px 6px rgba(15,23,42,.3);"></span>' +
+            "</div>",
+          map,
+        });
+        if (inDaejeon) {
+          map.setCenter(here);
+          map.setLevel(5);
+        }
+      },
+      () => {}, // 거부·실패 시 조용히 기본 화면 유지
+      { enableHighAccuracy: true, timeout: 8000 },
+    );
+  }
+
   function refresh() {
     setLoading(true);
     setError(false);
@@ -137,6 +173,7 @@ export default function NightBikeMap() {
             // 대부분의 개별 배지가 바로 보이게 하고, 사용자가 직접 축소할 때만 뭉친다
             level: 4,
           });
+          locateUser(kakao);
           mapRef.current.addControl(
             new kakao.maps.ZoomControl(),
             kakao.maps.ControlPosition.RIGHT,
@@ -218,6 +255,34 @@ export default function NightBikeMap() {
               <p key={i}>{highlightWords(line, PROMO_HIGHLIGHTS[locale] ?? PROMO_HIGHLIGHTS.ko)}</p>
             ))}
         </div>
+        {/* 앱 연동 — 안드로이드는 플레이스토어 검색으로 바로, 아이폰은 App Store에서
+            '타슈'를 검색하도록 안내하고 이름을 한 번에 복사할 수 있게 한다 (피드백 11) */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <a
+            href="https://play.google.com/store/search?q=%ED%83%80%EC%8A%88&c=apps"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-700"
+          >
+            <ExternalLink size={13} />
+            Google Play
+          </a>
+          <button
+            type="button"
+            onClick={() => {
+              try {
+                navigator.clipboard.writeText("타슈");
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 1600);
+              } catch {}
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-daejeon-blue hover:text-daejeon-blue"
+          >
+            {copied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+            {copied ? t("copied") : t("copyName")}
+          </button>
+        </div>
+        <p className="mt-2.5 text-xs text-slate-400">{t("appStoreHint")}</p>
       </div>
 
       <div className="mb-3 mt-6 flex flex-wrap items-center justify-between gap-2">
