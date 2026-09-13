@@ -36,7 +36,7 @@ export default function GuidebookBanner() {
           <BookOpen size={15} className="text-amber-600" />
           {t("guidebookOverline")}
         </p>
-        <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+        <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
           Tour<span className="text-amber-400">Night</span> GUIDEBOOK
         </h2>
         <p className="mt-2 text-sm text-slate-400">{t("guidebookSubtitle")}</p>
@@ -62,7 +62,7 @@ export default function GuidebookBanner() {
           {/* 책등 */}
           <div className="absolute inset-y-0 left-0 w-2.5 bg-gradient-to-r from-black/70 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-3.5">
-            <p className="text-[13px] font-extrabold leading-tight text-slate-900">
+            <p className="text-[13px] font-extrabold leading-tight text-white">
               Tour<span className="text-amber-400">Night</span>
             </p>
             <p className="mt-0.5 text-[9px] font-bold tracking-[0.2em] text-amber-600">

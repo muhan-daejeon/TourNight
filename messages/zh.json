@@ -116,7 +116,12 @@
     "catKlife": "K-Life指南",
     "catPersona": "性格测试",
     "catStamp": "盖章之旅",
-    "searchButton": "搜索"
+    "searchButton": "搜索",
+    "aboutLead": "第一次来?从这里开始",
+    "aboutTitle": "大田是?",
+    "aboutBody": "科学之城,也是面包与刀削面之城;入夜后,甲川的桥梁与韩光塔熠熠生辉。从首尔乘KTX仅1小时,大田就在韩国的正中心。",
+    "aboutKkum": "黄色小精灵Kkumdori自1993年大田世博会起就是大田的吉祥物,象征梦想与希望的城市之脸。",
+    "aboutCta": "和Kkumdori一起开始旅程吧"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。",

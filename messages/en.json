@@ -116,7 +116,12 @@
     "catKlife": "K-Life Guide",
     "catPersona": "Persona Test",
     "catStamp": "Stamp Tour",
-    "searchButton": "Search"
+    "searchButton": "Search",
+    "aboutLead": "First time here? Start with this",
+    "aboutTitle": "What is Daejeon?",
+    "aboutBody": "A city of science, of bread and kalguksu - and at night, of glowing bridges over Gapcheon and the shining Hanbit Tower. Just 1 hour from Seoul by KTX, right at the heart of Korea.",
+    "aboutKkum": "Kkumdori, the little yellow fairy, has been Daejeon's mascot since Expo '93 - the face of the city, symbolizing dreams and hope.",
+    "aboutCta": "Start your journey with Kkumdori"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest.",
