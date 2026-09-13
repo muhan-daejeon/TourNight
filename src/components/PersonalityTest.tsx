@@ -169,6 +169,15 @@ export default function PersonalityTest() {
   // 생성), 없는 문항은 기존 아이콘 자리표시자로 자연히 대체된다
   const qOptionImages = PERSONA_QUESTION_IMAGES[q.id.replace(/^q/, "")];
 
+  // 선택하면 색이 바뀌는 걸 잠깐 보여주고 바로 다음 문항으로 넘어간다 (피드백 9)
+  const choose = (key: OptionKey) => {
+    setAnswers((p) => ({ ...p, [q.id]: key }));
+    window.setTimeout(() => {
+      if (isLast) setPhase("analyzing");
+      else setIndex(index + 1);
+    }, 260);
+  };
+
   const goNext = () => {
     if (!selected) return;
     if (isLast) setPhase("analyzing");
@@ -201,44 +210,30 @@ export default function PersonalityTest() {
           {t(`questions.${q.id}.text`)}
         </h2>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 flex flex-col gap-3">
           {OPTION_KEYS.map((key) => {
             const on = selected === key;
-            const optionImage = qOptionImages?.[key];
             return (
               <button
                 key={key}
                 type="button"
-                onClick={() => setAnswers((p) => ({ ...p, [q.id]: key }))}
-                className={`group overflow-hidden rounded-2xl border text-left transition ${
+                onClick={() => choose(key)}
+                className={`flex w-full items-center gap-3.5 rounded-2xl border px-5 py-4 text-left transition-all duration-150 ${
                   on
-                    ? "border-indigo-400 bg-indigo-500/10"
-                    : "border-slate-200 bg-slate-50 hover:border-indigo-300/50"
+                    ? "scale-[1.01] border-daejeon-blue bg-indigo-50"
+                    : "border-slate-200 bg-white hover:scale-[1.02] hover:border-indigo-300 hover:shadow-md"
                 }`}
               >
-                <div className="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900">
-                  {optionImage ? (
-                    <Image
-                      src={optionImage}
-                      alt=""
-                      fill
-                      sizes="(min-width: 640px) 25vw, 50vw"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <ImageIcon size={22} className="text-slate-400" />
-                  )}
-                  <span
-                    className={`absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold uppercase ${
-                      on ? "bg-indigo-500 text-slate-900" : "bg-slate-950/70 text-slate-400"
-                    }`}
-                  >
-                    {key}
-                  </span>
-                </div>
-                <p className="px-4 py-3 text-sm leading-relaxed text-slate-400">
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold uppercase ${
+                    on ? "bg-daejeon-blue text-white" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {key}
+                </span>
+                <span className={`text-sm leading-relaxed sm:text-[15px] ${on ? "font-semibold text-slate-900" : "text-slate-600"}`}>
                   {t(`questions.${q.id}.${key}`)}
-                </p>
+                </span>
               </button>
             );
           })}
@@ -252,15 +247,6 @@ export default function PersonalityTest() {
           >
             <ChevronLeft size={15} />
             {t("prev")}
-          </button>
-          <button
-            type="button"
-            onClick={goNext}
-            disabled={!selected}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-indigo-500 px-7 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {isLast ? t("seeResult") : t("next")}
-            <ChevronRight size={15} />
           </button>
         </div>
       </div>

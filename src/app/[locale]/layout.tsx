@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import Header from "@/components/Header";
+import MascotGuide from "@/components/MascotGuide";
 import Footer from "@/components/Footer";
 import OnboardingTour from "@/components/OnboardingTour";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
@@ -59,6 +60,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <Header />
           <main className="flex-1">{children}</main>
+          <MascotGuide />
           <Footer />
           {/* 가입 후 둘러보기 — 어느 페이지에서도 이어지도록 레이아웃에 둔다 */}
           <OnboardingTour />

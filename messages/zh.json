@@ -30,7 +30,10 @@
     "klife": "K-Life指南",
     "stampTour": "도장투어",
     "stampTourWith": "with 꿈돌이",
-    "nightBike": "深夜免费自行车之旅"
+    "nightBike": "深夜免费自行车之旅",
+    "groupCourse": "规划路线",
+    "groupPlaces": "地点介绍",
+    "groupEnjoy": "玩转大田"
   },
   "home": {
     "heroTitle": "今晚，展开你的梦想",
@@ -1116,5 +1119,18 @@
     "myPhrasesEmpty": "点击表达卡上的收藏按钮，它们会汇集在这里--旅途中随时取用。",
     "you": "这样回答",
     "otherPhrases": "还有其他说法！"
+  },
+  "mascotGuide": {
+    "home": "你好!我是Kkumdori。今晚的大田由我来带路!",
+    "spots": "这些是大田夜晚值得去的景点。喜欢就加进路线吧!",
+    "festivals": "现在大田正在举办的庆典。晚上去更漂亮哦!",
+    "courses": "性格、AI、自选,三种方式打造你的夜间路线!",
+    "personality": "回答12个问题,我就告诉你你的夜游性格!",
+    "etiquette": "对韩国夜文化陌生?在这里按情境学礼仪和韩语!",
+    "klife": "从进店到离店,和我一起提前练习吧!",
+    "community": "旅行者们留下的故事。评论会自动翻译成你的语言!",
+    "stampTour": "打卡景点收集印章,集满4个就能做成照片条!",
+    "nightBike": "大田公共自行车Tashu!实时告诉你哪里有空车。",
+    "default": "需要什么就在菜单里选吧,我一直在这里!"
   }
 }

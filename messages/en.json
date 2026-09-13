@@ -30,7 +30,10 @@
     "klife": "K-Life Guide",
     "stampTour": "도장투어",
     "stampTourWith": "with 꿈돌이",
-    "nightBike": "Late-Night Free Bike Tour"
+    "nightBike": "Late-Night Free Bike Tour",
+    "groupCourse": "Plan a Course",
+    "groupPlaces": "Places",
+    "groupEnjoy": "Enjoy Daejeon"
   },
   "home": {
     "heroTitle": "Unfold Your Dream Tonight",
@@ -1116,5 +1119,18 @@
     "myPhrasesEmpty": "Tap Save on any phrase card and it will be collected here - ready to use mid-trip.",
     "you": "You reply",
     "otherPhrases": "More ways to say it!"
+  },
+  "mascotGuide": {
+    "home": "Hi! I'm Kkumdori. Let me guide your night in Daejeon!",
+    "spots": "Here are the best night spots in Daejeon. Add your favorites to a course!",
+    "festivals": "Festivals happening in Daejeon right now - even prettier at night!",
+    "courses": "Build your night course three ways: by persona, by AI, or by your picks!",
+    "personality": "Answer 12 questions and I'll tell you your night-travel persona!",
+    "etiquette": "New to Korean night culture? Learn manners and phrases by situation!",
+    "klife": "From entering to leaving a restaurant - let's practice together!",
+    "community": "Stories from fellow travelers. Comments auto-translate to your language!",
+    "stampTour": "Collect stamps by visiting spots. Four stamps make a photo strip!",
+    "nightBike": "Tashu, Daejeon's public bike! I'll show you available bikes in real time.",
+    "default": "Pick anything from the menu - I'll be right here with you!"
   }
 }

@@ -49,13 +49,12 @@ const MENU_EXTRAS = [
  * 순서가 MENU_ICONS와 1:1로 짝지어지므로(첫 번째 = menu1 …) 순서를 바꾸면
  * 아이콘도 같이 밀린다 */
 const MENU_GROUPS = [
-  { id: "explore", labelKey: "groupExplore", items: ["spots", "festivals", "courses"] },
-  // 성향 테스트는 놀이가 아니라 여행 준비 도구라 가이드 쪽에 둔다.
-  // 서바이벌 한국어는 나이트 에티켓 페이지에 완전 통합돼 메뉴에서 뺐고,
-  // 상황 시뮬레이션(K-Life 가이드)이 세 번째 자리로 들어왔다
-  { id: "guide", labelKey: "groupGuide", items: ["personality", "etiquette", "klife"] },
-  { id: "local", labelKey: "groupLocal", items: ["food", "stay", "shopping", "nightBike"] },
-  { id: "community", labelKey: "groupCommunity", items: ["community", "stampTour"] },
+  // 팀 피드백 구성: 코스 만들기(성향·AI·나만의) / 장소 소개 / 대전을 즐기기.
+  // 인생네컷(콜라주)은 도장투어 페이지 하단으로 옮겨져 도장투어 항목이 겸한다
+  { id: "course", labelKey: "groupCourse", items: ["personality", "courses"] },
+  { id: "places", labelKey: "groupPlaces", items: ["spots", "festivals", "food", "stay", "shopping"] },
+  { id: "enjoy", labelKey: "groupEnjoy", items: ["etiquette", "klife", "nightBike", "stampTour"] },
+  { id: "community", labelKey: "groupCommunity", items: ["community"] },
 ] as const;
 
 /** 카테고리에 마우스를 올렸을 때 왼쪽에 뜨는 마스코트 아이콘 — MENU_GROUPS와 같은 순서 */
@@ -277,7 +276,7 @@ export default function Header() {
         <nav
           onMouseEnter={openMenu}
           onMouseLeave={scheduleCloseMenu}
-          className="hidden lg:absolute lg:left-1/2 lg:top-1/2 lg:flex lg:-translate-x-1/2 lg:-translate-y-1/2 lg:flex-nowrap lg:gap-x-40 lg:gap-y-3"
+          className="hidden xl:absolute xl:left-1/2 xl:top-1/2 xl:flex xl:-translate-x-1/2 xl:-translate-y-1/2 xl:flex-nowrap xl:gap-x-24 2xl:gap-x-40"
         >
           {MENU_GROUPS.map((group, i) => {
             const groupActive = group.items.some((key) => isActive(findNavItem(key).href));
@@ -391,7 +390,7 @@ export default function Header() {
             onClick={() => setMobileMenuOpen((v) => !v)}
             aria-label={t("nav.menu")}
             aria-expanded={mobileMenuOpen}
-            className="rounded-full p-2 text-slate-300 transition hover:bg-white/5 hover:text-white lg:hidden"
+            className="rounded-full p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 xl:hidden"
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -465,10 +464,10 @@ export default function Header() {
           구조가 훨씬 단순하다. 큰제목(그룹명)은 크고 굵게, 그 아래 작은
           메뉴명들은 작고 가늘게 — 위계가 한눈에 보이게 */}
       {mobileMenuOpen && (
-        <div className="border-t border-white/10 bg-slate-950 px-5 py-5 lg:hidden">
+        <div className="border-t border-slate-200 bg-white px-5 py-5 xl:hidden">
           {MENU_GROUPS.map((group) => (
             <div key={group.id} className="mb-6 last:mb-0">
-              <p className="text-lg font-bold text-white">{t(`nav.${group.labelKey}`)}</p>
+              <p className="text-lg font-bold text-slate-900">{t(`nav.${group.labelKey}`)}</p>
               <div className="mt-2.5 flex flex-col gap-2.5">
                 {group.items.map((key) => {
                   const item = findNavItem(key);
