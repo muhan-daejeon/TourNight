@@ -37,7 +37,7 @@ export default function PageHero({
 }) {
   return (
     <div className={`mx-auto px-4 pt-6 ${MAX_W[width]}`}>
-      <div className="relative flex min-h-[190px] flex-col justify-center overflow-hidden rounded-3xl border border-white/10 px-7 py-9 sm:min-h-[210px] sm:px-10">
+      <div className="relative flex min-h-[190px] flex-col justify-center overflow-hidden rounded-3xl border border-slate-200 px-7 py-9 sm:min-h-[210px] sm:px-10">
         <Image
           src={image}
           alt=""
@@ -48,8 +48,9 @@ export default function PageHero({
         />
         {/* 글자가 얹히는 왼쪽은 진하게, 오른쪽은 사진이 살아 있게 */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/30" />
-        <div className="relative">
-          <p className="overline-label">{overline}</p>
+        {/* 사진 위 텍스트 — 본문이 라이트로 바뀌어도 여기는 밝은 색을 명시한다 */}
+        <div className="relative text-white">
+          <p className="overline-label !text-amber-300">{overline}</p>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-4xl">
             {title}
           </h1>

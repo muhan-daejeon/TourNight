@@ -109,7 +109,14 @@
     "heroPersonaTitle": "我的夜间旅行性格测试",
     "heroPersonaHighlight": "性格",
     "heroPersonaSubtitle": "通过模拟，抢先浏览最适合你类型的夜间路线。",
-    "heroPersonaCta": "开始测试"
+    "heroPersonaCta": "开始测试",
+    "catSpots": "夜间景点",
+    "catFestivals": "庆典·活动",
+    "catCourses": "推荐路线",
+    "catKlife": "K-Life指南",
+    "catPersona": "性格测试",
+    "catStamp": "盖章之旅",
+    "searchButton": "搜索"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。",

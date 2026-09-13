@@ -109,7 +109,14 @@
     "heroPersonaTitle": "私の夜観光タイプ診断",
     "heroPersonaHighlight": "タイプ",
     "heroPersonaSubtitle": "あなたのタイプにぴったりの夜のコースを、シミュレーションで先取り。",
-    "heroPersonaCta": "診断を始める"
+    "heroPersonaCta": "診断を始める",
+    "catSpots": "夜の名所",
+    "catFestivals": "祭り・イベント",
+    "catCourses": "おすすめコース",
+    "catKlife": "K-Lifeガイド",
+    "catPersona": "性格診断",
+    "catStamp": "スタンプツアー",
+    "searchButton": "検索"
   },
   "footer": {
     "notice": "本サービスは2026観光データ活用コンテストの出品作です。",

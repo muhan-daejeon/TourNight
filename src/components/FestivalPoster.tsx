@@ -40,14 +40,14 @@ export default function FestivalPoster({
   const STATUS_STYLE: Record<string, string> = {
     ongoing: "bg-emerald-400 text-slate-950",
     upcoming: "bg-amber-400 text-slate-950",
-    ended: "bg-slate-700/80 text-slate-300",
-    past: "bg-white/10 text-slate-200",
+    ended: "bg-slate-700/80 text-slate-400",
+    past: "bg-slate-100 text-slate-400",
   };
 
   return (
     <Link
       href={`/spots/${spot.contentId}`}
-      className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-2xl border border-white/10 bg-slate-900 transition hover:-translate-y-1 hover:border-amber-400/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)]"
+      className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:border-indigo-300 hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)]"
     >
       {spot.imageUrl && (
         <Image
@@ -79,12 +79,12 @@ export default function FestivalPoster({
           {spot.title}
         </h3>
         {period && (
-          <p className="mt-1.5 text-[12px] font-bold text-amber-300">
+          <p className="mt-1.5 text-[12px] font-bold text-amber-600">
             {status === "past" && <span className="mr-1 text-slate-400">{tf("lastYear")}</span>}
             {md(period.start)} – {md(period.end)}
           </p>
         )}
-        <p className="mt-1.5 line-clamp-2 text-[11px] leading-snug text-slate-300">
+        <p className="mt-1.5 line-clamp-2 text-[11px] leading-snug text-slate-400">
           {oneLiner(spot)}
         </p>
       </div>

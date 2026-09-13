@@ -216,8 +216,8 @@ export default function CourseMap({
   }, []);
 
   return (
-    <div className="relative h-full overflow-hidden rounded-2xl border border-white/10">
-      <div ref={containerRef} className="h-full w-full bg-slate-900" />
+    <div className="relative h-full overflow-hidden rounded-2xl border border-slate-200">
+      <div ref={containerRef} className="h-full w-full bg-white" />
     </div>
   );
 }

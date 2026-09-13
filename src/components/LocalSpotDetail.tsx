@@ -55,7 +55,7 @@ export default async function LocalSpotDetail({
             <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-4xl">
               {spot.title}
             </h1>
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-300">
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-400">
               <MapPin size={14} />
               {spot.addr}
             </p>
@@ -66,7 +66,7 @@ export default async function LocalSpotDetail({
       <PageBody>
         <Link
           href={`/${kind}`}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-400 transition hover:text-amber-300"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-400 transition hover:text-amber-600"
         >
           <ArrowLeft size={15} />
           {t("backToList")}
@@ -74,7 +74,7 @@ export default async function LocalSpotDetail({
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
           {/* 이용 정보 */}
-          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <section className="rounded-2xl border border-slate-200 bg-slate-100 p-5">
             <h2 className="text-lg font-bold">{t("infoTitle")}</h2>
             {rows.length === 0 ? (
               <p className="mt-3 text-sm text-slate-500">{t("noInfo")}</p>
@@ -82,10 +82,10 @@ export default async function LocalSpotDetail({
               <dl className="mt-4 space-y-3">
                 {rows.map(({ icon: Icon, label, value, strong }) => (
                   <div key={label} className="flex gap-3">
-                    <Icon size={16} className="mt-0.5 shrink-0 text-amber-300" />
+                    <Icon size={16} className="mt-0.5 shrink-0 text-amber-600" />
                     <div className="min-w-0">
                       <dt className="text-xs text-slate-500">{label}</dt>
-                      <dd className={`mt-0.5 text-sm ${strong ? "font-bold text-white" : "text-slate-200"}`}>
+                      <dd className={`mt-0.5 text-sm ${strong ? "font-bold text-slate-900" : "text-slate-400"}`}>
                         {value}
                       </dd>
                     </div>
@@ -111,16 +111,16 @@ export default async function LocalSpotDetail({
                 <li key={n.contentId}>
                   <Link
                     href={`/spots/${n.contentId}`}
-                    className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-2 transition hover:border-amber-400/40"
+                    className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 p-2 transition hover:border-indigo-300"
                   >
-                    <div className="relative h-14 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-900">
+                    <div className="relative h-14 w-16 shrink-0 overflow-hidden rounded-lg bg-white">
                       {n.imageUrl && (
                         <Image src={n.imageUrl} alt="" fill sizes="64px" className="object-cover" />
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">{n.title}</p>
-                      <p className="text-xs text-amber-300">
+                      <p className="truncate text-sm font-semibold text-slate-900">{n.title}</p>
+                      <p className="text-xs text-amber-600">
                         {n.distanceM < 1000
                           ? `${Math.round(n.distanceM)}m`
                           : `${(n.distanceM / 1000).toFixed(1)}km`}
@@ -132,7 +132,7 @@ export default async function LocalSpotDetail({
             </ul>
           </aside>
         </div>
-        <p className="mt-8 text-[11px] text-slate-600">{t("source")}</p>
+        <p className="mt-8 text-[11px] text-slate-400">{t("source")}</p>
       </PageBody>
     </>
   );

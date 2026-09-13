@@ -15,7 +15,7 @@ interface User {
 }
 
 const fieldClass =
-  "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
+  "w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-300/60";
 
 export default function ProfileForm({ welcome = false }: { welcome?: boolean }) {
   const t = useTranslations("auth");
@@ -87,7 +87,7 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
 
   if (user === null) {
     return (
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3">
         <span className="text-sm text-slate-400">{t("loginRequired")}</span>
         <Link
           href="/login"
@@ -103,12 +103,12 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {welcome && !user.country && (
-        <p className="rounded-xl border border-amber-300/25 bg-amber-300/10 px-4 py-3 text-sm text-amber-200">
+        <p className="rounded-xl border border-amber-300/25 bg-amber-300/10 px-4 py-3 text-sm text-amber-700">
           {t("welcomeCountryPrompt")}
         </p>
       )}
       <div>
-        <label className="mb-1.5 block text-sm text-slate-300">
+        <label className="mb-1.5 block text-sm text-slate-400">
           {t("email")}
         </label>
         <input
@@ -119,7 +119,7 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
         />
       </div>
       <div>
-        <label className="mb-1.5 block text-sm text-slate-300">
+        <label className="mb-1.5 block text-sm text-slate-400">
           {t("nickname")}
         </label>
         <input
@@ -134,7 +134,7 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
         />
       </div>
       <div>
-        <label className="mb-1.5 block text-sm text-slate-300">
+        <label className="mb-1.5 block text-sm text-slate-400">
           {t("country")}
         </label>
         <select
@@ -171,7 +171,7 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
         <button
           type="button"
           onClick={() => router.push("/?tour=start")}
-          className="flex w-full items-center justify-center gap-1.5 rounded-full border border-white/15 py-2.5 text-sm font-semibold text-slate-300 transition hover:border-amber-400/50 hover:text-amber-300"
+          className="flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 py-2.5 text-sm font-semibold text-slate-400 transition hover:border-indigo-300 hover:text-amber-600"
         >
           <Compass size={15} />
           {tTour("replay")}
@@ -183,7 +183,7 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
         <button
           type="button"
           onClick={() => setShowPersonaResult(true)}
-          className="flex w-full items-center justify-center gap-1.5 rounded-full border border-white/15 py-2.5 text-sm font-semibold text-slate-300 transition hover:border-amber-400/50 hover:text-amber-300"
+          className="flex w-full items-center justify-center gap-1.5 rounded-full border border-slate-200 py-2.5 text-sm font-semibold text-slate-400 transition hover:border-indigo-300 hover:text-amber-600"
         >
           <Sparkles size={15} />
           {tPersonality("myResultCta")}
@@ -199,7 +199,7 @@ export default function ProfileForm({ welcome = false }: { welcome?: boolean }) 
         <button
           type="button"
           onClick={() => router.replace("/?skipIntro=1")}
-          className="w-full py-1 text-center text-sm text-slate-400 transition hover:text-slate-200"
+          className="w-full py-1 text-center text-sm text-slate-400 transition hover:text-slate-400"
         >
           {t("skipForNow")}
         </button>

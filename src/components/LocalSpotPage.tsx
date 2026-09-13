@@ -38,7 +38,7 @@ export default async function LocalSpotPage({
       />
       <PageBody>
         <NightLifeExplorer kind={kind} spots={spots} nightSpots={nightSpots} />
-        <p className="mt-8 text-[11px] text-slate-600">{t("source")}</p>
+        <p className="mt-8 text-[11px] text-slate-400">{t("source")}</p>
       </PageBody>
     </>
   );

@@ -161,7 +161,7 @@ export default function KLifeGuide({
   return (
     <div>
       {/* ── 스텝퍼 — 아이콘+제목 카드형(레퍼런스 시안), sticky로 늘 보인다 ── */}
-      <div className="sticky top-[calc(var(--header-h,72px)+1px)] z-40 -mx-4 border-b border-white/10 bg-slate-950/90 px-4 py-2.5 backdrop-blur">
+      <div className="sticky top-[calc(var(--header-h,72px)+1px)] z-40 -mx-4 border-b border-slate-200 bg-white/90 px-4 py-2.5 backdrop-blur">
         <div className="flex items-stretch gap-1.5 overflow-x-auto no-scrollbar">
           {Array.from({ length: totalSteps }, (_, i) => {
             const isCheck = i === checkIndex;
@@ -176,26 +176,26 @@ export default function KLifeGuide({
                 aria-current={on ? "step" : undefined}
                 className={`flex min-w-[76px] shrink-0 flex-col items-center gap-1 rounded-xl border px-2.5 py-2 transition sm:min-w-[92px] ${
                   on
-                    ? "border-amber-400/70 bg-amber-400/10 shadow-[0_0_16px_rgba(251,191,36,0.15)]"
+                    ? "border-amber-400 bg-amber-50 shadow-[0_0_16px_rgba(251,191,36,0.15)]"
                     : i < active
-                      ? "border-white/10 bg-white/[0.04]"
-                      : "border-white/10 bg-transparent hover:bg-white/[0.04]"
+                      ? "border-slate-200 bg-slate-100"
+                      : "border-slate-200 bg-transparent hover:bg-slate-100"
                 }`}
               >
                 <Icon
                   size={16}
-                  className={on ? "text-amber-300" : i < active ? "text-amber-300/60" : "text-slate-500"}
+                  className={on ? "text-amber-600" : i < active ? "text-amber-600/60" : "text-slate-500"}
                 />
                 <span
                   className={`text-[10px] font-bold leading-none ${
-                    on ? "text-amber-300" : "text-slate-500"
+                    on ? "text-amber-600" : "text-slate-500"
                   }`}
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span
                   className={`line-clamp-1 text-[11px] font-semibold leading-tight ${
-                    on ? "text-white" : "text-slate-400"
+                    on ? "text-slate-900" : "text-slate-400"
                   }`}
                 >
                   {title}
@@ -214,16 +214,16 @@ export default function KLifeGuide({
           // ── K-LIFE CHECK — 이제 별도 섹션이 아니라 7번째(마지막) 단계.
           // 헤더 모양은 다른 단계와 맞추고(같은 큰 번호+코드 배지), 내용만 퀴즈로 ──
           return (
-            <section key="check" className="border-b border-white/[0.06] py-10">
+            <section key="check" className="border-b border-slate-200 py-10">
               <div className="flex items-center gap-3">
                 <span className="text-5xl font-extrabold leading-none text-amber-400 sm:text-6xl">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-bold tracking-wide text-slate-300">
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold tracking-wide text-slate-400">
                   CHECK
                 </span>
               </div>
-              <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+              <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
                 {t("checkTitle")}
               </h2>
               <p className="mt-1.5 text-sm text-slate-400">{t("checkSubtitle")}</p>
@@ -239,30 +239,30 @@ export default function KLifeGuide({
         }
         const step = steps[i];
         return (
-        <section key={step.id} className="border-b border-white/[0.06] py-10">
+        <section key={step.id} className="border-b border-slate-200 py-10">
           {/* STEP HEADER — 큰 노란 번호가 단계의 얼굴 (레퍼런스 시안) */}
           <div className="flex items-center gap-3">
             <span className="text-5xl font-extrabold leading-none text-amber-400 sm:text-6xl">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-bold tracking-wide text-slate-300">
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold tracking-wide text-slate-400">
               {step.code}
             </span>
           </div>
-          <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+          <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
             {step.title[locale]}
           </h2>
           <p className="mt-1.5 text-sm text-slate-400">{step.subtitle[locale]}</p>
 
           {/* IN KOREA / CULTURE TIP — 박스 그리드 대신 한 줄씩 나열하는 목록 */}
           <div className="mt-6">
-            <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-amber-300">
+            <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-amber-600">
               <Lightbulb size={14} />
               {t("inKorea")}
             </p>
             <ul className="mt-2.5 space-y-2">
               {step.tips.map((tip, j) => (
-                <li key={j} className="flex items-start gap-2 text-sm leading-relaxed text-slate-300">
+                <li key={j} className="flex items-start gap-2 text-sm leading-relaxed text-slate-400">
                   <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-amber-400/70" aria-hidden />
                   {tip[locale]}
                 </li>
@@ -272,7 +272,7 @@ export default function KLifeGuide({
 
 
           {/* REAL KOREAN */}
-          <p className="mt-6 text-xs font-bold uppercase tracking-wide text-amber-300">
+          <p className="mt-6 text-xs font-bold uppercase tracking-wide text-amber-600">
             {t("realKorean")}
           </p>
           {step.quickUse ? (
@@ -283,13 +283,13 @@ export default function KLifeGuide({
                   key={p.ko}
                   type="button"
                   onClick={() => setZoom(p)}
-                  className="group rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-left transition hover:border-amber-300/50"
+                  className="group rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-indigo-300"
                 >
-                  <span className="flex items-center justify-between text-xs font-bold text-amber-300">
+                  <span className="flex items-center justify-between text-xs font-bold text-amber-600">
                     {p.situation[locale]}
-                    <Maximize2 size={13} className="text-slate-500 group-hover:text-amber-300" />
+                    <Maximize2 size={13} className="text-slate-500 group-hover:text-amber-600" />
                   </span>
-                  <span className="mt-2 block text-lg font-bold leading-snug text-white">
+                  <span className="mt-2 block text-lg font-bold leading-snug text-slate-900">
                     {p.ko}
                   </span>
                   <span className="mt-0.5 block text-xs text-slate-500">{p.roman}</span>
@@ -308,23 +308,23 @@ export default function KLifeGuide({
                       <button
                         type="button"
                         onClick={() => speak(step.staffLine!.ko)}
-                        className="flex flex-col rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-left transition hover:border-amber-300/40 sm:p-5"
+                        className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-indigo-300 sm:p-5"
                       >
                         <span className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
                           <MessageCircle size={13} />
                           {t("staffSays")}
                         </span>
-                        <span className="mt-2 text-2xl font-extrabold leading-snug text-white sm:text-3xl">
+                        <span className="mt-2 text-2xl font-extrabold leading-snug text-slate-900 sm:text-3xl">
                           &ldquo;{step.staffLine.ko}&rdquo;
                         </span>
-                        <span className="mt-1 text-sm text-amber-300/80">{step.staffLine.roman}</span>
+                        <span className="mt-1 text-sm text-amber-600/80">{step.staffLine.roman}</span>
                         <span className="mt-0.5 text-sm text-slate-400">
                           {step.staffLine.meaning[locale]}
                         </span>
                         <span className="mt-auto flex items-center gap-1.5 pt-3 text-xs font-bold text-slate-400">
                           <Volume2
                             size={14}
-                            className={speaking === step.staffLine.ko ? "animate-pulse text-amber-300" : ""}
+                            className={speaking === step.staffLine.ko ? "animate-pulse text-amber-600" : ""}
                           />
                           {t("listen")}
                         </span>
@@ -352,26 +352,26 @@ export default function KLifeGuide({
 
                   {/* 보조 표현 — 컴팩트 행으로 */}
                   {others.length > 0 && (
-                    <div className="mt-4 rounded-2xl border border-white/10 bg-slate-900/40 p-4">
+                    <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
                       <p className="text-xs font-bold text-slate-400">{t("otherPhrases")}</p>
-                      <ul className="mt-2 divide-y divide-white/[0.06]">
+                      <ul className="mt-2 divide-y divide-slate-200">
                         {others.map((p) => (
                           <li key={p.ko} className="flex items-center gap-2 py-2.5">
                             <button
                               type="button"
                               onClick={() => speak(p.ko)}
                               aria-label={t("listen")}
-                              className="shrink-0 rounded-full bg-white/10 p-2 text-slate-300 transition hover:bg-white/15 hover:text-white"
+                              className="shrink-0 rounded-full bg-slate-100 p-2 text-slate-400 transition hover:bg-slate-200 hover:text-slate-900"
                             >
                               <Volume2
                                 size={13}
-                                className={speaking === p.ko ? "animate-pulse text-amber-300" : ""}
+                                className={speaking === p.ko ? "animate-pulse text-amber-600" : ""}
                               />
                             </button>
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-sm font-bold text-white">
+                              <span className="block truncate text-sm font-bold text-slate-900">
                                 {p.ko}
-                                <span className="ml-2 font-medium text-amber-300/70">{p.roman}</span>
+                                <span className="ml-2 font-medium text-amber-600/70">{p.roman}</span>
                               </span>
                               <span className="block truncate text-xs text-slate-400">
                                 {p.situation[locale]} · {p.meaning[locale]}
@@ -381,10 +381,10 @@ export default function KLifeGuide({
                               type="button"
                               onClick={() => toggleSave(p.ko)}
                               aria-label={t("save")}
-                              className="shrink-0 rounded-full p-2 text-slate-400 transition hover:text-amber-300"
+                              className="shrink-0 rounded-full p-2 text-slate-400 transition hover:text-amber-600"
                             >
                               {saved.includes(p.ko) ? (
-                                <BookmarkCheck size={15} className="text-amber-300" />
+                                <BookmarkCheck size={15} className="text-amber-600" />
                               ) : (
                                 <Bookmark size={15} />
                               )}
@@ -407,20 +407,20 @@ export default function KLifeGuide({
           K-LIFE CHECK가 7번째 단계로 들어오면서 "확인하기"로 따로 빠지던
           버튼도 없어지고, 다른 단계와 똑같이 다음/이전으로만 오간다 ── */}
       <div className="pointer-events-none sticky bottom-4 z-40 -mx-4 px-4">
-        <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-950/90 p-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur">
+        <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 p-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur">
           <button
             type="button"
             onClick={() => goTo(active - 1)}
             disabled={active === 0}
             aria-label={t("prevStep")}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 px-3.5 py-2.5 text-xs font-semibold text-slate-300 transition enabled:hover:text-white disabled:opacity-30"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold text-slate-400 transition enabled:hover:text-slate-900 disabled:opacity-30"
           >
             <ArrowLeft size={14} />
             <span className="hidden sm:inline">{t("prevStep")}</span>
           </button>
           <span className="min-w-0 flex-1 truncate text-center text-xs font-semibold tabular-nums text-slate-400">
             {String(active + 1).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
-            <span className="ml-2 hidden text-slate-300 sm:inline">
+            <span className="ml-2 hidden text-slate-400 sm:inline">
               {active === checkIndex ? t("checkTitle") : steps[active].title[locale]}
             </span>
           </span>
@@ -447,13 +447,13 @@ export default function KLifeGuide({
           role="dialog"
           aria-modal="true"
           onClick={() => setZoom(null)}
-          className="fixed inset-0 z-[80] flex flex-col items-center justify-center gap-6 bg-slate-950/97 p-6 backdrop-blur"
+          className="fixed inset-0 z-[80] flex flex-col items-center justify-center gap-6 bg-white/97 p-6 backdrop-blur"
         >
           <p className="text-sm font-semibold text-slate-400">{zoom.situation[locale]}</p>
-          <p className="max-w-3xl text-center text-4xl font-extrabold leading-tight text-white sm:text-6xl">
+          <p className="max-w-3xl text-center text-4xl font-extrabold leading-tight text-slate-900 sm:text-6xl">
             {zoom.ko}
           </p>
-          <p className="text-lg text-amber-300">{zoom.roman}</p>
+          <p className="text-lg text-amber-600">{zoom.roman}</p>
           <p className="text-base text-slate-400">{zoom.meaning[locale]}</p>
           <div className="mt-2 flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
             <button
@@ -467,10 +467,10 @@ export default function KLifeGuide({
             <button
               type="button"
               onClick={() => toggleSave(zoom.ko)}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-400 transition hover:text-slate-900"
             >
               {saved.includes(zoom.ko) ? (
-                <BookmarkCheck size={16} className="text-amber-300" />
+                <BookmarkCheck size={16} className="text-amber-600" />
               ) : (
                 <Bookmark size={16} />
               )}
@@ -480,7 +480,7 @@ export default function KLifeGuide({
               type="button"
               onClick={() => setZoom(null)}
               aria-label={t("close")}
-              className="rounded-full border border-white/20 p-3 text-slate-400 transition hover:text-white"
+              className="rounded-full border border-slate-300 p-3 text-slate-400 transition hover:text-slate-900"
             >
               <X size={16} />
             </button>
@@ -517,19 +517,19 @@ function PhraseCard({
     <div
       className={`rounded-2xl border p-4 ${
         main
-          ? "border-amber-400/40 bg-amber-400/[0.06] sm:p-5"
-          : "border-white/10 bg-slate-900/50"
+          ? "border-amber-300 bg-amber-50 sm:p-5"
+          : "border-slate-200 bg-white"
       }`}
     >
       <p className="text-xs font-semibold text-slate-400">{p.situation[locale]}</p>
       <p
-        className={`mt-1.5 font-extrabold leading-snug text-white ${
+        className={`mt-1.5 font-extrabold leading-snug text-slate-900 ${
           main ? "text-2xl sm:text-3xl" : "text-lg"
         }`}
       >
         {p.ko}
       </p>
-      <p className={`mt-1 text-amber-300/80 ${main ? "text-sm" : "text-xs"}`}>{p.roman}</p>
+      <p className={`mt-1 text-amber-600/80 ${main ? "text-sm" : "text-xs"}`}>{p.roman}</p>
       <p className={`mt-0.5 text-slate-400 ${main ? "text-sm" : "text-xs"}`}>
         {p.meaning[locale]}
       </p>
@@ -537,9 +537,9 @@ function PhraseCard({
         <button
           type="button"
           onClick={onSpeak}
-          className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-bold text-slate-200 transition hover:bg-white/15"
+          className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3.5 py-1.5 text-xs font-bold text-slate-400 transition hover:bg-slate-200"
         >
-          <Volume2 size={13} className={speaking ? "animate-pulse text-amber-300" : ""} />
+          <Volume2 size={13} className={speaking ? "animate-pulse text-amber-600" : ""} />
           {listenLabel}
         </button>
         <button
@@ -547,8 +547,8 @@ function PhraseCard({
           onClick={onSave}
           className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
             savedNow
-              ? "bg-amber-400/20 text-amber-300"
-              : "bg-white/10 text-slate-200 hover:bg-white/15"
+              ? "bg-amber-100 text-amber-600"
+              : "bg-slate-100 text-slate-400 hover:bg-slate-200"
           }`}
         >
           {savedNow ? <BookmarkCheck size={13} /> : <Bookmark size={13} />}
@@ -563,8 +563,8 @@ function PhraseCard({
 function QuizCard({ q, locale }: { q: KQuiz; locale: KLocale }) {
   const [picked, setPicked] = useState<number | null>(null);
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-5">
-      <p className="text-sm font-bold leading-relaxed text-white">{q.prompt[locale]}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <p className="text-sm font-bold leading-relaxed text-slate-900">{q.prompt[locale]}</p>
       <div className="mt-3 space-y-2">
         {q.options.map((o, i) => {
           const isPicked = picked === i;
@@ -577,10 +577,10 @@ function QuizCard({ q, locale }: { q: KQuiz; locale: KLocale }) {
               onClick={() => setPicked(i)}
               className={`flex w-full items-center gap-2.5 rounded-xl border px-4 py-2.5 text-left text-sm transition ${
                 revealed && o.correct
-                  ? "border-emerald-400/60 bg-emerald-400/10 text-emerald-200"
+                  ? "border-emerald-400 bg-emerald-50 text-emerald-700"
                   : isPicked
-                    ? "border-rose-400/60 bg-rose-400/10 text-rose-200"
-                    : "border-white/10 bg-slate-950/40 text-slate-300 enabled:hover:border-amber-300/40"
+                    ? "border-rose-400 bg-rose-50 text-rose-700"
+                    : "border-slate-200 bg-slate-50 text-slate-400 enabled:hover:border-indigo-300"
               }`}
             >
               {revealed && o.correct ? (
@@ -588,7 +588,7 @@ function QuizCard({ q, locale }: { q: KQuiz; locale: KLocale }) {
               ) : isPicked ? (
                 <XCircle size={15} className="shrink-0 text-rose-400" />
               ) : (
-                <span className="h-[15px] w-[15px] shrink-0 rounded-full border border-white/25" />
+                <span className="h-[15px] w-[15px] shrink-0 rounded-full border border-slate-300" />
               )}
               {o.text[locale]}
             </button>
@@ -596,7 +596,7 @@ function QuizCard({ q, locale }: { q: KQuiz; locale: KLocale }) {
         })}
       </div>
       {picked !== null && (
-        <p className="mt-3 rounded-xl bg-white/[0.04] px-3.5 py-2.5 text-xs leading-relaxed text-slate-300">
+        <p className="mt-3 rounded-xl bg-slate-100 px-3.5 py-2.5 text-xs leading-relaxed text-slate-400">
           💡 {q.feedback[locale]}
         </p>
       )}

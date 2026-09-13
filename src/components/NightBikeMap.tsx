@@ -46,7 +46,7 @@ function highlightWords(text: string, words: string[]) {
   const pattern = new RegExp(`(${words.map(escapeRegExp).join("|")})`, "g");
   return text.split(pattern).map((part, i) =>
     words.includes(part) ? (
-      <span key={i} className="font-semibold text-amber-300">
+      <span key={i} className="font-semibold text-amber-600">
         {part}
       </span>
     ) : (
@@ -210,8 +210,8 @@ export default function NightBikeMap() {
           그만큼을 음수 마진으로 상쇄한 뒤 8px만 남긴다 — calc라 루트 글자
           크기(1.2배)가 바뀌어도 항상 "2rem을 상쇄하고 8px만" 유지된다.
           가로·텍스트 모두 가운데 정렬 */}
-      <div className="mx-auto w-full rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center sm:w-1/2 [margin-top:calc(8px-2rem)]">
-        <div className="space-y-1.5 text-sm leading-relaxed text-slate-300">
+      <div className="mx-auto w-full rounded-2xl border border-slate-200 bg-slate-100 p-5 text-center sm:w-1/2 [margin-top:calc(8px-2rem)]">
+        <div className="space-y-1.5 text-sm leading-relaxed text-slate-400">
           {t("promoText")
             .split("\n")
             .map((line, i) => (
@@ -231,7 +231,7 @@ export default function NightBikeMap() {
             {t("legendEmpty")}
           </span>
           {stations && (
-            <span className="text-slate-600">{t("stationCount", { count: stations.length })}</span>
+            <span className="text-slate-400">{t("stationCount", { count: stations.length })}</span>
           )}
         </div>
         <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -246,7 +246,7 @@ export default function NightBikeMap() {
             type="button"
             onClick={refresh}
             disabled={loading}
-            className="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 font-semibold text-slate-300 transition hover:border-white/25 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 font-semibold text-slate-400 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
             {t("refresh")}
@@ -254,8 +254,8 @@ export default function NightBikeMap() {
         </div>
       </div>
 
-      <div className="relative h-[60vh] min-h-[420px] overflow-hidden rounded-2xl border border-white/10 lg:h-[720px]">
-        <div ref={containerRef} className="h-full w-full bg-slate-900" />
+      <div className="relative h-[60vh] min-h-[420px] overflow-hidden rounded-2xl border border-slate-200 lg:h-[720px]">
+        <div ref={containerRef} className="h-full w-full bg-white" />
         {!stations && !error && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 text-sm text-slate-400">
             {t("loading")}

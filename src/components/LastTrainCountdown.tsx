@@ -55,11 +55,11 @@ export default function LastTrainCountdown() {
   const soon = diffMin <= 40;
   return (
     <span
-      className={`flex items-center gap-1.5 ${soon ? "font-semibold text-rose-300" : ""}`}
+      className={`flex items-center gap-1.5 ${soon ? "font-semibold text-rose-600" : ""}`}
     >
-      <TrainFront size={14} className={soon ? "text-rose-300" : "text-emerald-300"} />
+      <TrainFront size={14} className={soon ? "text-rose-600" : "text-emerald-600"} />
       {t("lastTrainIn")}{" "}
-      <b className={soon ? "text-rose-200" : "text-white"}>
+      <b className={soon ? "text-rose-700" : "text-slate-900"}>
         {h > 0 ? t("hourMin", { h, m }) : t("minOnly", { m })}
       </b>
     </span>

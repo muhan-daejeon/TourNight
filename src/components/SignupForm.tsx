@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { COUNTRIES, localeForCountry } from "@/lib/countries";
 
 const fieldClass =
-  "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
+  "w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-300/60";
 
 export default function SignupForm() {
   const t = useTranslations("auth");
@@ -67,7 +67,7 @@ export default function SignupForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="mb-1.5 block text-sm text-slate-300">
+        <label className="mb-1.5 block text-sm text-slate-400">
           {t("email")}
         </label>
         <input
@@ -79,7 +79,7 @@ export default function SignupForm() {
         />
       </div>
       <div>
-        <label className="mb-1.5 block text-sm text-slate-300">
+        <label className="mb-1.5 block text-sm text-slate-400">
           {t("password")}
         </label>
         <input
@@ -92,7 +92,7 @@ export default function SignupForm() {
         <p className="mt-1 text-xs text-slate-500">{t("passwordHint")}</p>
       </div>
       <div>
-        <label className="mb-1.5 block text-sm text-slate-300">
+        <label className="mb-1.5 block text-sm text-slate-400">
           {t("nickname")}
         </label>
         <input
@@ -104,7 +104,7 @@ export default function SignupForm() {
         />
       </div>
       <div>
-        <label className="mb-1.5 block text-sm text-slate-300">
+        <label className="mb-1.5 block text-sm text-slate-400">
           {t("country")}
         </label>
         <select
@@ -133,7 +133,7 @@ export default function SignupForm() {
 
       <p className="text-center text-sm text-slate-400">
         {t("haveAccount")}{" "}
-        <Link href="/login" className="font-semibold text-amber-300 hover:underline">
+        <Link href="/login" className="font-semibold text-amber-600 hover:underline">
           {t("goLogin")}
         </Link>
       </p>

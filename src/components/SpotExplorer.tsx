@@ -33,10 +33,10 @@ const CATEGORY_ICON: Record<string, LucideIcon> = {
 };
 
 const CATEGORY_TEXT: Record<string, string> = {
-  science: "text-sky-300",
-  nature: "text-emerald-300",
+  science: "text-sky-600",
+  nature: "text-emerald-600",
   festival: "text-pink-300",
-  city: "text-amber-300",
+  city: "text-amber-600",
 };
 
 /** 이미지가 없을 때 쓰는 카테고리별 야간 그라데이션 썸네일 */
@@ -131,8 +131,8 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
     <div>
       {/* 코스 만드는 법 — 처음 온 사람을 위한 3단계 안내 */}
       {showHowTo && (
-        <div className="relative mb-4 overflow-hidden rounded-2xl border border-amber-400/25 bg-amber-400/[0.06] px-5 py-4">
-          <p className="flex items-center gap-2 pr-8 text-sm font-bold text-amber-300">
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+          <p className="flex items-center gap-2 pr-8 text-sm font-bold text-amber-600">
             <Route size={16} />
             {t("howToTitle")}
           </p>
@@ -142,9 +142,9 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                 <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[11px] font-extrabold text-slate-950">
                   {i + 1}
                 </span>
-                <span className="text-[13px] leading-snug text-slate-300">
+                <span className="text-[13px] leading-snug text-slate-400">
                   {t.rich(key, {
-                    b: (c) => <b className="font-bold text-white">{c}</b>,
+                    b: (c) => <b className="font-bold text-slate-900">{c}</b>,
                   })}
                 </span>
               </li>
@@ -154,7 +154,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             type="button"
             onClick={closeHowTo}
             aria-label={t("howToClose")}
-            className="absolute right-3 top-3 rounded-full p-1 text-slate-400 transition hover:bg-white/10 hover:text-white"
+            className="absolute right-3 top-3 rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-900"
           >
             <X size={15} />
           </button>
@@ -172,7 +172,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("searchPlaceholder")}
-          className="w-full rounded-full border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 backdrop-blur transition focus:border-amber-400/60 focus:bg-white/[0.07] focus:outline-none"
+          className="w-full rounded-full border border-slate-200 bg-slate-100 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 backdrop-blur transition focus:border-amber-400 focus:bg-white/[0.07] focus:outline-none"
         />
       </div>
 
@@ -189,7 +189,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
               className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition ${
                 category === c
                   ? "border-amber-400 bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.3)]"
-                  : "border-white/10 bg-white/5 text-slate-300 backdrop-blur hover:border-white/25 hover:text-white"
+                  : "border-slate-200 bg-slate-100 text-slate-400 backdrop-blur hover:border-slate-300 hover:text-slate-900"
               }`}
             >
               {Icon && <Icon size={14} strokeWidth={2.2} />}
@@ -205,7 +205,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition ${
               onlyBookmarked
                 ? "border-amber-400 bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.3)]"
-                : "border-white/10 bg-white/5 text-slate-300 backdrop-blur hover:border-white/25 hover:text-white"
+                : "border-slate-200 bg-slate-100 text-slate-400 backdrop-blur hover:border-slate-300 hover:text-slate-900"
             }`}
           >
             <Bookmark
@@ -225,7 +225,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             늘어나 사진 아래에 빈 공간이 생긴다 */}
         <div className="order-2 grid content-start items-start gap-3 sm:grid-cols-2 lg:order-1">
           {filtered.length === 0 && (
-            <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
+            <p className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
               {t("noResults")}
             </p>
           )}
@@ -240,7 +240,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                 onClick={() => setSelectedId(spot.contentId)}
                 className={`glass-card group cursor-pointer overflow-hidden rounded-2xl ${
                   selectedId === spot.contentId
-                    ? "!border-amber-400/60 !bg-amber-400/5"
+                    ? "!border-amber-400 !bg-amber-400/5"
                     : ""
                 }`}
               >
@@ -260,7 +260,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                     <Icon
                       size={40}
                       strokeWidth={1.2}
-                      className="text-white/20"
+                      className="text-slate-300"
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent" />
@@ -288,7 +288,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                     className={`absolute right-3 top-11 rounded-full p-1.5 backdrop-blur transition ${
                       bookmarks.includes(spot.contentId)
                         ? "bg-amber-400 text-slate-950"
-                        : "bg-slate-950/70 text-slate-200 hover:bg-slate-950/90 hover:text-amber-300"
+                        : "bg-slate-950/70 text-slate-400 hover:bg-white/90 hover:text-amber-600"
                     }`}
                   >
                     <Bookmark
@@ -316,7 +316,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                     className={`absolute right-3 top-3 flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur transition ${
                       basket.includes(spot.contentId)
                         ? "bg-amber-400 text-slate-950"
-                        : "bg-slate-950/70 text-slate-200 hover:bg-slate-950/90 hover:text-amber-300"
+                        : "bg-slate-950/70 text-slate-400 hover:bg-white/90 hover:text-amber-600"
                     }`}
                   >
                     {basket.includes(spot.contentId) ? (
@@ -331,10 +331,10 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
 
                   <div className="absolute inset-x-0 bottom-0 flex items-end gap-2 p-3.5">
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-lg font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] group-hover:text-amber-300">
+                      <h3 className="truncate text-lg font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] group-hover:text-amber-600">
                         {spot.title}
                       </h3>
-                      <p className="truncate text-[13px] text-slate-300">
+                      <p className="truncate text-[13px] text-slate-400">
                         {spot.addr}
                       </p>
                     </div>
@@ -342,7 +342,7 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                       href={`/spots/${spot.contentId}`}
                       onClick={(e) => e.stopPropagation()}
                       aria-label={spot.title}
-                      className="shrink-0 rounded-full bg-white/10 p-2 text-white backdrop-blur transition hover:bg-amber-400 hover:text-slate-950"
+                      className="shrink-0 rounded-full bg-slate-100 p-2 text-slate-900 backdrop-blur transition hover:bg-amber-400 hover:text-slate-950"
                     >
                       <ChevronRight size={18} />
                     </Link>
@@ -372,21 +372,21 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
       {/* 담은 명소 바 — 2곳 이상 담으면 그 조합으로 코스를 짤 수 있다 */}
       {basket.length > 0 && (
         <div className="fixed inset-x-0 bottom-4 z-40 px-4">
-          <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-2 rounded-2xl border border-white/15 bg-slate-950/90 p-3 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur">
+          <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur">
             {basket.map((id) => {
               const spot = spots.find((s) => s.contentId === id);
               if (!spot) return null;
               return (
                 <span
                   key={id}
-                  className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 py-1 pl-3 pr-1.5 text-[13px] font-semibold text-slate-100"
+                  className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 py-1 pl-3 pr-1.5 text-[13px] font-semibold text-slate-900"
                 >
                   {spot.title}
                   <button
                     type="button"
                     onClick={() => toggleBasket(id)}
                     aria-label={t("basketRemove")}
-                    className="rounded-full p-0.5 text-slate-500 transition hover:bg-white/10 hover:text-white"
+                    className="rounded-full p-0.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
                   >
                     <X size={13} />
                   </button>

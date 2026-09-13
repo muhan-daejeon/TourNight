@@ -11,7 +11,7 @@ export default function ScrollTopButton() {
       type="button"
       onClick={() => window.scrollTo({ top: 0 })}
       aria-label={t("toTop")}
-      className="flex size-9 items-center justify-center rounded-full border border-white/15 text-slate-300 transition hover:border-amber-400/50 hover:text-amber-300"
+      className="flex size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-indigo-400 hover:text-indigo-600"
     >
       <ArrowUp size={16} />
     </button>

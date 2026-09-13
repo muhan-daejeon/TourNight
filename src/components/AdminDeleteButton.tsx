@@ -36,7 +36,7 @@ export default function AdminDeleteButton({
       onClick={remove}
       disabled={busy}
       aria-label={`${label} 삭제`}
-      className="shrink-0 rounded-full p-1.5 text-slate-500 transition hover:bg-rose-400/10 hover:text-rose-300 disabled:opacity-50"
+      className="shrink-0 rounded-full p-1.5 text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
     >
       <Trash2 size={14} />
     </button>

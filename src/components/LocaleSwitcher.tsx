@@ -31,7 +31,7 @@ export default function LocaleSwitcher() {
   const pathname = usePathname();
 
   return (
-    <div className="relative flex shrink-0 items-center gap-1 rounded-full border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/25 hover:text-white">
+    <div className="relative flex shrink-0 items-center gap-1 rounded-full border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition hover:border-slate-300 hover:text-slate-900">
       <Globe size={14} />
       {LOCALE_CODES[locale] ?? locale.toUpperCase()}
       <ChevronDown size={12} className="text-slate-500" />
@@ -42,7 +42,7 @@ export default function LocaleSwitcher() {
         aria-label="Language"
       >
         {routing.locales.map((l) => (
-          <option key={l} value={l} className="bg-slate-900 text-slate-100">
+          <option key={l} value={l} className="bg-white text-slate-900">
             {LOCALE_LABELS[l]}
           </option>
         ))}

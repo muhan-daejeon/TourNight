@@ -39,14 +39,14 @@ export default function SpotGuide({ contentId }: { contentId: string }) {
   if (status === "error") return null;
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
+    <section className="rounded-2xl border border-slate-200 bg-slate-100 p-6 backdrop-blur">
       <h2 className="flex items-center gap-2 text-lg font-bold">
-        <MoonStar size={17} className="text-amber-300" />
+        <MoonStar size={17} className="text-amber-600" />
         {t("guideTitle")}
       </h2>
       {status === "loading" ? (
         <div className="mt-4">
-          <p className="flex items-center gap-2 text-sm text-amber-300/90">
+          <p className="flex items-center gap-2 text-sm text-amber-600">
             <Sparkles size={14} className="animate-pulse" />
             {t("generating")}
           </p>
@@ -54,7 +54,7 @@ export default function SpotGuide({ contentId }: { contentId: string }) {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="h-4 animate-pulse rounded bg-white/5"
+                className="h-4 animate-pulse rounded bg-slate-100"
                 style={{ width: `${90 - i * 15}%` }}
               />
             ))}
@@ -64,21 +64,21 @@ export default function SpotGuide({ contentId }: { contentId: string }) {
         <>
           {/* 소개문은 길어서 3줄만 보여주고 나머지는 펼쳐 읽게 한다 */}
           <p
-            className={`mt-3 leading-relaxed text-slate-300 ${expanded ? "" : "line-clamp-3"}`}
+            className={`mt-3 leading-relaxed text-slate-400 ${expanded ? "" : "line-clamp-3"}`}
           >
             {guide?.intro}
           </p>
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="mt-1.5 text-xs font-semibold text-amber-300/80 transition hover:text-amber-300"
+            className="mt-1.5 text-xs font-semibold text-amber-600/80 transition hover:text-amber-600"
           >
             {expanded ? t("less") : t("more")}
           </button>
           <ul className="mt-4 space-y-2">
             {guide?.tips.map((tip, i) => (
-              <li key={i} className="flex gap-2 text-sm text-slate-300">
-                <span className="mt-0.5 shrink-0 text-amber-300">✦</span>
+              <li key={i} className="flex gap-2 text-sm text-slate-400">
+                <span className="mt-0.5 shrink-0 text-amber-600">✦</span>
                 {tip}
               </li>
             ))}

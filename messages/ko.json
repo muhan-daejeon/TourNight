@@ -109,7 +109,14 @@
     "heroPersonaTitle": "나의 야간 여행성향 테스트",
     "heroPersonaHighlight": "여행성향",
     "heroPersonaSubtitle": "성향에 딱 맞는 야간 코스를 시뮬레이션으로 미리 훑어보세요.",
-    "heroPersonaCta": "테스트 시작하기"
+    "heroPersonaCta": "테스트 시작하기",
+    "catSpots": "야간 명소",
+    "catFestivals": "축제·행사",
+    "catCourses": "추천 코스",
+    "catKlife": "K-Life 가이드",
+    "catPersona": "성향 테스트",
+    "catStamp": "도장투어",
+    "searchButton": "검색"
   },
   "footer": {
     "notice": "본 서비스는 2026 관광데이터 활용 공모전 출품작입니다.",

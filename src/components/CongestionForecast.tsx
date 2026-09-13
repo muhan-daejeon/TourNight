@@ -16,9 +16,9 @@ function level(rate: number): "low" | "mid" | "high" {
 }
 
 const LEVEL_STYLE: Record<string, string> = {
-  low: "border-emerald-400/30 bg-emerald-400/10 text-emerald-300",
-  mid: "border-amber-400/30 bg-amber-400/10 text-amber-300",
-  high: "border-rose-400/30 bg-rose-400/10 text-rose-300",
+  low: "border-emerald-400/30 bg-emerald-50 text-emerald-600",
+  mid: "border-amber-300 bg-amber-50 text-amber-600",
+  high: "border-rose-400/30 bg-rose-50 text-rose-600",
 };
 
 /** 향후 7일 혼잡도 예측 (KT 이동통신 데이터 기반) — 데이터 없는 스팟은 미제공 안내 */
@@ -33,9 +33,9 @@ export default async function CongestionForecast({
 
   if (days.length === 0) {
     return (
-      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
+      <section className="rounded-2xl border border-slate-200 bg-slate-100 p-6 backdrop-blur">
         <h2 className="flex items-center gap-2 text-lg font-bold">
-          <Users size={17} className="text-amber-300" />
+          <Users size={17} className="text-amber-600" />
           {t("title")}
         </h2>
         <p className="mt-3 text-sm text-slate-500">{t("unavailable")}</p>
@@ -49,9 +49,9 @@ export default async function CongestionForecast({
   const best = days.reduce((a, b) => (b.rate < a.rate ? b : a));
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
+    <section className="rounded-2xl border border-slate-200 bg-slate-100 p-6 backdrop-blur">
       <h2 className="flex items-center gap-2 text-lg font-bold">
-        <Users size={17} className="text-amber-300" />
+        <Users size={17} className="text-amber-600" />
         {t("title")}
       </h2>
       <div className="mt-4 grid grid-cols-7 gap-1.5">
@@ -74,10 +74,10 @@ export default async function CongestionForecast({
       </div>
       <p className="mt-3 text-xs text-slate-500">
         {t("best")}:{" "}
-        <b className="text-emerald-300">
+        <b className="text-emerald-600">
           {fmt.format(new Date(`${best.date}T00:00:00+09:00`))}
         </b>
-        <span className="mx-2 text-slate-700">·</span>
+        <span className="mx-2 text-slate-400">·</span>
         {t("source")}
       </p>
     </section>

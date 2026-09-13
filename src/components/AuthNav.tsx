@@ -53,21 +53,21 @@ export default function AuthNav() {
         {user.role === "admin" && (
           <Link
             href="/admin"
-            className="rounded-full border border-white/15 px-2.5 py-1 text-xs font-semibold text-slate-300 transition hover:border-amber-300/60 hover:text-amber-300"
+            className="rounded-full border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-400 transition hover:border-indigo-300 hover:text-amber-600"
           >
             관리자
           </Link>
         )}
         <Link
           href="/profile"
-          className="max-w-24 truncate font-semibold text-amber-300 transition hover:text-amber-200"
+          className="max-w-24 truncate font-semibold text-amber-600 transition hover:text-amber-700"
         >
           {user.nickname}
         </Link>
         <button
           type="button"
           onClick={logout}
-          className="flex items-center gap-1 text-slate-400 transition hover:text-white"
+          className="flex items-center gap-1 text-slate-400 transition hover:text-slate-900"
           aria-label={t("logout")}
         >
           <LogOut size={15} />
@@ -77,13 +77,13 @@ export default function AuthNav() {
   }
 
   return (
-    <div className="flex shrink-0 items-center gap-3 text-sm text-slate-300">
+    <div className="flex shrink-0 items-center gap-3 text-sm text-slate-400">
       <Link
         href="/login"
         className={
           pathname.startsWith("/login")
-            ? "font-semibold text-amber-300"
-            : "transition hover:text-amber-300"
+            ? "font-semibold text-amber-600"
+            : "transition hover:text-amber-600"
         }
       >
         {t("login")}

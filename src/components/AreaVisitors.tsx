@@ -20,8 +20,8 @@ export default async function AreaVisitors({ addr }: { addr: string }) {
   );
 
   return (
-    <p className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-sm text-slate-300 backdrop-blur">
-      <UsersRound size={15} className="shrink-0 text-amber-300" />
+    <p className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-100 px-5 py-3 text-sm text-slate-400 backdrop-blur">
+      <UsersRound size={15} className="shrink-0 text-amber-600" />
       {t("line", { gu: v.gu, count })}
       <span className="text-xs text-slate-500">
         {t("basis", { month: v.basisMonth })}

@@ -109,7 +109,14 @@
     "heroPersonaTitle": "My Night Travel Persona Test",
     "heroPersonaHighlight": "Persona",
     "heroPersonaSubtitle": "Preview night courses picked just for your type through a quick simulation.",
-    "heroPersonaCta": "Start the test"
+    "heroPersonaCta": "Start the test",
+    "catSpots": "Night Spots",
+    "catFestivals": "Festivals",
+    "catCourses": "Courses",
+    "catKlife": "K-Life Guide",
+    "catPersona": "Persona Test",
+    "catStamp": "Stamp Tour",
+    "searchButton": "Search"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest.",
