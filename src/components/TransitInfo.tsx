@@ -30,7 +30,7 @@ export function TransitLine({ transit }: { transit: SpotTransit | null }) {
   return (
     <span
       className={`flex items-center gap-1 text-[11px] font-medium ${
-        early ? "text-rose-300" : "text-slate-400"
+        early ? "text-rose-600" : "text-slate-400"
       }`}
     >
       <BusFront size={11} />
@@ -48,9 +48,9 @@ export function TransitCard({ transit }: { transit: SpotTransit | null }) {
   if (!transit) return null;
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-      <h2 className="flex items-center gap-2 text-sm font-bold text-slate-100">
-        <BusFront size={15} className="text-amber-300" />
+    <section className="rounded-2xl border border-slate-200 bg-slate-100 p-5">
+      <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+        <BusFront size={15} className="text-amber-600" />
         {t("title")}
       </h2>
 
@@ -61,7 +61,7 @@ export function TransitCard({ transit }: { transit: SpotTransit | null }) {
         </p>
       ) : (
         <>
-          <p className="mt-2 text-[13px] text-slate-300">
+          <p className="mt-2 text-[13px] text-slate-400">
             {t("nearestStop", {
               stop: transit.nodeName,
               distance: transit.distanceM ?? 0,
@@ -75,10 +75,10 @@ export function TransitCard({ transit }: { transit: SpotTransit | null }) {
                   key={r.routeNo}
                   className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px]"
                 >
-                  <span className="rounded-md bg-amber-300/15 px-2 py-0.5 text-[12px] font-bold text-amber-300">
+                  <span className="rounded-md bg-amber-300/15 px-2 py-0.5 text-[12px] font-bold text-amber-600">
                     {r.routeNo}
                   </span>
-                  <span className="text-slate-200">
+                  <span className="text-slate-400">
                     {t("lastBus", { time: formatBusTime(r.lastTime) })}
                   </span>
                   {r.intervalMin && (
@@ -90,7 +90,7 @@ export function TransitCard({ transit }: { transit: SpotTransit | null }) {
               ))}
             </ul>
           )}
-          <p className="mt-3 text-[11px] text-slate-600">{t("dataNote")}</p>
+          <p className="mt-3 text-[11px] text-slate-400">{t("dataNote")}</p>
         </>
       )}
     </section>

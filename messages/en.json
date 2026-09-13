@@ -1,8 +1,8 @@
 {
   "site": {
     "title": "TourNight",
-    "tagline": "Travel the Night of Daejeon",
-    "description": "Science, nature, and night — your guide to Daejeon after dark",
+    "tagline": "Where Dreams Wake Up at Night",
+    "description": "Science, nature, and dreams - your guide to Daejeon after dark",
     "loading": "Loading"
   },
   "intro": {
@@ -33,8 +33,8 @@
     "nightBike": "Late-Night Free Bike Tour"
   },
   "home": {
-    "heroTitle": "Daejeon Shines Brighter at Night",
-    "heroSubtitle": "Night views, starlight, and festivals of Korea's science city — all in one place",
+    "heroTitle": "Unfold Your Dream Tonight",
+    "heroSubtitle": "Night views, starlight and festivals in Daejeon - the city of Kkumdori, where dreams come alive",
     "spotsSection": "Where to tonight?",
     "searchPlaceholder": "Search by name or area",
     "noResults": "No spots found",
@@ -73,7 +73,7 @@
     "heroAiOverline": "AI course planner",
     "heroAiTitle": "The smartest way to wander the night",
     "heroAiHighlight": "smartest",
-    "heroAiSubtitle": "Just save the spots you want to see — we design the whole night, from the best order to each travel mode and the last-bus check.",
+    "heroAiSubtitle": "Just save the spots you want to see - we design the whole night, from the best order to each travel mode and the last-bus check.",
     "heroAiCta": "Plan a course",
     "festivalsSection": "Daejeon festivals & events",
     "festivalsSectionSub": "Festival venues that fill the Daejeon night",
@@ -105,11 +105,18 @@
     "howToStep3": "AI sets the order and shows routes and travel times",
     "howToClose": "Close",
     "basketOne": "One place is enough - we'll link nearby spots into a course",
-    "heroPersonaOverline": "Daejeon nights — find your own color",
+    "heroPersonaOverline": "Daejeon nights - find your own color",
     "heroPersonaTitle": "My Night Travel Persona Test",
     "heroPersonaHighlight": "Persona",
     "heroPersonaSubtitle": "Preview night courses picked just for your type through a quick simulation.",
-    "heroPersonaCta": "Start the test"
+    "heroPersonaCta": "Start the test",
+    "catSpots": "Night Spots",
+    "catFestivals": "Festivals",
+    "catCourses": "Courses",
+    "catKlife": "K-Life Guide",
+    "catPersona": "Persona Test",
+    "catStamp": "Stamp Tour",
+    "searchButton": "Search"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest.",
@@ -182,10 +189,10 @@
   },
   "etiquette": {
     "title": "Night Etiquette",
-    "subtitle": "How to enjoy Daejeon nights the right way — pick a situation",
+    "subtitle": "How to enjoy Daejeon nights the right way - pick a situation",
     "error": "Please try again later.",
     "phrasesTitle": "Survival Korean",
-    "phrasesSubtitle": "Type what you want to say — we'll give you the Korean for it",
+    "phrasesSubtitle": "Type what you want to say - we'll give you the Korean for it",
     "emergency": {
       "title": "Emergency",
       "police": "Police",
@@ -319,7 +326,7 @@
       },
       "latefood": {
         "dos": [
-          "Try chimaek — the culture of enjoying fried chicken with beer."
+          "Try chimaek - the culture of enjoying fried chicken with beer."
         ],
         "donts": []
       },
@@ -397,7 +404,7 @@
     "limitReached": "You have used today’s limit ({limit} posts). Please try again tomorrow.",
     "textRejected": "This content does not meet the community rules and was not posted.",
     "report": "Report",
-    "reportDone": "Thanks — your report has been received.",
+    "reportDone": "Thanks - your report has been received.",
     "reportAlready": "You have already reported this.",
     "reportedLabel": "Reported",
     "translate": "Translate",
@@ -443,7 +450,7 @@
     "reselect": "Pick places again",
     "consent": {
       "title": "Allow location access?",
-      "body": "We use your location only to confirm you're actually at the spot when you stamp it — it's checked in that moment only, never saved with your photo or on our servers.",
+      "body": "We use your location only to confirm you're actually at the spot when you stamp it - it's checked in that moment only, never saved with your photo or on our servers.",
       "agree": "Agree & start",
       "cancel": "Cancel",
       "denied": "Location access was denied. Please allow location in your browser settings and try again."
@@ -578,7 +585,7 @@
   },
   "comingSoon": {
     "short": "Coming soon",
-    "body": "Food, stay and shopping listings come from the Korea Tourism Organization's information service. We're still wiring that data up — this page will fill in as soon as it's ready."
+    "body": "Food, stay and shopping listings come from the Korea Tourism Organization's information service. We're still wiring that data up - this page will fill in as soon as it's ready."
   },
   "survey": {
     "q1": "Where are you starting from?",
@@ -652,7 +659,7 @@
       },
       "etiquette": {
         "title": "So nothing feels awkward",
-        "body": "Street food tents, noraebang, late-night diners — the manners that only exist after dark, sorted by the situation you're in."
+        "body": "Street food tents, noraebang, late-night diners - the manners that only exist after dark, sorted by the situation you're in."
       },
       "phrases": {
         "title": "Stuck for words? Show the screen",
@@ -672,9 +679,9 @@
   },
   "personality": {
     "title": "Night Travel Persona Test",
-    "subtitle": "Discover your Daejeon night-travel style in 12 questions — with night courses picked for your type.",
+    "subtitle": "Discover your Daejeon night-travel style in 12 questions - with night courses picked for your type.",
     "introTitle": "What would you do?",
-    "introBody": "Just pick your gut choice for each 'what if' scene. There are no wrong answers — go with what pulls you.",
+    "introBody": "Just pick your gut choice for each 'what if' scene. There are no wrong answers - go with what pulls you.",
     "introMeta": "{count} questions · about 2 minutes",
     "start": "Start test",
     "prev": "Back",
@@ -684,46 +691,46 @@
     "recommendCta": "See recommended courses",
     "seeSpots": "Browse night spots",
     "restart": "Retake",
-    "noCourses": "No courses to recommend yet — try building one on the courses page.",
+    "noCourses": "No courses to recommend yet - try building one on the courses page.",
     "questions": {
       "q1": {
         "text": "You've made it to Daejeon Station! Checked in, and about 3 hours left before nightfall. First move?",
         "a": "Just start walking. Wander the nearby alleys and stumble onto a local bar or a tiny cafe.",
         "b": "Check what festivals, night markets or events are on tonight, and head where the crowd is.",
         "c": "Take it easy. Find a scenic riverside walk near the hotel and stroll quietly.",
-        "d": "Hold on — search 'Daejeon must-see night spots' first and plan a route around photogenic places."
+        "d": "Hold on - search 'Daejeon must-see night spots' first and plan a route around photogenic places."
       },
       "q2": {
-        "text": "You reach the night market — but you're short on time. If you can pick only one zone?",
+        "text": "You reach the night market - but you're short on time. If you can pick only one zone?",
         "a": "Head for the tucked-away alley or the row of local food stalls only locals seem to know.",
         "b": "Go where the game booths, hands-on stalls and buskers are clustered.",
         "c": "Hit the food zone and taste a few of the region's signature dishes.",
         "d": "Head near the photo spot where the whole market fits in one frame."
       },
       "q3": {
-        "text": "As you walk, a local suddenly speaks up: \"This pub is really hot — want to come along?\"",
-        "a": "The thrill of joining strangers wins — you say \"Let's go!\" right away.",
+        "text": "As you walk, a local suddenly speaks up: \"This pub is really hot - want to come along?\"",
+        "a": "The thrill of joining strangers wins - you say \"Let's go!\" right away.",
         "b": "Your plan is set, so you politely decline and stick to it.",
         "c": "You hesitate a bit, but the hope of a new connection wins and you tag along.",
         "d": "You check the pub's vibe on social media first, then weigh if it's your taste."
       },
       "q4": {
         "text": "You must pick just one Daejeon night tour course. Which pulls you most?",
-        "a": "Explore on foot — hidden alleys, local bars and secret night-view points you'd never find by day.",
+        "a": "Explore on foot - hidden alleys, local bars and secret night-view points you'd never find by day.",
         "b": "Hear Daejeon's history and city stories while touring late-night venues and storytelling walks.",
         "c": "A 'night food crawl' through night markets, local eateries and late-night bites.",
         "d": "Spend the night among people, with outdoor performances and festivals."
       },
       "q5": {
         "text": "It starts to drizzle. You have an umbrella and one or two more hours to roam. You…",
-        "a": "Even better — head to a lesser-known area where you can explore rainy alleys and local bars.",
+        "a": "Even better - head to a lesser-known area where you can explore rainy alleys and local bars.",
         "b": "Find somewhere indoors like a theater, museum or exhibition to enjoy culture and stories out of the rain.",
         "c": "Rain means food. Move to an indoor food court or covered market zone and keep eating.",
-        "d": "Change plans — settle into a cafe near the hotel and relax over the night view."
+        "d": "Change plans - settle into a cafe near the hotel and relax over the night view."
       },
       "q6": {
         "text": "How do you take photos while traveling?",
-        "a": "Photos are just for memories — I record only enough to remember later.",
+        "a": "Photos are just for memories - I record only enough to remember later.",
         "b": "That lighting is gorgeous! I hunt for beautiful views and enjoy the shots themselves.",
         "c": "Anything tasty or unusual, I make sure to snap once.",
         "d": "Snapped it! Posted it! I love putting it on my story live and watching the reactions."
@@ -737,7 +744,7 @@
       },
       "q8": {
         "text": "A friend asks, \"If you had to post one highlight of your Daejeon trip, what would it be?\" You pick…",
-        "a": "A photo of a hidden alley or local shop — the 'wait, this place existed?' kind.",
+        "a": "A photo of a hidden alley or local shop - the 'wait, this place existed?' kind.",
         "b": "A night-view shot with beautiful light and lines, or a moody walking snap.",
         "c": "A photo of a unique late-night dish you feel you can only get in Daejeon.",
         "d": "A scene of people laughing together, or a clip from a performance or festival."
@@ -750,10 +757,10 @@
         "d": "A night festival or live performance."
       },
       "q10": {
-        "text": "Your schedule wrapped up early — suddenly a whole 2 hours opened up. How do you use it?",
-        "a": "Head to a neighborhood not on the plan — hop on a bus or subway on a whim.",
+        "text": "Your schedule wrapped up early - suddenly a whole 2 hours opened up. How do you use it?",
+        "a": "Head to a neighborhood not on the plan - hop on a bus or subway on a whim.",
         "b": "Wind down and relax at a cafe or hot spring, wrapping up the day.",
-        "c": "There's still something I haven't eaten — go back to the market or a local spot for more.",
+        "c": "There's still something I haven't eaten - go back to the market or a local spot for more.",
         "d": "Scan social media and the map app to hunt for 'a night spot only I know' in Daejeon."
       },
       "q11": {
@@ -775,7 +782,7 @@
       "explorer": {
         "name": "NIGHT EXPLORER",
         "tagline": "The night adventurer",
-        "desc": "You get the biggest kick out of exploring new alleys, local spots and off-the-map routes. 'We came all this way — let's check out where others don't go' comes naturally to you.",
+        "desc": "You get the biggest kick out of exploring new alleys, local spots and off-the-map routes. 'We came all this way - let's check out where others don't go' comes naturally to you.",
         "keywords": [
           "#AlleyExplorer",
           "#LocalFinder",
@@ -800,7 +807,7 @@
       "player": {
         "name": "NIGHT PLAYER",
         "tagline": "The night reveler",
-        "desc": "You build your night around things to do — festivals, night markets, games, hands-on experiences and events. You love high-energy places alive with sound and light.",
+        "desc": "You build your night around things to do - festivals, night markets, games, hands-on experiences and events. You love high-energy places alive with sound and light.",
         "keywords": [
           "#FestivalLover",
           "#Recharged",
@@ -825,7 +832,7 @@
       "socializer": {
         "name": "NIGHT SOCIALIZER",
         "tagline": "The night connector",
-        "desc": "You'd rather spend the night among people — locals, fellow travelers, companions. You enjoy meeting new people and good conversation, and remember trips as relationships.",
+        "desc": "You'd rather spend the night among people - locals, fellow travelers, companions. You enjoy meeting new people and good conversation, and remember trips as relationships.",
         "keywords": [
           "#PeoplePerson",
           "#Gatherings",
@@ -850,7 +857,7 @@
       "viewLover": {
         "name": "NIGHT VIEW LOVER",
         "tagline": "The scenery lover",
-        "desc": "You savor light and landscape itself — night views, mood, quiet walks, photo spots. You linger by rivers, overlooks and trails, soaking in the city's night air.",
+        "desc": "You savor light and landscape itself - night views, mood, quiet walks, photo spots. You linger by rivers, overlooks and trails, soaking in the city's night air.",
         "keywords": [
           "#ViewCollector",
           "#MoodyWalks",
@@ -900,7 +907,7 @@
       "foodie": {
         "name": "NIGHT FOODIE",
         "tagline": "The night foodie",
-        "desc": "For you, what you eat is the heart of the night — night markets, local eateries, late-night food runs. Daejeon after dark is your time to complete a personal food crawl.",
+        "desc": "For you, what you eat is the heart of the night - night markets, local eateries, late-night food runs. Daejeon after dark is your time to complete a personal food crawl.",
         "keywords": [
           "#NightFoodie",
           "#FlavorFinder",
@@ -925,7 +932,7 @@
       "trendsetter": {
         "name": "NIGHT TRENDSETTER",
         "tagline": "The digital storyteller",
-        "desc": "How you'll show your night on social media — photos, video, stories, live — is part of the trip itself. You naturally think about how to capture and share the moment.",
+        "desc": "How you'll show your night on social media - photos, video, stories, live - is part of the trip itself. You naturally think about how to capture and share the moment.",
         "keywords": [
           "#Documenter",
           "#SocialVibe",
@@ -1054,9 +1061,9 @@
   "briefing": {
     "overline": "Tonight's Briefing",
     "mood": {
-      "wet": "Rain tonight — indoors is the move",
-      "stars": "Moonless clear night — perfect for stargazing",
-      "moon": "The moon is full — fancy a moonlit walk?",
+      "wet": "Rain tonight - indoors is the move",
+      "stars": "Moonless clear night - perfect for stargazing",
+      "moon": "The moon is full - fancy a moonlit walk?",
       "clear": "Daejeon's night is open again tonight"
     },
     "precip": {
@@ -1089,7 +1096,7 @@
   },
   "klife": {
     "restaurantTitle": "K-Life Guide · Restaurant",
-    "restaurantSubtitle": "From walking in to walking out — experience the situation in advance and speak on the spot",
+    "restaurantSubtitle": "From walking in to walking out - experience the situation in advance and speak on the spot",
     "inKorea": "IN KOREA · Culture tips",
     "realKorean": "REAL KOREAN · Phrases that work",
     "staffSays": "The staff will ask (tap to listen)",
@@ -1099,9 +1106,9 @@
     "prevStep": "Previous",
     "nextStep": "Next step",
     "checkTitle": "Did you get the situation?",
-    "checkSubtitle": "Not a test — just pick what you would do in real life",
+    "checkSubtitle": "Not a test - just pick what you would do in real life",
     "myPhrases": "My saved phrases",
-    "myPhrasesEmpty": "Tap Save on any phrase card and it will be collected here — ready to use mid-trip.",
+    "myPhrasesEmpty": "Tap Save on any phrase card and it will be collected here - ready to use mid-trip.",
     "you": "You reply",
     "otherPhrases": "More ways to say it!"
   }

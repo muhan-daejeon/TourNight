@@ -48,8 +48,8 @@ export default function AdminRoleToggle({
       disabled={busy}
       className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold transition disabled:opacity-50 ${
         role === "admin"
-          ? "border-white/15 text-slate-400 hover:border-rose-300/50 hover:text-rose-300"
-          : "border-white/15 text-slate-400 hover:border-amber-300/60 hover:text-amber-300"
+          ? "border-slate-200 text-slate-400 hover:border-rose-300/50 hover:text-rose-600"
+          : "border-slate-200 text-slate-400 hover:border-indigo-300 hover:text-amber-600"
       }`}
     >
       {busy ? "..." : role === "admin" ? "관리자 해제" : "관리자 지정"}

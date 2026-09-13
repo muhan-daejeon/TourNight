@@ -169,8 +169,8 @@ export default function NightEtiquette({
                   onClick={() => setSelected(id)}
                   className={`group relative h-28 overflow-hidden rounded-2xl border text-left transition sm:h-32 ${
                     selected === id
-                      ? "border-amber-400/70 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
-                      : "border-white/10 hover:-translate-y-0.5 hover:border-white/25"
+                      ? "border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
+                      : "border-slate-200 hover:-translate-y-0.5 hover:border-slate-300"
                   }`}
                 >
                   {image ? (
@@ -183,7 +183,7 @@ export default function NightEtiquette({
                     />
                   ) : (
                     <span className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950">
-                      <Icon size={30} strokeWidth={1.3} className="text-white/20" />
+                      <Icon size={30} strokeWidth={1.3} className="text-slate-300" />
                     </span>
                   )}
                   <span
@@ -197,13 +197,13 @@ export default function NightEtiquette({
                     <Icon
                       size={14}
                       strokeWidth={2.2}
-                      className={`shrink-0 ${selected === id ? "text-amber-300" : "text-amber-300/70"}`}
+                      className={`shrink-0 ${selected === id ? "text-amber-600" : "text-amber-600/70"}`}
                     />
                     <span
                       className={
                         selected === id
-                          ? "text-amber-200"
-                          : "text-white group-hover:text-amber-200"
+                          ? "text-amber-700"
+                          : "text-slate-900 group-hover:text-amber-700"
                       }
                     >
                       {t(`topics.${id}`)}
@@ -240,8 +240,8 @@ export default function NightEtiquette({
 
           {/* 이 상황에서 바로 쓰는 한국어 — 에티켓(행동)과 표현(말)을 한 흐름으로 */}
           {phraseCategory && phrases && phrases.length > 0 && (
-            <div className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-400/[0.04] p-5">
-              <p className="flex items-center gap-2 text-sm font-bold text-amber-300">
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <p className="flex items-center gap-2 text-sm font-bold text-amber-600">
                 <Languages size={15} />
                 {t("situationPhrases")}
               </p>
@@ -249,22 +249,22 @@ export default function NightEtiquette({
                 {phrases.map((p) => (
                   <li
                     key={p.korean}
-                    className="flex items-center gap-2 rounded-xl bg-slate-950/40 px-3.5 py-2.5"
+                    className="flex items-center gap-2 rounded-xl bg-slate-50 px-3.5 py-2.5"
                   >
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="font-semibold text-slate-100">{p.korean}</span>
-                      <span className="text-xs text-amber-300/80">{p.roman}</span>
+                      <span className="font-semibold text-slate-900">{p.korean}</span>
+                      <span className="text-xs text-amber-600/80">{p.roman}</span>
                       <span className="text-sm text-slate-400">{p.meaning}</span>
                     </span>
                     <button
                       type="button"
                       onClick={() => speak(p.korean)}
                       aria-label={p.korean}
-                      className="shrink-0 rounded-full bg-white/10 p-2.5 text-slate-300 transition hover:bg-white/15 hover:text-white"
+                      className="shrink-0 rounded-full bg-slate-100 p-2.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-900"
                     >
                       <Volume2
                         size={15}
-                        className={speakingKo === p.korean ? "animate-pulse text-amber-300" : ""}
+                        className={speakingKo === p.korean ? "animate-pulse text-amber-600" : ""}
                       />
                     </button>
                   </li>
@@ -272,7 +272,7 @@ export default function NightEtiquette({
               </ul>
               <a
                 href="#phrasebook"
-                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-400 transition hover:text-amber-300"
+                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-400 transition hover:text-amber-600"
               >
                 {t("phrasesMore")}
                 <ChevronRight size={13} />
@@ -286,8 +286,8 @@ export default function NightEtiquette({
 }
 
 const TONE = {
-  emerald: { border: "border-emerald-400/20", bg: "bg-emerald-400/[0.05]", text: "text-emerald-300", icon: "text-emerald-400" },
-  rose: { border: "border-rose-400/20", bg: "bg-rose-400/[0.05]", text: "text-rose-300", icon: "text-rose-400" },
+  emerald: { border: "border-emerald-200", bg: "bg-emerald-50", text: "text-emerald-600", icon: "text-emerald-400" },
+  rose: { border: "border-rose-200", bg: "bg-rose-50", text: "text-rose-600", icon: "text-rose-400" },
 } as const;
 
 /**
@@ -320,7 +320,7 @@ function DoDontSlider({
     <div className={`rounded-2xl border p-5 ${c.border} ${c.bg}`}>
       <p className={`mb-3 text-sm font-bold ${c.text}`}>{title}</p>
 
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-800/60">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-100">
         <Image
           src={images[current].image}
           alt=""
@@ -330,7 +330,7 @@ function DoDontSlider({
         />
       </div>
 
-      <p className="mt-3 flex gap-2 text-sm text-slate-200">
+      <p className="mt-3 flex gap-2 text-sm text-slate-400">
         <Icon size={15} className={`mt-0.5 shrink-0 ${c.icon}`} />
         {captions[current] ?? images[current].caption}
       </p>
@@ -341,7 +341,7 @@ function DoDontSlider({
             type="button"
             onClick={() => setIndex((i) => (i - 1 + images.length) % images.length)}
             aria-label={t("prevItem")}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-white/5 hover:text-white"
+            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-900"
           >
             <ChevronLeft size={16} />
           </button>
@@ -352,7 +352,7 @@ function DoDontSlider({
             type="button"
             onClick={() => setIndex((i) => (i + 1) % images.length)}
             aria-label={t("nextItem")}
-            className="rounded-full p-1.5 text-slate-400 transition hover:bg-white/5 hover:text-white"
+            className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-900"
           >
             <ChevronRight size={16} />
           </button>

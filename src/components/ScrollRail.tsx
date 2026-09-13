@@ -47,7 +47,7 @@ export default function ScrollRail({
   };
 
   const arrow =
-    "absolute top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/15 bg-slate-950/80 p-2 text-white backdrop-blur transition hover:bg-slate-900 disabled:pointer-events-none disabled:opacity-0 lg:block";
+    "absolute top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-slate-200 bg-slate-950/80 p-2 text-white backdrop-blur transition hover:bg-white disabled:pointer-events-none disabled:opacity-0 lg:block";
 
   return (
     <div className="relative">

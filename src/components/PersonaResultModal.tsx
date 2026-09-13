@@ -66,7 +66,7 @@ export default function PersonaResultModal({ onClose }: { onClose: () => void })
       role="dialog"
       aria-modal="true"
       onClick={onClose}
-      className="fixed inset-0 z-[70] overflow-y-auto bg-slate-950/90 p-4 py-10 backdrop-blur-sm sm:py-16"
+      className="fixed inset-0 z-[70] overflow-y-auto bg-white/90 p-4 py-10 backdrop-blur-sm sm:py-16"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -76,23 +76,23 @@ export default function PersonaResultModal({ onClose }: { onClose: () => void })
           type="button"
           onClick={onClose}
           aria-label={t("resultClose")}
-          className="absolute -top-3 right-0 z-10 rounded-full bg-slate-800 p-2 text-slate-300 shadow-lg transition hover:text-white"
+          className="absolute -top-3 right-0 z-10 rounded-full bg-slate-200 p-2 text-slate-400 shadow-lg transition hover:text-slate-900"
         >
           <X size={18} />
         </button>
 
         <div className="pt-10">
           {state === "loading" && (
-            <div className="h-64 animate-pulse rounded-3xl border border-white/10 bg-slate-900/50" />
+            <div className="h-64 animate-pulse rounded-3xl border border-slate-200 bg-white" />
           )}
 
           {state === "empty" && (
-            <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-10 text-center">
-              <p className="text-sm text-slate-300">{t("noSavedResult")}</p>
+            <div className="rounded-3xl border border-slate-200 bg-slate-900/80 p-10 text-center">
+              <p className="text-sm text-slate-400">{t("noSavedResult")}</p>
               <Link
                 href="/personality"
                 onClick={onClose}
-                className="mt-5 inline-flex items-center gap-2 rounded-full bg-indigo-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-400"
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-indigo-500 px-6 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-indigo-400"
               >
                 {t("goTest")}
                 <ArrowRight size={15} />

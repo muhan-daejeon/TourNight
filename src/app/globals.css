@@ -5,6 +5,39 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ── 대전 브랜드 컬러 (대전광역시 CI 팔레트 기반) ──
+   Main: 대전 블루 PANTONE 2145C(#004EA2) · 대전 그린 2413C(#35B597)
+   Sub:  4150C(#4774B9) · 2062C(#A64089) · 2012C(#F39800) 등
+   기존 코드가 쓰는 indigo·amber 유틸리티 스케일을 이 팔레트로 재정의해
+   사이트 전체의 주 동선(블루)과 버튼·야간 액센트(오렌지)가 한 번에 바뀐다. */
+@theme {
+  --color-daejeon-blue: #004ea2;
+  --color-daejeon-green: #35b597;
+  --color-daejeon-orange: #f39800;
+  --color-daejeon-purple: #a64089;
+
+  /* indigo → 대전 블루 스케일 */
+  --color-indigo-50: #edf3fa;
+  --color-indigo-100: #d9e5f4;
+  --color-indigo-200: #b0cbe9;
+  --color-indigo-300: #7fa8d9;
+  --color-indigo-400: #4774b9; /* PANTONE 4150C */
+  --color-indigo-500: #1b63b5;
+  --color-indigo-600: #004ea2; /* PANTONE 2145C */
+  --color-indigo-700: #003d80;
+  --color-indigo-800: #0a2f63;
+  --color-indigo-900: #08234a;
+
+  /* amber → 대전 오렌지 스케일 (PANTONE 2012C) */
+  --color-amber-50: #fef4e5;
+  --color-amber-100: #fde5c2;
+  --color-amber-200: #fbd090;
+  --color-amber-300: #f7ae33;
+  --color-amber-400: #f39800; /* PANTONE 2012C */
+  --color-amber-600: #c97c00;
+  --color-amber-700: #a56300;
+}
+
 :root {
   /*
     --header-row-h: 로고+카테고리 "줄" 자체의 높이.
@@ -32,16 +65,9 @@ html {
   font-size: 120%;
 }
 
-/* 칙칙함 개선 — 페이지 배경은 body가 아니라 html에 깐다: 바탕(slate-950) 위에
-   도시 불빛 같은 인디고·보랏빛 글로우. body에 깔지 않는 이유는 별 레이어
-   (body::before, z -1)가 body 배경 뒤로 들어가 가려지기 때문. 스크롤해도
-   하늘은 제자리(fixed) — 콘텐츠만 그 아래로 흐른다 */
 html {
-  background-color: #020617; /* slate-950 */
-  background-image:
-    radial-gradient(1100px 560px at 50% -120px, rgba(99, 102, 241, 0.16), transparent 70%),
-    radial-gradient(900px 520px at 88% 12%, rgba(168, 85, 247, 0.09), transparent 65%);
-  background-attachment: fixed;
+  /* 라이트 테마 전환 — 밝은 바탕 위에 대형 사진과 콘텐츠가 주인공이 된다 */
+  background-color: #ffffff;
 }
 
 body {
@@ -51,46 +77,22 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* 밤하늘 별 — .night-hero(정의만 있고 미사용)의 별을 화면 전체로 옮겨 왔다.
-   fixed라 스크롤과 무관하게 하늘에 붙어 있고, z -1이라 모든 콘텐츠 뒤에서
-   은은하게 반짝인다. 클릭도 가리지 않는다 */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255, 255, 255, 0.55) 50%, transparent 51%),
-    radial-gradient(1px 1px at 31% 9%, rgba(255, 255, 255, 0.45) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 46% 24%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
-    radial-gradient(1px 1px at 58% 12%, rgba(255, 255, 255, 0.4) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 71% 20%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
-    radial-gradient(1px 1px at 84% 8%, rgba(255, 255, 255, 0.45) 50%, transparent 51%),
-    radial-gradient(1px 1px at 93% 28%, rgba(255, 255, 255, 0.35) 50%, transparent 51%),
-    radial-gradient(1px 1px at 6% 44%, rgba(255, 255, 255, 0.3) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 24% 58%, rgba(255, 255, 255, 0.28) 50%, transparent 51%),
-    radial-gradient(1px 1px at 66% 50%, rgba(255, 255, 255, 0.3) 50%, transparent 51%),
-    radial-gradient(1px 1px at 88% 62%, rgba(255, 255, 255, 0.25) 50%, transparent 51%),
-    radial-gradient(1px 1px at 40% 78%, rgba(255, 255, 255, 0.2) 50%, transparent 51%),
-    radial-gradient(1px 1px at 78% 86%, rgba(255, 255, 255, 0.18) 50%, transparent 51%);
-  animation: twinkle 5s ease-in-out infinite;
-}
 
 ::selection {
   background: rgba(251, 191, 36, 0.3);
 }
 
-/* 섹션 제목용 형광펜 밑줄 — 서울의 밤 포털의 노란 마커처럼, 글자 아래쪽 1/3을
-   앰버로 슥 칠한다. 줄바꿈돼도 각 줄에 이어지도록 clone */
+/* 섹션 제목용 밑줄 — 대전 블루→그린 그라데이션 바. 노란 형광펜(서울의 밤
+   포털의 시그니처)과 확실히 갈라서는 우리 표식이다 */
 .marker-underline {
   background-image: linear-gradient(
-    to top,
-    rgba(251, 191, 36, 0.3) 0%,
-    rgba(251, 191, 36, 0.3) 32%,
-    transparent 32%
+    90deg,
+    rgba(0, 78, 162, 0.35),
+    rgba(53, 181, 151, 0.5)
   );
-  border-radius: 2px;
+  background-repeat: no-repeat;
+  background-size: 100% 0.32em;
+  background-position: 0 92%;
   padding: 0 0.12em;
   margin: 0 -0.12em;
   -webkit-box-decoration-break: clone;
@@ -186,8 +188,8 @@ body::before {
 
 /* ── 글래스 카드 ── */
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid rgb(226 232 240); /* slate-200 */
   backdrop-filter: blur(12px);
   transition:
     transform 0.25s ease,
@@ -198,11 +200,8 @@ body::before {
 
 .glass-card:hover {
   transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(251, 191, 36, 0.35);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.45),
-    0 0 24px rgba(251, 191, 36, 0.08);
+  border-color: rgba(79, 70, 229, 0.4); /* indigo-600 */
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.1);
 }
 
 /* 섹션 오버라인 라벨 */
@@ -211,5 +210,5 @@ body::before {
   font-weight: 700;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: rgb(251 191 36 / 0.9);
+  color: rgb(38 142 117); /* 대전 그린(2413C)의 대비 보정 톤 */
 }

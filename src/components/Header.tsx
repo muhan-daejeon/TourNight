@@ -228,7 +228,7 @@ export default function Header() {
 
   const linkClass = (active: boolean) =>
     `shrink-0 transition ${
-      active ? "font-semibold text-amber-300" : "hover:text-amber-300"
+      active ? "font-semibold text-indigo-600" : "hover:text-indigo-600"
     }`;
 
   // "/"는 startsWith로 보면 모든 경로에 걸리므로 정확히 일치할 때만 현재 탭이다
@@ -245,7 +245,7 @@ export default function Header() {
     // backdrop-blur에 걸려 부모 메뉴 글자까지 흐릿해진다. 켜져 있지 않을 때도
     // z-50이던 걸 z-[56]으로만 올린 것뿐이라 다른 겹침에는 영향이 없다
     <header
-      className="sticky top-0 z-[56] border-b border-white/[0.06] bg-slate-950/80 backdrop-blur-md"
+      className="sticky top-0 z-[56] border-b border-slate-200 bg-white/95 backdrop-blur-md"
       // 호버로 연 메뉴는 헤더(패널 포함) 밖으로 마우스가 나가면 닫는다
       onMouseLeave={() => canHover && setMenuOpen(false)}
     >
@@ -261,9 +261,9 @@ export default function Header() {
         <Link href="/" className="flex shrink-0 flex-col leading-none xl:ml-10">
           <span
             data-header-logo
-            className="text-[26px] font-extrabold tracking-tight text-white lg:text-[34px]"
+            className="text-[26px] font-extrabold tracking-tight text-slate-900 lg:text-[34px]"
           >
-            Tour<span className="text-amber-400">Night</span>
+            Tour<span className="text-indigo-600">Night</span>
           </span>
           <span className="mt-1 text-[10px] tracking-tight text-slate-500">
             {t("site.tagline")}
@@ -333,12 +333,12 @@ export default function Header() {
                     aria-expanded={menuOpen}
                     className={`whitespace-nowrap text-base tracking-wide transition ${
                       isTourTarget
-                        ? "rounded-lg border-2 border-amber-400 px-3 py-1 font-semibold text-amber-300"
+                        ? "rounded-lg border-2 border-amber-400 px-3 py-1 font-semibold text-amber-600"
                         : dimmedByTour
-                          ? "font-light text-slate-600"
+                          ? "font-light text-slate-300"
                           : groupActive
-                            ? "font-light text-amber-300"
-                            : "font-light text-slate-200 hover:text-amber-300"
+                            ? "font-light text-indigo-600"
+                            : "font-light text-slate-700 hover:text-indigo-600"
                     }`}
                   >
                     {t(`nav.${group.labelKey}`)}
@@ -351,9 +351,9 @@ export default function Header() {
                 {isTourTarget && (
                   <span
                     data-tour-target={TOUR_KEY[tourTarget.itemKey]}
-                    className="flex items-center gap-1.5 whitespace-nowrap text-[13px] font-light text-amber-300"
+                    className="flex items-center gap-1.5 whitespace-nowrap text-[13px] font-light text-amber-600"
                   >
-                    <span aria-hidden>—</span>
+                    <span aria-hidden>-</span>
                     {t(`nav.${tourTarget.itemKey}`)}
                   </span>
                 )}
@@ -380,7 +380,7 @@ export default function Header() {
             }}
             aria-label={t("home.searchPlaceholder")}
             aria-expanded={searchOpen}
-            className="rounded-full p-2 text-slate-300 transition hover:bg-white/5 hover:text-white"
+            className="rounded-full p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
           >
             <Search size={18} />
           </button>
@@ -403,7 +403,7 @@ export default function Header() {
           ref={panelRef}
           onMouseEnter={openMenu}
           onMouseLeave={scheduleCloseMenu}
-          className="absolute inset-x-0 top-full z-40 overflow-hidden border-t border-white/10 bg-slate-950"
+          className="absolute inset-x-0 top-full z-40 overflow-hidden border-t border-slate-200 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)]"
         >
           {/* 메뉴 칸은 가운데 쪽에 몰려 있어 패널 양옆이 비는데, 그 자리를
               채우는 장식 — 실제 메뉴 폭이 넓어지는 lg 이상에서만 보인다.
@@ -498,7 +498,7 @@ export default function Header() {
       {searchOpen && (
         <form
           onSubmit={submitSearch}
-          className="border-t border-white/[0.06] bg-slate-950/95"
+          className="border-t border-slate-200 bg-white"
         >
           <div className="flex w-full items-center gap-2 px-6 py-3">
             <Search size={16} className="shrink-0 text-slate-500" />
@@ -508,7 +508,7 @@ export default function Header() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("home.searchPlaceholder")}
-              className="flex-1 bg-transparent text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none"
+              className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
             />
             <button
               type="submit"
@@ -520,7 +520,7 @@ export default function Header() {
               type="button"
               onClick={() => setSearchOpen(false)}
               aria-label={t("community.photoClose")}
-              className="shrink-0 rounded-full p-1.5 text-slate-500 transition hover:text-white"
+              className="shrink-0 rounded-full p-1.5 text-slate-400 transition hover:text-slate-900"
             >
               <X size={16} />
             </button>

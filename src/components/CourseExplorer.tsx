@@ -74,13 +74,13 @@ function StopChain({
     <div className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1.5 text-[13px]">
       {course.stops.map((s, si) => (
         <span key={s.contentId} className="flex items-center gap-1.5">
-          <span className="text-slate-200">
+          <span className="text-slate-400">
             <span className="text-slate-500">{si + 1}.</span> {s.title}
           </span>
           {si < course.stops.length - 1 && (
-            <span className="flex items-center gap-1 text-slate-600">
+            <span className="flex items-center gap-1 text-slate-400">
               {course.legs[si]?.together && (
-                <span className="flex items-center gap-0.5 rounded-full bg-amber-300/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                <span className="flex items-center gap-0.5 rounded-full bg-amber-300/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">
                   <Users size={9} />
                   {t("together")}
                 </span>
@@ -160,7 +160,7 @@ function RoutePanel({
   ] as const;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+    <div className="rounded-2xl border border-slate-200 bg-slate-100 p-4">
       <div className="flex flex-wrap gap-1.5">
         {modes.map(([m, Icon, label]) => {
           const total = totalOf(course, m);
@@ -172,7 +172,7 @@ function RoutePanel({
               className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold transition ${
                 mode === m
                   ? "border-amber-400 bg-amber-400 text-slate-950"
-                  : "border-white/10 bg-white/5 text-slate-300 hover:border-white/25 hover:text-white"
+                  : "border-slate-200 bg-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-900"
               }`}
             >
               <Icon size={14} />
@@ -196,7 +196,7 @@ function RoutePanel({
           if (!total) return null;
           return (
             <div className="mt-3">
-              <p className="text-sm font-bold text-amber-300">
+              <p className="text-sm font-bold text-amber-600">
                 {mode === "best"
                   ? t("totalBest", {
                       min: total.min,
@@ -281,22 +281,22 @@ function RoutePanel({
             const unavailable = !r || (r.status !== "ok" && r.status !== "too_close");
             return (
               <li key={i} className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-bold text-slate-300">
+                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400">
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] text-slate-300">
+                  <p className="truncate text-[13px] text-slate-400">
                     {course.stops[i].title}
-                    <span className="mx-1 text-slate-600">→</span>
+                    <span className="mx-1 text-slate-400">→</span>
                     {course.stops[i + 1].title}
                   </p>
                   <p
                     className={`flex items-center gap-1.5 text-[13px] font-semibold ${
-                      unavailable ? "text-rose-300" : "text-slate-100"
+                      unavailable ? "text-rose-600" : "text-slate-900"
                     }`}
                   >
                     {LegIcon && !unavailable && (
-                      <LegIcon size={13} className="shrink-0 text-amber-300" />
+                      <LegIcon size={13} className="shrink-0 text-amber-600" />
                     )}
                     {detail}
                     {walkHint && (
@@ -312,7 +312,7 @@ function RoutePanel({
                   {picked === "transit" &&
                     r?.status === "ok" &&
                     r.legs.some((sub) => sub.mode !== "WALK" && sub.startName) && (
-                      <ol className="mt-1.5 space-y-1 border-l border-white/10 pl-2.5">
+                      <ol className="mt-1.5 space-y-1 border-l border-slate-200 pl-2.5">
                         {r.legs.map((sub, k) => {
                           if (sub.mode === "WALK") {
                             const m = Math.round((sub.durationSec ?? 0) / 60);
@@ -331,14 +331,14 @@ function RoutePanel({
                           return (
                             <li
                               key={k}
-                              className="flex items-start gap-1.5 text-[12px] text-slate-300"
+                              className="flex items-start gap-1.5 text-[12px] text-slate-400"
                             >
                               <SubIcon
                                 size={11}
-                                className="mt-0.5 shrink-0 text-amber-300/80"
+                                className="mt-0.5 shrink-0 text-amber-600/80"
                               />
                               <span className="min-w-0">
-                                <b className="text-slate-100">{sub.route}</b>{" "}
+                                <b className="text-slate-900">{sub.route}</b>{" "}
                                 {t("stepRide", {
                                   start: sub.startName ?? "",
                                   end: sub.endName ?? "",
@@ -364,10 +364,10 @@ function RoutePanel({
 
 /** 카테고리 배지 색 — 홈 리스트·지도 핀과 같은 계열 */
 const CATEGORY_TEXT: Record<string, string> = {
-  science: "text-sky-300",
-  nature: "text-emerald-300",
+  science: "text-sky-600",
+  nature: "text-emerald-600",
   festival: "text-pink-300",
-  city: "text-amber-300",
+  city: "text-amber-600",
 };
 
 export default function CourseExplorer({ courses }: { courses: Course[] }) {
@@ -484,7 +484,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
     `w-full rounded-2xl border p-4 text-left transition ${
       active
         ? "border-amber-300/60 bg-amber-300/[0.06]"
-        : "border-white/10 bg-white/[0.03] hover:border-white/20"
+        : "border-slate-200 bg-slate-100 hover:border-slate-300"
     }`;
 
   return (
@@ -492,20 +492,20 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
       {/* 코스 카드 목록 — AI가 짠 코스가 있으면 맨 위 */}
       <div className="space-y-3">
         {aiState === "loading" && (
-          <div className="flex items-center gap-2.5 rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] p-4 text-sm text-amber-200/90">
+          <div className="flex items-center gap-2.5 rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] p-4 text-sm text-amber-700/90">
             <Loader2 size={15} className="animate-spin" />
             {t("aiLoading")}
           </div>
         )}
 
         {aiState === "limit" && (
-          <p className="rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] p-4 text-sm text-amber-200/90">
+          <p className="rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] p-4 text-sm text-amber-700/90">
             {t("aiDailyLimit")}
           </p>
         )}
 
         {aiState === "error" && (
-          <p className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-400">
+          <p className="rounded-2xl border border-slate-200 bg-slate-100 p-4 text-sm text-slate-400">
             {t("aiError")}
           </p>
         )}
@@ -524,19 +524,19 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                 </span>
                 {/* 홈에서 켜둔 카테고리 필터를 우선했음을 알림 */}
                 {aiCourse.prefCategory && (
-                  <span className="rounded-full border border-white/15 px-2 py-0.5 text-[11px] font-semibold text-slate-300">
+                  <span className="rounded-full border border-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-400">
                     {t("aiCategoryPref", {
                       category: home(`categories.${aiCourse.prefCategory}`),
                     })}
                   </span>
                 )}
               </span>
-              <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-300/90">
+              <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-600">
                 <Route size={13} />
                 {formatDistance(aiCourse.totalM)}
               </span>
             </div>
-            <h3 className="mt-2 font-bold text-slate-100">{aiCourse.title}</h3>
+            <h3 className="mt-2 font-bold text-slate-900">{aiCourse.title}</h3>
             <p className="mt-0.5 text-xs text-slate-500">
               {t("stopsCount", { count: aiCourse.stops.length })} ·{" "}
               {(() => {
@@ -551,7 +551,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
               })()}
             </p>
             {aiCourse.summary && (
-              <p className="mt-2 text-[13px] leading-relaxed text-slate-300">
+              <p className="mt-2 text-[13px] leading-relaxed text-slate-400">
                 {aiCourse.summary}
               </p>
             )}
@@ -561,11 +561,11 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
               <ol className="mt-3 space-y-2">
                 {aiCourse.stops.map((s, i) => (
                   <li key={s.contentId} className="flex gap-2.5">
-                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[11px] font-bold text-amber-300">
+                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[11px] font-bold text-amber-600">
                       {i + 1}
                     </span>
                     <div className="min-w-0">
-                      <p className="flex flex-wrap items-center gap-1.5 text-[13px] font-semibold text-slate-100">
+                      <p className="flex flex-wrap items-center gap-1.5 text-[13px] font-semibold text-slate-900">
                         {s.title}
                         <span
                           className={`text-[11px] font-medium ${CATEGORY_TEXT[s.category]}`}
@@ -578,7 +578,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                           </span>
                         )}
                         {i > 0 && aiCourse.legs[i - 1]?.together && (
-                          <span className="flex items-center gap-0.5 rounded-full bg-amber-300/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                          <span className="flex items-center gap-0.5 rounded-full bg-amber-300/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">
                             <Users size={9} />
                             {t("together")}
                           </span>
@@ -601,16 +601,16 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             )}
 
             {aiCourse.tip && (
-              <p className="mt-3 flex gap-1.5 rounded-xl bg-white/[0.04] px-3 py-2 text-[12px] leading-relaxed text-slate-300">
-                <Lightbulb size={13} className="mt-0.5 shrink-0 text-amber-300" />
+              <p className="mt-3 flex gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-[12px] leading-relaxed text-slate-400">
+                <Lightbulb size={13} className="mt-0.5 shrink-0 text-amber-600" />
                 {aiCourse.tip}
               </p>
             )}
             {/* 코스가 끝나는 곳 인근 숙소 — 야간 소비를 숙박으로 연결 */}
             {aiCourse.stays.length > 0 && (
-              <div className="mt-3 border-t border-white/10 pt-3">
-                <p className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-300">
-                  <BedDouble size={13} className="text-amber-300" />
+              <div className="mt-3 border-t border-slate-200 pt-3">
+                <p className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-400">
+                  <BedDouble size={13} className="text-amber-600" />
                   {t("staysNear", {
                     name: aiCourse.stops[aiCourse.stops.length - 1].title,
                   })}
@@ -623,7 +623,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                       target="_blank"
                       rel="noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="group w-32 shrink-0 overflow-hidden rounded-lg border border-white/10 transition hover:border-amber-300/50"
+                      className="group w-32 shrink-0 overflow-hidden rounded-lg border border-slate-200 transition hover:border-indigo-300"
                     >
                       <div className="relative h-16 w-full">
                         <Image
@@ -635,7 +635,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                         />
                       </div>
                       <div className="p-1.5">
-                        <p className="truncate text-[11px] font-semibold text-slate-200 group-hover:text-amber-300">
+                        <p className="truncate text-[11px] font-semibold text-slate-400 group-hover:text-amber-600">
                           {s.title}
                         </p>
                         <p className="text-[10px] text-slate-500">
@@ -648,7 +648,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
               </div>
             )}
 
-            <p className="mt-2 text-[11px] text-slate-600">
+            <p className="mt-2 text-[11px] text-slate-400">
               {aiCourse.source === "ai" ? t("aiNote") : t("aiFallbackNote")}
             </p>
           </button>
@@ -680,10 +680,10 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             className={cardClass(course?.id === c.id)}
           >
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-bold text-slate-100">
+              <h3 className="font-bold text-slate-900">
                 {t("courseTitle", { name: c.stops[0].title })}
               </h3>
-              <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-300/90">
+              <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-600">
                 <Route size={13} />
                 {formatDistance(c.totalM)}
               </span>
@@ -708,12 +708,12 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
         ))}
 
         {!courses.length && aiState !== "loading" && (
-          <p className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-500">
+          <p className="rounded-2xl border border-slate-200 bg-slate-100 p-4 text-sm text-slate-500">
             {t("empty")}
           </p>
         )}
 
-        <p className="flex items-center gap-1.5 px-1 pt-1 text-[11px] text-slate-600">
+        <p className="flex items-center gap-1.5 px-1 pt-1 text-[11px] text-slate-400">
           <MapPin size={11} />
           {t("dataNote")}
         </p>
@@ -722,9 +722,9 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
       {/* 선택이 없으면 지도 자리를 비워두지 않고 안내를 둔다 (레이아웃 유지) */}
       {!course && (
         <div className="lg:sticky lg:top-20 lg:self-start">
-          <div className="flex h-80 items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 text-center lg:h-[500px]">
+          <div className="flex h-80 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white/[0.02] px-6 text-center lg:h-[500px]">
             <p className="flex flex-col items-center gap-2 text-sm text-slate-500">
-              <MapPin size={22} strokeWidth={1.5} className="text-slate-600" />
+              <MapPin size={22} strokeWidth={1.5} className="text-slate-400" />
               {t("selectHint")}
             </p>
           </div>

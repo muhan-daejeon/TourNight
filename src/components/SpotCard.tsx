@@ -57,7 +57,7 @@ export default function SpotCard({ spot }: { spot: NightSpot }) {
   const gu = district(spot.addrKo ?? spot.addr ?? "");
 
   return (
-    <article className="group relative h-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-1 hover:border-amber-400/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)]">
+    <article className="group relative h-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 transition hover:-translate-y-1 hover:border-indigo-300 hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)]">
       <Link href={`/spots/${spot.contentId}`} className="block">
         <div
           className={`relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br ${CATEGORY_SCENE[spot.category]}`}
@@ -71,15 +71,15 @@ export default function SpotCard({ spot }: { spot: NightSpot }) {
               className="object-cover transition duration-500 group-hover:scale-[1.04]"
             />
           ) : (
-            <Icon size={36} strokeWidth={1.2} className="text-white/20" />
+            <Icon size={36} strokeWidth={1.2} className="text-slate-300" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
         </div>
         <div className="p-4">
-          <h3 className="truncate text-[15px] font-bold text-white group-hover:text-amber-300">
+          <h3 className="truncate text-[15px] font-bold text-slate-900 group-hover:text-amber-600">
             {spot.title}
           </h3>
-          <p className="mt-1.5 flex gap-2 text-[11px] font-semibold text-amber-300">
+          <p className="mt-1.5 flex gap-2 text-[11px] font-semibold text-amber-600">
             <span>#{t(`categories.${spot.category}`)}</span>
             {gu && <span>#{gu}</span>}
           </p>
@@ -98,7 +98,7 @@ export default function SpotCard({ spot }: { spot: NightSpot }) {
         className={`absolute right-3 top-3 rounded-full p-2 backdrop-blur transition ${
           saved
             ? "bg-amber-400 text-slate-950"
-            : "bg-slate-950/50 text-white hover:bg-slate-950/80"
+            : "bg-slate-950/50 text-slate-900 hover:bg-slate-950/80"
         }`}
       >
         <Bookmark size={15} fill={saved ? "currentColor" : "none"} />

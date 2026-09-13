@@ -35,7 +35,7 @@ export default function CourseTabs({ courses }: { courses: Course[] }) {
         data-tour="courses"
         role="tablist"
         aria-label={t("title")}
-        className="mb-7 flex gap-2 border-b border-white/[0.08]"
+        className="mb-7 flex gap-2 border-b border-slate-200"
       >
         {TABS.map(({ key, label, Icon }) => (
           <button
@@ -48,8 +48,8 @@ export default function CourseTabs({ courses }: { courses: Course[] }) {
             }}
             className={`-mb-px flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition ${
               tab === key
-                ? "border-amber-400 text-amber-300"
-                : "border-transparent text-slate-400 hover:text-slate-200"
+                ? "border-amber-400 text-amber-600"
+                : "border-transparent text-slate-400 hover:text-slate-400"
             }`}
           >
             <Icon size={15} />

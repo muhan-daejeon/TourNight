@@ -64,7 +64,7 @@ function TitleWithHighlight({
   return (
     <>
       {title.slice(0, at)}
-      <span className="text-amber-300">{highlight}</span>
+      <span className="text-amber-600">{highlight}</span>
       {title.slice(at + highlight.length)}
     </>
   );
@@ -91,7 +91,7 @@ function Slide({
       className={`w-full shrink-0 px-2 sm:px-4 ${active ? "" : "pointer-events-none"}`}
     >
       <div
-        className={`relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br sm:rounded-3xl ${slide.gradient} transition-[opacity,transform] duration-700 ${
+        className={`relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br sm:rounded-3xl ${slide.gradient} transition-[opacity,transform] duration-700 ${
           active ? "opacity-100 scale-100" : "opacity-40 scale-[0.97]"
         }`}
       >
@@ -123,7 +123,7 @@ function Slide({
           만큼 캐러셀 전체 높이가 로케일별로 들쭉날쭉해진다. 넘치는 줄은 아래
           subtitle의 line-clamp로 조용히 자른다 */}
       <div className="relative flex h-[408px] flex-col justify-center px-7 py-14 sm:h-[504px] sm:px-14 sm:py-20">
-        <p className="text-xs font-semibold tracking-[0.18em] text-slate-300 sm:text-sm">
+        <p className="text-xs font-semibold tracking-[0.18em] text-slate-400 sm:text-sm">
           {slide.overline}
         </p>
         {/* sm 이상에서 5xl을 썼었는데, 영어(다른 로케일도)는 같은 문구가 한국어보다
@@ -134,7 +134,7 @@ function Slide({
         <h1 className="mt-4 line-clamp-2 max-w-xl text-3xl font-extrabold leading-[1.22] tracking-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.8)] sm:text-4xl">
           <TitleWithHighlight title={slide.title} highlight={slide.highlight} />
         </h1>
-        <p className="mt-5 line-clamp-3 max-w-md text-sm leading-relaxed text-slate-300 sm:text-base">
+        <p className="mt-5 line-clamp-3 max-w-md text-sm leading-relaxed text-slate-400 sm:text-base">
           {slide.subtitle}
         </p>
         <div className="mt-8">
@@ -263,7 +263,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             type="button"
             onClick={() => go(-1)}
             aria-label={t("prevSlide")}
-            className="absolute left-5 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/15 bg-slate-950/50 p-2.5 text-white backdrop-blur transition hover:bg-slate-950/80 sm:block"
+            className="absolute left-5 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-slate-200 bg-slate-950/50 p-2.5 text-white backdrop-blur transition hover:bg-slate-950/80 sm:block"
           >
             <ChevronLeft size={20} />
           </button>
@@ -271,7 +271,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             type="button"
             onClick={() => go(1)}
             aria-label={t("nextSlide")}
-            className="absolute right-5 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/15 bg-slate-950/50 p-2.5 text-white backdrop-blur transition hover:bg-slate-950/80 sm:block"
+            className="absolute right-5 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-slate-200 bg-slate-950/50 p-2.5 text-white backdrop-blur transition hover:bg-slate-950/80 sm:block"
           >
             <ChevronRight size={20} />
           </button>
@@ -281,14 +281,14 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               type="button"
               onClick={() => go(-1)}
               aria-label={t("prevSlide")}
-              className="rounded-full p-1 text-slate-300 transition hover:text-white sm:hidden"
+              className="rounded-full p-1 text-slate-400 transition hover:text-slate-900 sm:hidden"
             >
               <ChevronLeft size={15} />
             </button>
             {/* 몇 번째인지는 화면에 보이므로, 읽어주는 쪽은 이 한 줄만 담당한다 */}
             <span
               aria-live="polite"
-              className="text-xs font-semibold tabular-nums text-slate-300"
+              className="text-xs font-semibold tabular-nums text-slate-400"
             >
               {index + 1} / {count}
             </span>
@@ -296,7 +296,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               type="button"
               onClick={() => setUserPaused(playing)}
               aria-label={playing ? t("pauseSlides") : t("playSlides")}
-              className="rounded-full p-1 text-slate-300 transition hover:text-white"
+              className="rounded-full p-1 text-slate-400 transition hover:text-slate-900"
             >
               {playing ? <Pause size={13} /> : <Play size={13} />}
             </button>
@@ -304,7 +304,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               type="button"
               onClick={() => go(1)}
               aria-label={t("nextSlide")}
-              className="rounded-full p-1 text-slate-300 transition hover:text-white sm:hidden"
+              className="rounded-full p-1 text-slate-400 transition hover:text-slate-900 sm:hidden"
             >
               <ChevronRight size={15} />
             </button>

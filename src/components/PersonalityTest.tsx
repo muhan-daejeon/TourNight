@@ -81,10 +81,10 @@ export default function PersonalityTest() {
       { key: "how4", Icon: Camera },
     ];
     return (
-      <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/50">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
         <div className="grid gap-8 p-8 sm:grid-cols-[1.4fr_1fr] sm:p-11">
           <div>
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">
+            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
               {t("introTitle")}
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-400">
@@ -93,10 +93,10 @@ export default function PersonalityTest() {
             <div className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-4">
               {HOW.map(({ key, Icon }, i) => (
                 <div key={key}>
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-300">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600">
                     <Icon size={20} />
                   </div>
-                  <p className="mt-3 text-[13px] font-bold text-white">
+                  <p className="mt-3 text-[13px] font-bold text-slate-900">
                     {i + 1}. {t(`${key}.title`)}
                   </p>
                   <p className="mt-1 text-[11px] leading-snug text-slate-500">
@@ -118,22 +118,22 @@ export default function PersonalityTest() {
             ) : (
               <>
                 <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_50%_40%,rgba(165,180,252,0.35),transparent_70%)]" />
-                <Sparkles size={48} className="relative text-indigo-200/80" />
+                <Sparkles size={48} className="relative text-indigo-700/80" />
               </>
             )}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 border-t border-white/10 bg-slate-950/40 px-8 py-5 sm:px-11">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300">
+        <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 bg-slate-50 px-8 py-5 sm:px-11">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-400">
             <ListChecks size={13} /> {t("metaCount", { count: QUESTIONS.length })}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-400">
             <Clock size={13} /> {t("metaTime")}
           </span>
           <button
             type="button"
             onClick={() => setPhase("quiz")}
-            className="ml-auto inline-flex items-center gap-2 rounded-full bg-indigo-500 px-7 py-3 text-sm font-bold text-white shadow-[0_0_28px_rgba(99,102,241,0.4)] transition hover:bg-indigo-400"
+            className="ml-auto inline-flex items-center gap-2 rounded-full bg-indigo-500 px-7 py-3 text-sm font-bold text-slate-900 shadow-[0_0_28px_rgba(99,102,241,0.4)] transition hover:bg-indigo-400"
           >
             {t("start")}
             <ArrowRight size={16} />
@@ -176,19 +176,19 @@ export default function PersonalityTest() {
   };
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/50">
+    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
       {/* 진행바 + 시간 배지 */}
-      <div className="border-b border-white/10 px-6 py-5 sm:px-9">
+      <div className="border-b border-slate-200 px-6 py-5 sm:px-9">
         <div className="mb-2 flex items-center justify-between text-xs font-semibold">
-          <span className="tabular-nums text-slate-300">
+          <span className="tabular-nums text-slate-400">
             {String(index + 1).padStart(2, "0")} / {QUESTIONS.length}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/15 px-2.5 py-1 text-indigo-200">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/15 px-2.5 py-1 text-indigo-700">
             <Clock size={12} />
             {QUESTION_TIMES[index]}
           </span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
           <div
             className="h-full rounded-full bg-indigo-500 transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -197,7 +197,7 @@ export default function PersonalityTest() {
       </div>
 
       <div className="p-6 sm:p-9">
-        <h2 className="text-lg font-bold leading-snug text-white sm:text-xl">
+        <h2 className="text-lg font-bold leading-snug text-slate-900 sm:text-xl">
           {t(`questions.${q.id}.text`)}
         </h2>
 
@@ -213,7 +213,7 @@ export default function PersonalityTest() {
                 className={`group overflow-hidden rounded-2xl border text-left transition ${
                   on
                     ? "border-indigo-400 bg-indigo-500/10"
-                    : "border-white/10 bg-slate-950/40 hover:border-indigo-300/50"
+                    : "border-slate-200 bg-slate-50 hover:border-indigo-300/50"
                 }`}
               >
                 <div className="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900">
@@ -226,17 +226,17 @@ export default function PersonalityTest() {
                       className="object-cover"
                     />
                   ) : (
-                    <ImageIcon size={22} className="text-slate-600" />
+                    <ImageIcon size={22} className="text-slate-400" />
                   )}
                   <span
                     className={`absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold uppercase ${
-                      on ? "bg-indigo-500 text-white" : "bg-slate-950/70 text-slate-300"
+                      on ? "bg-indigo-500 text-slate-900" : "bg-slate-950/70 text-slate-400"
                     }`}
                   >
                     {key}
                   </span>
                 </div>
-                <p className="px-4 py-3 text-sm leading-relaxed text-slate-200">
+                <p className="px-4 py-3 text-sm leading-relaxed text-slate-400">
                   {t(`questions.${q.id}.${key}`)}
                 </p>
               </button>
@@ -248,7 +248,7 @@ export default function PersonalityTest() {
           <button
             type="button"
             onClick={() => (index > 0 ? setIndex(index - 1) : setPhase("intro"))}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/15 px-5 py-2.5 text-sm font-semibold text-slate-300 transition hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-400 transition hover:text-slate-900"
           >
             <ChevronLeft size={15} />
             {t("prev")}
@@ -257,7 +257,7 @@ export default function PersonalityTest() {
             type="button"
             onClick={goNext}
             disabled={!selected}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-indigo-500 px-7 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-40"
+            className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-indigo-500 px-7 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isLast ? t("seeResult") : t("next")}
             <ChevronRight size={15} />
@@ -292,19 +292,19 @@ function Analyzing({
   }, [onDone]);
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/50 p-10 text-center sm:p-16">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-300">
+    <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center sm:p-16">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600">
         <Sparkles size={30} className="animate-pulse" />
       </div>
-      <h2 className="mt-6 text-2xl font-bold text-white">{t("analyzingTitle")}</h2>
+      <h2 className="mt-6 text-2xl font-bold text-slate-900">{t("analyzingTitle")}</h2>
       <p className="mt-2 text-sm text-slate-400">{t("analyzingBody")}</p>
-      <div className="mx-auto mt-8 h-2 w-full max-w-sm overflow-hidden rounded-full bg-white/10">
+      <div className="mx-auto mt-8 h-2 w-full max-w-sm overflow-hidden rounded-full bg-slate-100">
         <div
           className="h-full rounded-full bg-indigo-500 transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="mt-3 text-sm font-bold tabular-nums text-indigo-300">
+      <p className="mt-3 text-sm font-bold tabular-nums text-indigo-600">
         {t("analyzingProgress", { pct })}
       </p>
     </div>

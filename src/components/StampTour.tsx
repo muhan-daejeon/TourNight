@@ -88,28 +88,28 @@ function ConsentModal({
       role="dialog"
       aria-modal="true"
       aria-label={t("title")}
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-white/90 p-4 backdrop-blur-sm"
     >
-      <div className="relative w-full max-w-sm rounded-3xl border border-white/10 bg-slate-900 p-6 text-center">
+      <div className="relative w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 text-center">
         <button
           type="button"
           onClick={onClose}
           aria-label="닫기"
-          className="absolute right-4 top-4 text-slate-500 transition hover:text-white"
+          className="absolute right-4 top-4 text-slate-500 transition hover:text-slate-900"
         >
           <X size={16} />
         </button>
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-400/15 text-amber-300">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
           <MapPin size={22} />
         </span>
-        <h2 className="mt-4 text-lg font-bold text-white">{t("title")}</h2>
+        <h2 className="mt-4 text-lg font-bold text-slate-900">{t("title")}</h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-400">{t("body")}</p>
         {denied && <p className="mt-3 text-xs text-rose-400">{t("denied")}</p>}
         <div className="mt-6 flex gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full border border-white/15 py-2.5 text-sm font-semibold text-slate-300 transition hover:border-white/30"
+            className="flex-1 rounded-full border border-slate-200 py-2.5 text-sm font-semibold text-slate-400 transition hover:border-white/30"
           >
             {t("cancel")}
           </button>
@@ -231,21 +231,21 @@ function PlacePickerModal({
       role="dialog"
       aria-modal="true"
       aria-label={t("title")}
-      className="fixed inset-0 z-[70] overflow-y-auto bg-slate-950/90 p-4 py-8 backdrop-blur-sm"
+      className="fixed inset-0 z-[70] overflow-y-auto bg-white/90 p-4 py-8 backdrop-blur-sm"
     >
-      <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-slate-900 p-6">
+      <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6">
         <button
           type="button"
           onClick={onClose}
           aria-label="닫기"
-          className="absolute right-5 top-5 text-slate-500 transition hover:text-white"
+          className="absolute right-5 top-5 text-slate-500 transition hover:text-slate-900"
         >
           <X size={16} />
         </button>
 
-        <h2 className="pr-8 text-lg font-bold text-white">{t("title")}</h2>
+        <h2 className="pr-8 text-lg font-bold text-slate-900">{t("title")}</h2>
         <div className="mt-2 flex items-center justify-between gap-3">
-          <p className="text-xs font-semibold text-amber-300/80">
+          <p className="text-xs font-semibold text-amber-600/80">
             {t("selectedCount", { count: chosen.length })}
           </p>
           <button
@@ -263,19 +263,19 @@ function PlacePickerModal({
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="flex-1 rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60"
+            className="flex-1 rounded-lg border border-slate-200 bg-slate-950/60 px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-300/60"
           />
           <button
             type="submit"
             disabled={searching || !keyword.trim()}
-            className="shrink-0 rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+            className="shrink-0 rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-400 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {searching ? t("searching") : t("searchButton")}
           </button>
         </form>
 
         {searched && !searching && (
-          <ul className="mt-3 max-h-52 space-y-1.5 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.02] p-2">
+          <ul className="mt-3 max-h-52 space-y-1.5 overflow-y-auto rounded-xl border border-slate-200 bg-white/[0.02] p-2">
             {searchError ? (
               <li className="px-2 py-3 text-center text-xs text-rose-400">{t("searchError")}</li>
             ) : results.length === 0 ? (
@@ -284,10 +284,10 @@ function PlacePickerModal({
               results.map((r, i) => (
                 <li
                   key={`${r.name}-${i}`}
-                  className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 transition hover:bg-white/5"
+                  className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 transition hover:bg-slate-100"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-semibold text-slate-100">
+                    <span className="block truncate text-sm font-semibold text-slate-900">
                       {r.name}
                     </span>
                     <span className="block truncate text-xs text-slate-500">{r.addr}</span>
@@ -295,7 +295,7 @@ function PlacePickerModal({
                   <button
                     type="button"
                     onClick={() => addChosen(r)}
-                    className="shrink-0 rounded-full border border-amber-300/40 px-3 py-1 text-xs font-semibold text-amber-300 transition hover:bg-amber-400/10"
+                    className="shrink-0 rounded-full border border-amber-300/40 px-3 py-1 text-xs font-semibold text-amber-600 transition hover:bg-amber-50"
                   >
                     {t("select")}
                   </button>
@@ -305,18 +305,18 @@ function PlacePickerModal({
           </ul>
         )}
 
-        <div className="mt-5 border-t border-white/10 pt-4">
+        <div className="mt-5 border-t border-slate-200 pt-4">
           <p className="text-xs font-semibold text-slate-400">{t("selectedListTitle")}</p>
           {chosen.length === 0 ? (
-            <p className="mt-2 text-xs text-slate-600">{t("selectedEmpty")}</p>
+            <p className="mt-2 text-xs text-slate-400">{t("selectedEmpty")}</p>
           ) : (
             <ul className="mt-2 space-y-1.5">
               {chosen.map((c, i) => (
                 <li
                   key={`${c.name}-${i}`}
-                  className="flex items-center justify-between gap-2 rounded-lg bg-amber-400/[0.06] px-3 py-2"
+                  className="flex items-center justify-between gap-2 rounded-lg bg-amber-50 px-3 py-2"
                 >
-                  <span className="flex min-w-0 items-center gap-2 text-sm text-slate-100">
+                  <span className="flex min-w-0 items-center gap-2 text-sm text-slate-900">
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[11px] font-bold text-slate-950">
                       {i + 1}
                     </span>
@@ -429,7 +429,7 @@ function StampRoad({
   const PATH = "M20,16 C55,12 85,20 78,30 C72,48 26,44 18,58 C12,70 56,74 74,78";
 
   return (
-    <div className="relative mt-6 aspect-[3/4] w-full overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 sm:aspect-[16/9]">
+    <div className="relative mt-6 aspect-[3/4] w-full overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 sm:aspect-[16/9]">
       {/* 홈 히어로와 같은 반짝이는 밤하늘 배경 */}
       <div className="night-hero pointer-events-none absolute inset-0" />
 
@@ -485,8 +485,8 @@ function StampRoad({
               aria-label={done ? t("stamped") : t("tapToStamp")}
               className={`relative flex h-16 w-16 items-center justify-center rounded-full shadow-[0_6px_20px_rgba(0,0,0,0.55)] transition sm:h-[72px] sm:w-[72px] ${
                 done
-                  ? "border-2 border-amber-400 bg-slate-900"
-                  : "border-2 border-dashed border-amber-400/50 bg-slate-900/70 hover:border-amber-400 disabled:cursor-not-allowed disabled:hover:border-amber-400/50"
+                  ? "border-2 border-amber-400 bg-white"
+                  : "border-2 border-dashed border-amber-400/50 bg-slate-900/70 hover:border-amber-400 disabled:cursor-not-allowed disabled:hover:border-indigo-300"
               }`}
             >
               {done ? (
@@ -503,7 +503,7 @@ function StampRoad({
                   </span>
                 </>
               ) : busy ? (
-                <Loader2 size={20} className="animate-spin text-amber-300" />
+                <Loader2 size={20} className="animate-spin text-amber-600" />
               ) : (
                 <StampIcon size={22} className="text-amber-400/80" />
               )}
@@ -595,10 +595,10 @@ function CollageSection({ tour }: { tour: StampTourData }) {
   }
 
   return (
-    <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-center">
-      <h3 className="text-base font-bold text-white">{t("title")}</h3>
+    <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-100 p-6 text-center">
+      <h3 className="text-base font-bold text-slate-900">{t("title")}</h3>
       <p className="mt-1 text-xs text-slate-500">{t("hint")}</p>
-      <div className="relative mx-auto mt-4 aspect-[788/1123] w-full max-w-[220px] overflow-hidden rounded-xl border border-white/10 bg-white shadow-lg">
+      <div className="relative mx-auto mt-4 aspect-[788/1123] w-full max-w-[220px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
         {preview && (
           // eslint-disable-next-line @next/next/no-img-element -- 로컬 object URL이라 next/image 로더가 다루지 못한다
           <img src={preview} alt="" className="h-full w-full object-cover" />
@@ -683,8 +683,8 @@ export default function StampTour() {
     <>
       {phase === "loading" && (
         <div className="animate-pulse space-y-4">
-          <div className="h-6 w-2/3 rounded bg-white/5" />
-          <div className="aspect-[3/4] w-full rounded-3xl bg-white/5 sm:aspect-[16/9]" />
+          <div className="h-6 w-2/3 rounded bg-slate-100" />
+          <div className="aspect-[3/4] w-full rounded-3xl bg-slate-100 sm:aspect-[16/9]" />
         </div>
       )}
 
@@ -695,7 +695,7 @@ export default function StampTour() {
           <button
             type="button"
             onClick={() => setPhase("picker")}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-2.5 text-sm font-semibold text-slate-200 backdrop-blur transition hover:bg-slate-900/70"
+            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-400 backdrop-blur transition hover:bg-slate-900/70"
           >
             <RotateCcw size={15} />
             {t("reselect")}

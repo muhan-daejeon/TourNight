@@ -20,7 +20,7 @@ export default function GuidebookBanner() {
     <button
       type="button"
       onClick={() => router.push("/?tour=start")}
-      className="group relative flex w-full flex-col items-start gap-6 overflow-hidden rounded-3xl border border-white/10 px-7 py-10 text-left transition hover:border-amber-400/40 sm:flex-row sm:items-center sm:px-12"
+      className="group relative flex w-full flex-col items-start gap-6 overflow-hidden rounded-3xl border border-slate-200 px-7 py-10 text-left transition hover:border-indigo-300 sm:flex-row sm:items-center sm:px-12"
     >
       <Image
         src="/hero-night.jpg"
@@ -33,10 +33,10 @@ export default function GuidebookBanner() {
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/70 to-indigo-950/40" />
       <div className="relative flex-1">
         <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-slate-400">
-          <BookOpen size={15} className="text-amber-300" />
+          <BookOpen size={15} className="text-amber-600" />
           {t("guidebookOverline")}
         </p>
-        <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+        <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
           Tour<span className="text-amber-400">Night</span> GUIDEBOOK
         </h2>
         <p className="mt-2 text-sm text-slate-400">{t("guidebookSubtitle")}</p>
@@ -50,7 +50,7 @@ export default function GuidebookBanner() {
           직접 세워 둔다 (뒤에 한 권 겹쳐 두께를 만든다) */}
       <div className="relative hidden shrink-0 sm:block">
         <div className="absolute left-3 top-2 h-[168px] w-[124px] rotate-6 rounded-lg bg-indigo-900/70 shadow-[0_10px_30px_rgba(0,0,0,0.5)]" />
-        <div className="relative h-[176px] w-[130px] overflow-hidden rounded-lg border border-white/15 shadow-[0_14px_40px_rgba(0,0,0,0.6)] transition duration-500 group-hover:-translate-y-1">
+        <div className="relative h-[176px] w-[130px] overflow-hidden rounded-lg border border-slate-200 shadow-[0_14px_40px_rgba(0,0,0,0.6)] transition duration-500 group-hover:-translate-y-1">
           <Image
             src="/spots/hanbit-tower.jpg"
             alt=""
@@ -62,10 +62,10 @@ export default function GuidebookBanner() {
           {/* 책등 */}
           <div className="absolute inset-y-0 left-0 w-2.5 bg-gradient-to-r from-black/70 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-3.5">
-            <p className="text-[13px] font-extrabold leading-tight text-white">
+            <p className="text-[13px] font-extrabold leading-tight text-slate-900">
               Tour<span className="text-amber-400">Night</span>
             </p>
-            <p className="mt-0.5 text-[9px] font-bold tracking-[0.2em] text-amber-300">
+            <p className="mt-0.5 text-[9px] font-bold tracking-[0.2em] text-amber-600">
               GUIDEBOOK
             </p>
             <span className="mt-2 block h-px w-8 bg-amber-300/70" />

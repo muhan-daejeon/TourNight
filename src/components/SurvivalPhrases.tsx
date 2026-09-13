@@ -32,8 +32,8 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 function PhraseRow({ p }: { p: Phrase }) {
   return (
     <li className="flex flex-col gap-0.5 bg-white/[0.02] px-5 py-3">
-      <span className="font-semibold text-slate-100">{p.korean}</span>
-      <span className="text-xs text-amber-300/80">{p.roman}</span>
+      <span className="font-semibold text-slate-900">{p.korean}</span>
+      <span className="text-xs text-amber-600/80">{p.roman}</span>
       <span className="text-sm text-slate-400">{p.meaning}</span>
     </li>
   );
@@ -116,7 +116,7 @@ export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: b
           onChange={(e) => setQuery(e.target.value)}
           maxLength={80}
           placeholder={t("searchPlaceholder")}
-          className="w-full rounded-full border border-white/10 bg-white/5 py-2.5 pl-10 pr-24 text-sm text-slate-100 placeholder:text-slate-500 backdrop-blur transition focus:border-amber-400/60 focus:outline-none"
+          className="w-full rounded-full border border-slate-200 bg-slate-100 py-2.5 pl-10 pr-24 text-sm text-slate-900 placeholder:text-slate-400 backdrop-blur transition focus:border-amber-400 focus:outline-none"
         />
         <button
           type="submit"
@@ -127,7 +127,7 @@ export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: b
       </form>
 
       {searchStatus === "loading" && (
-        <p className="mt-3 flex items-center gap-2 text-sm text-amber-300/90">
+        <p className="mt-3 flex items-center gap-2 text-sm text-amber-600">
           <Sparkles size={14} className="animate-pulse" />
           {t("searching")}
         </p>
@@ -136,8 +136,8 @@ export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: b
         <p className="mt-3 text-sm text-red-400">{t("error")}</p>
       )}
       {searchStatus === "done" && searchResult && (
-        <div className="mt-3 overflow-hidden rounded-2xl border border-amber-400/30">
-          <ul className="divide-y divide-white/5">
+        <div className="mt-3 overflow-hidden rounded-2xl border border-amber-300">
+          <ul className="divide-y divide-slate-200">
             <PhraseRow p={searchResult.main} />
             {searchResult.related.map((p, i) => (
               <PhraseRow key={i} p={p} />
@@ -151,7 +151,7 @@ export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: b
       <div className="mt-6 space-y-2.5">
         {status === "loading" &&
           [0, 1, 2].map((i) => (
-            <div key={i} className="h-12 animate-pulse rounded-2xl bg-white/5" />
+            <div key={i} className="h-12 animate-pulse rounded-2xl bg-slate-100" />
           ))}
         {status === "done" &&
           CATEGORY_IDS.filter((c) => book[c]?.length).map((c) => {
@@ -163,12 +163,12 @@ export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: b
                 // 둘러보기에서 펼쳐져 있는 묶음도 함께 밝힌다. 검색창만 비추면
                 // 무엇을 하는 곳인지만 보이고 어떤 표현이 나오는지는 안 보인다.
                 data-tour={open ? "phrases" : undefined}
-                className="overflow-hidden rounded-2xl border border-white/10"
+                className="overflow-hidden rounded-2xl border border-slate-200"
               >
                 <button
                   onClick={() => setOpenCat(open ? "" : c)}
                   className={`flex w-full items-center gap-2.5 px-5 py-3.5 text-left text-sm font-semibold transition ${
-                    open ? "bg-white/[0.06] text-amber-300" : "bg-white/[0.02] text-slate-200 hover:bg-white/[0.05]"
+                    open ? "bg-slate-100 text-amber-600" : "bg-white/[0.02] text-slate-400 hover:bg-slate-100"
                   }`}
                 >
                   <Icon size={16} strokeWidth={2} />
@@ -178,7 +178,7 @@ export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: b
                   </span>
                 </button>
                 {open && (
-                  <ul className="divide-y divide-white/5 border-t border-white/5">
+                  <ul className="divide-y divide-slate-200 border-t border-white/5">
                     {book[c].map((p, i) => (
                       <PhraseRow key={i} p={p} />
                     ))}

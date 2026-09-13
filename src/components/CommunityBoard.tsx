@@ -67,7 +67,7 @@ function QuotaLabel({ used, limit }: { used: number; limit: number }) {
   return (
     <span
       title={t("quotaHint")}
-      className={`shrink-0 text-xs ${done ? "font-semibold text-rose-300" : "text-slate-500"}`}
+      className={`shrink-0 text-xs ${done ? "font-semibold text-rose-600" : "text-slate-500"}`}
     >
       {t("quotaToday", { used, limit })}
     </span>
@@ -98,7 +98,7 @@ function formatRelative(iso: string, locale: string, justNow: string): string {
 }
 
 const inputClass =
-  "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 text-xs text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
+  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-300/60";
 
 /** 메일 인증을 마친 작성자 표시 — 신원 보증이 아니라 '연락 가능한 계정'이라는 뜻 */
 function VerifiedBadge() {
@@ -146,7 +146,7 @@ function ReportButton({
 
   if (done) {
     return (
-      <span className="shrink-0 text-[11px] text-slate-600">
+      <span className="shrink-0 text-[11px] text-slate-400">
         {t("reportedLabel")}
       </span>
     );
@@ -159,18 +159,18 @@ function ReportButton({
         onClick={() => setOpen((v) => !v)}
         aria-label={t("report")}
         aria-expanded={open}
-        className="rounded-full p-1 text-slate-600 transition hover:text-rose-300"
+        className="rounded-full p-1 text-slate-400 transition hover:text-rose-600"
       >
         <Flag size={13} />
       </button>
       {open && (
-        <div className="absolute right-0 top-6 z-20 w-36 overflow-hidden rounded-xl border border-white/15 bg-slate-900 shadow-xl">
+        <div className="absolute right-0 top-6 z-20 w-36 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
           {REASONS.map((r) => (
             <button
               key={r}
               type="button"
               onClick={() => send(r)}
-              className="block w-full px-3 py-2 text-left text-xs text-slate-300 transition hover:bg-white/10 hover:text-white"
+              className="block w-full px-3 py-2 text-left text-xs text-slate-400 transition hover:bg-slate-100 hover:text-slate-900"
             >
               {t(`reportReasons.${r}`)}
             </button>
@@ -184,7 +184,7 @@ function ReportButton({
 function LoginPrompt({ text }: { text: string }) {
   const tAuth = useTranslations("auth");
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3">
       <span className="text-sm text-slate-400">{text}</span>
       <Link
         href="/login"
@@ -215,8 +215,8 @@ function VerifyResultInner() {
     <p
       className={`rounded-xl border px-4 py-3 text-sm ${
         message.good
-          ? "border-emerald-400/25 bg-emerald-400/[0.06] text-emerald-200"
-          : "border-rose-400/25 bg-rose-400/[0.06] text-rose-200"
+          ? "border-emerald-400/25 bg-emerald-400/[0.06] text-emerald-700"
+          : "border-rose-400/25 bg-rose-400/[0.06] text-rose-700"
       }`}
     >
       {t(message.key)}
@@ -269,11 +269,11 @@ function VerifyPrompt({ mailFrom }: { mailFrom: string | null }) {
           : null;
 
   return (
-    <div className="rounded-xl border border-amber-400/25 bg-amber-400/[0.06] px-4 py-3.5">
+    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-start gap-2.5">
-          <MailCheck size={16} className="mt-0.5 shrink-0 text-amber-300" />
-          <p className="text-sm text-slate-300">{t("verifyRequired")}</p>
+          <MailCheck size={16} className="mt-0.5 shrink-0 text-amber-600" />
+          <p className="text-sm text-slate-400">{t("verifyRequired")}</p>
         </div>
         <button
           type="button"
@@ -292,11 +292,11 @@ function VerifyPrompt({ mailFrom }: { mailFrom: string | null }) {
           <>
             <br />
             <span className="text-slate-500">{t("verifyFrom")} </span>
-            <span className="font-semibold text-amber-200/90">{mailFrom}</span>
+            <span className="font-semibold text-amber-700/90">{mailFrom}</span>
           </>
         )}
       </p>
-      {note && <p className="mt-2 pl-6 text-xs text-slate-300">{note}</p>}
+      {note && <p className="mt-2 pl-6 text-xs text-slate-400">{note}</p>}
     </div>
   );
 }
@@ -514,9 +514,9 @@ function PostItem({
   }
 
   return (
-    <li className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+    <li className="rounded-2xl border border-slate-200 bg-slate-100 p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-amber-300/90">
+        <span className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-amber-600">
           <span className="truncate">{post.author}</span>
           {post.authorVerified && <VerifiedBadge />}
         </span>
@@ -544,7 +544,7 @@ function PostItem({
         targetType="post"
         targetId={post.id}
         text={post.body}
-        className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-200"
+        className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-400"
       />
 
       {/* 첨부 사진 — 눌러서 원본 크기로 */}
@@ -552,7 +552,7 @@ function PostItem({
         <button
           type="button"
           onClick={() => setLightbox(true)}
-          className="mt-3 block overflow-hidden rounded-xl border border-white/10 transition hover:border-white/25"
+          className="mt-3 block overflow-hidden rounded-xl border border-slate-200 transition hover:border-slate-300"
         >
           <Image
             src={post.mediaUrl}
@@ -570,7 +570,7 @@ function PostItem({
           role="dialog"
           aria-modal="true"
           onClick={() => setLightbox(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 p-4 backdrop-blur-sm"
         >
           <Image
             src={post.mediaUrl}
@@ -583,7 +583,7 @@ function PostItem({
           <button
             type="button"
             aria-label={t("photoClose")}
-            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
+            className="absolute right-4 top-4 rounded-full bg-slate-100 p-2 text-white transition hover:bg-white/20"
           >
             <X size={18} />
           </button>
@@ -593,14 +593,14 @@ function PostItem({
       <button
         type="button"
         onClick={toggle}
-        className="mt-3 flex items-center gap-1.5 text-xs text-slate-400 transition hover:text-amber-300"
+        className="mt-3 flex items-center gap-1.5 text-xs text-slate-400 transition hover:text-amber-600"
       >
         <MessageCircle size={14} />
         {count > 0 ? `${t("comments")} ${count}` : t("commentAdd")}
       </button>
 
       {expanded && (
-        <div className="mt-3 space-y-3 border-t border-white/10 pt-3">
+        <div className="mt-3 space-y-3 border-t border-slate-200 pt-3">
           {status === "loading" ? (
             <p className="text-xs text-slate-500">…</p>
           ) : status === "error" ? (
@@ -608,9 +608,9 @@ function PostItem({
           ) : comments && comments.length > 0 ? (
             <ul className="space-y-2">
               {comments.map((c) => (
-                <li key={c.id} className="rounded-lg bg-white/[0.03] px-3 py-2">
+                <li key={c.id} className="rounded-lg bg-slate-100 px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="flex min-w-0 items-center gap-1 text-xs font-semibold text-slate-300">
+                    <span className="flex min-w-0 items-center gap-1 text-xs font-semibold text-slate-400">
                       <span className="truncate">{c.author}</span>
                       {c.authorVerified && <VerifiedBadge />}
                     </span>
@@ -633,7 +633,7 @@ function PostItem({
                       )}
                     </div>
                   </div>
-                  <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-slate-300">
+                  <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-slate-400">
                     {c.translatedBody ?? c.body}
                   </p>
                   {/* 자동 번역된 댓글은 원문도 함께 — 뉘앙스 확인용. 댓글은
@@ -649,7 +649,7 @@ function PostItem({
                       href={c.mediaUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-1.5 block w-fit overflow-hidden rounded-lg border border-white/10 transition hover:border-white/25"
+                      className="mt-1.5 block w-fit overflow-hidden rounded-lg border border-slate-200 transition hover:border-slate-300"
                     >
                       <Image
                         src={c.mediaUrl}
@@ -678,13 +678,13 @@ function PostItem({
                 <img
                   src={photo.preview}
                   alt=""
-                  className="max-h-28 rounded-lg border border-white/10"
+                  className="max-h-28 rounded-lg border border-slate-200"
                 />
                 <button
                   type="button"
                   onClick={clearPhoto}
                   aria-label={t("photoRemove")}
-                  className="absolute -right-2 -top-2 rounded-full bg-slate-900 p-1 text-slate-300 shadow-lg ring-1 ring-white/15 transition hover:text-white"
+                  className="absolute -right-2 -top-2 rounded-full bg-white p-1 text-slate-400 shadow-lg ring-1 ring-white/15 transition hover:text-slate-900"
                 >
                   <X size={12} />
                 </button>
@@ -712,7 +712,7 @@ function PostItem({
                     onClick={() => photoInputRef.current?.click()}
                     disabled={!me || submitting}
                     aria-label={t("photoAdd")}
-                    className="shrink-0 rounded-lg border border-white/15 px-2.5 py-2 text-slate-300 transition hover:border-white/30 hover:text-white disabled:opacity-40"
+                    className="shrink-0 rounded-lg border border-slate-200 px-2.5 py-2 text-slate-400 transition hover:border-white/30 hover:text-slate-900 disabled:opacity-40"
                   >
                     <ImagePlus size={14} />
                   </button>
@@ -877,16 +877,16 @@ export default function CommunityBoard({
         {me && !me.emailVerified && <VerifyPrompt mailFrom={mailFrom} />}
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur"
+          className="rounded-2xl border border-slate-200 bg-slate-100 p-5 backdrop-blur"
         >
           <p className="mb-2 text-xs text-slate-500">
             {me ? (
               <>
                 {t("postingAs")} ·{" "}
-                <span className="text-amber-300/90">{me.nickname}</span>
+                <span className="text-amber-600">{me.nickname}</span>
               </>
             ) : (
-              <span className="inline-block h-3 w-32 animate-pulse rounded bg-white/10 align-middle" />
+              <span className="inline-block h-3 w-32 animate-pulse rounded bg-slate-100 align-middle" />
             )}
           </p>
           <textarea
@@ -896,7 +896,7 @@ export default function CommunityBoard({
             maxLength={BODY_MAX}
             rows={2}
             placeholder={t("bodyPlaceholder")}
-            className="w-full resize-none rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60 disabled:opacity-60"
+            className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-300/60 disabled:opacity-60"
           />
           {/* 첨부 미리보기 */}
           {photo && (
@@ -906,13 +906,13 @@ export default function CommunityBoard({
               <img
                 src={photo.preview}
                 alt=""
-                className="max-h-44 rounded-lg border border-white/10"
+                className="max-h-44 rounded-lg border border-slate-200"
               />
               <button
                 type="button"
                 onClick={clearPhoto}
                 aria-label={t("photoRemove")}
-                className="absolute -right-2 -top-2 rounded-full bg-slate-900 p-1.5 text-slate-300 shadow-lg ring-1 ring-white/15 transition hover:text-white"
+                className="absolute -right-2 -top-2 rounded-full bg-white p-1.5 text-slate-400 shadow-lg ring-1 ring-white/15 transition hover:text-slate-900"
               >
                 <X size={13} />
               </button>
@@ -934,7 +934,7 @@ export default function CommunityBoard({
                     type="button"
                     onClick={() => photoInputRef.current?.click()}
                     disabled={submitting}
-                    className="flex items-center gap-1.5 rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/30 hover:text-white disabled:opacity-40"
+                    className="flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-400 transition hover:border-white/30 hover:text-slate-900 disabled:opacity-40"
                   >
                     <ImagePlus size={14} />
                     {t("photoAdd")}
@@ -965,7 +965,7 @@ export default function CommunityBoard({
       {/* 목록 — 서버에서 채워 오므로 로딩 상태가 없다.
           조회에 실패하면 listPosts가 빈 배열을 주고 아래 빈 상태로 표시된다 */}
       {posts.length > 0 && (
-        <div role="tablist" className="flex gap-1 border-b border-white/10">
+        <div role="tablist" className="flex gap-1 border-b border-slate-200">
           {(["latest", "popular", "photos"] as const).map((v) => (
             <button
               key={v}
@@ -974,8 +974,8 @@ export default function CommunityBoard({
               onClick={() => setView(v)}
               className={`-mb-px border-b-2 px-3.5 py-2.5 text-sm font-semibold transition ${
                 view === v
-                  ? "border-amber-400 text-amber-300"
-                  : "border-transparent text-slate-400 hover:text-slate-200"
+                  ? "border-amber-400 text-amber-600"
+                  : "border-transparent text-slate-400 hover:text-slate-400"
               }`}
             >
               {t(`view.${v}`)}
@@ -985,7 +985,7 @@ export default function CommunityBoard({
       )}
       {visible.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-14 text-center">
-          <MessageSquare size={30} strokeWidth={1.5} className="text-slate-600" />
+          <MessageSquare size={30} strokeWidth={1.5} className="text-slate-400" />
           <p className="text-sm text-slate-500">{t(view === "photos" ? "emptyPhotos" : "empty")}</p>
         </div>
       ) : (

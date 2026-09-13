@@ -77,21 +77,21 @@ export default function PersonalityResultView({
       <div className="overflow-hidden rounded-3xl border border-indigo-400/25 bg-gradient-to-b from-indigo-500/10 to-slate-900/40">
         <div className="grid items-center gap-6 p-8 sm:grid-cols-[1fr_auto] sm:p-11">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-300">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">
               {t("resultOverline")}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+              <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
                 {t(`types.${primary}.name`)}
               </h2>
-              <span className="rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-bold text-indigo-200">
+              <span className="rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-bold text-indigo-700">
                 {t("primaryBadge")}
               </span>
             </div>
-            <p className="mt-1.5 text-sm font-semibold text-indigo-200">
+            <p className="mt-1.5 text-sm font-semibold text-indigo-700">
               {t(`types.${primary}.tagline`)}
             </p>
-            <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-300">
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-400">
               {t(`types.${primary}.desc`)}
             </p>
           </div>
@@ -115,11 +115,11 @@ export default function PersonalityResultView({
         </div>
 
         {secondary && (
-          <div className="mx-8 mb-6 rounded-2xl border border-white/10 bg-slate-950/40 p-4 sm:mx-11">
+          <div className="mx-8 mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:mx-11">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
               {t("alsoStrong")}
             </p>
-            <p className="mt-1.5 text-base font-bold text-white">
+            <p className="mt-1.5 text-base font-bold text-slate-900">
               {t(`types.${secondary}.name`)}
             </p>
             <p className="mt-1 text-xs leading-relaxed text-slate-400">
@@ -128,12 +128,12 @@ export default function PersonalityResultView({
           </div>
         )}
 
-        <div className="flex flex-wrap gap-3 border-t border-white/10 bg-slate-950/40 px-8 py-5 sm:px-11">
+        <div className="flex flex-wrap gap-3 border-t border-slate-200 bg-slate-50 px-8 py-5 sm:px-11">
           {!showDetail && (
             <button
               type="button"
               onClick={() => setShowDetail(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-indigo-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-400"
+              className="inline-flex items-center gap-2 rounded-full bg-indigo-500 px-6 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-indigo-400"
             >
               {t("detailCta")}
               <ArrowRight size={15} />
@@ -143,7 +143,7 @@ export default function PersonalityResultView({
             <button
               type="button"
               onClick={onRestart}
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-2.5 text-sm font-semibold text-slate-300 transition hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-400 transition hover:text-slate-900"
             >
               <RefreshCw size={14} />
               {t("otherTest")}
@@ -218,21 +218,21 @@ function ResultDetail({
   return (
     <div className="space-y-6">
       {/* 07 상세 분석 */}
-      <div className="rounded-3xl border border-white/10 bg-slate-900/50 p-8 sm:p-11">
-        <h3 className="text-lg font-bold text-white">{t("detailTitle")}</h3>
+      <div className="rounded-3xl border border-slate-200 bg-white p-8 sm:p-11">
+        <h3 className="text-lg font-bold text-slate-900">{t("detailTitle")}</h3>
         <p className="mt-1 text-sm text-slate-400">{t("detailSub")}</p>
         <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_1fr]">
           <PersonalityRadar values={values} label={(ty) => t(`axes.${ty}`)} />
           <div className="space-y-6">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-indigo-300">
+              <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">
                 {t("keywordsTitle")}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {keywords.map((k) => (
                   <span
                     key={k}
-                    className="rounded-full bg-indigo-500/15 px-3 py-1.5 text-xs font-bold text-indigo-200"
+                    className="rounded-full bg-indigo-500/15 px-3 py-1.5 text-xs font-bold text-indigo-700"
                   >
                     {k}
                   </span>
@@ -240,12 +240,12 @@ function ResultDetail({
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-indigo-300">
+              <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">
                 {t("strengthsTitle")}
               </p>
               <ul className="mt-3 space-y-2">
                 {strengths.map((s) => (
-                  <li key={s} className="flex gap-2 text-sm text-slate-300">
+                  <li key={s} className="flex gap-2 text-sm text-slate-400">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" />
                     {s}
                   </li>
@@ -257,10 +257,10 @@ function ResultDetail({
       </div>
 
       {/* 08 탭 상세 */}
-      <div className="rounded-3xl border border-white/10 bg-slate-900/50">
+      <div className="rounded-3xl border border-slate-200 bg-white">
         <div
           role="tablist"
-          className="flex gap-1 overflow-x-auto border-b border-white/10 px-4 sm:px-6"
+          className="flex gap-1 overflow-x-auto border-b border-slate-200 px-4 sm:px-6"
         >
           {TABS.map(({ key, Icon }) => (
             <button
@@ -271,8 +271,8 @@ function ResultDetail({
               onClick={() => setTab(key)}
               className={`-mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-4 py-3.5 text-sm font-semibold transition ${
                 tab === key
-                  ? "border-indigo-400 text-indigo-300"
-                  : "border-transparent text-slate-400 hover:text-slate-200"
+                  ? "border-indigo-400 text-indigo-600"
+                  : "border-transparent text-slate-400 hover:text-slate-400"
               }`}
             >
               <Icon size={15} />
@@ -284,10 +284,10 @@ function ResultDetail({
         <div className="p-6 sm:p-8">
           {tab === "traits" && (
             <div>
-              <p className="text-sm font-bold text-white">{t("traitsHeading")}</p>
+              <p className="text-sm font-bold text-slate-900">{t("traitsHeading")}</p>
               <ul className="mt-4 space-y-2.5">
                 {traits.map((s) => (
-                  <li key={s} className="flex gap-2.5 text-sm text-slate-300">
+                  <li key={s} className="flex gap-2.5 text-sm text-slate-400">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400" />
                     {s}
                   </li>
@@ -309,7 +309,7 @@ function ResultDetail({
               )}
               <Link
                 href="/courses"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-indigo-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-400"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-indigo-500 px-6 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-indigo-400"
               >
                 {t("matchedCourseCta")}
                 <ArrowRight size={15} />
@@ -325,9 +325,9 @@ function ResultDetail({
                     <Link
                       key={s.contentId}
                       href={`/spots/${s.contentId}`}
-                      className="group overflow-hidden rounded-2xl border border-white/10 bg-slate-950/40 transition hover:border-indigo-300/40"
+                      className="group overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-indigo-300/40"
                     >
-                      <div className="relative h-28 w-full overflow-hidden bg-slate-800">
+                      <div className="relative h-28 w-full overflow-hidden bg-slate-200">
                         {s.imageUrl && (
                           <Image
                             src={s.imageUrl}
@@ -337,11 +337,11 @@ function ResultDetail({
                             className="object-cover transition duration-500 group-hover:scale-105"
                           />
                         )}
-                        <span className="absolute left-2.5 top-2.5 rounded-full bg-slate-950/70 px-2 py-0.5 text-[10px] font-bold text-indigo-200 backdrop-blur">
+                        <span className="absolute left-2.5 top-2.5 rounded-full bg-slate-950/70 px-2 py-0.5 text-[10px] font-bold text-indigo-700 backdrop-blur">
                           {th(`categories.${s.category}`)}
                         </span>
                       </div>
-                      <p className="line-clamp-1 px-3 py-2.5 text-sm font-semibold text-white">
+                      <p className="line-clamp-1 px-3 py-2.5 text-sm font-semibold text-slate-900">
                         {s.title}
                       </p>
                     </Link>
@@ -352,7 +352,7 @@ function ResultDetail({
               )}
               <Link
                 href="/spots"
-                className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-2.5 text-sm font-semibold text-slate-200 transition hover:text-white"
+                className="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-400 transition hover:text-slate-900"
               >
                 <MapPin size={15} />
                 {t("seeSpots")}
@@ -363,8 +363,8 @@ function ResultDetail({
           {tab === "tips" && (
             <ul className="space-y-2.5">
               {tips.map((s) => (
-                <li key={s} className="flex gap-2.5 text-sm text-slate-300">
-                  <Sparkles size={15} className="mt-0.5 shrink-0 text-indigo-300" />
+                <li key={s} className="flex gap-2.5 text-sm text-slate-400">
+                  <Sparkles size={15} className="mt-0.5 shrink-0 text-indigo-600" />
                   {s}
                 </li>
               ))}
@@ -391,9 +391,9 @@ function CourseCard({
   return (
     <Link
       href="/courses"
-      className="group overflow-hidden rounded-2xl border border-white/10 bg-slate-950/40 transition hover:border-indigo-300/40"
+      className="group overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-indigo-300/40"
     >
-      <div className="relative h-32 w-full overflow-hidden bg-slate-800">
+      <div className="relative h-32 w-full overflow-hidden bg-slate-200">
         {cover && (
           <Image
             src={cover}
@@ -407,7 +407,7 @@ function CourseCard({
           {cats.map((c) => (
             <span
               key={c}
-              className="rounded-full bg-slate-950/70 px-2 py-0.5 text-[10px] font-bold text-indigo-200 backdrop-blur"
+              className="rounded-full bg-slate-950/70 px-2 py-0.5 text-[10px] font-bold text-indigo-700 backdrop-blur"
             >
               {th(`categories.${c}`)}
             </span>
@@ -415,10 +415,10 @@ function CourseCard({
         </div>
       </div>
       <div className="p-4">
-        <p className="text-xs font-semibold text-indigo-300">
+        <p className="text-xs font-semibold text-indigo-600">
           {labelStops("stopsCount", { count: course.stops.length })}
         </p>
-        <p className="mt-1.5 line-clamp-2 text-sm font-semibold leading-snug text-white">
+        <p className="mt-1.5 line-clamp-2 text-sm font-semibold leading-snug text-slate-900">
           {course.stops.map((s) => s.title).join(" → ")}
         </p>
       </div>

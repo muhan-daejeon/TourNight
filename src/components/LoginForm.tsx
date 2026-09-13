@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 const fieldClass =
-  "w-full rounded-lg border border-white/10 bg-slate-900/60 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-amber-300/60";
+  "w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-300/60";
 
 export default function LoginForm({
   oauthError = false,
@@ -63,7 +63,7 @@ export default function LoginForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="mb-1.5 block text-sm text-slate-300">
+        <label className="mb-1.5 block text-sm text-slate-400">
           {t("email")}
         </label>
         <input
@@ -75,7 +75,7 @@ export default function LoginForm({
         />
       </div>
       <div>
-        <label className="mb-1.5 block text-sm text-slate-300">
+        <label className="mb-1.5 block text-sm text-slate-400">
           {t("password")}
         </label>
         <input
@@ -99,7 +99,7 @@ export default function LoginForm({
 
       <p className="text-center text-sm text-slate-400">
         {t("noAccount")}{" "}
-        <Link href="/signup" className="font-semibold text-amber-300 hover:underline">
+        <Link href="/signup" className="font-semibold text-amber-600 hover:underline">
           {t("goSignup")}
         </Link>
       </p>

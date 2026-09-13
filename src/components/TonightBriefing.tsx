@@ -42,7 +42,7 @@ function renderHeadline(text: string, words: string[]) {
   const pattern = new RegExp(`(${words.map(escapeRegExp).join("|")})`, "g");
   return text.split(pattern).map((part, i) =>
     words.includes(part) ? (
-      <span key={i} className="neon-glow text-amber-300">
+      <span key={i} className="neon-glow text-amber-600">
         {part}
       </span>
     ) : (
@@ -73,27 +73,27 @@ export default async function TonightBriefing() {
 
   return (
     <section className="flex flex-col items-center text-center">
-      <h2 className="text-[calc(1.875rem-2px)] font-bold leading-snug tracking-tight text-white sm:text-[calc(2.25rem-2px)]">
+      <h2 className="text-[calc(1.875rem-2px)] font-bold leading-snug tracking-tight text-slate-900 sm:text-[calc(2.25rem-2px)]">
         {renderHeadline(t(`mood.${mood.key}`), highlights[mood.key] ?? [])}
       </h2>
       {/* 온도·일몰·월령·막차 — 예전 "별 보기 좋은 밤이에요" 문구와 같은 크기(text-xs)로,
           그보다 10px 더 아래로 내려서 헤드라인과 확실히 구분되게 둔다 */}
-      <div className="mt-3 flex translate-y-[10px] flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-slate-300">
+      <div className="mt-3 flex translate-y-[10px] flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-slate-400">
         {c.temp !== null && (
           <span className="flex items-center gap-1.5">
-            <Thermometer size={14} className="text-sky-300" />
-            <b className="text-white">{c.temp}°C</b>
+            <Thermometer size={14} className="text-sky-600" />
+            <b className="text-slate-900">{c.temp}°C</b>
           </span>
         )}
         {c.precip && (
-          <span className="flex items-center gap-1 font-semibold text-sky-300">
+          <span className="flex items-center gap-1 font-semibold text-sky-600">
             <Umbrella size={13} />
             {t(`precip.${c.precip}`)}
           </span>
         )}
         <span className="flex items-center gap-1.5">
-          <Sunset size={14} className="text-amber-300" />
-          {t("sunset")} <b className="text-white">{c.sunset}</b>
+          <Sunset size={14} className="text-amber-600" />
+          {t("sunset")} <b className="text-slate-900">{c.sunset}</b>
         </span>
         <span>
           {c.moonEmoji} {t("moonAge", { age: Math.round(c.lunAge) })}

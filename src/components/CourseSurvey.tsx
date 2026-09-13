@@ -69,7 +69,7 @@ const chip = (on: boolean) =>
   `flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition ${
     on
       ? "border-amber-400 bg-amber-400 text-slate-950"
-      : "border-white/10 bg-white/5 text-slate-300 hover:border-white/25 hover:text-white"
+      : "border-slate-200 bg-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-900"
   }`;
 
 export default function CourseSurvey() {
@@ -170,11 +170,11 @@ export default function CourseSurvey() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-7 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+      <div className="space-y-7 rounded-2xl border border-slate-200 bg-slate-100 p-6">
         {/* 1. 출발지 */}
         <fieldset>
-          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-200">
-            <MapPin size={15} className="text-amber-300" />
+          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-400">
+            <MapPin size={15} className="text-amber-600" />
             {t("q1")}
           </legend>
           <div className="flex flex-wrap gap-2">
@@ -209,8 +209,8 @@ export default function CourseSurvey() {
 
         {/* 2. 언제, 얼마나 */}
         <fieldset>
-          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-200">
-            <Clock size={15} className="text-amber-300" />
+          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-400">
+            <Clock size={15} className="text-amber-600" />
             {t("q2")}
           </legend>
           <div className="flex flex-wrap items-center gap-2">
@@ -219,7 +219,7 @@ export default function CourseSurvey() {
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
               aria-label={t("startTime")}
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-100 outline-none transition focus:border-amber-400/60"
+              className="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm text-slate-900 outline-none transition focus:border-amber-400"
             />
             {DURATIONS.map((d) => (
               <button
@@ -236,8 +236,8 @@ export default function CourseSurvey() {
 
         {/* 3. 이동 수단 */}
         <fieldset>
-          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-200">
-            <Bus size={15} className="text-amber-300" />
+          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-400">
+            <Bus size={15} className="text-amber-600" />
             {t("q3")}
           </legend>
           <div className="flex flex-wrap gap-2">
@@ -257,8 +257,8 @@ export default function CourseSurvey() {
 
         {/* 4. 동행 */}
         <fieldset>
-          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-200">
-            <Users size={15} className="text-amber-300" />
+          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-400">
+            <Users size={15} className="text-amber-600" />
             {t("q4")}
           </legend>
           <div className="flex flex-wrap gap-2">
@@ -277,8 +277,8 @@ export default function CourseSurvey() {
 
         {/* 5. 테마 (복수) */}
         <fieldset>
-          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-200">
-            <Sparkles size={15} className="text-amber-300" />
+          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-400">
+            <Sparkles size={15} className="text-amber-600" />
             {t("q5")}
           </legend>
           <div className="flex flex-wrap gap-2">
@@ -302,7 +302,7 @@ export default function CourseSurvey() {
           <p className="mt-2 text-xs text-slate-500">{t("themeNote")}</p>
         </fieldset>
 
-        <div className="flex flex-wrap items-center gap-3 border-t border-white/[0.06] pt-5">
+        <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-5">
           <button
             type="button"
             onClick={submit}
@@ -316,7 +316,7 @@ export default function CourseSurvey() {
         </div>
 
         {error && (
-          <p className="rounded-xl border border-rose-400/25 bg-rose-400/[0.06] px-4 py-3 text-sm text-rose-200">
+          <p className="rounded-xl border border-rose-400/25 bg-rose-400/[0.06] px-4 py-3 text-sm text-rose-700">
             {error}
           </p>
         )}
@@ -343,29 +343,29 @@ function SurveyResult({
   const a = course.applied;
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+    <section className="rounded-2xl border border-slate-200 bg-slate-100 p-6">
       {course.title && (
         <h2 className="text-xl font-bold tracking-tight">{course.title}</h2>
       )}
       {course.summary && (
-        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+        <p className="mt-2 text-sm leading-relaxed text-slate-400">
           {course.summary}
         </p>
       )}
 
       {/* 적용된 조건 — 설문 답변이 실제 제약으로 쓰였다는 근거 */}
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
+        <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-slate-400">
           {a.startTime} – {a.endTime}
         </span>
-        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
+        <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-slate-400">
           {t(`transports.${a.transport}`)}
         </span>
-        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
+        <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-slate-400">
           {t("stopsCount", { n: course.stops.length })}
         </span>
         {course.source === "distance" && (
-          <span className="rounded-full border border-amber-400/25 bg-amber-400/[0.06] px-3 py-1.5 text-amber-200">
+          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-700">
             {tc("aiFallbackNote")}
           </span>
         )}
@@ -384,7 +384,7 @@ function SurveyResult({
             className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
               mode === m
                 ? "border-amber-400 bg-amber-400 text-slate-950"
-                : "border-white/10 bg-white/5 text-slate-300 hover:border-white/25"
+                : "border-slate-200 bg-slate-100 text-slate-400 hover:border-slate-300"
             }`}
           >
             {tc(
@@ -407,14 +407,14 @@ function SurveyResult({
           return (
             <li
               key={s.contentId}
-              className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3"
+              className="rounded-xl border border-slate-200 bg-white/[0.02] px-4 py-3"
             >
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-amber-400 text-xs font-extrabold text-slate-950">
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-bold text-white">{s.title}</p>
+                  <p className="font-bold text-slate-900">{s.title}</p>
                   {course.notes[i] && (
                     <p className="mt-1 text-sm text-slate-400">
                       {course.notes[i]}
@@ -431,13 +431,13 @@ function SurveyResult({
                     {/* 붐빔은 거르지 않고 알려만 준다. 없는 곳은 아예 표시하지 않는다 —
                         '정보 없음'을 '한산함'으로 읽으면 안 된다 */}
                     {crowd != null && crowd >= 70 && (
-                      <span className="flex items-center gap-1 font-semibold text-amber-300">
+                      <span className="flex items-center gap-1 font-semibold text-amber-600">
                         <AlertTriangle size={11} />
                         {t("crowded", { rate: crowd })}
                       </span>
                     )}
                     {crowd != null && crowd < 40 && (
-                      <span className="text-emerald-300/80">
+                      <span className="text-emerald-600/80">
                         {t("quiet", { rate: crowd })}
                       </span>
                     )}
@@ -450,11 +450,11 @@ function SurveyResult({
       </ol>
 
       {course.tip && (
-        <p className="mt-5 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
+        <p className="mt-5 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-400">
           {course.tip}
         </p>
       )}
-      <p className="mt-3 text-xs leading-relaxed text-slate-600">
+      <p className="mt-3 text-xs leading-relaxed text-slate-400">
         {t("crowdNote")}
       </p>
     </section>

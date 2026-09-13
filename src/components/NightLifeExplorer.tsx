@@ -14,9 +14,9 @@ const fmt = (m: number) => (m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`);
 
 /** 탭별 포인트 색 — 명소(앰버)와 다른 네온 계열 */
 const ACCENT: Record<LocalKind, { text: string; ring: string; chip: string; glow: string }> = {
-  food: { text: "text-rose-300", ring: "hover:border-rose-400/50", chip: "bg-rose-400/15 text-rose-200", glow: "from-rose-500/20" },
-  stay: { text: "text-violet-300", ring: "hover:border-violet-400/50", chip: "bg-violet-400/15 text-violet-200", glow: "from-violet-500/20" },
-  shopping: { text: "text-emerald-300", ring: "hover:border-emerald-400/50", chip: "bg-emerald-400/15 text-emerald-200", glow: "from-emerald-500/20" },
+  food: { text: "text-rose-600", ring: "hover:border-rose-400/50", chip: "bg-rose-400/15 text-rose-700", glow: "from-rose-500/20" },
+  stay: { text: "text-violet-300", ring: "hover:border-violet-400/50", chip: "bg-violet-400/15 text-violet-700", glow: "from-violet-500/20" },
+  shopping: { text: "text-emerald-600", ring: "hover:border-emerald-400/50", chip: "bg-emerald-400/15 text-emerald-700", glow: "from-emerald-500/20" },
 };
 
 const AREA_ORDER: NightAreaId[] = ["yuseong", "dunsan", "expo", "downtown", "other"];
@@ -81,7 +81,7 @@ export default function NightLifeExplorer({
               className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
                 area === id
                   ? "border-white bg-white text-slate-950"
-                  : "border-white/10 bg-white/5 text-slate-300 hover:border-white/30 hover:text-white"
+                  : "border-slate-200 bg-slate-100 text-slate-400 hover:border-white/30 hover:text-slate-900"
               }`}
             >
               {id === "all" ? t("filterAll") : t(`areas.${id}`)}
@@ -104,8 +104,8 @@ export default function NightLifeExplorer({
               <div
                 className={
                   area === "all"
-                    ? "flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-end sm:justify-between"
-                    : "relative overflow-hidden rounded-3xl border border-white/10 px-6 py-6 sm:px-8"
+                    ? "flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between"
+                    : "relative overflow-hidden rounded-3xl border border-slate-200 px-6 py-6 sm:px-8"
                 }
               >
                 {area !== "all" && (
@@ -124,13 +124,13 @@ export default function NightLifeExplorer({
                   </div>
                   {chips.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
-                      <Sparkles size={13} className="text-amber-300" />
+                      <Sparkles size={13} className="text-amber-600" />
                       <span className="mr-1 text-xs text-slate-400">{t("areaSpots")}</span>
                       {chips.map((n) => (
                         <Link
                           key={n.contentId}
                           href={`/spots/${n.contentId}`}
-                          className="rounded-full border border-amber-400/30 px-2.5 py-1 text-xs font-semibold text-amber-200 transition hover:bg-amber-400 hover:text-slate-950"
+                          className="rounded-full border border-amber-300 px-2.5 py-1 text-xs font-semibold text-amber-700 transition hover:bg-amber-400 hover:text-slate-950"
                         >
                           {n.title}
                         </Link>
@@ -141,16 +141,16 @@ export default function NightLifeExplorer({
               </div>
 
               {/* 가로형 행 목록 */}
-              <ol className="mt-4 divide-y divide-white/[0.06]">
+              <ol className="mt-4 divide-y divide-slate-200">
                 {list.map((s, i) => (
                   <li key={s.contentId}>
-                    <div className={`group flex gap-4 rounded-2xl border border-transparent px-2 py-4 transition ${accent.ring} hover:bg-white/[0.03]`}>
+                    <div className={`group flex gap-4 rounded-2xl border border-transparent px-2 py-4 transition ${accent.ring} hover:bg-slate-100`}>
                       <span className={`w-7 shrink-0 pt-1 text-right text-lg font-black tabular-nums ${accent.text}`}>
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <Link
                         href={`/${kind}/${s.contentId}`}
-                        className="relative h-24 w-32 shrink-0 overflow-hidden rounded-xl bg-slate-900 sm:h-28 sm:w-44"
+                        className="relative h-24 w-32 shrink-0 overflow-hidden rounded-xl bg-white sm:h-28 sm:w-44"
                       >
                         <Image
                           src={s.imageUrl!}
@@ -163,7 +163,7 @@ export default function NightLifeExplorer({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <Link href={`/${kind}/${s.contentId}`} className="block truncate text-base font-bold text-white group-hover:underline sm:text-lg">
+                            <Link href={`/${kind}/${s.contentId}`} className="block truncate text-base font-bold text-slate-900 group-hover:underline sm:text-lg">
                               {s.title}
                             </Link>
                             <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-400">
@@ -174,7 +174,7 @@ export default function NightLifeExplorer({
                           <Link
                             href={`/${kind}/${s.contentId}`}
                             aria-label={s.title}
-                            className="hidden shrink-0 rounded-full border border-white/10 p-2 text-slate-300 transition hover:bg-white hover:text-slate-950 sm:block"
+                            className="hidden shrink-0 rounded-full border border-slate-200 p-2 text-slate-400 transition hover:bg-white hover:text-slate-950 sm:block"
                           >
                             <ChevronRight size={15} />
                           </Link>
@@ -188,7 +188,7 @@ export default function NightLifeExplorer({
                           )}
                           {s.nearest && (
                             <span className="text-slate-400">
-                              <b className="text-amber-300">{fmt(s.nearest.distanceM)}</b> {s.nearest.title}
+                              <b className="text-amber-600">{fmt(s.nearest.distanceM)}</b> {s.nearest.title}
                             </span>
                           )}
                           {s.tel && (
@@ -202,7 +202,7 @@ export default function NightLifeExplorer({
                         {s.nearest && (
                           <Link
                             href={`/courses?from=${s.nearest.contentId}`}
-                            className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-amber-300 transition hover:text-amber-200"
+                            className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-amber-600 transition hover:text-amber-700"
                           >
                             <Route size={12} />
                             {t("planNearby")}
