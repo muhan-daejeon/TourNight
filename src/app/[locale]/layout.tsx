@@ -32,7 +32,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "site" });
   return {
-    title: `${t("title")} — ${t("tagline")}`,
+    title: `${t("title")} - ${t("tagline")}`,
     description: t("description"),
   };
 }

@@ -353,7 +353,7 @@ export default function Header() {
                     data-tour-target={TOUR_KEY[tourTarget.itemKey]}
                     className="flex items-center gap-1.5 whitespace-nowrap text-[13px] font-light text-amber-600"
                   >
-                    <span aria-hidden>—</span>
+                    <span aria-hidden>-</span>
                     {t(`nav.${tourTarget.itemKey}`)}
                   </span>
                 )}

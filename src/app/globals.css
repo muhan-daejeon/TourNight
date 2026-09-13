@@ -5,6 +5,39 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ── 대전 브랜드 컬러 (대전광역시 CI 팔레트 기반) ──
+   Main: 대전 블루 PANTONE 2145C(#004EA2) · 대전 그린 2413C(#35B597)
+   Sub:  4150C(#4774B9) · 2062C(#A64089) · 2012C(#F39800) 등
+   기존 코드가 쓰는 indigo·amber 유틸리티 스케일을 이 팔레트로 재정의해
+   사이트 전체의 주 동선(블루)과 버튼·야간 액센트(오렌지)가 한 번에 바뀐다. */
+@theme {
+  --color-daejeon-blue: #004ea2;
+  --color-daejeon-green: #35b597;
+  --color-daejeon-orange: #f39800;
+  --color-daejeon-purple: #a64089;
+
+  /* indigo → 대전 블루 스케일 */
+  --color-indigo-50: #edf3fa;
+  --color-indigo-100: #d9e5f4;
+  --color-indigo-200: #b0cbe9;
+  --color-indigo-300: #7fa8d9;
+  --color-indigo-400: #4774b9; /* PANTONE 4150C */
+  --color-indigo-500: #1b63b5;
+  --color-indigo-600: #004ea2; /* PANTONE 2145C */
+  --color-indigo-700: #003d80;
+  --color-indigo-800: #0a2f63;
+  --color-indigo-900: #08234a;
+
+  /* amber → 대전 오렌지 스케일 (PANTONE 2012C) */
+  --color-amber-50: #fef4e5;
+  --color-amber-100: #fde5c2;
+  --color-amber-200: #fbd090;
+  --color-amber-300: #f7ae33;
+  --color-amber-400: #f39800; /* PANTONE 2012C */
+  --color-amber-600: #c97c00;
+  --color-amber-700: #a56300;
+}
+
 :root {
   /*
     --header-row-h: 로고+카테고리 "줄" 자체의 높이.
@@ -49,16 +82,17 @@ body {
   background: rgba(251, 191, 36, 0.3);
 }
 
-/* 섹션 제목용 형광펜 밑줄 — 서울의 밤 포털의 노란 마커처럼, 글자 아래쪽 1/3을
-   앰버로 슥 칠한다. 줄바꿈돼도 각 줄에 이어지도록 clone */
+/* 섹션 제목용 밑줄 — 대전 블루→그린 그라데이션 바. 노란 형광펜(서울의 밤
+   포털의 시그니처)과 확실히 갈라서는 우리 표식이다 */
 .marker-underline {
   background-image: linear-gradient(
-    to top,
-    rgba(251, 191, 36, 0.3) 0%,
-    rgba(251, 191, 36, 0.3) 32%,
-    transparent 32%
+    90deg,
+    rgba(0, 78, 162, 0.35),
+    rgba(53, 181, 151, 0.5)
   );
-  border-radius: 2px;
+  background-repeat: no-repeat;
+  background-size: 100% 0.32em;
+  background-position: 0 92%;
   padding: 0 0.12em;
   margin: 0 -0.12em;
   -webkit-box-decoration-break: clone;
@@ -176,5 +210,5 @@ body {
   font-weight: 700;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: rgb(79 70 229 / 0.95); /* indigo-600 */
+  color: rgb(38 142 117); /* 대전 그린(2413C)의 대비 보정 톤 */
 }

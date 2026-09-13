@@ -53,14 +53,21 @@ export default async function HomePage({
   const [feature, ...restSpots] = photoSpots;
   const gridSpots = restSpots.slice(0, 4);
 
+  // 아이콘 원은 대전 CI 3색(블루·그린·오렌지)을 순환 — 단색 회색 대신
+  // 팔레트가 첫 화면에서 바로 보이게 한다
   const CATS = [
-    { Icon: Moon, label: t("catSpots"), href: "/spots" },
-    { Icon: Sparkles, label: t("catFestivals"), href: "/festivals" },
-    { Icon: Compass, label: t("catCourses"), href: "/courses" },
-    { Icon: UtensilsCrossed, label: t("catKlife"), href: "/klife/restaurant" },
-    { Icon: Landmark, label: t("catPersona"), href: "/personality" },
-    { Icon: Camera, label: t("catStamp"), href: "/stamp-tour" },
+    { Icon: Moon, label: t("catSpots"), href: "/spots", tone: "blue" },
+    { Icon: Sparkles, label: t("catFestivals"), href: "/festivals", tone: "green" },
+    { Icon: Compass, label: t("catCourses"), href: "/courses", tone: "orange" },
+    { Icon: UtensilsCrossed, label: t("catKlife"), href: "/klife/restaurant", tone: "blue" },
+    { Icon: Landmark, label: t("catPersona"), href: "/personality", tone: "green" },
+    { Icon: Camera, label: t("catStamp"), href: "/stamp-tour", tone: "orange" },
   ] as const;
+  const TONE = {
+    blue: "bg-indigo-50 text-daejeon-blue group-hover:bg-daejeon-blue",
+    green: "bg-emerald-50 text-daejeon-green group-hover:bg-daejeon-green",
+    orange: "bg-amber-50 text-daejeon-orange group-hover:bg-daejeon-orange",
+  } as const;
 
   return (
     <div>
@@ -79,7 +86,7 @@ export default async function HomePage({
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/50" />
         <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-white">
           <p className="text-xs font-semibold tracking-[0.25em] sm:text-sm">
-            DAEJEON NIGHT TRAVEL
+            DREAM CITY DAEJEON
           </p>
           <h1 className="mt-4 text-3xl font-extrabold leading-tight drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] sm:text-5xl">
             {t("heroTitle")}
@@ -112,9 +119,9 @@ export default async function HomePage({
       {/* ── 카테고리 숏컷 ── */}
       <section className="mx-auto max-w-5xl px-6 py-12">
         <div className="grid grid-cols-3 gap-6 sm:grid-cols-6">
-          {CATS.map(({ Icon, label, href }) => (
+          {CATS.map(({ Icon, label, href, tone }) => (
             <Link key={href} href={href} className="group flex flex-col items-center gap-2.5">
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition group-hover:bg-indigo-600 group-hover:text-white">
+              <span className={`flex h-16 w-16 items-center justify-center rounded-full transition group-hover:text-white ${TONE[tone]}`}>
                 <Icon size={24} strokeWidth={1.8} />
               </span>
               <span className="text-center text-[13px] font-semibold text-slate-700">
@@ -218,7 +225,7 @@ export default async function HomePage({
 
       {/* ── 성향 테스트 CTA ── */}
       <section className="mx-auto max-w-7xl px-6 py-14">
-        <div className="flex flex-col items-center gap-6 rounded-2xl bg-indigo-600 px-8 py-14 text-center text-white">
+        <div className="flex flex-col items-center gap-6 rounded-2xl bg-gradient-to-r from-daejeon-blue to-daejeon-green px-8 py-14 text-center text-white">
           <h2 className="text-3xl font-extrabold">{t("heroPersonaTitle")}</h2>
           <p className="max-w-xl text-indigo-100">{t("heroPersonaSubtitle")}</p>
           <Link
