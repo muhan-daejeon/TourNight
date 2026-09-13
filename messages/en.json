@@ -367,7 +367,11 @@
       }
     },
     "phrasesMore": "See the full phrasebook below",
-    "situationPhrases": "Korean you can use right now"
+    "situationPhrases": "Korean you can use right now",
+    "learnTitle": "Ready to practice?",
+    "learnBody": "The K-Life Guide walks you through this situation from start to finish.",
+    "learnCta": "Go to K-Life Guide",
+    "learnLater": "Later"
   },
   "community": {
     "title": "Night Community",
@@ -524,7 +528,8 @@
     "areaVisitors": {
       "line": "≈{count} out-of-town visitors/day in {gu}",
       "basis": "(as of {month} · mobile big data)"
-    }
+    },
+    "nearbyFood": "Food Nearby"
   },
   "auth": {
     "login": "Log in",

@@ -367,7 +367,11 @@
       }
     },
     "phrasesMore": "下の表現集をすべて見る",
-    "situationPhrases": "この場面ですぐ使える韓国語"
+    "situationPhrases": "この場面ですぐ使える韓国語",
+    "learnTitle": "そろそろ練習してみる?",
+    "learnBody": "この状況を最初から最後まで体験できるK-Lifeガイドがあります。",
+    "learnCta": "K-Lifeガイドへ",
+    "learnLater": "あとで"
   },
   "community": {
     "title": "ナイトコミュニティ",
@@ -524,7 +528,8 @@
     "areaVisitors": {
       "line": "{gu}の1日平均域外訪問者 約{count}人",
       "basis": "（{month}基準・通信ビッグデータ）"
-    }
+    },
+    "nearbyFood": "近くのグルメ"
   },
   "auth": {
     "login": "ログイン",

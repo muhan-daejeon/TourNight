@@ -367,7 +367,11 @@
       }
     },
     "phrasesMore": "查看下方完整表达集",
-    "situationPhrases": "这个场景立刻能用的韩语"
+    "situationPhrases": "这个场景立刻能用的韩语",
+    "learnTitle": "要开始练习了吗?",
+    "learnBody": "K-Life指南带你从头到尾提前体验这个情境。",
+    "learnCta": "前往K-Life指南",
+    "learnLater": "稍后"
   },
   "community": {
     "title": "夜间社区",
@@ -524,7 +528,8 @@
     "areaVisitors": {
       "line": "{gu}日均外地访客约{count}人",
       "basis": "（{month}基准·通信大数据）"
-    }
+    },
+    "nearbyFood": "附近美食"
   },
   "auth": {
     "login": "登录",

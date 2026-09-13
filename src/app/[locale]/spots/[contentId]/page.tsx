@@ -5,6 +5,7 @@ import Image from "next/image";
 import {
   ArrowLeft,
   BedDouble,
+  UtensilsCrossed,
   MapPin,
   Navigation,
   Telescope,
@@ -20,7 +21,7 @@ import {
   getCongestion,
   type NearbySpot,
 } from "@/lib/spots";
-import { fetchNearbyStays } from "@/lib/kto";
+import { fetchNearbyFood, fetchNearbyStays } from "@/lib/kto";
 import NightMap from "@/components/NightMap";
 import SpotGuide from "@/components/SpotGuide";
 import CongestionForecast from "@/components/CongestionForecast";
@@ -129,12 +130,13 @@ export default async function SpotPage({
   const Icon = CATEGORY_ICON[spot.category];
 
   // 혼잡도·방문객 통계는 여기서 기다리지 않는다 (아래 Suspense에서 따로 채운다)
-  const [natureNearby, nearby, stays, transit] = await Promise.all([
+  const [natureNearby, nearby, stays, food, transit] = await Promise.all([
     spot.category === "nature"
       ? Promise.resolve([])
       : getNearbySpots(contentId, { category: "nature", limit: 3, locale }),
     getNearbySpots(contentId, { limit: 4, locale }),
     fetchNearbyStays(spot.mapX, spot.mapY),
+    fetchNearbyFood(spot.mapX, spot.mapY),
     getSpotTransit(contentId),
   ]);
 
@@ -248,6 +250,49 @@ export default async function SpotPage({
                 ))}
               </div>
             </section>
+
+            {/* 주변 맛집 — 밤 나들이의 "뭐 먹지"에 바로 답한다 (피드백 7) */}
+            {food.length > 0 && (
+              <section>
+                <h2 className="mb-3 flex items-center gap-2 text-lg font-bold">
+                  <UtensilsCrossed size={17} className="text-daejeon-orange" />
+                  {t("nearbyFood")}
+                </h2>
+                <div className="flex flex-col gap-2.5">
+                  {food.map((f) => (
+                    <a
+                      key={f.contentId}
+                      href={`https://map.kakao.com/link/map/${encodeURIComponent(f.title)},${f.mapY},${f.mapX}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="glass-card group flex items-center gap-3 rounded-xl p-2.5"
+                    >
+                      <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-slate-200">
+                        <Image
+                          src={f.imageUrl}
+                          alt={f.title}
+                          fill
+                          sizes="56px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-[15px] font-semibold text-slate-900 group-hover:text-daejeon-orange">
+                          {f.title}
+                        </h3>
+                        <p className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-slate-400">
+                          <span className="font-semibold text-daejeon-orange/90">
+                            {formatDistance(f.distM)}
+                          </span>
+                          <span className="text-slate-300">·</span>
+                          <span className="truncate">{f.addr}</span>
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* 주변 숙소 — 야간 소비→숙박 연계 (계획서 기능 4) */}
             {stays.length > 0 && (

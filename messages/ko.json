@@ -367,7 +367,11 @@
       }
     },
     "phrasesMore": "아래 전체 표현집 보기",
-    "situationPhrases": "이 상황에서 바로 쓰는 한국어"
+    "situationPhrases": "이 상황에서 바로 쓰는 한국어",
+    "learnTitle": "이제 학습을 해볼까요?",
+    "learnBody": "이 상황을 처음부터 끝까지 미리 경험하는 K-Life 가이드가 있어요.",
+    "learnCta": "K-Life 가이드로 이동",
+    "learnLater": "나중에"
   },
   "community": {
     "title": "야간 커뮤니티",
@@ -538,7 +542,8 @@
     "areaVisitors": {
       "line": "{gu} 하루 평균 외지 방문객 약 {count}명",
       "basis": "({month} 기준 · 이동통신 빅데이터)"
-    }
+    },
+    "nearbyFood": "주변 맛집"
   },
   "auth": {
     "login": "로그인",

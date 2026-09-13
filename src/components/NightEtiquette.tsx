@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { Link } from "@/i18n/navigation";
 import {
   Footprints,
   TreeDeciduous,
@@ -111,6 +112,23 @@ export default function NightEtiquette({
       cancelled = true;
     };
   }, [selected, phraseBook, effectiveLocale]);
+
+  // 주제를 살펴본 뒤 "이제 학습을 해볼까요?" 팝업으로 K-Life 가이드에 잇는다
+  // (피드백 5). 귀찮지 않게 세션당 한 번만 띄운다.
+  const [learnPrompt, setLearnPrompt] = useState(false);
+  useEffect(() => {
+    if (!selected) return;
+    try {
+      if (sessionStorage.getItem("tn-learn-prompted")) return;
+    } catch {}
+    const id = window.setTimeout(() => {
+      setLearnPrompt(true);
+      try {
+        sessionStorage.setItem("tn-learn-prompted", "1");
+      } catch {}
+    }, 1600);
+    return () => window.clearTimeout(id);
+  }, [selected]);
 
   const phraseCategory = selected ? TOPIC_PHRASE_CATEGORY[selected] : undefined;
   const phrases = phraseCategory ? phraseBook?.[phraseCategory]?.slice(0, 6) : undefined;
@@ -279,6 +297,29 @@ export default function NightEtiquette({
               </a>
             </div>
           )}
+        </div>
+      )}
+
+      {/* 학습 유도 팝업 — 에티켓(행동)을 봤으니 K-Life(상황 연습)로 (피드백 5) */}
+      {learnPrompt && (
+        <div className="fixed inset-x-4 bottom-6 z-[65] mx-auto max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_48px_rgba(15,23,42,0.2)]">
+          <p className="text-base font-bold text-slate-900">{t("learnTitle")}</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{t("learnBody")}</p>
+          <div className="mt-4 flex items-center gap-2.5">
+            <Link
+              href="/klife/restaurant"
+              className="flex-1 rounded-full bg-daejeon-blue px-4 py-2.5 text-center text-sm font-bold text-white transition hover:bg-indigo-500"
+            >
+              {t("learnCta")}
+            </Link>
+            <button
+              type="button"
+              onClick={() => setLearnPrompt(false)}
+              className="rounded-full border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-500 transition hover:text-slate-900"
+            >
+              {t("learnLater")}
+            </button>
+          </div>
         </div>
       )}
     </div>
