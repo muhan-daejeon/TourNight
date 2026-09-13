@@ -72,18 +72,18 @@ export default function IntroSequence({ skipIntro }: { skipIntro: boolean }) {
         }
         @keyframes tn-ufo-flight {
           0% {
-            transform: translate(calc(-100vw + 6rem), calc(-100vh + 14rem)) rotate(-16deg) scale(0.7);
+            transform: translate(-58vw, -60vh) rotate(-12deg) scale(3);
             opacity: 0;
           }
-          10% { opacity: 1; }
-          40% {
-            transform: translate(-52vw, -46vh) rotate(9deg) scale(1.12);
+          14% { opacity: 1; }
+          38% {
+            transform: translate(-42vw, -42vh) rotate(7deg) scale(2.5);
           }
-          70% {
-            transform: translate(-14vw, -16vh) rotate(-7deg) scale(0.98);
+          72% {
+            transform: translate(-11vw, -12vh) rotate(-6deg) scale(1.35);
           }
-          88% {
-            transform: translate(1.5rem, 0.75rem) rotate(3deg) scale(1.04);
+          90% {
+            transform: translate(0.9rem, 0.5rem) rotate(3deg) scale(1.05);
           }
           100% {
             transform: translate(0, 0) rotate(0deg) scale(1);

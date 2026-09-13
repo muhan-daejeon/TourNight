@@ -1,9 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
-import { ArrowRight, BookOpen, MessageSquare } from "lucide-react";
+import { ArrowRight, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
-import { withPeriods } from "@/lib/festivals";
+import { getVerifiedNightSpots } from "@/lib/spots";
 import { listNotices } from "@/lib/notices";
 import { listPopularPosts, type CommunityPost } from "@/lib/community";
 import IntroSequence from "@/components/IntroSequence";
@@ -37,7 +36,6 @@ export default async function HomePage({
   ]);
   const notices = listNotices(locale);
   const photoSpots = spots.filter((s) => s.imageUrl);
-  const festivals = (await withPeriods(pickFestivals(spots))).slice(0, 4);
   const [feature, ...restSpots] = photoSpots;
   const gridSpots = restSpots.slice(0, 4);
 
@@ -69,25 +67,6 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* ── 가이드북 — 하단의 큰 배너 대신 상단의 슬림 버튼 스트립 ── */}
-      <section className="mx-auto max-w-7xl px-6 pt-6">
-        <Link
-          href="/etiquette"
-          className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3.5 transition hover:border-indigo-300 hover:bg-indigo-50"
-        >
-          <BookOpen size={18} className="shrink-0 text-daejeon-blue" />
-          <span className="min-w-0 flex-1 truncate text-sm text-slate-600">
-            <b className="font-extrabold text-slate-900">
-              Tour<span className="text-daejeon-blue">Night</span> GUIDEBOOK
-            </b>
-            <span className="ml-2 hidden sm:inline">{t("guidebookSubtitle")}</span>
-          </span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-daejeon-blue px-4 py-1.5 text-xs font-bold text-white transition group-hover:bg-indigo-500">
-            {t("guidebookCta")}
-            <ArrowRight size={13} />
-          </span>
-        </Link>
-      </section>
 
       {/* ── 🌙 오늘 밤 브리핑 — 실시간 데이터(날씨·일몰·월령·막차) + 조건 추천 ── */}
       <section className="mx-auto max-w-7xl px-6 pb-4">
@@ -124,48 +103,33 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* ── 지금 대전의 밤은 — 축제 포스터 ── */}
-      {festivals.length > 0 && (
-        <section className="mx-auto max-w-7xl px-6 py-14">
-          {/* 가운데 정렬 헤더 — 작은 리드문 + 큰 컬러 타이틀 */}
-          <div className="mb-10 text-center">
-            <p className="text-sm font-semibold text-slate-500">{t("festivalsSectionSub")}</p>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-daejeon-green sm:text-4xl">
-              {t("festivalsSection")}
-            </h2>
-          </div>
-          {/* 사진 카드 + 아래 제목·한 줄 설명 */}
-          <div className="grid grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-4">
-            {festivals.map((f) => (
-              <Link key={f.contentId} href={`/spots/${f.contentId}`} className="group">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-200">
-                  {f.imageUrl && (
-                    <Image
-                      src={f.imageUrl}
-                      alt={f.title}
-                      fill
-                      sizes="(min-width:1024px) 25vw, 50vw"
-                      className="object-cover transition duration-500 group-hover:scale-105"
-                    />
-                  )}
-                </div>
-                <h3 className="mt-3 line-clamp-1 text-[15px] font-bold text-slate-900 group-hover:text-daejeon-green">
-                  {f.title}
-                </h3>
-                <p className="mt-1 line-clamp-1 text-sm text-slate-500">{f.addr}</p>
-              </Link>
-            ))}
-          </div>
-          <div className="mt-9 text-center">
-            <Link
-              href="/festivals"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-daejeon-green hover:text-daejeon-green"
-            >
-              {t("festivalsViewAll")} <ArrowRight size={14} />
+      {/* ── 투어나잇을 즐겨보세요 — 대표 기능 3분할 배너 (각진 모서리, 10px 간격) ── */}
+      <section className="py-14">
+        <h2 className="mb-6 text-center text-3xl font-extrabold tracking-tight text-daejeon-blue sm:text-4xl">
+          {t("enjoyTitle")}
+        </h2>
+        <div className="ml-[calc(50%-50vw)] grid w-screen grid-cols-1 gap-[10px] bg-white sm:grid-cols-3">
+          {[
+            { href: "/personality", img: "/spots/sikjangsan.jpg", label: t("enjoy1") },
+            { href: "/stamp-tour", img: "/spots/expo-bridge.jpg", label: t("enjoy2") },
+            { href: "/klife/restaurant", img: "/etiquette/dining.jpg", label: t("enjoy3") },
+          ].map(({ href, img, label }) => (
+            <Link key={href} href={href} className="group relative block h-56 overflow-hidden sm:h-72">
+              <Image
+                src={img}
+                alt=""
+                fill
+                sizes="(min-width:640px) 33vw, 100vw"
+                className="object-cover transition duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-slate-950/45 transition group-hover:bg-slate-950/30" />
+              <span className="absolute inset-0 flex items-center justify-center px-4 text-center text-xl font-extrabold text-white drop-shadow sm:text-2xl">
+                {label}
+              </span>
             </Link>
-          </div>
-        </section>
-      )}
+          ))}
+        </div>
+      </section>
 
       {/* ── 오늘 밤, 어디로 갈까요? — 대형 피처 + 그리드, 사진이 주인공 ── */}
       {feature && (

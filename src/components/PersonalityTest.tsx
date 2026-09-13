@@ -5,24 +5,19 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import {
   ArrowRight,
-  BarChart3,
-  Camera,
   ChevronLeft,
-  ChevronRight,
   Clock,
-  ImageIcon,
   ListChecks,
   Sparkles,
-  UserRound,
 } from "lucide-react";
 import {
   OPTION_KEYS,
+  PERSONALITY_TYPES,
   QUESTIONS,
   QUESTION_TIMES,
   scorePersonality,
   type OptionKey,
 } from "@/lib/personality-test";
-import { PERSONA_INTRO_IMAGE, PERSONA_QUESTION_IMAGES } from "@/lib/persona-images";
 import PersonalityResultView from "./PersonalityResultView";
 
 type Phase = "intro" | "quiz" | "analyzing" | "result";
@@ -74,70 +69,58 @@ export default function PersonalityTest() {
 
   // ── 인트로(테스트 소개) ────────────────────────────────────
   if (phase === "intro") {
-    const HOW: { key: string; Icon: typeof ListChecks }[] = [
-      { key: "how1", Icon: ListChecks },
-      { key: "how2", Icon: BarChart3 },
-      { key: "how3", Icon: UserRound },
-      { key: "how4", Icon: Camera },
-    ];
+    // 마스코트 로테이션 — 팀 에셋(성향 캐릭터 7종)을 4마리씩 보이게 무한 슬라이드.
+    // 트랙을 두 벌 이어 붙이고 -50%까지 밀면 이음새 없이 계속 돈다
+    const marquee = [...PERSONALITY_TYPES, ...PERSONALITY_TYPES];
     return (
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
-        <div className="grid gap-8 p-8 sm:grid-cols-[1.4fr_1fr] sm:p-11">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-              {t("introTitle")}
-            </h2>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-400">
-              {t("introBody")}
-            </p>
-            <div className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              {HOW.map(({ key, Icon }, i) => (
-                <div key={key}>
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600">
-                    <Icon size={20} />
-                  </div>
-                  <p className="mt-3 text-[13px] font-bold text-slate-900">
-                    {i + 1}. {t(`${key}.title`)}
-                  </p>
-                  <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                    {t(`${key}.body`)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="relative flex min-h-[180px] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600/25 via-purple-700/20 to-slate-900">
-            {PERSONA_INTRO_IMAGE ? (
-              <Image
-                src={PERSONA_INTRO_IMAGE}
-                alt=""
-                fill
-                sizes="(min-width: 640px) 40vw, 100vw"
-                className="object-cover"
-              />
-            ) : (
-              <>
-                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_50%_40%,rgba(165,180,252,0.35),transparent_70%)]" />
-                <Sparkles size={48} className="relative text-indigo-700/80" />
-              </>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 bg-slate-50 px-8 py-5 sm:px-11">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-400">
+      <div className="py-6 text-center">
+        <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          {t("introTitle")}
+        </h2>
+        <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-slate-500">
+          {t("introBody")}
+        </p>
+
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
             <ListChecks size={13} /> {t("metaCount", { count: QUESTIONS.length })}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-400">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
             <Clock size={13} /> {t("metaTime")}
           </span>
-          <button
-            type="button"
-            onClick={() => setPhase("quiz")}
-            className="ml-auto inline-flex items-center gap-2 rounded-full bg-indigo-500 px-7 py-3 text-sm font-bold text-slate-900 shadow-[0_0_28px_rgba(99,102,241,0.4)] transition hover:bg-indigo-400"
-          >
-            {t("start")}
-            <ArrowRight size={16} />
-          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setPhase("quiz")}
+          className="mt-8 inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-10 py-4 text-base font-bold text-white shadow-[0_8px_28px_rgba(0,78,162,0.35)] transition hover:bg-indigo-500"
+        >
+          {t("start")}
+          <ArrowRight size={17} />
+        </button>
+
+        {/* 성향 캐릭터 퍼레이드 — 4마리씩 보이며 쉬지 않고 흐른다 */}
+        <div className="relative mt-12 overflow-hidden" aria-hidden>
+          <div className="tn-parade flex w-max items-end gap-0">
+            {marquee.map((ty, i) => (
+              <div key={i} className="flex w-1/8 min-w-[25%] flex-col items-center gap-2 sm:min-w-[25%]">
+                <span className="rounded-full bg-daejeon-blue px-3 py-1 text-[11px] font-extrabold text-white shadow">
+                  {t(`axes.${ty}`)}
+                </span>
+                <Image
+                  src={`/mascots/${ty}.png`}
+                  alt=""
+                  width={140}
+                  height={140}
+                  className="h-24 w-auto drop-shadow-[0_10px_18px_rgba(15,23,42,0.18)] sm:h-32"
+                />
+              </div>
+            ))}
+          </div>
+          <style>{`
+            .tn-parade { animation: tn-parade 28s linear infinite; }
+            @keyframes tn-parade { to { transform: translateX(-50%); } }
+          `}</style>
         </div>
       </div>
     );
@@ -165,10 +148,6 @@ export default function PersonalityTest() {
   const selected = answers[q.id];
   const progress = ((index + 1) / QUESTIONS.length) * 100;
   const isLast = index === QUESTIONS.length - 1;
-  // q.id는 "q1".."q12" — 사진은 앞의 몇 문항만 있고(persona:images 스크립트로
-  // 생성), 없는 문항은 기존 아이콘 자리표시자로 자연히 대체된다
-  const qOptionImages = PERSONA_QUESTION_IMAGES[q.id.replace(/^q/, "")];
-
   // 선택하면 색이 바뀌는 걸 잠깐 보여주고 바로 다음 문항으로 넘어간다 (피드백 9)
   const choose = (key: OptionKey) => {
     setAnswers((p) => ({ ...p, [q.id]: key }));
@@ -176,12 +155,6 @@ export default function PersonalityTest() {
       if (isLast) setPhase("analyzing");
       else setIndex(index + 1);
     }, 260);
-  };
-
-  const goNext = () => {
-    if (!selected) return;
-    if (isLast) setPhase("analyzing");
-    else setIndex(index + 1);
   };
 
   return (

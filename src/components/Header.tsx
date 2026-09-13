@@ -13,6 +13,7 @@ import AuthNav from "./AuthNav";
 /** 탭의 href 출처 */
 const NAV_ITEMS = [
   { href: "/", key: "home" },
+  { href: "/about", key: "about" },
   { href: "/spots", key: "spots" },
   { href: "/festivals", key: "festivals" },
   { href: "/courses", key: "courses" },
@@ -52,7 +53,7 @@ const MENU_GROUPS = [
   // 팀 피드백 구성: 코스 만들기(성향·AI·나만의) / 장소 소개 / 대전을 즐기기.
   // 인생네컷(콜라주)은 도장투어 페이지 하단으로 옮겨져 도장투어 항목이 겸한다
   { id: "course", labelKey: "groupCourse", items: ["personality", "courses"] },
-  { id: "places", labelKey: "groupPlaces", items: ["spots", "festivals", "food", "stay", "shopping"] },
+  { id: "places", labelKey: "groupPlaces", items: ["about", "spots", "festivals", "food", "stay", "shopping"] },
   { id: "enjoy", labelKey: "groupEnjoy", items: ["etiquette", "klife", "nightBike", "stampTour"] },
   { id: "community", labelKey: "groupCommunity", items: ["community"] },
 ] as const;
