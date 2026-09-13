@@ -71,36 +71,6 @@ export default async function HomePage({
         <TonightBriefing />
       </section>
 
-      {/* ── 대전은? — 도시·꿈돌이 소개. 처음 온 외국인의 첫 질문에 답한다 ── */}
-      <section className="mx-auto max-w-5xl px-6 py-16 text-center">
-        <p className="text-sm font-semibold text-slate-500">{t("aboutLead")}</p>
-        <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-daejeon-blue sm:text-4xl">
-          {t("aboutTitle")}
-        </h2>
-        <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-slate-600">
-          {t("aboutBody")}
-        </p>
-        <div className="mx-auto mt-8 flex max-w-xl flex-col items-center gap-4 rounded-3xl border border-amber-200 bg-amber-50 px-7 py-8 sm:flex-row sm:text-left">
-          <Image
-            src="/menu-icons/menu1.png"
-            alt="꿈돌이"
-            width={96}
-            height={89}
-            className="h-20 w-auto drop-shadow"
-          />
-          <div>
-            <p className="text-sm leading-relaxed text-slate-600">{t("aboutKkum")}</p>
-            <Link
-              href="/personality"
-              className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-daejeon-blue transition hover:text-indigo-500"
-            >
-              {t("aboutCta")}
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ── 투어나잇을 즐겨보세요 — 대표 기능 3분할 (각진 모서리·10px 간격).
           타일마다 그 기능과 직접 관련된 비주얼: 성향 테스트=성향 캐릭터들,
           네컷사진=실제 콜라주 프레임, K-Life=포장마차(한국 밤 문화) ── */}
