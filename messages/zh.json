@@ -12,28 +12,29 @@
   },
   "nav": {
     "spots": "夜间景点",
-    "courses": "推荐路线",
+    "courses": "AI定制路线",
     "etiquette": "夜间礼仪",
     "community": "社区",
     "phrases": "生存韩语",
     "festivals": "庆典·活动",
-    "food": "深夜美食",
-    "stay": "今晚住宿",
+    "food": "美食",
+    "stay": "住宿",
     "shopping": "夜市 · 购物",
     "menu": "全部菜单",
     "groupExplore": "探索",
     "groupGuide": "旅行指南",
     "groupLocal": "夜生活",
-    "groupCommunity": "参与",
+    "groupCommunity": "消息",
     "home": "首页",
-    "personality": "性格测试",
+    "personality": "旅行类型路线",
     "klife": "K-Life指南",
-    "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이",
-    "nightBike": "深夜免费自行车之旅",
+    "stampTour": "四格照片 with 梦之子",
+    "nightBike": "骑行之旅 with Tashu",
     "groupCourse": "规划路线",
     "groupPlaces": "地点介绍",
-    "groupEnjoy": "玩转大田"
+    "groupEnjoy": "玩转大田",
+    "about": "关于大田",
+    "notices": "公告"
   },
   "home": {
     "heroTitle": "今晚，展开你的梦想",
@@ -124,7 +125,19 @@
     "aboutTitle": "大田是?",
     "aboutBody": "科学之城,也是面包与刀削面之城;入夜后,甲川的桥梁与韩光塔熠熠生辉。从首尔乘KTX仅1小时,大田就在韩国的正中心。",
     "aboutKkum": "黄色小精灵Kkumdori自1993年大田世博会起就是大田的吉祥物,象征梦想与希望的城市之脸。",
-    "aboutCta": "和Kkumdori一起开始旅程吧"
+    "aboutCta": "和Kkumdori一起开始旅程吧",
+    "enjoyTitle": "尽情享受TourNight",
+    "enjoy1": "我的旅行性格测试",
+    "enjoy1Desc": "回答12个问题,看看你是哪种夜晚旅行者 - 还有与你相似的梦之子角色,以及最适合你的大田夜游路线。",
+    "enjoy1Cta": "测测我的旅行类型",
+    "enjoy2": "和Kkumdori拍四格照片",
+    "enjoy2Desc": "走遍大田夜景景点收集印章,用梦之子相框拍下专属四格照片,留住今晚。",
+    "enjoy2Cta": "开始盖章之旅",
+    "enjoy3": "K-Life指南",
+    "enjoy3Desc": "从餐厅点餐到夜生活礼仪 - 第一次来韩国也不用担心,在真实场景中边练边学。",
+    "enjoy3Cta": "查看K-Life指南",
+    "showcasePrev": "上一个",
+    "showcaseNext": "下一个"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。",
@@ -193,7 +206,13 @@
     "selectHint": "选择路线后将在地图上显示",
     "aiDailyLimit": "今天的路线生成次数已用完，请明天再试。",
     "tabPreset": "推荐路线",
-    "tabSurvey": "专属路线"
+    "tabSurvey": "专属路线",
+    "tabPersona": "性格测试",
+    "tabAi": "AI路线定制",
+    "editTitle": "打磨我的路线",
+    "editHint": "可从推荐中移除,或从收藏中添加",
+    "editRemove": "从路线移除",
+    "editedNote": "你已编辑途经点 - 请在地图App再次确认顺序与路线。"
   },
   "etiquette": {
     "title": "夜间礼仪",
@@ -368,10 +387,11 @@
     },
     "phrasesMore": "查看下方完整表达集",
     "situationPhrases": "这个场景立刻能用的韩语",
-    "learnTitle": "要开始练习了吗?",
+    "learnTitle": "现在开始学习韩国生活吧?",
     "learnBody": "K-Life指南带你从头到尾提前体验这个情境。",
-    "learnCta": "前往K-Life指南",
-    "learnLater": "稍后"
+    "learnCta": "开始",
+    "learnLater": "稍后",
+    "backToTopics": "查看其他情境"
   },
   "community": {
     "title": "夜间社区",
@@ -457,7 +477,7 @@
   },
   "stampTour": {
     "overline": "STAMP TOUR",
-    "introTitle": "도장투어 with 꿈돌이",
+    "introTitle": "네컷 사진 with 꿈돌이",
     "introSubtitle": "走遍自己挑选的4个景点集章，完成专属于你的梦多尔四格照吧。",
     "reselect": "重新选择景点",
     "consent": {
@@ -693,8 +713,8 @@
   "personality": {
     "title": "夜间旅行性格测试",
     "subtitle": "用12个问题了解你的大田夜游风格，并为你的类型推荐夜间路线。",
-    "introTitle": "如果是你会怎么做？",
-    "introBody": "面对每个'如果'情境，凭直觉选择即可。没有标准答案--选你最心动的那个。",
+    "introTitle": "遇见你未曾了解的夜晚自己",
+    "introBody": "在大田,旅行成为梦想 - 12个问题找出你的梦想旅行性格。没有标准答案:选你心动的,Kkumdori会为你准备最合适的夜晚。",
     "introMeta": "共{count}题 · 约2分钟",
     "start": "开始测试",
     "prev": "上一题",
@@ -1019,7 +1039,8 @@
       "culturist": "文化",
       "foodie": "美食",
       "trendsetter": "自我表达"
-    }
+    },
+    "seeCourses": "查看推荐路线"
   },
   "local": {
     "food": {
@@ -1135,7 +1156,7 @@
     "otherPhrases": "还有其他说法！"
   },
   "mascotGuide": {
-    "home": "你好!我是Kkumdori。今晚的大田由我来带路!",
+    "home": "你好,我是Kkumdori,点我试试!",
     "spots": "这些是大田夜晚值得去的景点。喜欢就加进路线吧!",
     "festivals": "现在大田正在举办的庆典。晚上去更漂亮哦!",
     "courses": "性格、AI、自选,三种方式打造你的夜间路线!",
@@ -1146,5 +1167,42 @@
     "stampTour": "打卡景点收集印章,集满4个就能做成照片条!",
     "nightBike": "大田公共自行车Tashu!实时告诉你哪里有空车。",
     "default": "需要什么就在菜单里选吧,我一直在这里!"
+  },
+  "about": {
+    "title": "关于大田",
+    "subtitle": "写给初访者的大田指南",
+    "cityTitle": "\"大田\"是座怎样的城市?",
+    "cityBody": "大田位于韩国正中心,是科学之城。1993年曾举办世界博览会,政府研究机构与KAIST云集,被称为\"科学首都\"。\n从首尔乘KTX约1小时即达,也以圣心堂面包和刀削面闻名。入夜后,甲川的桥梁与韩光塔亮起,儒城温泉的足浴为一天画上句号。",
+    "stat1": {
+      "value": "1小时",
+      "label": "从首尔乘KTX"
+    },
+    "stat2": {
+      "value": "144万",
+      "label": "大田人口"
+    },
+    "stat3": {
+      "value": "1993",
+      "label": "大田世博会"
+    },
+    "stat4": {
+      "value": "No.1",
+      "label": "韩国科学首都"
+    },
+    "familyTitle": "大田的角色家族,Kkumssi Family",
+    "familyBody": "以1993年世博会吉祥物Kkumdori及伙伴们组成的大田官方角色家族。象征梦想与希望的Kkumdori,三十多年来一直深受市民喜爱。",
+    "familyPlaceholder": "Kkumssi Family插画即将上线",
+    "tashuTitle": "大田的免费自行车,Tashu",
+    "tashuBody": "Tashu是大田的公共自行车。每次租借前1小时免费且次数不限——1小时内归还再借,就能全天免费骑行。沿甲川自行车道夜骑,是只属于大田的奢侈!",
+    "tashuCaption": "甲川自行车道 - 夜骑胜地",
+    "tashuCta": "要不要骑骑Tashu?"
+  },
+  "saved": {
+    "title": "收藏的地点",
+    "empty": "点击景点卡片上的收藏(书签),它们会汇集在这里。",
+    "remove": "取消收藏",
+    "pickerTitle": "从收藏中添加",
+    "pickerHint": "点击图片即可加入路线",
+    "pickerAllAdded": "收藏的地点都已在路线中!"
   }
 }

@@ -12,9 +12,12 @@ import {
   Sparkles,
   Users,
   AlertTriangle,
+  X,
 } from "lucide-react";
 import type { Course } from "@/lib/courses";
 import CourseMap, { type MapMode } from "./CourseMap";
+import SavedSpots from "./SavedSpots";
+import type { NightSpot } from "@/lib/kto";
 
 /** 출발지를 직접 고를 때 쓰는 대전 주요 거점 — GPS를 못 쓰거나 거부했을 때 */
 const ANCHORS = [
@@ -457,6 +460,101 @@ function SurveyResult({
       <p className="mt-3 text-xs leading-relaxed text-slate-400">
         {t("crowdNote")}
       </p>
+
+      {/* 내 코스 다듬기 — 추천에서 빼거나, 찜한 장소에서 더한다 (피드백 8·10).
+          코스가 새로 오면 key로 편집 상태도 처음부터 */}
+      <CourseEditor
+        key={course.stops.map((st) => st.contentId).join("|")}
+        course={course}
+        tc={tc}
+      />
     </section>
+  );
+}
+
+/** 편집 중인 경유지 — 원본 CourseStop과 찜에서 더한 명소의 공통 최소형 */
+interface EditStop {
+  contentId: string;
+  title: string;
+  addr: string;
+  imageUrl: string | null;
+}
+
+function CourseEditor({
+  course,
+  tc,
+}: {
+  course: SurveyCourse;
+  tc: ReturnType<typeof useTranslations>;
+}) {
+  const [stops, setStops] = useState<EditStop[]>(
+    course.stops.map((st) => ({
+      contentId: st.contentId,
+      title: st.title,
+      addr: st.addr,
+      imageUrl: st.imageUrl,
+    })),
+  );
+  const edited =
+    stops.length !== course.stops.length ||
+    stops.some((st, i) => course.stops[i]?.contentId !== st.contentId);
+
+  return (
+    <div className="mt-8 border-t border-slate-200 pt-6">
+      <p className="text-base font-bold text-slate-900">{tc("editTitle")}</p>
+      <p className="mt-0.5 text-xs text-slate-400">{tc("editHint")}</p>
+
+      <ol className="mt-4 space-y-2">
+        {stops.map((st, i) => (
+          <li
+            key={st.contentId}
+            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5"
+          >
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-daejeon-blue text-[11px] font-extrabold text-white">
+              {i + 1}
+            </span>
+            {st.imageUrl && (
+              <span className="relative h-10 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-200">
+                {/* eslint-disable-next-line @next/next/no-img-element -- 작은 썸네일, 원본 크기 그대로 */}
+                <img src={st.imageUrl} alt="" className="h-full w-full object-cover" />
+              </span>
+            )}
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold text-slate-800">
+                {st.title}
+              </span>
+              <span className="block truncate text-xs text-slate-400">{st.addr}</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setStops((prev) => prev.filter((x) => x.contentId !== st.contentId))}
+              disabled={stops.length <= 1}
+              aria-label={tc("editRemove")}
+              className="shrink-0 rounded-full p-1.5 text-slate-400 transition enabled:hover:text-rose-500 disabled:opacity-30"
+            >
+              <X size={14} />
+            </button>
+          </li>
+        ))}
+      </ol>
+
+      {edited && (
+        <p className="mt-3 rounded-xl bg-amber-50 px-3.5 py-2.5 text-xs leading-relaxed text-amber-700">
+          {tc("editedNote")}
+        </p>
+      )}
+
+      {/* 찜한 장소에서 추가 — 이미지를 누르면 코스 끝에 붙는다 */}
+      <SavedSpots
+        mode="picker"
+        excludeIds={stops.map((st) => st.contentId)}
+        onPick={(sp: NightSpot) =>
+          setStops((prev) => [
+            ...prev,
+            { contentId: sp.contentId, title: sp.title, addr: sp.addr, imageUrl: sp.imageUrl },
+          ])
+        }
+      />
+    </div>
   );
 }

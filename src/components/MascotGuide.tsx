@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
-import { usePathname } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 /**
  * 우측 하단 꿈돌이 안내 도우미 (피드백 12).
@@ -35,6 +35,7 @@ function guideKey(pathname: string): string {
 export default function MascotGuide() {
   const t = useTranslations("mascotGuide");
   const pathname = usePathname();
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
 
   // 닫힘 상태는 sessionStorage를 구독해 읽는다 — 서버 스냅샷은 "안 닫힘"이라
@@ -94,7 +95,16 @@ export default function MascotGuide() {
         <span className="absolute -bottom-1.5 right-8 h-3 w-3 rotate-45 border-b border-r border-slate-200 bg-white" />
       </div>
 
-      <div className="tn-float pointer-events-auto">
+      {/* 홈에서는 꿈돌이를 누르면 온보딩 둘러보기가 재생된다 (마이페이지
+          '둘러보기 다시 보기'와 동일 동작 - ?tour=start) */}
+      <button
+        type="button"
+        onClick={() => {
+          if (guideKey(pathname) === "home") router.push("/?tour=start");
+        }}
+        className={`tn-float pointer-events-auto ${guideKey(pathname) === "home" ? "cursor-pointer" : "cursor-default"}`}
+        aria-label="꿈돌이"
+      >
         <Image
           src="/mascot-ufo.png"
           alt="꿈돌이"
@@ -102,7 +112,7 @@ export default function MascotGuide() {
           height={86}
           className="h-auto w-24 drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-28"
         />
-      </div>
+      </button>
 
       <style>{`
         .tn-float { animation: tn-float 3s ease-in-out infinite; }

@@ -12,28 +12,29 @@
   },
   "nav": {
     "spots": "Night Spots",
-    "courses": "Courses",
+    "courses": "AI-Based Course",
     "etiquette": "Night Etiquette",
     "community": "Community",
     "phrases": "Survival Korean",
     "festivals": "Festivals",
-    "food": "Late-night Eats",
-    "stay": "Tonight's Stay",
+    "food": "Food",
+    "stay": "Stay",
     "shopping": "Night Markets",
     "menu": "All menu",
     "groupExplore": "Explore",
     "groupGuide": "Travel Guide",
     "groupLocal": "Night Life",
-    "groupCommunity": "Participate",
+    "groupCommunity": "News",
     "home": "Home",
-    "personality": "Persona Test",
+    "personality": "Personality-Based Course",
     "klife": "K-Life Guide",
-    "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이",
-    "nightBike": "Late-Night Free Bike Tour",
+    "stampTour": "Four-Cut Photo with Kkumdori",
+    "nightBike": "Bike Trip with Tashu",
     "groupCourse": "Plan a Course",
     "groupPlaces": "Places",
-    "groupEnjoy": "Enjoy Daejeon"
+    "groupEnjoy": "Enjoy Daejeon",
+    "about": "About Daejeon",
+    "notices": "Notices"
   },
   "home": {
     "heroTitle": "Unfold Your Dream Tonight",
@@ -55,7 +56,7 @@
       "nature": "Nature",
       "festival": "Festival",
       "city": "City",
-      "food": "Eat",
+      "food": "Food",
       "stay": "Stay",
       "shopping": "Shop"
     },
@@ -124,7 +125,19 @@
     "aboutTitle": "What is Daejeon?",
     "aboutBody": "A city of science, of bread and kalguksu - and at night, of glowing bridges over Gapcheon and the shining Hanbit Tower. Just 1 hour from Seoul by KTX, right at the heart of Korea.",
     "aboutKkum": "Kkumdori, the little yellow fairy, has been Daejeon's mascot since Expo '93 - the face of the city, symbolizing dreams and hope.",
-    "aboutCta": "Start your journey with Kkumdori"
+    "aboutCta": "Start your journey with Kkumdori",
+    "enjoyTitle": "Enjoy TourNight",
+    "enjoy1": "My Travel Persona Test",
+    "enjoy1Desc": "Answer 12 quick questions to find out what kind of night traveler you are - and meet the Kkumdori character that matches you, with night courses to follow.",
+    "enjoy1Cta": "Find my travel type",
+    "enjoy2": "4-Cut Photo with Kkumdori",
+    "enjoy2Desc": "Collect stamps around Daejeon's night spots and keep tonight in a four-cut photo framed with Kkumdori.",
+    "enjoy2Cta": "Start the stamp tour",
+    "enjoy3": "K-Life Guide",
+    "enjoy3Desc": "From ordering at a restaurant to nightlife etiquette - practice real situations so your first night in Korea feels easy.",
+    "enjoy3Cta": "Open the K-Life guide",
+    "showcasePrev": "Previous",
+    "showcaseNext": "Next"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest.",
@@ -193,7 +206,13 @@
     "selectHint": "Pick a course to see its route on the map",
     "aiDailyLimit": "You have used all of today's course generations. Please try again tomorrow.",
     "tabPreset": "Featured courses",
-    "tabSurvey": "Made for you"
+    "tabSurvey": "Made for you",
+    "tabPersona": "Persona Test",
+    "tabAi": "AI Course Builder",
+    "editTitle": "Fine-tune My Course",
+    "editHint": "Remove recommended stops or add from your saved places",
+    "editRemove": "Remove from course",
+    "editedNote": "You've edited the stops - double-check order and routes in a map app."
   },
   "etiquette": {
     "title": "Night Etiquette",
@@ -368,10 +387,11 @@
     },
     "phrasesMore": "See the full phrasebook below",
     "situationPhrases": "Korean you can use right now",
-    "learnTitle": "Ready to practice?",
+    "learnTitle": "Ready to learn real K-Life?",
     "learnBody": "The K-Life Guide walks you through this situation from start to finish.",
-    "learnCta": "Go to K-Life Guide",
-    "learnLater": "Later"
+    "learnCta": "Start",
+    "learnLater": "Later",
+    "backToTopics": "Back to topics"
   },
   "community": {
     "title": "Night Community",
@@ -457,7 +477,7 @@
   },
   "stampTour": {
     "overline": "STAMP TOUR",
-    "introTitle": "도장투어 with 꿈돌이",
+    "introTitle": "네컷 사진 with 꿈돌이",
     "introSubtitle": "Pick 4 spots of your own, collect a stamp at each, and complete your own Ggumdol four-cut photo.",
     "reselect": "Pick places again",
     "consent": {
@@ -693,8 +713,8 @@
   "personality": {
     "title": "Night Travel Persona Test",
     "subtitle": "Discover your Daejeon night-travel style in 12 questions - with night courses picked for your type.",
-    "introTitle": "What would you do?",
-    "introBody": "Just pick your gut choice for each 'what if' scene. There are no wrong answers - go with what pulls you.",
+    "introTitle": "Meet the night-you you never knew",
+    "introBody": "Daejeon, where travel becomes a dream - 12 questions reveal your dream-travel persona. No wrong answers: pick what pulls you, and Kkumdori will set up your perfect night.",
     "introMeta": "{count} questions · about 2 minutes",
     "start": "Start test",
     "prev": "Back",
@@ -1019,7 +1039,8 @@
       "culturist": "Culture",
       "foodie": "Food",
       "trendsetter": "Express"
-    }
+    },
+    "seeCourses": "See Recommended Courses"
   },
   "local": {
     "food": {
@@ -1135,7 +1156,7 @@
     "otherPhrases": "More ways to say it!"
   },
   "mascotGuide": {
-    "home": "Hi! I'm Kkumdori. Let me guide your night in Daejeon!",
+    "home": "Hi, I'm Kkumdori - click me!",
     "spots": "Here are the best night spots in Daejeon. Add your favorites to a course!",
     "festivals": "Festivals happening in Daejeon right now - even prettier at night!",
     "courses": "Build your night course three ways: by persona, by AI, or by your picks!",
@@ -1146,5 +1167,42 @@
     "stampTour": "Collect stamps by visiting spots. Four stamps make a photo strip!",
     "nightBike": "Tashu, Daejeon's public bike! I'll show you available bikes in real time.",
     "default": "Pick anything from the menu - I'll be right here with you!"
+  },
+  "about": {
+    "title": "About Daejeon",
+    "subtitle": "A first-timer's guide to Daejeon",
+    "cityTitle": "What kind of city is Daejeon?",
+    "cityBody": "Daejeon sits at the very center of Korea - the nation's science capital. It hosted the 1993 World Expo and is home to government research institutes and KAIST.\nJust an hour from Seoul by KTX, it's also famous for Sungsimdang bakery and kalguksu noodles. At night, the bridges over Gapcheon and Hanbit Tower light up, and Yuseong's hot-spring foot baths melt the day away.",
+    "stat1": {
+      "value": "1 hr",
+      "label": "from Seoul by KTX"
+    },
+    "stat2": {
+      "value": "1.44M",
+      "label": "population"
+    },
+    "stat3": {
+      "value": "1993",
+      "label": "Daejeon Expo"
+    },
+    "stat4": {
+      "value": "No.1",
+      "label": "Korea's science capital"
+    },
+    "familyTitle": "Kkumssi Family, Daejeon's Characters",
+    "familyBody": "Daejeon's official character family, led by Kkumdori - the 1993 Expo mascot - and friends. Symbolizing dreams and hope, Kkumdori has been loved by locals for over 30 years.",
+    "familyPlaceholder": "Kkumssi Family illustration coming soon",
+    "tashuTitle": "Tashu, Daejeon's Free Bikes",
+    "tashuBody": "Tashu is Daejeon's public bike. Every ride is free for the first hour with unlimited rentals - return within the hour, borrow again, and ride all day for free. A night ride along the Gapcheon bike path is a luxury only Daejeon offers!",
+    "tashuCaption": "Gapcheon bike path - night riding favorite",
+    "tashuCta": "Shall we ride Tashu?"
+  },
+  "saved": {
+    "title": "Saved Places",
+    "empty": "Tap the bookmark on any spot card and it will be collected here.",
+    "remove": "Remove",
+    "pickerTitle": "Add from Saved Places",
+    "pickerHint": "Tap an image to add it to your course",
+    "pickerAllAdded": "All your saved places are already in the course!"
   }
 }

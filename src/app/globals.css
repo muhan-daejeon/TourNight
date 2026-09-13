@@ -149,6 +149,14 @@ body {
   50% { opacity: 0.35; }
 }
 
+/* 가로 캐러셀 트랙 — 스크롤바 없이 쓸어 넘긴다 */
+.tn-scrollbar-none {
+  scrollbar-width: none;
+}
+.tn-scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* 네온사인 글로우 — "대전의 밤" 문구가 밝아졌다 옅어졌다를 반복한다 */
 .neon-glow {
   animation: neon-pulse 2.6s ease-in-out infinite;

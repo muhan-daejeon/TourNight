@@ -113,20 +113,12 @@ export default function NightEtiquette({
     };
   }, [selected, phraseBook, effectiveLocale]);
 
-  // 주제를 살펴본 뒤 "이제 학습을 해볼까요?" 팝업으로 K-Life 가이드에 잇는다
-  // (피드백 5). 귀찮지 않게 세션당 한 번만 띄운다.
+  // 주제를 골라 상세를 보면 잠시 뒤 "이제 한국 생활을 배워볼까요?" 팝업이
+  // 화면을 블러로 덮으며 떠서 K-Life 가이드로 잇는다 (피드백 플로우 2→3단계)
   const [learnPrompt, setLearnPrompt] = useState(false);
   useEffect(() => {
-    if (!selected) return;
-    try {
-      if (sessionStorage.getItem("tn-learn-prompted")) return;
-    } catch {}
-    const id = window.setTimeout(() => {
-      setLearnPrompt(true);
-      try {
-        sessionStorage.setItem("tn-learn-prompted", "1");
-      } catch {}
-    }, 1600);
+    if (!selected) return; // 닫힘 리셋은 각 클릭 핸들러에서 (효과 내 동기 setState 회피)
+    const id = window.setTimeout(() => setLearnPrompt(true), 2000);
     return () => window.clearTimeout(id);
   }, [selected]);
 
@@ -173,7 +165,18 @@ export default function NightEtiquette({
 
   return (
     <div className="mt-8" data-tour="etiquette">
-      {GROUPS.map((group) => (
+      {/* 주제를 고르면 박스들은 접어두고 상세가 화면을 채운다 (피드백 플로우 1단계) */}
+      {selected && (
+        <button
+          type="button"
+          onClick={() => { setSelected(null); setLearnPrompt(false); }}
+          className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-500 transition hover:border-daejeon-blue hover:text-daejeon-blue"
+        >
+          <ChevronLeft size={15} />
+          {t("backToTopics")}
+        </button>
+      )}
+      {!selected && GROUPS.map((group) => (
         <div key={group.key} className="mb-5">
           <p className="overline-label mb-2">{t(`groups.${group.key}`)}</p>
           {/* 사진이 먼저 보이고 그 아래 주제명을 얹은 카드 */}
@@ -184,7 +187,7 @@ export default function NightEtiquette({
               return (
                 <button
                   key={id}
-                  onClick={() => setSelected(id)}
+                  onClick={() => { setSelected(id); setLearnPrompt(false); }}
                   className={`group relative h-28 overflow-hidden rounded-2xl border text-left transition sm:h-32 ${
                     selected === id
                       ? "border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
@@ -300,25 +303,26 @@ export default function NightEtiquette({
         </div>
       )}
 
-      {/* 학습 유도 팝업 — 에티켓(행동)을 봤으니 K-Life(상황 연습)로 (피드백 5) */}
+      {/* 학습 유도 — 화면 전체를 블러로 덮고, 팝업만 또렷하게 (피드백 플로우 2단계) */}
       {learnPrompt && (
-        <div className="fixed inset-x-4 bottom-6 z-[65] mx-auto max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_48px_rgba(15,23,42,0.2)]">
-          <p className="text-base font-bold text-slate-900">{t("learnTitle")}</p>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{t("learnBody")}</p>
-          <div className="mt-4 flex items-center gap-2.5">
-            <Link
-              href="/klife/restaurant"
-              className="flex-1 rounded-full bg-daejeon-blue px-4 py-2.5 text-center text-sm font-bold text-white transition hover:bg-indigo-500"
-            >
-              {t("learnCta")}
-            </Link>
+        <div className="fixed inset-0 z-[75] flex items-center justify-center bg-white/40 p-6 backdrop-blur-md">
+          <div className="relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-[0_24px_64px_rgba(15,23,42,0.25)]">
             <button
               type="button"
               onClick={() => setLearnPrompt(false)}
-              className="rounded-full border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-500 transition hover:text-slate-900"
+              aria-label={t("learnLater")}
+              className="absolute right-3 top-3 rounded-full p-1.5 text-slate-400 transition hover:text-slate-700"
             >
-              {t("learnLater")}
+              <X size={16} />
             </button>
+            <p className="text-xl font-extrabold text-slate-900">{t("learnTitle")}</p>
+            <Link
+              href="/klife/restaurant"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-8 py-3 text-sm font-bold text-white transition hover:bg-indigo-500"
+            >
+              {t("learnCta")}
+              <ChevronRight size={15} />
+            </Link>
           </div>
         </div>
       )}

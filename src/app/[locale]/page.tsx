@@ -1,13 +1,15 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
-import { ArrowRight, BookOpen, MessageSquare } from "lucide-react";
+import { ArrowRight, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
-import { withPeriods } from "@/lib/festivals";
+import { getVerifiedNightSpots } from "@/lib/spots";
+import { getKtoOverview } from "@/lib/kto-live";
 import { listNotices } from "@/lib/notices";
 import { listPopularPosts, type CommunityPost } from "@/lib/community";
 import IntroSequence from "@/components/IntroSequence";
 import TonightBriefing from "@/components/TonightBriefing";
+import FeatureShowcase from "@/components/FeatureShowcase";
+import SpotShowcase, { type ShowcaseSpot } from "@/components/SpotShowcase";
 
 // 야간 검증 스팟·커뮤니티 인기글 기준, 1시간 주기로 재생성
 export const revalidate = 3600;
@@ -37,9 +39,17 @@ export default async function HomePage({
   ]);
   const notices = listNotices(locale);
   const photoSpots = spots.filter((s) => s.imageUrl);
-  const festivals = (await withPeriods(pickFestivals(spots))).slice(0, 4);
-  const [feature, ...restSpots] = photoSpots;
-  const gridSpots = restSpots.slice(0, 4);
+
+  // 명소 캐러셀 카드에 쓸 소개문 — 상세 API에서 앞부분만 (1시간 캐시라 부담 없다)
+  const showcaseSpots: ShowcaseSpot[] = await Promise.all(
+    photoSpots.slice(0, 8).map(async (s) => ({
+      contentId: s.contentId,
+      title: s.title,
+      addr: s.addr,
+      imageUrl: s.imageUrl!,
+      desc: await getKtoOverview(s.contentId, locale).catch(() => ""),
+    })),
+  );
 
   return (
     <div>
@@ -69,187 +79,26 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* ── 가이드북 — 하단의 큰 배너 대신 상단의 슬림 버튼 스트립 ── */}
-      <section className="mx-auto max-w-7xl px-6 pt-6">
-        <Link
-          href="/etiquette"
-          className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3.5 transition hover:border-indigo-300 hover:bg-indigo-50"
-        >
-          <BookOpen size={18} className="shrink-0 text-daejeon-blue" />
-          <span className="min-w-0 flex-1 truncate text-sm text-slate-600">
-            <b className="font-extrabold text-slate-900">
-              Tour<span className="text-daejeon-blue">Night</span> GUIDEBOOK
-            </b>
-            <span className="ml-2 hidden sm:inline">{t("guidebookSubtitle")}</span>
-          </span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-daejeon-blue px-4 py-1.5 text-xs font-bold text-white transition group-hover:bg-indigo-500">
-            {t("guidebookCta")}
-            <ArrowRight size={13} />
-          </span>
-        </Link>
-      </section>
 
-      {/* ── 🌙 오늘 밤 브리핑 — 실시간 데이터(날씨·일몰·월령·막차) + 조건 추천 ── */}
-      <section className="mx-auto max-w-7xl px-6 pb-4">
+      {/* ── 🌙 오늘 밤 브리핑 — 메인 이미지 바로 아래 실시간 정보 한 줄 ── */}
+      <section className="mx-auto max-w-7xl px-6 pt-7">
         <TonightBriefing />
       </section>
 
-      {/* ── 대전은? — 도시·꿈돌이 소개. 처음 온 외국인의 첫 질문에 답한다 ── */}
-      <section className="mx-auto max-w-5xl px-6 py-16 text-center">
-        <p className="text-sm font-semibold text-slate-500">{t("aboutLead")}</p>
-        <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-daejeon-blue sm:text-4xl">
-          {t("aboutTitle")}
-        </h2>
-        <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-slate-600">
-          {t("aboutBody")}
-        </p>
-        <div className="mx-auto mt-8 flex max-w-xl flex-col items-center gap-4 rounded-3xl border border-amber-200 bg-amber-50 px-7 py-8 sm:flex-row sm:text-left">
-          <Image
-            src="/menu-icons/menu1.png"
-            alt="꿈돌이"
-            width={96}
-            height={89}
-            className="h-20 w-auto drop-shadow"
-          />
-          <div>
-            <p className="text-sm leading-relaxed text-slate-600">{t("aboutKkum")}</p>
-            <Link
-              href="/personality"
-              className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-daejeon-blue transition hover:text-indigo-500"
-            >
-              {t("aboutCta")}
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
+      {/* ── 투어나잇을 즐겨보세요 — 좌 텍스트 + 우 비주얼을 화살표로 넘기는
+          쇼케이스 (성향 테스트 · 네컷사진 · K-Life) ── */}
+      <section className="mx-auto max-w-7xl px-6 py-16">
+        <FeatureShowcase />
       </section>
 
-      {/* ── 지금 대전의 밤은 — 축제 포스터 ── */}
-      {festivals.length > 0 && (
-        <section className="mx-auto max-w-7xl px-6 py-14">
-          {/* 가운데 정렬 헤더 — 작은 리드문 + 큰 컬러 타이틀 */}
-          <div className="mb-10 text-center">
-            <p className="text-sm font-semibold text-slate-500">{t("festivalsSectionSub")}</p>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-daejeon-green sm:text-4xl">
-              {t("festivalsSection")}
-            </h2>
-          </div>
-          {/* 사진 카드 + 아래 제목·한 줄 설명 */}
-          <div className="grid grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-4">
-            {festivals.map((f) => (
-              <Link key={f.contentId} href={`/spots/${f.contentId}`} className="group">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-200">
-                  {f.imageUrl && (
-                    <Image
-                      src={f.imageUrl}
-                      alt={f.title}
-                      fill
-                      sizes="(min-width:1024px) 25vw, 50vw"
-                      className="object-cover transition duration-500 group-hover:scale-105"
-                    />
-                  )}
-                </div>
-                <h3 className="mt-3 line-clamp-1 text-[15px] font-bold text-slate-900 group-hover:text-daejeon-green">
-                  {f.title}
-                </h3>
-                <p className="mt-1 line-clamp-1 text-sm text-slate-500">{f.addr}</p>
-              </Link>
-            ))}
-          </div>
-          <div className="mt-9 text-center">
-            <Link
-              href="/festivals"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-daejeon-green hover:text-daejeon-green"
-            >
-              {t("festivalsViewAll")} <ArrowRight size={14} />
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {/* ── 오늘 밤, 어디로 갈까요? — 대형 피처 + 그리드, 사진이 주인공 ── */}
-      {feature && (
-        <section className="bg-slate-50 py-14">
+      {/* ── 오늘 밤, 어디로 갈까요? — 좌 제목·화살표 + 우 카드 캐러셀 ── */}
+      {showcaseSpots.length > 0 && (
+        <section className="bg-slate-50 py-16">
           <div className="mx-auto max-w-7xl px-6">
-            <div className="mb-2 text-center">
-              <p className="text-sm font-semibold text-slate-500">{t("spotsSectionSub")}</p>
-              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-daejeon-blue sm:text-4xl">
-                {t("spotsSection")}
-              </h2>
-            </div>
-            <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-              <Link
-                href={`/spots/${feature.contentId}`}
-                className="group relative block overflow-hidden rounded-2xl"
-              >
-                <div className="relative h-[340px] sm:h-[420px]">
-                  <Image
-                    src={feature.imageUrl!}
-                    alt={feature.title}
-                    fill
-                    sizes="(min-width:1024px) 55vw, 100vw"
-                    className="object-cover transition duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 p-7 text-white">
-                    <h3 className="text-2xl font-extrabold drop-shadow">{feature.title}</h3>
-                    <p className="mt-1 text-sm text-white/80">{feature.addr}</p>
-                  </div>
-                </div>
-              </Link>
-              <div className="grid grid-cols-2 gap-4">
-                {gridSpots.map((s) => (
-                  <Link key={s.contentId} href={`/spots/${s.contentId}`} className="group">
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-200">
-                      <Image
-                        src={s.imageUrl!}
-                        alt={s.title}
-                        fill
-                        sizes="25vw"
-                        className="object-cover transition duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                    <h3 className="mt-2 line-clamp-1 text-sm font-bold text-slate-800 transition group-hover:text-indigo-600">
-                      {s.title}
-                    </h3>
-                    <p className="line-clamp-1 text-xs text-slate-500">{s.addr}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end">
-              <Link
-                href="/spots"
-                className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-indigo-600"
-              >
-                {t("spotsViewAll")} <ArrowRight size={15} />
-              </Link>
-            </div>
+            <SpotShowcase spots={showcaseSpots} />
           </div>
         </section>
       )}
-
-      {/* ── 성향 테스트 CTA ── */}
-      <section className="mx-auto max-w-7xl px-6 py-14">
-        <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-2xl px-8 py-16 text-center text-white">
-          <Image
-            src="/spots/expo-bridge.jpg"
-            alt=""
-            fill
-            sizes="(min-width:1280px) 1216px, 100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/55 to-daejeon-blue/50" />
-          <h2 className="relative text-3xl font-extrabold drop-shadow">{t("heroPersonaTitle")}</h2>
-          <p className="relative max-w-xl text-slate-200">{t("heroPersonaSubtitle")}</p>
-          <Link
-            href="/personality"
-            className="relative rounded-full bg-white px-8 py-3.5 text-sm font-bold text-indigo-700 transition hover:bg-indigo-50"
-          >
-            {t("heroPersonaCta")} →
-          </Link>
-        </div>
-      </section>
 
       {/* ── 소식 · 인기글 · SNS ── */}
       <section className="mx-auto max-w-7xl px-6 pb-14">

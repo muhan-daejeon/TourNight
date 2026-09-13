@@ -13,13 +13,12 @@ import {
   ChevronRight,
   Search,
   Route,
-  Plus,
-  Check,
   X,
   type LucideIcon,
 } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { NightSpot } from "@/lib/kto";
+import type { LocalSpot } from "@/lib/kto-live";
 import NightMap from "./NightMap";
 import { useBookmarks } from "./useBookmarks";
 
@@ -47,12 +46,30 @@ const CATEGORY_SCENE: Record<string, string> = {
   city: "from-amber-950 via-slate-900 to-orange-950",
 };
 
-export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
+export default function SpotExplorer({
+  spots,
+  food = [],
+  stay = [],
+}: {
+  spots: NightSpot[];
+  /** 명소 화면에 함께 노출하는 맛집·숙소 (피드백 7) — 칩으로 전환해 본다 */
+  food?: LocalSpot[];
+  stay?: LocalSpot[];
+}) {
   const t = useTranslations("home");
   const router = useRouter();
   const [category, setCategory] = useState<string>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { ids: bookmarks, toggle: toggleBookmark } = useBookmarks();
+
+  /** 지도 팝업의 "코스 만들기" — 그 스팟을 거치는 AI 코스를 코스 페이지에서 짠다 */
+  const planCourse = (ids: string[]) =>
+    router.push(
+      `/courses?from=${encodeURIComponent(ids.join(","))}` +
+        (category === "all" || category === "food" || category === "stay"
+          ? ""
+          : `&category=${category}`),
+    );
   const [onlyBookmarked, setOnlyBookmarked] = useState(false);
 
   // 헤더 검색이 /spots?q=…로 넘어온다. 사용자가 여기서 다시 치면 그 값이 이기고,
@@ -66,9 +83,6 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
   }
   const query = typedQuery ?? urlQuery;
   const setQuery = setTypedQuery;
-  // 코스에 담은 명소들 — 담긴 곳을 전부 거치는 AI 코스를 짠다 (최대 4곳)
-  const MAX_BASKET = 4;
-  const [basket, setBasket] = useState<string[]>([]);
 
   // '담기'가 코스 만들기의 시작이라는 걸 처음 온 사람은 알 수 없다 → 3단계로 알려준다.
   // 한 번 닫았거나 이미 담아 본 사람에게는 다시 띄우지 않는다
@@ -84,23 +98,6 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
     setShowHowTo(false);
   };
 
-  const toggleBasket = (contentId: string) => {
-    closeHowTo();
-    setBasket((prev) =>
-      prev.includes(contentId)
-        ? prev.filter((id) => id !== contentId)
-        : prev.length >= MAX_BASKET
-          ? prev
-          : [...prev, contentId],
-    );
-  };
-
-  const planCourse = (ids: string[]) =>
-    router.push(
-      `/courses?from=${encodeURIComponent(ids.join(","))}` +
-        (category === "all" ? "" : `&category=${category}`),
-    );
-
   // 카테고리 + 텍스트(이름·주소) 동시 필터
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -114,6 +111,17 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
       );
     });
   }, [spots, category, query, onlyBookmarked, bookmarks]);
+
+  // 맛집/숙소 칩이 켜져 있으면 명소 대신 그 목록을 보여준다 (검색어 공유)
+  const localList = category === "food" ? food : category === "stay" ? stay : null;
+  const localFiltered = useMemo(() => {
+    if (!localList) return null;
+    const q = query.trim().toLowerCase();
+    if (!q) return localList;
+    return localList.filter(
+      (s) => s.title.toLowerCase().includes(q) || (s.addr ?? "").toLowerCase().includes(q),
+    );
+  }, [localList, query]);
 
   // 지도 마커 표시 여부 판단용 — 현재 필터를 통과한 스팟 ID 집합
   const visibleIds = useMemo(
@@ -197,6 +205,22 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             </button>
           );
         })}
+        {/* 맛집·숙소 — KTO 로컬 목록으로 전환 (피드백 7) */}
+        {([["food", food.length], ["stay", stay.length]] as const)
+          .filter(([, n]) => n > 0)
+          .map(([c]) => (
+            <button
+              key={c}
+              onClick={() => setCategory(c)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+                category === c
+                  ? "border-amber-400 bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.3)]"
+                  : "border-slate-200 bg-slate-100 text-slate-400 backdrop-blur hover:border-slate-300 hover:text-slate-900"
+              }`}
+            >
+              {t(`categories.${c}`)}
+            </button>
+          ))}
         {/* 찜한 곳만 — 하나도 없으면 눌러도 빈 목록이라 아예 띄우지 않는다 */}
         {bookmarks.length > 0 && (
           <button
@@ -224,12 +248,43 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
             content-start가 없으면 스팟이 적은 카테고리에서 카드가 옆 지도 높이만큼
             늘어나 사진 아래에 빈 공간이 생긴다 */}
         <div className="order-2 grid content-start items-start gap-3 sm:grid-cols-2 lg:order-1">
-          {filtered.length === 0 && (
+          {localFiltered &&
+            localFiltered.map((ls) => (
+              <Link
+                key={ls.contentId}
+                href={`/${category === "food" ? "food" : "stay"}/${ls.contentId}`}
+                className="glass-card group overflow-hidden rounded-2xl"
+              >
+                <div className="relative h-44 w-full overflow-hidden bg-slate-200 sm:h-52">
+                  {ls.imageUrl && (
+                    <Image
+                      src={ls.imageUrl}
+                      alt={ls.title}
+                      fill
+                      sizes="(min-width: 1024px) 40vw, 100vw"
+                      className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                    />
+                  )}
+                </div>
+                <div className="p-3.5">
+                  <h3 className="line-clamp-1 text-[15px] font-bold text-slate-900 group-hover:text-daejeon-orange">
+                    {ls.title}
+                  </h3>
+                  <p className="mt-0.5 line-clamp-1 text-sm text-slate-500">{ls.addr}</p>
+                </div>
+              </Link>
+            ))}
+          {localFiltered && localFiltered.length === 0 && (
             <p className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
               {t("noResults")}
             </p>
           )}
-          {filtered.map((spot, si) => {
+          {!localFiltered && filtered.length === 0 && (
+            <p className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
+              {t("noResults")}
+            </p>
+          )}
+          {!localFiltered && filtered.map((spot, si) => {
             const Icon = CATEGORY_ICON[spot.category];
             return (
               <article
@@ -301,33 +356,6 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
                     />
                   </button>
 
-                  {/* 코스에 담기 — 담긴 곳들을 전부 거치는 AI 코스를 짤 수 있다 */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleBasket(spot.contentId);
-                    }}
-                    aria-label={
-                      basket.includes(spot.contentId)
-                        ? t("basketRemove")
-                        : t("basketAdd")
-                    }
-                    className={`absolute right-3 top-3 flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur transition ${
-                      basket.includes(spot.contentId)
-                        ? "bg-amber-400 text-slate-950"
-                        : "bg-slate-950/70 text-slate-400 hover:bg-white/90 hover:text-amber-600"
-                    }`}
-                  >
-                    {basket.includes(spot.contentId) ? (
-                      <Check size={12} strokeWidth={3} />
-                    ) : (
-                      <Plus size={12} strokeWidth={3} />
-                    )}
-                    {basket.includes(spot.contentId)
-                      ? t("basketAdded")
-                      : t("basketAdd")}
-                  </button>
 
                   <div className="absolute inset-x-0 bottom-0 flex items-end gap-2 p-3.5">
                     <div className="min-w-0 flex-1">
@@ -358,8 +386,16 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
           className="order-1 h-80 lg:order-2 lg:sticky lg:top-20 lg:h-[620px]"
         >
           <NightMap
-            spots={spots}
-            visibleIds={visibleIds}
+            spots={
+              localFiltered
+                ? localFiltered.map((ls) => ({ ...ls, category: "city" as const }))
+                : spots
+            }
+            visibleIds={
+              localFiltered
+                ? new Set(localFiltered.map((ls) => ls.contentId))
+                : visibleIds
+            }
             selectedId={activeSelectedId}
             onSelect={setSelectedId}
             // 코스 페이지에서 이 스팟을 거치는 AI 코스를 만들어 추천 코스와 함께 보여준다.
@@ -369,50 +405,6 @@ export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
         </div>
       </div>
 
-      {/* 담은 명소 바 — 2곳 이상 담으면 그 조합으로 코스를 짤 수 있다 */}
-      {basket.length > 0 && (
-        <div className="fixed inset-x-0 bottom-4 z-40 px-4">
-          <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur">
-            {basket.map((id) => {
-              const spot = spots.find((s) => s.contentId === id);
-              if (!spot) return null;
-              return (
-                <span
-                  key={id}
-                  className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 py-1 pl-3 pr-1.5 text-[13px] font-semibold text-slate-900"
-                >
-                  {spot.title}
-                  <button
-                    type="button"
-                    onClick={() => toggleBasket(id)}
-                    aria-label={t("basketRemove")}
-                    className="rounded-full p-0.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-                  >
-                    <X size={13} />
-                  </button>
-                </span>
-              );
-            })}
-            {basket.length >= MAX_BASKET ? (
-              <span className="text-[11px] text-slate-500">
-                {t("basketMax", { max: MAX_BASKET })}
-              </span>
-            ) : basket.length === 1 ? (
-              <span className="text-[11px] text-slate-500">
-                {t("basketOne")}
-              </span>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => planCourse(basket)}
-              className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
-            >
-              <Sparkles size={14} />
-              {t("basketPlan", { count: basket.length })}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
