@@ -101,9 +101,9 @@ export default function PersonalityTest() {
 
         {/* 성향 캐릭터 퍼레이드 — 4마리씩 보이며 쉬지 않고 흐른다 */}
         <div className="relative mt-12 overflow-hidden" aria-hidden>
-          <div className="tn-parade flex w-max items-end gap-0">
+          <div className="tn-parade flex w-max items-end gap-8 sm:gap-12">
             {marquee.map((ty, i) => (
-              <div key={i} className="flex w-1/8 min-w-[25%] flex-col items-center gap-2 sm:min-w-[25%]">
+              <div key={i} className="flex w-32 shrink-0 flex-col items-center gap-2 sm:w-40">
                 <span className="rounded-full bg-daejeon-blue px-3 py-1 text-[11px] font-extrabold text-white shadow">
                   {t(`axes.${ty}`)}
                 </span>
@@ -118,7 +118,7 @@ export default function PersonalityTest() {
             ))}
           </div>
           <style>{`
-            .tn-parade { animation: tn-parade 28s linear infinite; }
+            .tn-parade { animation: tn-parade 13s linear infinite; }
             @keyframes tn-parade { to { transform: translateX(-50%); } }
           `}</style>
         </div>

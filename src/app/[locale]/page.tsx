@@ -36,8 +36,6 @@ export default async function HomePage({
   ]);
   const notices = listNotices(locale);
   const photoSpots = spots.filter((s) => s.imageUrl);
-  const [feature, ...restSpots] = photoSpots;
-  const gridSpots = restSpots.slice(0, 4);
 
   return (
     <div>
@@ -103,36 +101,64 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* ── 투어나잇을 즐겨보세요 — 대표 기능 3분할 배너 (각진 모서리, 10px 간격) ── */}
-      <section className="py-14">
+      {/* ── 투어나잇을 즐겨보세요 — 대표 기능 3분할 (각진 모서리·10px 간격).
+          타일마다 그 기능과 직접 관련된 비주얼: 성향 테스트=성향 캐릭터들,
+          네컷사진=실제 콜라주 프레임, K-Life=포장마차(한국 밤 문화) ── */}
+      <section className="mx-auto max-w-7xl px-6 py-14">
         <h2 className="mb-6 text-center text-3xl font-extrabold tracking-tight text-daejeon-blue sm:text-4xl">
           {t("enjoyTitle")}
         </h2>
-        <div className="ml-[calc(50%-50vw)] grid w-screen grid-cols-1 gap-[10px] bg-white sm:grid-cols-3">
-          {[
-            { href: "/personality", img: "/spots/sikjangsan.jpg", label: t("enjoy1") },
-            { href: "/stamp-tour", img: "/spots/expo-bridge.jpg", label: t("enjoy2") },
-            { href: "/klife/restaurant", img: "/etiquette/dining.jpg", label: t("enjoy3") },
-          ].map(({ href, img, label }) => (
-            <Link key={href} href={href} className="group relative block h-56 overflow-hidden sm:h-72">
-              <Image
-                src={img}
-                alt=""
-                fill
-                sizes="(min-width:640px) 33vw, 100vw"
-                className="object-cover transition duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-slate-950/45 transition group-hover:bg-slate-950/30" />
-              <span className="absolute inset-0 flex items-center justify-center px-4 text-center text-xl font-extrabold text-white drop-shadow sm:text-2xl">
-                {label}
-              </span>
-            </Link>
-          ))}
+        <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
+          {/* ① 성향 테스트 — 성향 캐릭터 라인업 */}
+          <Link href="/personality" className="group relative block h-56 overflow-hidden bg-[#0b1026] sm:h-72">
+            <div className="absolute inset-x-0 bottom-5 flex items-end justify-center gap-2">
+              {(["explorer", "foodie", "viewLover", "player"] as const).map((k) => (
+                <Image
+                  key={k}
+                  src={`/mascots/${k}.png`}
+                  alt=""
+                  width={110}
+                  height={110}
+                  className="h-20 w-auto drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition duration-300 group-hover:-translate-y-1 sm:h-24"
+                />
+              ))}
+            </div>
+            <span className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/95 px-5 py-2 text-base font-extrabold text-slate-900 shadow sm:text-lg">
+              {t("enjoy1")}
+            </span>
+          </Link>
+          {/* ② 꿈돌이와 네컷사진 — 실제 콜라주 프레임 */}
+          <Link href="/stamp-tour" className="group relative block h-56 overflow-hidden bg-amber-100 sm:h-72">
+            <Image
+              src="/collage-frame.png"
+              alt=""
+              fill
+              sizes="(min-width:640px) 33vw, 100vw"
+              className="object-cover object-top opacity-90 transition duration-500 group-hover:scale-[1.03]"
+            />
+            <span className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap rounded-full bg-slate-950/85 px-5 py-2 text-base font-extrabold text-white shadow sm:text-lg">
+              {t("enjoy2")}
+            </span>
+          </Link>
+          {/* ③ K-Life 가이드 — 포장마차의 밤 */}
+          <Link href="/klife/restaurant" className="group relative block h-56 overflow-hidden sm:h-72">
+            <Image
+              src="/etiquette/pojangmacha.jpg"
+              alt=""
+              fill
+              sizes="(min-width:640px) 33vw, 100vw"
+              className="object-cover transition duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-slate-950/35 transition group-hover:bg-slate-950/25" />
+            <span className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/95 px-5 py-2 text-base font-extrabold text-slate-900 shadow sm:text-lg">
+              {t("enjoy3")}
+            </span>
+          </Link>
         </div>
       </section>
 
       {/* ── 오늘 밤, 어디로 갈까요? — 대형 피처 + 그리드, 사진이 주인공 ── */}
-      {feature && (
+      {photoSpots.length > 0 && (
         <section className="bg-slate-50 py-14">
           <div className="mx-auto max-w-7xl px-6">
             <div className="mb-2 text-center">
@@ -141,45 +167,24 @@ export default async function HomePage({
                 {t("spotsSection")}
               </h2>
             </div>
-            <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-              <Link
-                href={`/spots/${feature.contentId}`}
-                className="group relative block overflow-hidden rounded-2xl"
-              >
-                <div className="relative h-[340px] sm:h-[420px]">
-                  <Image
-                    src={feature.imageUrl!}
-                    alt={feature.title}
-                    fill
-                    sizes="(min-width:1024px) 55vw, 100vw"
-                    className="object-cover transition duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 p-7 text-white">
-                    <h3 className="text-2xl font-extrabold drop-shadow">{feature.title}</h3>
-                    <p className="mt-1 text-sm text-white/80">{feature.addr}</p>
+            <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-3">
+              {photoSpots.slice(0, 6).map((s) => (
+                <Link key={s.contentId} href={`/spots/${s.contentId}`} className="group">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-200">
+                    <Image
+                      src={s.imageUrl!}
+                      alt={s.title}
+                      fill
+                      sizes="(min-width:1024px) 33vw, 50vw"
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                    />
                   </div>
-                </div>
-              </Link>
-              <div className="grid grid-cols-2 gap-4">
-                {gridSpots.map((s) => (
-                  <Link key={s.contentId} href={`/spots/${s.contentId}`} className="group">
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-200">
-                      <Image
-                        src={s.imageUrl!}
-                        alt={s.title}
-                        fill
-                        sizes="25vw"
-                        className="object-cover transition duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                    <h3 className="mt-2 line-clamp-1 text-sm font-bold text-slate-800 transition group-hover:text-indigo-600">
-                      {s.title}
-                    </h3>
-                    <p className="line-clamp-1 text-xs text-slate-500">{s.addr}</p>
-                  </Link>
-                ))}
-              </div>
+                  <h3 className="mt-2.5 line-clamp-1 text-[15px] font-bold text-slate-900 transition group-hover:text-indigo-600">
+                    {s.title}
+                  </h3>
+                  <p className="line-clamp-1 text-sm text-slate-500">{s.addr}</p>
+                </Link>
+              ))}
             </div>
             <div className="mt-6 flex justify-end">
               <Link
@@ -192,28 +197,6 @@ export default async function HomePage({
           </div>
         </section>
       )}
-
-      {/* ── 성향 테스트 CTA ── */}
-      <section className="mx-auto max-w-7xl px-6 py-14">
-        <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-2xl px-8 py-16 text-center text-white">
-          <Image
-            src="/spots/expo-bridge.jpg"
-            alt=""
-            fill
-            sizes="(min-width:1280px) 1216px, 100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/55 to-daejeon-blue/50" />
-          <h2 className="relative text-3xl font-extrabold drop-shadow">{t("heroPersonaTitle")}</h2>
-          <p className="relative max-w-xl text-slate-200">{t("heroPersonaSubtitle")}</p>
-          <Link
-            href="/personality"
-            className="relative rounded-full bg-white px-8 py-3.5 text-sm font-bold text-indigo-700 transition hover:bg-indigo-50"
-          >
-            {t("heroPersonaCta")} →
-          </Link>
-        </div>
-      </section>
 
       {/* ── 소식 · 인기글 · SNS ── */}
       <section className="mx-auto max-w-7xl px-6 pb-14">
