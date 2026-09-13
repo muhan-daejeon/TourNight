@@ -1109,7 +1109,12 @@
     "myLocation": "現在地",
     "copyName": "「타슈」をコピー",
     "copied": "コピー済み!",
-    "appStoreHint": "iPhoneはApp Storeで「타슈」を検索してください - 上のボタンで名前をコピーできます。"
+    "appStoreHint": "iPhoneはApp Storeで「타슈」を検索してください - 上のボタンで名前をコピーできます。",
+    "coursesTitle": "おすすめタシュコース",
+    "coursesSub": "ステーションからすぐ出発できるナイトライド",
+    "nearestBadge": "今いる場所から一番近いコース!",
+    "courseMeta": "{km}km · 約{min}分",
+    "courseStart": "出発 {name}"
   },
   "klife": {
     "restaurantTitle": "K-Lifeガイド · 食堂編",

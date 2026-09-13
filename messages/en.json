@@ -1109,7 +1109,12 @@
     "myLocation": "You are here",
     "copyName": "Copy '타슈'",
     "copied": "Copied!",
-    "appStoreHint": "On iPhone, search for '타슈' (Tashu) in the App Store - copy the name with the button above."
+    "appStoreHint": "On iPhone, search for '타슈' (Tashu) in the App Store - copy the name with the button above.",
+    "coursesTitle": "Recommended Tashu Courses",
+    "coursesSub": "Night rides starting right at a station",
+    "nearestBadge": "Closest course to you right now!",
+    "courseMeta": "{km}km · about {min} min",
+    "courseStart": "Start at {name}"
   },
   "klife": {
     "restaurantTitle": "K-Life Guide · Restaurant",

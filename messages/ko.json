@@ -521,7 +521,12 @@
     "myLocation": "현위치",
     "copyName": "'타슈' 복사",
     "copied": "복사됨!",
-    "appStoreHint": "iPhone은 App Store에서 '타슈'를 검색하세요 - 위 버튼으로 이름을 복사할 수 있어요."
+    "appStoreHint": "iPhone은 App Store에서 '타슈'를 검색하세요 - 위 버튼으로 이름을 복사할 수 있어요.",
+    "coursesTitle": "추천 타슈 코스",
+    "coursesSub": "대여소에서 바로 출발하는 야간 라이딩",
+    "nearestBadge": "지금 위치와 가장 가까운 코스예요!",
+    "courseMeta": "{km}km · 약 {min}분",
+    "courseStart": "출발 {name}"
   },
   "spot": {
     "back": "목록으로",

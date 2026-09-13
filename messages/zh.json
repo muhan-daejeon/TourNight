@@ -1109,7 +1109,12 @@
     "myLocation": "当前位置",
     "copyName": "复制“타슈”",
     "copied": "已复制!",
-    "appStoreHint": "iPhone请在App Store搜索“타슈”(Tashu) - 可用上方按钮复制名称。"
+    "appStoreHint": "iPhone请在App Store搜索“타슈”(Tashu) - 可用上方按钮复制名称。",
+    "coursesTitle": "推荐Tashu路线",
+    "coursesSub": "从租赁点即刻出发的夜骑路线",
+    "nearestBadge": "离你当前位置最近的路线!",
+    "courseMeta": "{km}公里 · 约{min}分钟",
+    "courseStart": "出发 {name}"
   },
   "klife": {
     "restaurantTitle": "K-Life指南 · 餐厅篇",

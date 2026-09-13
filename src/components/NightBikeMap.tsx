@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, Copy, ExternalLink, RefreshCw } from "lucide-react";
+import { Check, Copy, ExternalLink, MapPin, RefreshCw, Route } from "lucide-react";
+import Image from "next/image";
+import { TASHU_COURSES, distanceM, type BikeLocale } from "@/lib/tashu-courses";
 
 const DAEJEON_CENTER = { lat: 36.3504, lng: 127.3845 };
 
@@ -100,6 +102,18 @@ export default function NightBikeMap() {
   // 현위치는 한 번만 잡는다 — stations 갱신 때마다 다시 묻지 않게
   const geoDoneRef = useRef(false);
   const [copied, setCopied] = useState(false);
+  // 현위치 — 잡히면 추천 코스를 가까운 순으로 다시 세운다 (피드백: 자전거 코스)
+  const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
+  const bikeLocale = (["ko", "en", "ja", "zh"].includes(locale) ? locale : "en") as BikeLocale;
+  const orderedCourses = useMemo(
+    () =>
+      userPos
+        ? [...TASHU_COURSES].sort(
+            (a, b) => distanceM(userPos, a.start) - distanceM(userPos, b.start),
+          )
+        : TASHU_COURSES,
+    [userPos],
+  );
 
   /** 브라우저 위치를 받아 지도를 현위치로 옮기고 빨간 점 + '현위치' 라벨을 찍는다
       (피드백 11). 대전 밖(아직 여행 전)이면 기본 대전 전경을 유지한다. */
@@ -109,6 +123,7 @@ export default function NightBikeMap() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;
+        setUserPos({ lat, lng });
         const inDaejeon = lat > 36.1 && lat < 36.62 && lng > 127.18 && lng < 127.72;
         const map = mapRef.current;
         if (!map) return;
@@ -284,6 +299,77 @@ export default function NightBikeMap() {
         </div>
         <p className="mt-2.5 text-xs text-slate-400">{t("appStoreHint")}</p>
       </div>
+
+      {/* ── 추천 타슈 코스 — 대여소 밀집 지점과 야간 명소를 조합해 미리 설계.
+          현위치가 잡히면 가장 가까운 코스가 맨 앞으로 오고 네온 테두리로 빛난다 ── */}
+      <section className="mt-10">
+        <div className="mb-5 text-center">
+          <p className="text-sm font-semibold text-slate-500">{t("coursesSub")}</p>
+          <h2 className="mt-1.5 text-2xl font-extrabold tracking-tight text-daejeon-green sm:text-3xl">
+            {t("coursesTitle")}
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {orderedCourses.map((c, i) => {
+            const nearest = i === 0 && !!userPos;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => {
+                  const { kakao } = window as KakaoNS;
+                  const map = mapRef.current;
+                  if (kakao?.maps && map) {
+                    map.setCenter(new kakao.maps.LatLng(c.start.lat, c.start.lng));
+                    map.setLevel(5);
+                    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }
+                }}
+                className={`group relative overflow-hidden rounded-2xl border bg-white text-left transition hover:-translate-y-0.5 hover:shadow-lg ${
+                  nearest ? "tn-neon border-emerald-400" : "border-slate-200"
+                }`}
+              >
+                {nearest && (
+                  <span className="absolute inset-x-0 top-0 z-10 bg-emerald-500 py-1 text-center text-[11px] font-extrabold text-white">
+                    {t("nearestBadge")}
+                  </span>
+                )}
+                <div className={`relative h-28 w-full overflow-hidden bg-slate-200 ${nearest ? "mt-6" : ""}`}>
+                  <Image
+                    src={c.image}
+                    alt=""
+                    fill
+                    sizes="(min-width:1024px) 25vw, 50vw"
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="text-[15px] font-bold text-slate-900">{c.name[bikeLocale]}</h3>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-daejeon-green">
+                    <Route size={12} />
+                    {t("courseMeta", { km: c.distanceKm, min: c.durationMin })}
+                  </p>
+                  <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-500">
+                    {c.desc[bikeLocale]}
+                  </p>
+                  <p className="mt-2 flex items-start gap-1 text-[11px] leading-snug text-slate-400">
+                    <MapPin size={11} className="mt-0.5 shrink-0 text-daejeon-orange" />
+                    {t("courseStart", { name: c.startName[bikeLocale] })} ·{" "}
+                    {c.stops.map((st) => st[bikeLocale]).join(" → ")}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <style>{`
+          .tn-neon { animation: tn-neon 1.8s ease-in-out infinite; }
+          @keyframes tn-neon {
+            0%, 100% { box-shadow: 0 0 6px rgba(16,185,129,.55), 0 0 18px rgba(16,185,129,.3); }
+            50% { box-shadow: 0 0 14px rgba(16,185,129,.85), 0 0 34px rgba(16,185,129,.45); }
+          }
+        `}</style>
+      </section>
 
       <div className="mb-3 mt-6 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3 text-xs text-slate-400">
