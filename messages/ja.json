@@ -12,7 +12,7 @@
   },
   "nav": {
     "spots": "夜の名所",
-    "courses": "おすすめコース",
+    "courses": "AIベースのコース",
     "etiquette": "ナイトエチケット",
     "community": "コミュニティ",
     "phrases": "サバイバル韓国語",
@@ -24,17 +24,17 @@
     "groupExplore": "見どころ",
     "groupGuide": "旅のガイド",
     "groupLocal": "ナイトライフ",
-    "groupCommunity": "参加",
+    "groupCommunity": "ニュース",
     "home": "ホーム",
-    "personality": "性格診断",
+    "personality": "旅行タイプ別コース",
     "klife": "K-Lifeガイド",
-    "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이",
-    "nightBike": "深夜無料自転車ツアー",
+    "stampTour": "4カット写真 with クムドリ",
+    "nightBike": "自転車の旅 with タシュ",
     "groupCourse": "コースづくり",
     "groupPlaces": "スポット紹介",
     "groupEnjoy": "大田を楽しむ",
-    "about": "About 大田"
+    "about": "About 大田",
+    "notices": "お知らせ"
   },
   "home": {
     "heroTitle": "今夜、君の夢を広げよう",
@@ -477,7 +477,7 @@
   },
   "stampTour": {
     "overline": "STAMP TOUR",
-    "introTitle": "도장투어 with 꿈돌이",
+    "introTitle": "네컷 사진 with 꿈돌이",
     "introSubtitle": "自分で選んだ名所4か所を巡ってスタンプを集め、あなただけのクムドル4カット写真を完成させましょう。",
     "reselect": "観光地を選び直す",
     "consent": {

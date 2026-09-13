@@ -12,7 +12,7 @@
   },
   "nav": {
     "spots": "야간 명소",
-    "courses": "추천 코스",
+    "courses": "AI 기반 코스",
     "etiquette": "나이트 에티켓",
     "community": "커뮤니티",
     "phrases": "서바이벌 한국어",
@@ -24,17 +24,17 @@
     "groupExplore": "둘러보기",
     "groupGuide": "여행 가이드",
     "groupLocal": "나이트 라이프",
-    "groupCommunity": "참여",
+    "groupCommunity": "소식",
     "home": "홈",
-    "personality": "성향 테스트",
+    "personality": "여행 성향 기반 코스",
     "klife": "K-Life 가이드",
-    "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이",
-    "nightBike": "심야 무료 자전거 여행",
+    "stampTour": "네컷 사진 with 꿈돌이",
+    "nightBike": "자전거 여행 with 타슈",
     "groupCourse": "코스 만들기",
     "groupPlaces": "장소 소개",
     "groupEnjoy": "대전을 즐기기",
-    "about": "About 대전"
+    "about": "About 대전",
+    "notices": "공지사항"
   },
   "home": {
     "heroTitle": "오늘 밤, 너의 꿈을 펼쳐 봐",
@@ -477,7 +477,7 @@
   },
   "stampTour": {
     "overline": "STAMP TOUR",
-    "introTitle": "도장투어 with 꿈돌이",
+    "introTitle": "네컷 사진 with 꿈돌이",
     "introSubtitle": "직접 고른 명소 4곳을 돌며 도장을 찍고, 나만의 꿈돌네컷을 완성해보세요.",
     "reselect": "관광지 다시 선택하기",
     "consent": {

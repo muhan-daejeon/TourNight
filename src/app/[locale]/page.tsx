@@ -80,8 +80,8 @@ export default async function HomePage({
       </section>
 
 
-      {/* ── 🌙 오늘 밤 브리핑 — 실시간 데이터(날씨·일몰·월령·막차) + 조건 추천 ── */}
-      <section className="mx-auto max-w-7xl px-6 pb-4 pt-14 sm:pt-20">
+      {/* ── 🌙 오늘 밤 브리핑 — 메인 이미지 바로 아래 실시간 정보 한 줄 ── */}
+      <section className="mx-auto max-w-7xl px-6 pt-7">
         <TonightBriefing />
       </section>
 

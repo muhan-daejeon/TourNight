@@ -12,7 +12,7 @@
   },
   "nav": {
     "spots": "夜间景点",
-    "courses": "推荐路线",
+    "courses": "AI定制路线",
     "etiquette": "夜间礼仪",
     "community": "社区",
     "phrases": "生存韩语",
@@ -24,17 +24,17 @@
     "groupExplore": "探索",
     "groupGuide": "旅行指南",
     "groupLocal": "夜生活",
-    "groupCommunity": "参与",
+    "groupCommunity": "消息",
     "home": "首页",
-    "personality": "性格测试",
+    "personality": "旅行类型路线",
     "klife": "K-Life指南",
-    "stampTour": "도장투어",
-    "stampTourWith": "with 꿈돌이",
-    "nightBike": "深夜免费自行车之旅",
+    "stampTour": "四格照片 with 梦之子",
+    "nightBike": "骑行之旅 with Tashu",
     "groupCourse": "规划路线",
     "groupPlaces": "地点介绍",
     "groupEnjoy": "玩转大田",
-    "about": "关于大田"
+    "about": "关于大田",
+    "notices": "公告"
   },
   "home": {
     "heroTitle": "今晚，展开你的梦想",
@@ -477,7 +477,7 @@
   },
   "stampTour": {
     "overline": "STAMP TOUR",
-    "introTitle": "도장투어 with 꿈돌이",
+    "introTitle": "네컷 사진 with 꿈돌이",
     "introSubtitle": "走遍自己挑选的4个景点集章，完成专属于你的梦多尔四格照吧。",
     "reselect": "重新选择景点",
     "consent": {

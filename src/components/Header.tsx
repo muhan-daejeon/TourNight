@@ -44,6 +44,8 @@ const MENU_EXTRAS = [
   { href: "/stay", key: "stay" },
   { href: "/shopping", key: "shopping" },
   { href: "/night-bike", key: "nightBike" },
+  // 공지사항은 홈의 소식 섹션이 담당한다 (전용 페이지가 아직 없다)
+  { href: "/#news", key: "notices" },
 ] as const;
 
 /** 상단에 늘 보이는 4개 카테고리와 그 아래 묶인 탭들 — 홈은 좌측 로고가 대신한다.
@@ -53,9 +55,10 @@ const MENU_GROUPS = [
   // 팀 피드백 구성: 코스 만들기(성향·AI·나만의) / 장소 소개 / 대전을 즐기기.
   // 인생네컷(콜라주)은 도장투어 페이지 하단으로 옮겨져 도장투어 항목이 겸한다
   { id: "course", labelKey: "groupCourse", items: ["personality", "courses"] },
-  { id: "places", labelKey: "groupPlaces", items: ["about", "spots", "festivals", "food", "stay", "shopping"] },
+  { id: "places", labelKey: "groupPlaces", items: ["spots", "festivals", "food", "stay", "shopping"] },
   { id: "enjoy", labelKey: "groupEnjoy", items: ["etiquette", "klife", "nightBike", "stampTour"] },
-  { id: "community", labelKey: "groupCommunity", items: ["community"] },
+  // 소식 — About 대전을 맨 위로 (팀 피드백)
+  { id: "community", labelKey: "groupCommunity", items: ["about", "community", "notices"] },
 ] as const;
 
 /** 카테고리에 마우스를 올렸을 때 왼쪽에 뜨는 마스코트 아이콘 — MENU_GROUPS와 같은 순서 */
@@ -442,16 +445,7 @@ export default function Header() {
                     href={item.href}
                     className={`whitespace-nowrap rounded-lg px-2 py-1.5 text-center text-base transition ${linkClass(isActive(item.href))}`}
                   >
-                    {key === "stampTour" ? (
-                      // "with 꿈돌이"는 브랜드 문구라 번역하지 않고(위 nav 키 참고),
-                      // 메인 메뉴명(text-base)의 0.7배 크기로 작게 붙인다
-                      <>
-                        {t("nav.stampTour")}{" "}
-                        <span className="text-[0.7em]">{t("nav.stampTourWith")}</span>
-                      </>
-                    ) : (
-                      t(`nav.${key}`)
-                    )}
+                    {t(`nav.${key}`)}
                   </Link>
                 );
               })}
@@ -478,14 +472,7 @@ export default function Header() {
                       href={item.href}
                       className={`block text-sm font-light ${linkClass(isActive(item.href))}`}
                     >
-                      {key === "stampTour" ? (
-                        <>
-                          {t("nav.stampTour")}{" "}
-                          <span className="text-[0.7em]">{t("nav.stampTourWith")}</span>
-                        </>
-                      ) : (
-                        t(`nav.${key}`)
-                      )}
+                      {t(`nav.${key}`)}
                     </Link>
                   );
                 })}
