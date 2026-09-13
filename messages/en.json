@@ -198,7 +198,13 @@
     "selectHint": "Pick a course to see its route on the map",
     "aiDailyLimit": "You have used all of today's course generations. Please try again tomorrow.",
     "tabPreset": "Featured courses",
-    "tabSurvey": "Made for you"
+    "tabSurvey": "Made for you",
+    "tabPersona": "Persona Test",
+    "tabAi": "AI Course Builder",
+    "editTitle": "Fine-tune My Course",
+    "editHint": "Remove recommended stops or add from your saved places",
+    "editRemove": "Remove from course",
+    "editedNote": "You've edited the stops - double-check order and routes in a map app."
   },
   "etiquette": {
     "title": "Night Etiquette",
@@ -1025,7 +1031,8 @@
       "culturist": "Culture",
       "foodie": "Food",
       "trendsetter": "Express"
-    }
+    },
+    "seeCourses": "See Recommended Courses"
   },
   "local": {
     "food": {
@@ -1181,5 +1188,13 @@
     "tashuBody": "Tashu is Daejeon's public bike. Every ride is free for the first hour with unlimited rentals - return within the hour, borrow again, and ride all day for free. A night ride along the Gapcheon bike path is a luxury only Daejeon offers!",
     "tashuCaption": "Gapcheon bike path - night riding favorite",
     "tashuCta": "Shall we ride Tashu?"
+  },
+  "saved": {
+    "title": "Saved Places",
+    "empty": "Tap the bookmark on any spot card and it will be collected here.",
+    "remove": "Remove",
+    "pickerTitle": "Add from Saved Places",
+    "pickerHint": "Tap an image to add it to your course",
+    "pickerAllAdded": "All your saved places are already in the course!"
   }
 }

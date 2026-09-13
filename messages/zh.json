@@ -198,7 +198,13 @@
     "selectHint": "选择路线后将在地图上显示",
     "aiDailyLimit": "今天的路线生成次数已用完，请明天再试。",
     "tabPreset": "推荐路线",
-    "tabSurvey": "专属路线"
+    "tabSurvey": "专属路线",
+    "tabPersona": "性格测试",
+    "tabAi": "AI路线定制",
+    "editTitle": "打磨我的路线",
+    "editHint": "可从推荐中移除,或从收藏中添加",
+    "editRemove": "从路线移除",
+    "editedNote": "你已编辑途经点 - 请在地图App再次确认顺序与路线。"
   },
   "etiquette": {
     "title": "夜间礼仪",
@@ -1025,7 +1031,8 @@
       "culturist": "文化",
       "foodie": "美食",
       "trendsetter": "自我表达"
-    }
+    },
+    "seeCourses": "查看推荐路线"
   },
   "local": {
     "food": {
@@ -1181,5 +1188,13 @@
     "tashuBody": "Tashu是大田的公共自行车。每次租借前1小时免费且次数不限——1小时内归还再借,就能全天免费骑行。沿甲川自行车道夜骑,是只属于大田的奢侈!",
     "tashuCaption": "甲川自行车道 - 夜骑胜地",
     "tashuCta": "要不要骑骑Tashu?"
+  },
+  "saved": {
+    "title": "收藏的地点",
+    "empty": "点击景点卡片上的收藏(书签),它们会汇集在这里。",
+    "remove": "取消收藏",
+    "pickerTitle": "从收藏中添加",
+    "pickerHint": "点击图片即可加入路线",
+    "pickerAllAdded": "收藏的地点都已在路线中!"
   }
 }

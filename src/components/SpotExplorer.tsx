@@ -13,8 +13,6 @@ import {
   ChevronRight,
   Search,
   Route,
-  Plus,
-  Check,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -63,6 +61,15 @@ export default function SpotExplorer({
   const [category, setCategory] = useState<string>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { ids: bookmarks, toggle: toggleBookmark } = useBookmarks();
+
+  /** 지도 팝업의 "코스 만들기" — 그 스팟을 거치는 AI 코스를 코스 페이지에서 짠다 */
+  const planCourse = (ids: string[]) =>
+    router.push(
+      `/courses?from=${encodeURIComponent(ids.join(","))}` +
+        (category === "all" || category === "food" || category === "stay"
+          ? ""
+          : `&category=${category}`),
+    );
   const [onlyBookmarked, setOnlyBookmarked] = useState(false);
 
   // 헤더 검색이 /spots?q=…로 넘어온다. 사용자가 여기서 다시 치면 그 값이 이기고,
@@ -76,9 +83,6 @@ export default function SpotExplorer({
   }
   const query = typedQuery ?? urlQuery;
   const setQuery = setTypedQuery;
-  // 코스에 담은 명소들 — 담긴 곳을 전부 거치는 AI 코스를 짠다 (최대 4곳)
-  const MAX_BASKET = 4;
-  const [basket, setBasket] = useState<string[]>([]);
 
   // '담기'가 코스 만들기의 시작이라는 걸 처음 온 사람은 알 수 없다 → 3단계로 알려준다.
   // 한 번 닫았거나 이미 담아 본 사람에게는 다시 띄우지 않는다
@@ -93,23 +97,6 @@ export default function SpotExplorer({
     localStorage.setItem(HOWTO_KEY, "done");
     setShowHowTo(false);
   };
-
-  const toggleBasket = (contentId: string) => {
-    closeHowTo();
-    setBasket((prev) =>
-      prev.includes(contentId)
-        ? prev.filter((id) => id !== contentId)
-        : prev.length >= MAX_BASKET
-          ? prev
-          : [...prev, contentId],
-    );
-  };
-
-  const planCourse = (ids: string[]) =>
-    router.push(
-      `/courses?from=${encodeURIComponent(ids.join(","))}` +
-        (category === "all" ? "" : `&category=${category}`),
-    );
 
   // 카테고리 + 텍스트(이름·주소) 동시 필터
   const filtered = useMemo(() => {
@@ -369,33 +356,6 @@ export default function SpotExplorer({
                     />
                   </button>
 
-                  {/* 코스에 담기 — 담긴 곳들을 전부 거치는 AI 코스를 짤 수 있다 */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleBasket(spot.contentId);
-                    }}
-                    aria-label={
-                      basket.includes(spot.contentId)
-                        ? t("basketRemove")
-                        : t("basketAdd")
-                    }
-                    className={`absolute right-3 top-3 flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur transition ${
-                      basket.includes(spot.contentId)
-                        ? "bg-amber-400 text-slate-950"
-                        : "bg-slate-950/70 text-slate-400 hover:bg-white/90 hover:text-amber-600"
-                    }`}
-                  >
-                    {basket.includes(spot.contentId) ? (
-                      <Check size={12} strokeWidth={3} />
-                    ) : (
-                      <Plus size={12} strokeWidth={3} />
-                    )}
-                    {basket.includes(spot.contentId)
-                      ? t("basketAdded")
-                      : t("basketAdd")}
-                  </button>
 
                   <div className="absolute inset-x-0 bottom-0 flex items-end gap-2 p-3.5">
                     <div className="min-w-0 flex-1">
@@ -445,50 +405,6 @@ export default function SpotExplorer({
         </div>
       </div>
 
-      {/* 담은 명소 바 — 2곳 이상 담으면 그 조합으로 코스를 짤 수 있다 */}
-      {basket.length > 0 && (
-        <div className="fixed inset-x-0 bottom-4 z-40 px-4">
-          <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur">
-            {basket.map((id) => {
-              const spot = spots.find((s) => s.contentId === id);
-              if (!spot) return null;
-              return (
-                <span
-                  key={id}
-                  className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 py-1 pl-3 pr-1.5 text-[13px] font-semibold text-slate-900"
-                >
-                  {spot.title}
-                  <button
-                    type="button"
-                    onClick={() => toggleBasket(id)}
-                    aria-label={t("basketRemove")}
-                    className="rounded-full p-0.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-                  >
-                    <X size={13} />
-                  </button>
-                </span>
-              );
-            })}
-            {basket.length >= MAX_BASKET ? (
-              <span className="text-[11px] text-slate-500">
-                {t("basketMax", { max: MAX_BASKET })}
-              </span>
-            ) : basket.length === 1 ? (
-              <span className="text-[11px] text-slate-500">
-                {t("basketOne")}
-              </span>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => planCourse(basket)}
-              className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
-            >
-              <Sparkles size={14} />
-              {t("basketPlan", { count: basket.length })}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import ProfileForm from "@/components/ProfileForm";
 import MyPhrases from "@/components/MyPhrases";
+import SavedSpots from "@/components/SavedSpots";
 import { RESTAURANT_STEPS } from "@/lib/klife-restaurant";
 
 export default async function ProfilePage({
@@ -26,6 +27,9 @@ export default async function ProfilePage({
         {welcome ? t("welcomeSubtitle") : t("profileSubtitle")}
       </p>
       <ProfileForm welcome={welcome} />
+
+      {/* 찜한 장소 — 명소 카드의 저장 버튼으로 모은 곳들 (피드백 8) */}
+      <SavedSpots mode="grid" />
 
       {/* K-Life 가이드 하단과 같은 내용 — 시나리오가 늘면 이 배열에 추가한다 */}
       <MyPhrases scenarios={[{ scenario: "restaurant", steps: RESTAURANT_STEPS }]} />
