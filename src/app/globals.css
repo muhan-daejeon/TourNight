@@ -149,6 +149,26 @@ body {
   50% { opacity: 0.35; }
 }
 
+/* 쇼케이스 캐러셀 — 슬라이드가 바뀔 때 살짝 떠오르며 나타난다 */
+@keyframes tn-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 가로 캐러셀 트랙 — 스크롤바 없이 쓸어 넘긴다 */
+.tn-scrollbar-none {
+  scrollbar-width: none;
+}
+.tn-scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* 네온사인 글로우 — "대전의 밤" 문구가 밝아졌다 옅어졌다를 반복한다 */
 .neon-glow {
   animation: neon-pulse 2.6s ease-in-out infinite;

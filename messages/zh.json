@@ -128,8 +128,16 @@
     "aboutCta": "和Kkumdori一起开始旅程吧",
     "enjoyTitle": "尽情享受TourNight",
     "enjoy1": "我的旅行性格测试",
+    "enjoy1Desc": "回答12个问题,看看你是哪种夜晚旅行者 - 还有与你相似的梦之子角色,以及最适合你的大田夜游路线。",
+    "enjoy1Cta": "测测我的旅行类型",
     "enjoy2": "和Kkumdori拍四格照片",
-    "enjoy3": "K-Life指南"
+    "enjoy2Desc": "走遍大田夜景景点收集印章,用梦之子相框拍下专属四格照片,留住今晚。",
+    "enjoy2Cta": "开始盖章之旅",
+    "enjoy3": "K-Life指南",
+    "enjoy3Desc": "从餐厅点餐到夜生活礼仪 - 第一次来韩国也不用担心,在真实场景中边练边学。",
+    "enjoy3Cta": "查看K-Life指南",
+    "showcasePrev": "上一个",
+    "showcaseNext": "下一个"
   },
   "footer": {
     "notice": "本服务为2026观光数据应用大赛参赛作品。",

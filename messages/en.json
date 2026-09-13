@@ -128,8 +128,16 @@
     "aboutCta": "Start your journey with Kkumdori",
     "enjoyTitle": "Enjoy TourNight",
     "enjoy1": "My Travel Persona Test",
+    "enjoy1Desc": "Answer 12 quick questions to find out what kind of night traveler you are - and meet the Kkumdori character that matches you, with night courses to follow.",
+    "enjoy1Cta": "Find my travel type",
     "enjoy2": "4-Cut Photo with Kkumdori",
-    "enjoy3": "K-Life Guide"
+    "enjoy2Desc": "Collect stamps around Daejeon's night spots and keep tonight in a four-cut photo framed with Kkumdori.",
+    "enjoy2Cta": "Start the stamp tour",
+    "enjoy3": "K-Life Guide",
+    "enjoy3Desc": "From ordering at a restaurant to nightlife etiquette - practice real situations so your first night in Korea feels easy.",
+    "enjoy3Cta": "Open the K-Life guide",
+    "showcasePrev": "Previous",
+    "showcaseNext": "Next"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest.",
