@@ -150,6 +150,58 @@ export async function fetchNearbyStays(
     .slice(0, limit);
 }
 
+/**
+ * 주변 맛집 조회 — 숙소(fetchNearbyStays)와 같은 위치기반 목록에서
+ * contentTypeId만 음식점(39)으로 바꾼 것. 야간 명소 상세에서 "이 근처에서
+ * 뭘 먹지"에 답한다 (피드백 7). 실패는 빈 배열 — 부가 정보라 상세를 막지 않는다.
+ */
+export async function fetchNearbyFood(
+  mapX: number,
+  mapY: number,
+  { radius = 1500, limit = 4 }: { radius?: number; limit?: number } = {},
+): Promise<NearbyStay[]> {
+  const apiKey = process.env.KTO_API_KEY;
+  if (!apiKey) return [];
+
+  const params = new URLSearchParams({
+    serviceKey: apiKey,
+    MobileOS: "ETC",
+    MobileApp: SERVICE_NAME,
+    _type: "json",
+    numOfRows: "20",
+    pageNo: "1",
+    mapX: String(mapX),
+    mapY: String(mapY),
+    radius: String(radius),
+    contentTypeId: "39", // 음식점
+  });
+  try {
+    const res = await fetch(`${BASE_URL}/locationBasedList2?${params}`, {
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(KTO_TIMEOUT_MS),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const items: (KtoListItem & { dist: string })[] =
+      data?.response?.body?.items?.item ?? [];
+    return items
+      .filter((it) => it.firstimage) // 사진 있는 곳만 (팀 방침)
+      .map((it) => ({
+        contentId: it.contentid,
+        title: it.title,
+        addr: it.addr1 || "",
+        imageUrl: it.firstimage,
+        distM: Math.round(Number(it.dist)),
+        mapX: Number(it.mapx),
+        mapY: Number(it.mapy),
+      }))
+      .sort((a, b) => a.distM - b.distM)
+      .slice(0, limit);
+  } catch {
+    return [];
+  }
+}
+
 /** 관광지 국문 개요 조회 (detailCommon2) — 수동 큐레이션 스팟(mock-)은 개요 없음 */
 export async function fetchOverviewKo(contentId: string): Promise<string> {
   const apiKey = process.env.KTO_API_KEY;

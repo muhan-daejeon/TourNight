@@ -1,25 +1,13 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Camera,
-  Compass,
-  Landmark,
-  MessageSquare,
-  Moon,
-  Search,
-  Sparkles,
-  UtensilsCrossed,
-} from "lucide-react";
+import { ArrowRight, BookOpen, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
 import { withPeriods } from "@/lib/festivals";
 import { listNotices } from "@/lib/notices";
 import { listPopularPosts, type CommunityPost } from "@/lib/community";
 import IntroSequence from "@/components/IntroSequence";
-import GuidebookBanner from "@/components/GuidebookBanner";
 import TonightBriefing from "@/components/TonightBriefing";
-import FestivalPoster from "@/components/FestivalPoster";
 
 // 야간 검증 스팟·커뮤니티 인기글 기준, 1시간 주기로 재생성
 export const revalidate = 3600;
@@ -53,22 +41,6 @@ export default async function HomePage({
   const [feature, ...restSpots] = photoSpots;
   const gridSpots = restSpots.slice(0, 4);
 
-  // 아이콘 원은 대전 CI 3색(블루·그린·오렌지)을 순환 — 단색 회색 대신
-  // 팔레트가 첫 화면에서 바로 보이게 한다
-  const CATS = [
-    { Icon: Moon, label: t("catSpots"), href: "/spots", tone: "blue" },
-    { Icon: Sparkles, label: t("catFestivals"), href: "/festivals", tone: "green" },
-    { Icon: Compass, label: t("catCourses"), href: "/courses", tone: "orange" },
-    { Icon: UtensilsCrossed, label: t("catKlife"), href: "/klife/restaurant", tone: "blue" },
-    { Icon: Landmark, label: t("catPersona"), href: "/personality", tone: "green" },
-    { Icon: Camera, label: t("catStamp"), href: "/stamp-tour", tone: "orange" },
-  ] as const;
-  const TONE = {
-    blue: "bg-indigo-50 text-daejeon-blue group-hover:bg-daejeon-blue",
-    green: "bg-emerald-50 text-daejeon-green group-hover:bg-daejeon-green",
-    orange: "bg-amber-50 text-daejeon-orange group-hover:bg-daejeon-orange",
-  } as const;
-
   return (
     <div>
       <IntroSequence skipIntro={skipIntro} />
@@ -94,42 +66,27 @@ export default async function HomePage({
           <p className="mt-3 max-w-xl text-sm text-white/85 sm:text-base">
             {t("heroSubtitle")}
           </p>
-          {/* 헤더 검색과 같은 목적지(/spots?q=) — 서버 컴포넌트라 GET 폼으로 */}
-          <form
-            action={`/${locale}/spots`}
-            className="mt-8 flex w-full max-w-xl items-center gap-2 rounded-full bg-white p-2 pl-5 shadow-xl"
-          >
-            <Search size={18} className="shrink-0 text-slate-400" />
-            <input
-              type="search"
-              name="q"
-              placeholder={t("searchPlaceholder")}
-              className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="shrink-0 rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-500"
-            >
-              {t("searchButton")}
-            </button>
-          </form>
         </div>
       </section>
 
-      {/* ── 카테고리 숏컷 ── */}
-      <section className="mx-auto max-w-5xl px-6 py-12">
-        <div className="grid grid-cols-3 gap-6 sm:grid-cols-6">
-          {CATS.map(({ Icon, label, href, tone }) => (
-            <Link key={href} href={href} className="group flex flex-col items-center gap-2.5">
-              <span className={`flex h-16 w-16 items-center justify-center rounded-full transition group-hover:text-white ${TONE[tone]}`}>
-                <Icon size={24} strokeWidth={1.8} />
-              </span>
-              <span className="text-center text-[13px] font-semibold text-slate-700">
-                {label}
-              </span>
-            </Link>
-          ))}
-        </div>
+      {/* ── 가이드북 — 하단의 큰 배너 대신 상단의 슬림 버튼 스트립 ── */}
+      <section className="mx-auto max-w-7xl px-6 pt-6">
+        <Link
+          href="/etiquette"
+          className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3.5 transition hover:border-indigo-300 hover:bg-indigo-50"
+        >
+          <BookOpen size={18} className="shrink-0 text-daejeon-blue" />
+          <span className="min-w-0 flex-1 truncate text-sm text-slate-600">
+            <b className="font-extrabold text-slate-900">
+              Tour<span className="text-daejeon-blue">Night</span> GUIDEBOOK
+            </b>
+            <span className="ml-2 hidden sm:inline">{t("guidebookSubtitle")}</span>
+          </span>
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-daejeon-blue px-4 py-1.5 text-xs font-bold text-white transition group-hover:bg-indigo-500">
+            {t("guidebookCta")}
+            <ArrowRight size={13} />
+          </span>
+        </Link>
       </section>
 
       {/* ── 🌙 오늘 밤 브리핑 — 실시간 데이터(날씨·일몰·월령·막차) + 조건 추천 ── */}
@@ -137,28 +94,75 @@ export default async function HomePage({
         <TonightBriefing />
       </section>
 
+      {/* ── 대전은? — 도시·꿈돌이 소개. 처음 온 외국인의 첫 질문에 답한다 ── */}
+      <section className="mx-auto max-w-5xl px-6 py-16 text-center">
+        <p className="text-sm font-semibold text-slate-500">{t("aboutLead")}</p>
+        <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-daejeon-blue sm:text-4xl">
+          {t("aboutTitle")}
+        </h2>
+        <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-slate-600">
+          {t("aboutBody")}
+        </p>
+        <div className="mx-auto mt-8 flex max-w-xl flex-col items-center gap-4 rounded-3xl border border-amber-200 bg-amber-50 px-7 py-8 sm:flex-row sm:text-left">
+          <Image
+            src="/menu-icons/menu1.png"
+            alt="꿈돌이"
+            width={96}
+            height={89}
+            className="h-20 w-auto drop-shadow"
+          />
+          <div>
+            <p className="text-sm leading-relaxed text-slate-600">{t("aboutKkum")}</p>
+            <Link
+              href="/personality"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-daejeon-blue transition hover:text-indigo-500"
+            >
+              {t("aboutCta")}
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── 지금 대전의 밤은 — 축제 포스터 ── */}
       {festivals.length > 0 && (
         <section className="mx-auto max-w-7xl px-6 py-14">
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <p className="overline-label">WHAT&apos;S ON</p>
-              <h2 className="mt-1.5 text-3xl font-extrabold tracking-tight">
-                {t("festivalsSection")}
-              </h2>
-              <p className="mt-1.5 text-sm text-slate-500">{t("festivalsSectionSub")}</p>
-            </div>
+          {/* 가운데 정렬 헤더 — 작은 리드문 + 큰 컬러 타이틀 */}
+          <div className="mb-10 text-center">
+            <p className="text-sm font-semibold text-slate-500">{t("festivalsSectionSub")}</p>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-daejeon-green sm:text-4xl">
+              {t("festivalsSection")}
+            </h2>
+          </div>
+          {/* 사진 카드 + 아래 제목·한 줄 설명 */}
+          <div className="grid grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-4">
+            {festivals.map((f) => (
+              <Link key={f.contentId} href={`/spots/${f.contentId}`} className="group">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-200">
+                  {f.imageUrl && (
+                    <Image
+                      src={f.imageUrl}
+                      alt={f.title}
+                      fill
+                      sizes="(min-width:1024px) 25vw, 50vw"
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                    />
+                  )}
+                </div>
+                <h3 className="mt-3 line-clamp-1 text-[15px] font-bold text-slate-900 group-hover:text-daejeon-green">
+                  {f.title}
+                </h3>
+                <p className="mt-1 line-clamp-1 text-sm text-slate-500">{f.addr}</p>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-9 text-center">
             <Link
               href="/festivals"
-              className="flex shrink-0 items-center gap-1 text-sm font-semibold text-slate-500 transition hover:text-indigo-600"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-daejeon-green hover:text-daejeon-green"
             >
-              {t("festivalsViewAll")} <ArrowRight size={15} />
+              {t("festivalsViewAll")} <ArrowRight size={14} />
             </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-            {festivals.map((f) => (
-              <FestivalPoster key={f.contentId} spot={f} />
-            ))}
           </div>
         </section>
       )}
@@ -167,11 +171,12 @@ export default async function HomePage({
       {feature && (
         <section className="bg-slate-50 py-14">
           <div className="mx-auto max-w-7xl px-6">
-            <p className="overline-label">Tonight</p>
-            <h2 className="mt-1.5 text-3xl font-extrabold tracking-tight">
-              {t("spotsSection")}
-            </h2>
-            <p className="mt-1.5 text-sm text-slate-500">{t("spotsSectionSub")}</p>
+            <div className="mb-2 text-center">
+              <p className="text-sm font-semibold text-slate-500">{t("spotsSectionSub")}</p>
+              <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-daejeon-blue sm:text-4xl">
+                {t("spotsSection")}
+              </h2>
+            </div>
             <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
               <Link
                 href={`/spots/${feature.contentId}`}
@@ -207,6 +212,7 @@ export default async function HomePage({
                     <h3 className="mt-2 line-clamp-1 text-sm font-bold text-slate-800 transition group-hover:text-indigo-600">
                       {s.title}
                     </h3>
+                    <p className="line-clamp-1 text-xs text-slate-500">{s.addr}</p>
                   </Link>
                 ))}
               </div>
@@ -225,12 +231,20 @@ export default async function HomePage({
 
       {/* ── 성향 테스트 CTA ── */}
       <section className="mx-auto max-w-7xl px-6 py-14">
-        <div className="flex flex-col items-center gap-6 rounded-2xl bg-gradient-to-r from-daejeon-blue to-daejeon-green px-8 py-14 text-center text-white">
-          <h2 className="text-3xl font-extrabold">{t("heroPersonaTitle")}</h2>
-          <p className="max-w-xl text-indigo-100">{t("heroPersonaSubtitle")}</p>
+        <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-2xl px-8 py-16 text-center text-white">
+          <Image
+            src="/spots/expo-bridge.jpg"
+            alt=""
+            fill
+            sizes="(min-width:1280px) 1216px, 100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/55 to-daejeon-blue/50" />
+          <h2 className="relative text-3xl font-extrabold drop-shadow">{t("heroPersonaTitle")}</h2>
+          <p className="relative max-w-xl text-slate-200">{t("heroPersonaSubtitle")}</p>
           <Link
             href="/personality"
-            className="rounded-full bg-white px-8 py-3.5 text-sm font-bold text-indigo-700 transition hover:bg-indigo-50"
+            className="relative rounded-full bg-white px-8 py-3.5 text-sm font-bold text-indigo-700 transition hover:bg-indigo-50"
           >
             {t("heroPersonaCta")} →
           </Link>
@@ -248,9 +262,16 @@ export default async function HomePage({
               {/* 월간 소식 카드 — 밤 사진을 쓰는 카드라 짙은 배경을 유지한다 */}
               <Link
                 href="/festivals"
-                className="group relative flex flex-col overflow-hidden rounded-2xl bg-gradient-to-b from-indigo-700 via-indigo-900 to-slate-950 transition hover:shadow-lg"
+                className="group relative flex min-h-[230px] flex-col overflow-hidden rounded-2xl transition hover:shadow-lg"
               >
-                <div className="pointer-events-none absolute inset-x-0 -top-14 h-36 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.2),transparent_70%)]" />
+                <Image
+                  src="/spots/jungangro-night.jpg"
+                  alt=""
+                  fill
+                  sizes="206px"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-950/55 to-slate-950/80" />
                 <div className="relative flex-1 p-5">
                   <p className="text-[11px] font-bold tracking-wide text-indigo-200">
                     {monthLabel(locale)}
@@ -393,10 +414,6 @@ export default async function HomePage({
           </div>
         </div>
 
-        {/* ── 가이드북 배너 ── */}
-        <div className="mt-16">
-          <GuidebookBanner />
-        </div>
       </section>
     </div>
   );

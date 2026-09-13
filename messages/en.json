@@ -30,7 +30,10 @@
     "klife": "K-Life Guide",
     "stampTour": "도장투어",
     "stampTourWith": "with 꿈돌이",
-    "nightBike": "Late-Night Free Bike Tour"
+    "nightBike": "Late-Night Free Bike Tour",
+    "groupCourse": "Plan a Course",
+    "groupPlaces": "Places",
+    "groupEnjoy": "Enjoy Daejeon"
   },
   "home": {
     "heroTitle": "Unfold Your Dream Tonight",
@@ -116,7 +119,12 @@
     "catKlife": "K-Life Guide",
     "catPersona": "Persona Test",
     "catStamp": "Stamp Tour",
-    "searchButton": "Search"
+    "searchButton": "Search",
+    "aboutLead": "First time here? Start with this",
+    "aboutTitle": "What is Daejeon?",
+    "aboutBody": "A city of science, of bread and kalguksu - and at night, of glowing bridges over Gapcheon and the shining Hanbit Tower. Just 1 hour from Seoul by KTX, right at the heart of Korea.",
+    "aboutKkum": "Kkumdori, the little yellow fairy, has been Daejeon's mascot since Expo '93 - the face of the city, symbolizing dreams and hope.",
+    "aboutCta": "Start your journey with Kkumdori"
   },
   "footer": {
     "notice": "This service is an entry for the 2026 Tourism Data Contest.",
@@ -359,7 +367,11 @@
       }
     },
     "phrasesMore": "See the full phrasebook below",
-    "situationPhrases": "Korean you can use right now"
+    "situationPhrases": "Korean you can use right now",
+    "learnTitle": "Ready to practice?",
+    "learnBody": "The K-Life Guide walks you through this situation from start to finish.",
+    "learnCta": "Go to K-Life Guide",
+    "learnLater": "Later"
   },
   "community": {
     "title": "Night Community",
@@ -516,7 +528,8 @@
     "areaVisitors": {
       "line": "≈{count} out-of-town visitors/day in {gu}",
       "basis": "(as of {month} · mobile big data)"
-    }
+    },
+    "nearbyFood": "Food Nearby"
   },
   "auth": {
     "login": "Log in",
@@ -1092,7 +1105,16 @@
     "loading": "Loading station data…",
     "error": "Couldn't load Tashu station data. Please try again in a moment.",
     "available": "{count} bikes available",
-    "promoText": "Download the Tashu app from the app store and ride bikes around Daejeon for free.\nEvery rental is free for up to one hour, with unlimited rentals.\nSo if you return it to a station and rent again before the hour is up, you can keep riding for free."
+    "promoText": "Download the Tashu app from the app store and ride bikes around Daejeon for free.\nEvery rental is free for up to one hour, with unlimited rentals.\nSo if you return it to a station and rent again before the hour is up, you can keep riding for free.",
+    "myLocation": "You are here",
+    "copyName": "Copy '타슈'",
+    "copied": "Copied!",
+    "appStoreHint": "On iPhone, search for '타슈' (Tashu) in the App Store - copy the name with the button above.",
+    "coursesTitle": "Recommended Tashu Courses",
+    "coursesSub": "Night rides starting right at a station",
+    "nearestBadge": "Closest course to you right now!",
+    "courseMeta": "{km}km · about {min} min",
+    "courseStart": "Start at {name}"
   },
   "klife": {
     "restaurantTitle": "K-Life Guide · Restaurant",
@@ -1111,5 +1133,18 @@
     "myPhrasesEmpty": "Tap Save on any phrase card and it will be collected here - ready to use mid-trip.",
     "you": "You reply",
     "otherPhrases": "More ways to say it!"
+  },
+  "mascotGuide": {
+    "home": "Hi! I'm Kkumdori. Let me guide your night in Daejeon!",
+    "spots": "Here are the best night spots in Daejeon. Add your favorites to a course!",
+    "festivals": "Festivals happening in Daejeon right now - even prettier at night!",
+    "courses": "Build your night course three ways: by persona, by AI, or by your picks!",
+    "personality": "Answer 12 questions and I'll tell you your night-travel persona!",
+    "etiquette": "New to Korean night culture? Learn manners and phrases by situation!",
+    "klife": "From entering to leaving a restaurant - let's practice together!",
+    "community": "Stories from fellow travelers. Comments auto-translate to your language!",
+    "stampTour": "Collect stamps by visiting spots. Four stamps make a photo strip!",
+    "nightBike": "Tashu, Daejeon's public bike! I'll show you available bikes in real time.",
+    "default": "Pick anything from the menu - I'll be right here with you!"
   }
 }
