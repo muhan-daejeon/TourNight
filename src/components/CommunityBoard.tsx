@@ -514,7 +514,19 @@ function PostItem({
   }
 
   return (
-    <li className="rounded-2xl border border-slate-200 bg-slate-100 p-4">
+    <li className="py-5">
+      <div className="flex items-start gap-4">
+        {/* 댓글 수 박스 — 누르면 댓글이 펼쳐진다 (참고 커뮤니티의 답변 수 패턴) */}
+        <button
+          type="button"
+          onClick={toggle}
+          className="flex h-14 w-14 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-daejeon-blue hover:text-daejeon-blue"
+        >
+          <span className="text-lg font-extrabold leading-none">{count}</span>
+          <span className="text-[10px] font-semibold text-slate-400">{t("comments")}</span>
+        </button>
+
+        <div className="min-w-0 flex-1">
       <div className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-amber-600">
           <span className="truncate">{post.author}</span>
@@ -544,26 +556,27 @@ function PostItem({
         targetType="post"
         targetId={post.id}
         text={post.body}
-        className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-400"
+        className="mt-1.5 line-clamp-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-slate-600"
       />
+        </div>
 
-      {/* 첨부 사진 — 눌러서 원본 크기로 */}
-      {post.mediaUrl && post.mediaType === "image" && (
-        <button
-          type="button"
-          onClick={() => setLightbox(true)}
-          className="mt-3 block overflow-hidden rounded-xl border border-slate-200 transition hover:border-slate-300"
-        >
-          <Image
-            src={post.mediaUrl}
-            alt=""
-            width={640}
-            height={480}
-            sizes="(max-width: 640px) 100vw, 640px"
-            className="max-h-80 w-auto object-cover"
-          />
-        </button>
-      )}
+        {/* 첨부 사진 — 텍스트 중심 리스트라 오른쪽 작은 썸네일로, 누르면 원본 */}
+        {post.mediaUrl && post.mediaType === "image" && (
+          <button
+            type="button"
+            onClick={() => setLightbox(true)}
+            className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl border border-slate-200 transition hover:border-slate-300"
+          >
+            <Image
+              src={post.mediaUrl}
+              alt=""
+              fill
+              sizes="72px"
+              className="object-cover"
+            />
+          </button>
+        )}
+      </div>
 
       {lightbox && post.mediaUrl && (
         <div
@@ -989,7 +1002,7 @@ export default function CommunityBoard({
           <p className="text-sm text-slate-500">{t(view === "photos" ? "emptyPhotos" : "empty")}</p>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="divide-y divide-slate-200 border-y border-slate-200">
           {visible.map((post) => (
             <PostItem
               key={post.id}
