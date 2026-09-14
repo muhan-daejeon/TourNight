@@ -18,6 +18,7 @@ import {
   QUESTION_TIMES,
   scorePersonality,
   type OptionKey,
+  type PersonalityResult,
 } from "@/lib/personality-test";
 import { PERSONA_QUESTION_IMAGES } from "@/lib/persona-images";
 import PersonalityResultView from "./PersonalityResultView";
@@ -43,10 +44,12 @@ export default function PersonalityTest({
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, OptionKey>>({});
+  // 서버에서 되살린 지난 결과 — 새로 푼 답이 아니라 이걸로 결과 화면을 연다
+  const [restored, setRestored] = useState<PersonalityResult | null>(null);
 
   const result = useMemo(
-    () => (phase === "result" ? scorePersonality(answers) : null),
-    [phase, answers],
+    () => (phase === "result" ? (restored ?? scorePersonality(answers)) : null),
+    [phase, answers, restored],
   );
 
   // 결과에 도달할 때마다 서버에 한 건 남긴다 — 프로필의 "내 여행 성향
@@ -69,9 +72,43 @@ export default function PersonalityTest({
     }).catch(() => {});
   }, [result]);
 
+  // 다른 페이지에 다녀와도 결과가 사라지지 않게 — 서버에 저장된 가장 최근
+  // 결과(/api/personality/latest)를 불러와 결과 화면으로 바로 연다.
+  // 사용자가 이미 인트로에서 테스트를 시작했다면 끼어들지 않는다.
+  const startedRef = useRef(false);
+  const restoreRef = useRef(false);
+  useEffect(() => {
+    if (restoreRef.current) return;
+    restoreRef.current = true;
+    fetch("/api/personality/latest")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const r = d?.result;
+        if (!r?.primary || startedRef.current) return;
+        // 저장분에는 primary·secondary·scores만 남아 있어 파생값은 다시 계산한다
+        const scores = r.scores as PersonalityResult["scores"];
+        const maxScore = Math.max(...Object.values(scores));
+        const revived: PersonalityResult = {
+          primary: r.primary,
+          secondary: r.secondary ?? null,
+          scores,
+          maxScore,
+          primaryTypes: (Object.keys(scores) as PersonalityResult["primaryTypes"]).filter(
+            (k) => scores[k] === maxScore,
+          ),
+        };
+        // 되살린 결과를 저장 effect가 또 서버에 남기지 않도록 키를 미리 채운다
+        savedResultRef.current = `${revived.primary}:${revived.secondary}:${JSON.stringify(revived.scores)}`;
+        setRestored(revived);
+        setPhase("result");
+      })
+      .catch(() => {});
+  }, []);
+
   function restart() {
     setAnswers({});
     setIndex(0);
+    setRestored(null);
     setPhase("intro");
   }
 
@@ -100,7 +137,7 @@ export default function PersonalityTest({
 
         <button
           type="button"
-          onClick={() => setPhase("quiz")}
+          onClick={() => { startedRef.current = true; setPhase("quiz"); }}
           className="mt-8 inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-10 py-4 text-base font-bold text-white shadow-[0_8px_28px_rgba(0,78,162,0.35)] transition hover:bg-indigo-500"
         >
           {t("start")}

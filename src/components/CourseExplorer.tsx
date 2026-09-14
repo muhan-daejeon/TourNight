@@ -380,6 +380,8 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const fromCategory = searchParams.get("category");
   // 둘러보기로 들어온 단계인지 (?tour=n)
   const tourParam = searchParams.get("tour");
+  // 성향 결과의 "추천 루트 보기"로 들어오면 ?course=<id>가 붙는다
+  const courseParam = searchParams.get("course");
 
   // 저장된 코스 복원은 아래 effect에서 마운트 후에 한다.
   // useState 초기값에서 localStorage를 읽으면 서버 HTML(코스 없음)과
@@ -407,6 +409,13 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   if (tourParam && tourPicked !== tourParam) {
     setTourPicked(tourParam);
     if (!selId && courses.length) setSelId(courses[0].id);
+  }
+
+  // 성향 결과에서 특정 코스로 — 같은 한 번만 고르기 패턴 (해제를 막지 않는다)
+  const [coursePicked, setCoursePicked] = useState<string | null>(null);
+  if (courseParam && coursePicked !== courseParam) {
+    setCoursePicked(courseParam);
+    if (courses.some((c) => c.id === courseParam)) setSelId(courseParam);
   }
 
   // 클라이언트 이동으로 from·카테고리가 바뀌면 렌더 중에 초기화 (effect 안 setState 회피)
