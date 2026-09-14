@@ -99,6 +99,19 @@ body {
   box-decoration-break: clone;
 }
 
+/* 문장 속 특정 단어에 형광펜 효과 — 민트(대전 그린) 단색. About 대전 페이지의
+   "대전의 캐릭터, 꿈씨패밀리" 문구와 같은 색을 쓴다 */
+.mint-highlight {
+  background-image: linear-gradient(rgba(53, 181, 151, 0.38), rgba(53, 181, 151, 0.38));
+  background-repeat: no-repeat;
+  background-size: 100% 0.34em;
+  background-position: 0 92%;
+  padding: 0 0.12em;
+  margin: 0 -0.12em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 /* 스크롤은 되지만 막대는 안 보이게 — 스냅 컨테이너 전용 */
 .no-scrollbar {
   scrollbar-width: none; /* Firefox */

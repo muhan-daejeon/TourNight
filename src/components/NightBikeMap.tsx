@@ -2,9 +2,37 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, Copy, ExternalLink, MapPin, RefreshCw, Route } from "lucide-react";
+import { ArrowRight, Check, Copy, MapPin, RefreshCw, Route } from "lucide-react";
 import Image from "next/image";
+import { Link } from "@/i18n/navigation";
 import { TASHU_COURSES, distanceM, type BikeLocale } from "@/lib/tashu-courses";
+
+/** Google Play 로고 — 대각선 그라데이션(파랑→초록→노랑→빨강)을 준 재생 버튼
+ * 모양으로, 실제 로고의 4색 구성을 간략화해 작은 크기에서도 알아볼 수 있게 했다 */
+function GooglePlayIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="tn-gplay" x1="4" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#00C3FF" />
+          <stop offset="0.35" stopColor="#33D67A" />
+          <stop offset="0.65" stopColor="#FFCD00" />
+          <stop offset="1" stopColor="#FF3D57" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M5 3.3v17.4a1 1 0 0 0 1.53.85l14.2-8.7a1 1 0 0 0 0-1.7L6.53 2.45A1 1 0 0 0 5 3.3Z"
+        fill="url(#tn-gplay)"
+      />
+    </svg>
+  );
+}
+
+/** 구글 플레이 연동 버튼·'타슈' 복사 버튼 — 같은 모양(흰 배경, 각진 모서리).
+ * 버튼 높이(패딩 2rem + 테두리 2px)의 절반이 기존 pill(rounded-full)의
+ * 유효 반지름이었으니, 그 1/3만큼만 둥글게 — (2rem+2px)/2/3 = (2rem+2px)/6 */
+const TASHU_BTN =
+  "inline-flex items-center gap-1.5 rounded-[calc((2rem+2px)/6)] border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-daejeon-blue hover:text-daejeon-blue";
 
 const DAEJEON_CENTER = { lat: 36.3504, lng: 127.3845 };
 
@@ -27,33 +55,6 @@ function esc(s: string) {
     /[&<>"']/g,
     (c) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
-  );
-}
-
-/** 지도 아래 안내 문구에서 노란색으로 강조할 단어 — 언어마다 실제 단어가 다르다 */
-const PROMO_HIGHLIGHTS: Record<string, string[]> = {
-  ko: ["타슈", "무료", "한 시간", "무제한"],
-  en: ["Tashu", "free", "one hour", "unlimited"],
-  ja: ["タシュ", "無料", "1時間", "無制限"],
-  zh: ["Tashu", "免费", "1小时", "不限"],
-};
-
-function escapeRegExp(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/** 문장 하나에서 강조 단어만 노란 글자로 바꿔 조각내 돌려준다 */
-function highlightWords(text: string, words: string[]) {
-  if (words.length === 0) return [text];
-  const pattern = new RegExp(`(${words.map(escapeRegExp).join("|")})`, "g");
-  return text.split(pattern).map((part, i) =>
-    words.includes(part) ? (
-      <span key={i} className="font-semibold text-amber-600">
-        {part}
-      </span>
-    ) : (
-      <span key={i}>{part}</span>
-    ),
   );
 }
 
@@ -257,52 +258,56 @@ export default function NightBikeMap() {
 
   return (
     <div>
-      {/* 타슈 앱 안내 — 위 히어로 배너("NIGHT BIKE" 박스) 바로 밑에, 8px 정도
+      {/* 앱 연동 버튼 — 위 히어로 배너("NIGHT BIKE" 박스) 바로 밑에, 20px 정도
           여백만 두고 온다. PageBody 자체에 이미 pt-8(2rem) 위 여백이 있어서,
-          그만큼을 음수 마진으로 상쇄한 뒤 8px만 남긴다 — calc라 루트 글자
-          크기(1.2배)가 바뀌어도 항상 "2rem을 상쇄하고 8px만" 유지된다.
-          가로·텍스트 모두 가운데 정렬 */}
-      <div className="mx-auto w-full rounded-2xl border border-slate-200 bg-slate-100 p-5 text-center sm:w-1/2 [margin-top:calc(8px-2rem)]">
-        <div className="space-y-1.5 text-sm leading-relaxed text-slate-400">
-          {t("promoText")
-            .split("\n")
-            .map((line, i) => (
-              <p key={i}>{highlightWords(line, PROMO_HIGHLIGHTS[locale] ?? PROMO_HIGHLIGHTS.ko)}</p>
-            ))}
-        </div>
-        {/* 앱 연동 — 안드로이드는 플레이스토어 검색으로 바로, 아이폰은 App Store에서
-            '타슈'를 검색하도록 안내하고 이름을 한 번에 복사할 수 있게 한다 (피드백 11) */}
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-          <a
-            href="https://play.google.com/store/search?q=%ED%83%80%EC%8A%88&c=apps"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-700"
-          >
-            <ExternalLink size={13} />
-            Google Play
-          </a>
-          <button
-            type="button"
-            onClick={() => {
-              try {
-                navigator.clipboard.writeText("타슈");
-                setCopied(true);
-                window.setTimeout(() => setCopied(false), 1600);
-              } catch {}
-            }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-daejeon-blue hover:text-daejeon-blue"
-          >
-            {copied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
-            {copied ? t("copied") : t("copyName")}
-          </button>
-        </div>
-        <p className="mt-2.5 text-xs text-slate-400">{t("appStoreHint")}</p>
+          그만큼을 음수 마진으로 상쇄한 뒤 20px만 남긴다 — calc라 루트 글자
+          크기(1.2배)가 바뀌어도 항상 "2rem을 상쇄하고 20px만" 유지된다.
+          안드로이드는 플레이스토어 검색으로 바로, 아이폰은 이름 복사로 안내한다 */}
+      <div className="flex flex-wrap items-center justify-center gap-2 [margin-top:calc(20px-2rem)]">
+        <a
+          href="https://play.google.com/store/search?q=%ED%83%80%EC%8A%88&c=apps"
+          target="_blank"
+          rel="noreferrer"
+          className={TASHU_BTN}
+        >
+          <GooglePlayIcon />
+          {t("installBtn")}
+        </a>
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              navigator.clipboard.writeText("타슈");
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 1600);
+            } catch {}
+          }}
+          className={TASHU_BTN}
+        >
+          {copied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+          {copied ? t("copied") : t("copyName")}
+        </button>
       </div>
+
+      {/* 타슈 소개(About 대전)로 가는 순 텍스트 링크 — 박스 없이, "추천 타슈
+          코스" 제목(coursesTitle)과 같은 크기, 검정 글자. 위아래 여백 30px씩 */}
+      <p className="mt-[20px] text-center">
+        <Link
+          href="/about#tashu"
+          className="inline-flex items-center gap-1.5 text-2xl font-extrabold tracking-tight text-slate-900 hover:text-daejeon-blue sm:text-3xl"
+        >
+          {t("learnMore")}
+          <ArrowRight size={22} />
+        </Link>
+      </p>
+
+      {/* 위 링크와 "대여소에서 바로 출발하는 야간 라이딩" 사이 여백을 2배로
+          넓히고, 그 한가운데에 가로 구분선을 둔다 */}
+      <hr className="mx-auto mt-[25px] w-20 border-t border-slate-200" />
 
       {/* ── 추천 타슈 코스 — 대여소 밀집 지점과 야간 명소를 조합해 미리 설계.
           현위치가 잡히면 가장 가까운 코스가 맨 앞으로 오고 네온 테두리로 빛난다 ── */}
-      <section className="mt-10">
+      <section className="mt-[30px]">
         <div className="mb-5 text-center">
           <p className="text-sm font-semibold text-slate-500">{t("coursesSub")}</p>
           <h2 className="mt-1.5 text-2xl font-extrabold tracking-tight text-daejeon-green sm:text-3xl">

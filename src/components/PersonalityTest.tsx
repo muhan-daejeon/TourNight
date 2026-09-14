@@ -125,7 +125,7 @@ export default function PersonalityTest({
             ))}
           </div>
           <style>{`
-            .tn-parade { animation: tn-parade 13s linear infinite; }
+            .tn-parade { animation: tn-parade 26s linear infinite; } /* 0.5배속 (기존 13s의 2배) */
             @keyframes tn-parade { to { transform: translateX(-50%); } }
           `}</style>
         </div>

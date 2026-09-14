@@ -106,10 +106,10 @@ export default function MascotGuide() {
         aria-label="꿈돌이"
       >
         <Image
-          src="/mascot-ufo.png"
+          src="/menu-panel/ggumdol-space.png"
           alt="꿈돌이"
-          width={112}
-          height={86}
+          width={560}
+          height={418}
           className="h-auto w-24 drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-28"
         />
       </button>

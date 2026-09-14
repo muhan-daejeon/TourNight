@@ -416,54 +416,26 @@ function StampRoad({
     }
   }
 
-  // 4칸의 자리(0~100 기준 %) — 왼쪽·오른쪽을 번갈아 두어 구불구불한 인상을 준다.
-  // 아래 path는 이 네 점을 곡선으로 잇는다. 하나를 옮기면 path도 함께 손봐야 한다.
-  // 1번은 원래 y:10이라 위 장소명 라벨이 카드 위로 잘려 보였고(→16으로 내림),
-  // 4번은 원래 y:85라 아래 "눌러서 도장 찍기" 문구가 카드 바닥에 바짝 붙었다(→78로 올림)
+  // 4칸의 자리(0~100 기준 %) — imgs/지도.jpg 속 길 위에 있는 별 4개(정류장)의
+  // 실제 좌표에 맞췄다. 지도 배경이 정사각형(1264x1264)이라 컨테이너도
+  // aspect-square로 맞춰야 이 좌표가 어긋나지 않는다(object-cover가 잘라내지 않음)
   const NODES = [
-    { x: 20, y: 16 },
-    { x: 78, y: 30 },
-    { x: 18, y: 58 },
-    { x: 74, y: 78 },
+    { x: 21.4, y: 64.1 },
+    { x: 75.6, y: 39.2 },
+    { x: 54.2, y: 26.9 },
+    { x: 40.0, y: 10.7 },
   ];
-  const PATH = "M20,16 C55,12 85,20 78,30 C72,48 26,44 18,58 C12,70 56,74 74,78";
 
   return (
-    <div className="relative mt-6 aspect-[3/4] w-full overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 sm:aspect-[16/9]">
-      {/* 홈 히어로와 같은 반짝이는 밤하늘 배경 */}
-      <div className="night-hero pointer-events-none absolute inset-0" />
-
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-      >
-        <defs>
-          <linearGradient id="stampRoadGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#fbbf24" />
-            <stop offset="100%" stopColor="#d97706" />
-          </linearGradient>
-        </defs>
-        <path
-          d={PATH}
-          fill="none"
-          stroke="url(#stampRoadGrad)"
-          strokeWidth="3.2"
-          strokeLinecap="round"
-          opacity="0.85"
-          vectorEffect="non-scaling-stroke"
-        />
-        <path
-          d={PATH}
-          fill="none"
-          stroke="#fef3c7"
-          strokeWidth="0.6"
-          strokeDasharray="1.6 2.6"
-          strokeLinecap="round"
-          opacity="0.55"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
+    <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-slate-200">
+      <Image
+        src="/stamp-tour/map.jpg"
+        alt=""
+        fill
+        sizes="(min-width: 1024px) 50vw, 100vw"
+        className="object-cover"
+        priority
+      />
 
       {NODES.map((pos, i) => {
         const stop = tour.stops[i];
@@ -595,10 +567,11 @@ function CollageSection({ tour }: { tour: StampTourData }) {
   }
 
   return (
-    <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-100 p-6 text-center">
+    <div className="text-center">
       <h3 className="text-base font-bold text-slate-900">{t("title")}</h3>
       <p className="mt-1 text-xs text-slate-500">{t("hint")}</p>
-      <div className="relative mx-auto mt-4 aspect-[788/1123] w-full max-w-[220px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+      {/* 겉 회색 박스는 없애고, 사진 자체는 각진 모서리로 */}
+      <div className="relative mx-auto mt-4 aspect-[788/1123] w-full max-w-[220px] overflow-hidden border border-slate-200 bg-white shadow-lg">
         {preview && (
           // eslint-disable-next-line @next/next/no-img-element -- 로컬 object URL이라 next/image 로더가 다루지 못한다
           <img src={preview} alt="" className="h-full w-full object-cover" />
@@ -700,8 +673,12 @@ export default function StampTour() {
             <RotateCcw size={15} />
             {t("reselect")}
           </button>
-          <StampRoad tour={tour} onUpdate={setTour} />
-          <CollageSection tour={tour} />
+          {/* 지도(도장)와 꿈돌네컷을 가로로 나란히 — 데스크탑에서만, 모바일은
+              세로로 쌓인다 */}
+          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+            <StampRoad tour={tour} onUpdate={setTour} />
+            <CollageSection tour={tour} />
+          </div>
         </div>
       )}
 
