@@ -478,7 +478,7 @@
   "stampTour": {
     "overline": "STAMP TOUR",
     "introTitle": "네컷 사진 with 꿈돌이",
-    "introSubtitle": "自分で選んだ名所4か所を巡ってスタンプを集め、あなただけのクムドル4カット写真を完成させましょう。",
+    "introSubtitle": "写真4枚を入れて、あなただけのクムドル4カットを完成させましょう。",
     "reselect": "観光地を選び直す",
     "consent": {
       "title": "位置情報の収集に同意しますか？",
@@ -518,7 +518,7 @@
     },
     "collage": {
       "title": "クムドル4カット",
-      "hint": "スタンプを押すたびに1コマずつ埋まります",
+      "hint": "1コマずつ写真を入れてみましょう",
       "download": "ダウンロード",
       "downloading": "作成中…",
       "incomplete": "お知らせ：すべてのスタンプを集めると利用できます。",

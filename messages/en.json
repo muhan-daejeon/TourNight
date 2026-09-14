@@ -478,7 +478,7 @@
   "stampTour": {
     "overline": "STAMP TOUR",
     "introTitle": "네컷 사진 with 꿈돌이",
-    "introSubtitle": "Pick 4 spots of your own, collect a stamp at each, and complete your own Ggumdol four-cut photo.",
+    "introSubtitle": "Fill in 4 photos to complete your own Ggumdol four-cut.",
     "reselect": "Pick places again",
     "consent": {
       "title": "Allow location access?",
@@ -518,7 +518,7 @@
     },
     "collage": {
       "title": "Ggumdol Four-Cut",
-      "hint": "Each stamp fills in one frame",
+      "hint": "Fill one frame at a time with a photo",
       "download": "Download",
       "downloading": "Preparing…",
       "incomplete": "Note: available once you've collected all 4 stamps.",

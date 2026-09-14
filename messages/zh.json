@@ -478,7 +478,7 @@
   "stampTour": {
     "overline": "STAMP TOUR",
     "introTitle": "네컷 사진 with 꿈돌이",
-    "introSubtitle": "走遍自己挑选的4个景点集章，完成专属于你的梦多尔四格照吧。",
+    "introSubtitle": "添加4张照片，完成专属于你的梦多尔四格照吧。",
     "reselect": "重新选择景点",
     "consent": {
       "title": "是否同意收集位置信息？",
@@ -518,7 +518,7 @@
     },
     "collage": {
       "title": "梦多尔四格照",
-      "hint": "每盖一个章就会填满一格",
+      "hint": "请逐格添加照片",
       "download": "下载",
       "downloading": "生成中…",
       "incomplete": "提示：集齐全部印章后即可使用。",
