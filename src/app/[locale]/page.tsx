@@ -37,7 +37,7 @@ export default async function HomePage({
     getVerifiedNightSpots(locale),
     listPopularPosts(4),
   ]);
-  const notices = listNotices(locale);
+  const notices = listNotices();
   const photoSpots = spots.filter((s) => s.imageUrl);
 
   // 명소 캐러셀 카드에 쓸 소개문 — 상세 API에서 앞부분만 (1시간 캐시라 부담 없다)

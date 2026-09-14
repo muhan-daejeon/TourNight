@@ -44,8 +44,7 @@ const MENU_EXTRAS = [
   { href: "/stay", key: "stay" },
   { href: "/shopping", key: "shopping" },
   { href: "/night-bike", key: "nightBike" },
-  // 공지사항은 홈의 소식 섹션이 담당한다 (전용 페이지가 아직 없다)
-  { href: "/#news", key: "notices" },
+  { href: "/notices", key: "notices" },
 ] as const;
 
 /** 상단에 늘 보이는 4개 카테고리와 그 아래 묶인 탭들 — 홈은 좌측 로고가 대신한다.
@@ -420,11 +419,11 @@ export default function Header() {
             className="pointer-events-none absolute bottom-0 right-[calc(1.5rem+15px)] hidden h-auto w-32 object-contain xl:block"
           />
           <Image
-            src="/menu-panel/ggumdol-space.png"
+            src="/menu-panel/ggumdol.png"
             alt=""
-            width={560}
-            height={418}
-            className="pointer-events-none absolute left-[calc(1.5rem+33px)] top-1/2 hidden h-auto w-[11.2rem] -translate-y-1/2 object-contain xl:block"
+            width={642}
+            height={856}
+            className="pointer-events-none absolute left-[calc(1.5rem+73px)] top-1/2 hidden h-auto w-[7.84rem] -translate-y-1/2 object-contain xl:block"
           />
 
           {/* 부모 이름은 되풀이하지 않는다 — 각 목록을 그 위 부모 버튼의 실제

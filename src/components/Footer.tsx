@@ -44,7 +44,7 @@ export default function Footer() {
                 {t(`footer.links.${key}`)}
               </span>
             ))}
-            <Link href="/#news" className="transition hover:text-indigo-600">
+            <Link href="/notices" className="transition hover:text-indigo-600">
               {t("footer.links.notices")}
             </Link>
           </nav>
