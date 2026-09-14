@@ -33,10 +33,18 @@ export default async function CommunitySidebar({
   const t = await getTranslations("community.sidebar");
   const stats = weekStats(posts);
 
-  // 본문에 명소 이름이 들어간 횟수 — 짧은 이름(2자)은 오탐이 많아 뺀다
+  // 명소별 언급 횟수 — 글의 방문 명소 태그가 1순위(정확), 본문에 이름이
+  // 그대로 들어간 경우가 2순위(태그 없던 옛 글 대비). 한 글은 한 번만 센다.
+  // 짧은 이름(2자)은 본문 매칭 오탐이 많아 텍스트 쪽에서만 뺀다
   const mentioned = spots
-    .filter((s) => s.title.length >= 3)
-    .map((s) => ({ spot: s, n: posts.filter((p) => p.body.includes(s.title)).length }))
+    .map((s) => ({
+      spot: s,
+      n: posts.filter(
+        (p) =>
+          (p.contentIds ?? []).includes(s.contentId) ||
+          (s.title.length >= 3 && p.body.includes(s.title)),
+      ).length,
+    }))
     .filter((m) => m.n > 0)
     .sort((a, b) => b.n - a.n)
     .slice(0, 5);

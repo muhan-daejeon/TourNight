@@ -473,7 +473,12 @@
       "guide1": "Share tips and reviews from your night out",
       "guide2": "Mention a spot by name and it shows up here",
       "guide3": "Please post only photos you took yourself"
-    }
+    },
+    "tagAdd": "Tag spots",
+    "tagSearch": "Search the places you visited",
+    "tagNoMatch": "No matching spot",
+    "tagLimit": "Up to {max} tags",
+    "tagRemove": "Remove tag"
   },
   "stampTour": {
     "overline": "STAMP TOUR",

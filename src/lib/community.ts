@@ -17,6 +17,9 @@ export interface CommunityPost {
   mediaType: MediaKind | null;
   /** 작성자가 메일 인증을 마쳤는지 — 목록에 배지로 표시한다 */
   authorVerified: boolean;
+  /** 방문 명소 태그(night_spots.content_id들) — 자유글이면 빈 배열.
+      이름은 화면이 명소 목록으로 풀어 보여준다 */
+  contentIds: string[];
 }
 
 export interface CommunityComment {
@@ -37,6 +40,22 @@ export interface CommunityComment {
 /** 입력 제한 */
 export const AUTHOR_MAX = 20;
 export const BODY_MAX = 200;
+/** KTO content_id는 숫자 문자열이라 32자면 넉넉하다 — 그 이상은 버린다 */
+export const CONTENT_ID_MAX = 32;
+/** 글 하나에 붙일 수 있는 방문 명소 태그 상한 */
+export const POST_SPOTS_MAX = 5;
+
+/** 명소 태그 배열 정리 — 공백 제거·길이 제한·중복 제거·개수 상한 */
+export function normalizeContentIds(ids: unknown): string[] {
+  if (!Array.isArray(ids)) return [];
+  const seen = new Set<string>();
+  for (const raw of ids) {
+    const id = typeof raw === "string" ? raw.trim().slice(0, CONTENT_ID_MAX) : "";
+    if (id) seen.add(id);
+    if (seen.size >= POST_SPOTS_MAX) break;
+  }
+  return [...seen];
+}
 
 interface PostRow {
   id: string;
@@ -48,6 +67,7 @@ interface PostRow {
   media_path?: string | null;
   media_type?: string | null;
   author_verified?: boolean;
+  content_ids?: string[] | null;
 }
 
 interface CommentRow {
@@ -72,6 +92,7 @@ function toPost(r: PostRow): CommunityPost {
     mediaUrl: r.media_path ? mediaPublicUrl(r.media_path) : null,
     mediaType: (r.media_type as MediaKind | null) ?? null,
     authorVerified: !!r.author_verified,
+    contentIds: r.content_ids ?? [],
   };
 }
 
@@ -95,7 +116,7 @@ export async function listPosts(limit = 100): Promise<CommunityPost[]> {
   try {
     const rows = await sql<PostRow[]>`
       select p.id, p.user_id, p.author, p.body, p.created_at,
-             p.media_path, p.media_type,
+             p.media_path, p.media_type, p.content_ids,
              bool_or(u.email_verified_at is not null) as author_verified,
              count(c.id) as comment_count
       from community_posts p
@@ -127,7 +148,7 @@ export async function listPopularPosts(limit = 4): Promise<CommunityPost[]> {
   try {
     const rows = await sql<PostRow[]>`
       select p.id, p.user_id, p.author, p.body, p.created_at,
-             p.media_path, p.media_type,
+             p.media_path, p.media_type, p.content_ids,
              bool_or(u.email_verified_at is not null) as author_verified,
              count(c.id) as comment_count
       from community_posts p
@@ -159,16 +180,19 @@ export async function createPost(input: {
   media?: { path: string; kind: MediaKind } | null;
   /** 관문에서 이미 확인한 값 — 방금 쓴 글에도 배지가 바로 붙게 한다 */
   verified: boolean;
+  /** 방문 명소 태그 (자유글이면 빈 배열/미지정) */
+  contentIds?: string[];
 }): Promise<CommunityPost | null> {
   const author = input.author?.trim().slice(0, AUTHOR_MAX) ?? "";
   const body = input.body?.trim().slice(0, BODY_MAX) ?? "";
   if (!author || !body) return null;
+  const contentIds = normalizeContentIds(input.contentIds);
 
   const rows = await sql<PostRow[]>`
-    insert into community_posts (user_id, author, body, media_path, media_type)
+    insert into community_posts (user_id, author, body, media_path, media_type, content_ids)
     values (${input.userId}, ${author}, ${body},
-            ${input.media?.path ?? null}, ${input.media?.kind ?? null})
-    returning id, user_id, author, body, created_at, media_path, media_type
+            ${input.media?.path ?? null}, ${input.media?.kind ?? null}, ${contentIds})
+    returning id, user_id, author, body, created_at, media_path, media_type, content_ids
   `;
   return toPost({ ...rows[0], author_verified: input.verified });
 }

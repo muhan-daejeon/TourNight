@@ -72,11 +72,15 @@ create table if not exists spot_guide (
 -- 커뮤니티 한줄 후기/질문 (로그인 없이 이름만 입력, 스팟 연동은 content_id로 선택)
 create table if not exists community_posts (
   id bigint generated always as identity primary key,
-  content_id text,                      -- 연관 스팟(night_spots.content_id) — null이면 자유글
+  content_ids text[] not null default '{}', -- 방문 명소 태그(night_spots.content_id 여러 개) — 빈 배열이면 자유글
   author text not null,                 -- 작성자 표시 이름 (로그인 대체)
   body text not null,                   -- 본문 (한줄 후기/질문)
   created_at timestamptz not null default now()
 );
+
+-- 이미 배포된 DB 보강: 단일 content_id(초기안)에서 다중 content_ids(태그)로 전환.
+-- 집계는 애플리케이션에서 하므로 배열 컬럼에 별도 인덱스는 두지 않는다.
+alter table community_posts add column if not exists content_ids text[] not null default '{}';
 
 create index if not exists community_posts_created_idx on community_posts (created_at desc);
 

@@ -473,7 +473,12 @@
       "guide1": "夜に訪れた場所の感想やコツを共有しましょう",
       "guide2": "名所の名前を書くとここにまとまります",
       "guide3": "写真は自分で撮ったものだけ投稿してください"
-    }
+    },
+    "tagAdd": "スポットタグ",
+    "tagSearch": "行った場所の名前で検索",
+    "tagNoMatch": "一致するスポットがありません",
+    "tagLimit": "タグは最大{max}個まで",
+    "tagRemove": "タグを外す"
   },
   "stampTour": {
     "overline": "STAMP TOUR",
