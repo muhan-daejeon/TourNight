@@ -25,7 +25,7 @@ const SLIDES: {
 }[] = [
   { key: 1, href: "/personality", bar: "bg-daejeon-blue", cta: "text-daejeon-blue" },
   { key: 2, href: "/stamp-tour", bar: "bg-daejeon-green", cta: "text-daejeon-green" },
-  { key: 3, href: "/klife/restaurant", bar: "bg-daejeon-orange", cta: "text-daejeon-orange" },
+  { key: 3, href: "/etiquette", bar: "bg-daejeon-orange", cta: "text-daejeon-orange" },
 ];
 
 const GAP = 12; // gap-3 — 스크롤 한 걸음 계산에 쓴다

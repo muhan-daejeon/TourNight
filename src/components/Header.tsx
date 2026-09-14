@@ -19,7 +19,6 @@ const NAV_ITEMS = [
   { href: "/courses", key: "courses" },
   { href: "/personality", key: "personality" },
   { href: "/etiquette", key: "etiquette" },
-  { href: "/klife/restaurant", key: "klife" },
   { href: "/community", key: "community" },
   { href: "/stamp-tour", key: "stampTour" },
 ] as const;
@@ -55,7 +54,7 @@ const MENU_GROUPS = [
   // 인생네컷(콜라주)은 도장투어 페이지 하단으로 옮겨져 도장투어 항목이 겸한다
   { id: "course", labelKey: "groupCourse", items: ["personality", "courses"] },
   { id: "places", labelKey: "groupPlaces", items: ["spots", "festivals", "food", "stay", "shopping"] },
-  { id: "enjoy", labelKey: "groupEnjoy", items: ["etiquette", "klife", "nightBike", "stampTour"] },
+  { id: "enjoy", labelKey: "groupEnjoy", items: ["etiquette", "nightBike", "stampTour"] },
   // 소식 — About 대전을 맨 위로 (팀 피드백)
   { id: "community", labelKey: "groupCommunity", items: ["about", "community", "notices"] },
 ] as const;

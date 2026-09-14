@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
 import {
   Footprints,
   TreeDeciduous,
@@ -27,6 +26,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ETIQUETTE_ITEMS, type EtiquetteItem } from "@/lib/etiquette-items";
+import KLifeGuide from "./KLifeGuide";
+import { RESTAURANT_STEPS, RESTAURANT_QUIZ } from "@/lib/klife-restaurant";
 
 // 그룹 구성: 예절 6 + 실용 정보 4 (서버 ETIQUETTE_TOPICS와 일치)
 const GROUPS: { key: "places" | "culture"; topics: string[] }[] = [
@@ -84,6 +85,7 @@ export default function NightEtiquette({
   topicImages?: Record<string, string>;
 }) {
   const t = useTranslations("etiquette");
+  const tk = useTranslations("klife");
   const locale = useLocale();
   const [selected, setSelected] = useState<string | null>(null);
   const images = selected ? ETIQUETTE_ITEMS[selected] : undefined;
@@ -116,11 +118,14 @@ export default function NightEtiquette({
   // 주제를 골라 상세를 보면 잠시 뒤 "이제 한국 생활을 배워볼까요?" 팝업이
   // 화면을 블러로 덮으며 떠서 K-Life 가이드로 잇는다 (피드백 플로우 2→3단계)
   const [learnPrompt, setLearnPrompt] = useState(false);
+  // 팝업의 "시작하기"를 누르면 페이지를 떠나지 않고 이 자리에서 K-Life
+  // 가이드(식당편)가 이어진다 — 두 페이지를 하나의 학습 흐름으로 합쳤다
+  const [klifeStarted, setKlifeStarted] = useState(false);
   useEffect(() => {
-    if (!selected) return; // 닫힘 리셋은 각 클릭 핸들러에서 (효과 내 동기 setState 회피)
+    if (!selected || klifeStarted) return; // 닫힘 리셋은 각 클릭 핸들러에서 (효과 내 동기 setState 회피)
     const id = window.setTimeout(() => setLearnPrompt(true), 2000);
     return () => window.clearTimeout(id);
-  }, [selected]);
+  }, [selected, klifeStarted]);
 
   const phraseCategory = selected ? TOPIC_PHRASE_CATEGORY[selected] : undefined;
   const phrases = phraseCategory ? phraseBook?.[phraseCategory]?.slice(0, 6) : undefined;
@@ -169,11 +174,16 @@ export default function NightEtiquette({
       {selected && (
         <button
           type="button"
-          onClick={() => { setSelected(null); setLearnPrompt(false); }}
+          onClick={() => {
+            // K-Life 중이면 한 단계만 물러나 에티켓 상세로, 아니면 주제 목록으로
+            if (klifeStarted) setKlifeStarted(false);
+            else setSelected(null);
+            setLearnPrompt(false);
+          }}
           className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-500 transition hover:border-daejeon-blue hover:text-daejeon-blue"
         >
           <ChevronLeft size={15} />
-          {t("backToTopics")}
+          {klifeStarted ? t("backToEtiquette") : t("backToTopics")}
         </button>
       )}
       {!selected && GROUPS.map((group) => (
@@ -187,7 +197,7 @@ export default function NightEtiquette({
               return (
                 <button
                   key={id}
-                  onClick={() => { setSelected(id); setLearnPrompt(false); }}
+                  onClick={() => { setSelected(id); setLearnPrompt(false); setKlifeStarted(false); }}
                   className={`group relative h-28 overflow-hidden rounded-2xl border text-left transition sm:h-32 ${
                     selected === id
                       ? "border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
@@ -237,7 +247,7 @@ export default function NightEtiquette({
         </div>
       ))}
 
-      {images && captions && (
+      {!klifeStarted && images && captions && (
         <div ref={resultRef} className="mt-6">
           {/* Do / Don't — 항목마다 사진 한 장 + 설명, 화살표로 한 장씩 넘겨 본다 */}
           <div className="grid gap-3 sm:grid-cols-2">
@@ -303,6 +313,25 @@ export default function NightEtiquette({
         </div>
       )}
 
+      {/* K-Life 가이드 — 팝업의 "시작하기" 다음 단계. 별도 페이지로 보내지 않고
+          이 자리에서 식당편 시나리오가 이어진다 (피드백 플로우 3단계) */}
+      {klifeStarted && (
+        <div className="mt-6">
+          <div className="mb-6">
+            <p className="overline-label">K-LIFE GUIDE</p>
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900">
+              {tk("restaurantTitle")}
+            </h2>
+            <p className="mt-1.5 text-sm text-slate-500">{tk("restaurantSubtitle")}</p>
+          </div>
+          <KLifeGuide
+            scenario="restaurant"
+            steps={RESTAURANT_STEPS}
+            quiz={RESTAURANT_QUIZ}
+          />
+        </div>
+      )}
+
       {/* 학습 유도 — 화면 전체를 블러로 덮고, 팝업만 또렷하게 (피드백 플로우 2단계) */}
       {learnPrompt && (
         <div className="fixed inset-0 z-[75] flex items-center justify-center bg-white/40 p-6 backdrop-blur-md">
@@ -316,13 +345,19 @@ export default function NightEtiquette({
               <X size={16} />
             </button>
             <p className="text-xl font-extrabold text-slate-900">{t("learnTitle")}</p>
-            <Link
-              href="/klife/restaurant"
+            <button
+              type="button"
+              onClick={() => {
+                setLearnPrompt(false);
+                setKlifeStarted(true);
+                // 팝업이 닫히고 가이드가 그려진 다음 프레임에 맨 위로
+                window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
+              }}
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-8 py-3 text-sm font-bold text-white transition hover:bg-indigo-500"
             >
               {t("learnCta")}
               <ChevronRight size={15} />
-            </Link>
+            </button>
           </div>
         </div>
       )}
