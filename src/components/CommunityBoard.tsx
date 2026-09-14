@@ -284,18 +284,22 @@ function VerifyPrompt({ mailFrom }: { mailFrom: string | null }) {
           {state === "sending" ? t("verifySending") : t("verifyResend")}
         </button>
       </div>
-      {/* 스팸함 안내 + 발신 주소. 일본 캐리어 메일은 기본이 '모르는 도메인 차단'이라
-          이 주소를 수신 허용에 넣지 않으면 아예 도착하지 않는다 */}
-      <p className="mt-2.5 pl-6 text-xs leading-relaxed text-slate-400">
-        {t("verifySpamHint")}
-        {mailFrom && (
-          <>
-            <br />
-            <span className="text-slate-500">{t("verifyFrom")} </span>
-            <span className="font-semibold text-amber-700/90">{mailFrom}</span>
-          </>
-        )}
-      </p>
+      {/* 스팸함 안내 + 발신 주소는 메일을 실제로 찾아볼 때(재발송 직후)만 편다.
+          평소엔 한 줄 배너로 접어 목록 첫 화면을 덜 차지하게 한다.
+          일본 캐리어 메일은 기본이 '모르는 도메인 차단'이라 이 주소를 수신
+          허용에 넣지 않으면 아예 도착하지 않는다 */}
+      {state === "sent" && (
+        <p className="mt-2.5 pl-6 text-xs leading-relaxed text-slate-400">
+          {t("verifySpamHint")}
+          {mailFrom && (
+            <>
+              <br />
+              <span className="text-slate-500">{t("verifyFrom")} </span>
+              <span className="font-semibold text-amber-700/90">{mailFrom}</span>
+            </>
+          )}
+        </p>
+      )}
       {note && <p className="mt-2 pl-6 text-xs text-slate-400">{note}</p>}
     </div>
   );
@@ -560,23 +564,25 @@ function PostItem({
       />
         </div>
 
-        {/* 첨부 사진 — 텍스트 중심 리스트라 오른쪽 작은 썸네일로, 누르면 원본 */}
-        {post.mediaUrl && post.mediaType === "image" && (
-          <button
-            type="button"
-            onClick={() => setLightbox(true)}
-            className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl border border-slate-200 transition hover:border-slate-300"
-          >
-            <Image
-              src={post.mediaUrl}
-              alt=""
-              fill
-              sizes="72px"
-              className="object-cover"
-            />
-          </button>
-        )}
       </div>
+
+      {/* 첨부 사진 — 밤 후기의 주인공이라 옆 썸네일 대신 본문 아래 큰 미리보기로.
+          누르면 원본(라이트박스) */}
+      {post.mediaUrl && post.mediaType === "image" && (
+        <button
+          type="button"
+          onClick={() => setLightbox(true)}
+          className="group relative mt-3 block h-52 w-full overflow-hidden rounded-xl border border-slate-200 transition hover:border-slate-300 sm:h-64"
+        >
+          <Image
+            src={post.mediaUrl}
+            alt=""
+            fill
+            sizes="(min-width: 640px) 640px, 90vw"
+            className="object-cover transition duration-300 group-hover:scale-[1.02]"
+          />
+        </button>
+      )}
 
       {lightbox && post.mediaUrl && (
         <div
