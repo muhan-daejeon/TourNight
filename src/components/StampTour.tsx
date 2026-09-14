@@ -4,29 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Check,
-  Download,
-  Loader2,
-  MapPin,
-  RotateCcw,
-  Stamp as StampIcon,
-  X,
-} from "lucide-react";
+import { ArrowRight, Check, Download, Loader2, MapPin, RotateCcw, X } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { renderCollageFromUrls } from "@/lib/collage";
 
 /**
- * 도장투어 with 꿈돌이.
+ * 도장투어 with 꿈돌이 → 꿈돌네컷.
  *
  * 흐름: (아직 안 골랐다면) 위치 정보 동의 → 갈 곳 4곳 검색·선택 → 저장 →
- * 구불구불한 길 위 도장 4개. 도장을 누르면 GPS로 그 장소 근처인지 확인한
- * 뒤에만 사진을 올릴 수 있고, 올린 사진은 바로 아래 "꿈돌네컷" 미리보기의
- * 그 칸을 채운다. 4칸이 다 차면 다운로드할 수 있다.
+ * 민트 네온 도장 4개(지그재그 선으로 연결). 도장을 누르면 GPS로 그 장소
+ * 근처인지 확인한 뒤에만 사진을 올릴 수 있고, 올린 사진은 우측 "꿈돌이와
+ * 심야여행" 네컷 프레임의 그 칸을 채운다. 4칸이 다 차면 다운로드할 수 있다.
  *
  * 이미 골라 둔 계정은 /api/stamp-tour가 바로 그 결과를 주므로 동의·선택
- * 단계를 건너뛰고 곧장 길 화면으로 간다.
+ * 단계를 건너뛰고 곧장 도장 화면으로 간다.
  */
 
 interface StampStop {
@@ -49,6 +40,7 @@ interface PickedPlace {
 const DAEJEON_CENTER = { lat: 36.3504, lng: 127.3845 };
 /** 이 반경(m) 안이면 "그 장소에 있다"고 본다 — 명소 하나가 꽤 넓을 수 있어 넉넉히 잡는다 */
 const STAMP_RADIUS_M = 300;
+const MINT = "#35b597";
 
 function haversineMeters(
   a: { lat: number; lng: number },
@@ -341,7 +333,7 @@ function PlacePickerModal({
   );
 }
 
-/** 구불구불한 길 위에 도장 4개 — 카드 배경은 홈 히어로와 같은 밤하늘 인상을 쓴다 */
+/** 도장 4개(민트 네온) — 지그재그 선으로 연결, 배경 없이 */
 function StampRoad({
   tour,
   onUpdate,
@@ -357,9 +349,8 @@ function StampRoad({
   // 파일 선택창은 탭한 그 순간(동기적으로) 열어야 한다 — GPS 확인처럼 비동기
   // 콜백 안에서 뒤늦게 .click()을 부르면, 모바일 브라우저(특히 iOS/일부
   // 안드로이드)가 "사용자가 직접 누른 게 아니다"로 보고 조용히 막아버린다.
-  // 에러도 안 나서 겉으론 "눌러도 아무 반응 없음"으로만 보이는 게 이 증상이다.
-  // 그래서 순서를 바꿨다 — 사진 선택창은 즉시 열고, 위치 확인은 사진을
-  // 고른 "뒤"(handleFile)에서 한다. GPS가 안 맞으면 그때 업로드를 취소한다
+  // 그래서 사진 선택창은 즉시 열고, 위치 확인은 사진을 고른 "뒤"(handleFile)
+  // 에서 한다. GPS가 안 맞으면 그때 업로드를 취소한다
   function handleStampClick(slot: number) {
     const stop = tour.stops[slot];
     if (stop.photoUrl || checkingSlot !== null || uploadingSlot !== null) return;
@@ -416,176 +407,120 @@ function StampRoad({
     }
   }
 
-  // 4칸의 자리(0~100 기준 %) — imgs/지도.jpg 속 길 위에 있는 별 4개(정류장)의
-  // 실제 좌표에 맞췄다. 지도 배경이 정사각형(1264x1264)이라 컨테이너도
-  // aspect-square로 맞춰야 이 좌표가 어긋나지 않는다(object-cover가 잘라내지 않음)
+  // 4칸의 자리(0~100 기준 %)와 그 사이를 잇는 지그재그 선
   const NODES = [
-    { x: 21.4, y: 64.1 },
-    { x: 75.6, y: 39.2 },
-    { x: 54.2, y: 26.9 },
-    { x: 40.0, y: 10.7 },
+    { x: 20, y: 16 },
+    { x: 78, y: 30 },
+    { x: 18, y: 58 },
+    { x: 74, y: 78 },
   ];
+  const PATH = "M20,16 C55,12 85,20 78,30 C72,48 26,44 18,58 C12,70 56,74 74,78";
 
   return (
-    <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-slate-200">
-      <Image
-        src="/stamp-tour/map.jpg"
-        alt=""
-        fill
-        sizes="(min-width: 1024px) 50vw, 100vw"
-        className="object-cover"
-        priority
-      />
+    <div className="mx-auto w-full max-w-sm">
+      <div className="relative aspect-[3/4] w-full">
+        {/* 도장을 잇는 선 — 굵고 옅은 층(후광) + 가늘고 밝은 층(중심선)을
+            겹쳐 네온 느낌을 낸다. 전체가 함께 밝아졌다 옅어졌다 한다 */}
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          className="tn-mint-path pointer-events-none absolute inset-0 h-full w-full"
+        >
+          <path
+            d={PATH}
+            fill="none"
+            stroke={MINT}
+            strokeWidth="5"
+            strokeLinecap="round"
+            opacity="0.5"
+            vectorEffect="non-scaling-stroke"
+            style={{ filter: "blur(3px)" }}
+          />
+          <path
+            d={PATH}
+            fill="none"
+            stroke={MINT}
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
 
-      {NODES.map((pos, i) => {
-        const stop = tour.stops[i];
-        const done = !!stop.photoUrl;
-        const busy = checkingSlot === i || uploadingSlot === i;
-        return (
-          <div
-            key={i}
-            className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1.5"
-            style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-          >
-            <span className="max-w-[108px] truncate text-[11px] font-medium text-slate-400">
-              {stop.name}
-            </span>
-            <button
-              type="button"
-              onClick={() => handleStampClick(i)}
-              disabled={done || checkingSlot !== null || uploadingSlot !== null}
-              aria-label={done ? t("stamped") : t("tapToStamp")}
-              className={`relative flex h-16 w-16 items-center justify-center rounded-full shadow-[0_6px_20px_rgba(0,0,0,0.55)] transition sm:h-[72px] sm:w-[72px] ${
-                done
-                  ? "border-2 border-amber-400 bg-white"
-                  : "border-2 border-dashed border-amber-400/50 bg-slate-900/70 hover:border-amber-400 disabled:cursor-not-allowed disabled:hover:border-indigo-300"
-              }`}
+        {NODES.map((pos, i) => {
+          const stop = tour.stops[i];
+          const done = !!stop.photoUrl;
+          const busy = checkingSlot === i || uploadingSlot === i;
+          return (
+            <div
+              key={i}
+              className="absolute -translate-x-1/2 -translate-y-1/2"
+              style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
             >
-              {done ? (
-                <>
-                  <Image
-                    src={stop.photoUrl!}
-                    alt=""
-                    fill
-                    sizes="72px"
-                    className="rounded-full object-cover"
-                  />
-                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-slate-950">
-                    <Check size={12} strokeWidth={3} />
-                  </span>
-                </>
-              ) : busy ? (
-                <Loader2 size={20} className="animate-spin text-amber-600" />
-              ) : (
-                <StampIcon size={22} className="text-amber-400/80" />
-              )}
-            </button>
-            {!done && (
-              <span className="text-[10px] text-slate-500">
-                {uploadingSlot === i ? t("uploading") : checkingSlot === i ? t("verifying") : t("tapToStamp")}
-              </span>
-            )}
-            <input
-              ref={(el) => {
-                fileInputRefs.current[i] = el;
-              }}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0] ?? null;
-                // 같은 파일을 다시 골라도(예: GPS가 안 맞아 취소된 뒤 재시도)
-                // change 이벤트가 다시 뜨도록 값을 비워 둔다
-                e.target.value = "";
-                handleFile(i, file);
-              }}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-/** 도장 사진으로 채워지는 꿈돌네컷 미리보기 + 다운로드 */
-function CollageSection({ tour }: { tour: StampTourData }) {
-  const t = useTranslations("stampTour.collage");
-  const [preview, setPreview] = useState<string | null>(null);
-  const [rendering, setRendering] = useState(false);
-
-  // 몇 번 도장인지와 무관하게, 찍은 순서대로(=stops 배열에서 사진 있는 것만
-  // 앞으로 모아) 첫 칸부터 채운다 — 4번을 먼저 찍었다고 네컷의 네 번째 칸부터
-  // 채워지면 어색하니, 도장 칸 자체(스탬프 로드)는 그 장소 사진을 그대로
-  // 보여주되 네컷 미리보기만 빈 칸 없이 앞에서부터 채워지게 분리한다
-  const filledUrls = tour.stops
-    .map((s) => s.photoUrl)
-    .filter((url): url is string => url !== null);
-  const photoUrls: (string | null)[] = [
-    ...filledUrls,
-    ...Array(tour.stops.length - filledUrls.length).fill(null),
-  ];
-
-  // 도장을 찍을 때마다(사진이 바뀔 때마다) 미리보기를 다시 그린다
-  useEffect(() => {
-    let cancelled = false;
-    let objectUrl: string | null = null;
-    renderCollageFromUrls(photoUrls)
-      .then((blob) => {
-        if (cancelled) return;
-        objectUrl = URL.createObjectURL(blob);
-        setPreview(objectUrl);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- photoUrls는 매 렌더 새 배열이라 내용으로 비교한다
-  }, [photoUrls.join("|")]);
-
-  async function download() {
-    if (!tour.complete) {
-      alert(t("incomplete"));
-      return;
-    }
-    setRendering(true);
-    try {
-      const blob = await renderCollageFromUrls(photoUrls);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "꿈돌네컷.png";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch {
-      alert(t("downloadError"));
-    } finally {
-      setRendering(false);
-    }
-  }
-
-  return (
-    <div className="text-center">
-      <h3 className="text-base font-bold text-slate-900">{t("title")}</h3>
-      <p className="mt-1 text-xs text-slate-500">{t("hint")}</p>
-      {/* 겉 회색 박스는 없애고, 사진 자체는 각진 모서리로 */}
-      <div className="relative mx-auto mt-4 aspect-[788/1123] w-full max-w-[220px] overflow-hidden border border-slate-200 bg-white shadow-lg">
-        {preview && (
-          // eslint-disable-next-line @next/next/no-img-element -- 로컬 object URL이라 next/image 로더가 다루지 못한다
-          <img src={preview} alt="" className="h-full w-full object-cover" />
-        )}
+              <button
+                type="button"
+                onClick={() => handleStampClick(i)}
+                disabled={done || checkingSlot !== null || uploadingSlot !== null}
+                aria-label={done ? t("stamped") : t("tapToStamp")}
+                className="tn-mint-stamp relative flex h-16 w-16 items-center justify-center rounded-full bg-white transition disabled:cursor-not-allowed sm:h-[72px] sm:w-[72px]"
+              >
+                {done ? (
+                  <>
+                    <Image
+                      src={stop.photoUrl!}
+                      alt=""
+                      fill
+                      sizes="72px"
+                      className="rounded-full object-cover"
+                    />
+                    <span
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-white"
+                      style={{ backgroundColor: MINT }}
+                    >
+                      <Check size={12} strokeWidth={3} />
+                    </span>
+                  </>
+                ) : busy ? (
+                  <Loader2 size={20} className="animate-spin" style={{ color: MINT }} />
+                ) : null}
+              </button>
+              <input
+                ref={(el) => {
+                  fileInputRefs.current[i] = el;
+                }}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  // 같은 파일을 다시 골라도(예: GPS가 안 맞아 취소된 뒤 재시도)
+                  // change 이벤트가 다시 뜨도록 값을 비워 둔다
+                  e.target.value = "";
+                  handleFile(i, file);
+                }}
+              />
+            </div>
+          );
+        })}
       </div>
-      <button
-        type="button"
-        onClick={download}
-        disabled={rendering}
-        className="mt-5 inline-flex items-center gap-2 rounded-full bg-amber-400 px-6 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <Download size={15} />
-        {rendering ? t("downloading") : t("download")}
-      </button>
+
+      <style>{`
+        /* 도장 — 테두리 없이 네온 후광만(밝기가 은은하게 오르내림) */
+        .tn-mint-stamp {
+          animation: tn-mint-glow 1.8s ease-in-out infinite;
+        }
+        @keyframes tn-mint-glow {
+          0%, 100% { box-shadow: 0 0 6px rgba(53, 181, 151, 0.55), 0 0 16px rgba(53, 181, 151, 0.3); }
+          50% { box-shadow: 0 0 14px rgba(53, 181, 151, 0.9), 0 0 32px rgba(53, 181, 151, 0.5); }
+        }
+        /* 도장을 잇는 선 — 같은 리듬으로 후광·중심선이 함께 밝아진다 */
+        .tn-mint-path {
+          animation: tn-mint-path-glow 1.8s ease-in-out infinite;
+        }
+        @keyframes tn-mint-path-glow {
+          0%, 100% { opacity: 0.65; }
+          50% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -597,6 +532,8 @@ export default function StampTour() {
   const [tour, setTour] = useState<StampTourData | null>(null);
   const [consentDenied, setConsentDenied] = useState(false);
   const [consentChecking, setConsentChecking] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [rendering, setRendering] = useState(false);
 
   useEffect(() => {
     fetch("/api/stamp-tour")
@@ -611,6 +548,30 @@ export default function StampTour() {
       })
       .catch(() => setPhase("consent"));
   }, []);
+
+  const photoUrls: (string | null)[] = tour
+    ? tour.stops.map((s) => s.photoUrl)
+    : [null, null, null, null];
+  const photoKey = photoUrls.join("|");
+
+  // 도장을 찍을 때마다(사진이 바뀔 때마다) 네컷 미리보기를 다시 그린다
+  useEffect(() => {
+    if (!tour) return;
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    renderCollageFromUrls(photoUrls)
+      .then((blob) => {
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setPreview(objectUrl);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- photoUrls는 매 렌더 새 배열이라 photoKey(내용)로 비교한다
+  }, [tour, photoKey]);
 
   function handleAgree() {
     if (!("geolocation" in navigator)) {
@@ -652,32 +613,74 @@ export default function StampTour() {
     }
   }
 
+  async function download() {
+    if (!tour?.complete) {
+      alert(t("collage.incomplete"));
+      return;
+    }
+    setRendering(true);
+    try {
+      const blob = await renderCollageFromUrls(photoUrls);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "꿈돌네컷.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert(t("collage.downloadError"));
+    } finally {
+      setRendering(false);
+    }
+  }
+
   return (
     <>
       {phase === "loading" && (
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 w-2/3 rounded bg-slate-100" />
-          <div className="aspect-[3/4] w-full rounded-3xl bg-slate-100 sm:aspect-[16/9]" />
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
+          <div className="mx-auto aspect-[3/4] w-full max-w-sm animate-pulse rounded-2xl bg-slate-100" />
+          <div className="mx-auto aspect-[788/1123] w-full max-w-md animate-pulse rounded-2xl bg-slate-100" />
         </div>
       )}
 
       {phase === "main" && tour && (
         <div>
-          {/* 원래 여기 있던 안내 문장 대신, 다시 고를 수 있는 버튼을 둔다 —
-              지금 카드들의 네이비 배경(slate-900)보다 옅게 비치는 톤으로 */}
           <button
             type="button"
             onClick={() => setPhase("picker")}
-            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-400 backdrop-blur transition hover:bg-slate-900/70"
+            className="mx-auto flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-400 transition hover:bg-slate-50 lg:mx-0"
           >
             <RotateCcw size={15} />
             {t("reselect")}
           </button>
-          {/* 지도(도장)와 꿈돌네컷을 가로로 나란히 — 데스크탑에서만, 모바일은
-              세로로 쌓인다 */}
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
-            <StampRoad tour={tour} onUpdate={setTour} />
-            <CollageSection tour={tour} />
+
+          <div className="mt-6 grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
+            {/* 좌측 — 도장 4개 + 다운로드 버튼 */}
+            <div>
+              <StampRoad tour={tour} onUpdate={setTour} />
+              <div className="mt-8 text-center">
+                <button
+                  type="button"
+                  onClick={download}
+                  disabled={rendering || !tour.complete}
+                  className="inline-flex items-center gap-2 rounded-full border-2 px-6 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ borderColor: MINT, color: MINT }}
+                >
+                  <Download size={15} />
+                  {rendering ? t("collage.downloading") : t("collage.download")}
+                </button>
+              </div>
+            </div>
+
+            {/* 우측 — 큰 네컷 프레임(미리보기 전용) */}
+            <div className="relative mx-auto aspect-[788/1123] w-full max-w-md">
+              {preview && (
+                // eslint-disable-next-line @next/next/no-img-element -- 로컬 object URL이라 next/image 로더가 다루지 못한다
+                <img src={preview} alt="" className="h-full w-full object-contain" />
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -694,7 +697,7 @@ export default function StampTour() {
         <PlacePickerModal
           onComplete={handlePickerComplete}
           // 이미 골라 둔 게 있으면 "다시 선택하기"에서 들어온 것 — 닫으면 원래
-          // 보던 길 화면으로 돌아간다. 처음 고르는 중이면 여전히 홈으로 나간다
+          // 보던 도장 화면으로 돌아간다. 처음 고르는 중이면 여전히 홈으로 나간다
           onClose={() => (tour ? setPhase("main") : router.push("/"))}
         />
       )}
