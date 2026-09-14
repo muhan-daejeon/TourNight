@@ -19,6 +19,7 @@ import {
   scorePersonality,
   type OptionKey,
 } from "@/lib/personality-test";
+import { PERSONA_QUESTION_IMAGES } from "@/lib/persona-images";
 import PersonalityResultView from "./PersonalityResultView";
 
 type Phase = "intro" | "quiz" | "analyzing" | "result";
@@ -175,6 +176,9 @@ export default function PersonalityTest({
 
   // ── 문항 ───────────────────────────────────────────────────
   const q = QUESTIONS[index];
+  // 선택지 일러스트 — "q1" → "1" 키로 찾는다. 라이트 테마 개편 때 렌더만
+  // 빠져 있던 것을 복원했다 (사진 파일과 매핑은 그대로 남아 있었다)
+  const qOptionImages = PERSONA_QUESTION_IMAGES[q.id.replace(/^q/, "")];
   const selected = answers[q.id];
   const progress = ((index + 1) / QUESTIONS.length) * 100;
   const isLast = index === QUESTIONS.length - 1;
@@ -213,30 +217,45 @@ export default function PersonalityTest({
           {t(`questions.${q.id}.text`)}
         </h2>
 
-        <div className="mt-6 flex flex-col gap-3">
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
           {OPTION_KEYS.map((key) => {
             const on = selected === key;
+            const optionImage = qOptionImages?.[key];
             return (
               <button
                 key={key}
                 type="button"
                 onClick={() => choose(key)}
-                className={`flex w-full items-center gap-3.5 rounded-2xl border px-5 py-4 text-left transition-all duration-150 ${
+                className={`group overflow-hidden rounded-2xl border text-left transition-all duration-150 ${
                   on
                     ? "scale-[1.01] border-daejeon-blue bg-indigo-50"
                     : "border-slate-200 bg-white hover:scale-[1.02] hover:border-indigo-300 hover:shadow-md"
                 }`}
               >
-                <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold uppercase ${
-                    on ? "bg-daejeon-blue text-white" : "bg-slate-100 text-slate-500"
-                  }`}
-                >
-                  {key}
-                </span>
-                <span className={`text-sm leading-relaxed sm:text-[15px] ${on ? "font-semibold text-slate-900" : "text-slate-600"}`}>
-                  {t(`questions.${q.id}.${key}`)}
-                </span>
+                {/* 상황 일러스트 — 글보다 그림이 먼저 읽히는 선택지 (사진 없는 문항은 글만) */}
+                {optionImage && (
+                  <div className="relative h-36 w-full overflow-hidden bg-slate-100 sm:h-40">
+                    <Image
+                      src={optionImage}
+                      alt=""
+                      fill
+                      sizes="(min-width: 640px) 340px, 90vw"
+                      className="object-cover transition duration-300 group-hover:scale-[1.04]"
+                    />
+                  </div>
+                )}
+                <div className="flex items-center gap-3.5 px-5 py-4">
+                  <span
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold uppercase ${
+                      on ? "bg-daejeon-blue text-white" : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {key}
+                  </span>
+                  <span className={`text-sm leading-relaxed sm:text-[15px] ${on ? "font-semibold text-slate-900" : "text-slate-600"}`}>
+                    {t(`questions.${q.id}.${key}`)}
+                  </span>
+                </div>
               </button>
             );
           })}
