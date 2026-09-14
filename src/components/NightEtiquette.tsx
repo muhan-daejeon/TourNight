@@ -115,17 +115,16 @@ export default function NightEtiquette({
     };
   }, [selected, phraseBook, effectiveLocale]);
 
-  // 주제를 골라 상세를 보면 잠시 뒤 "이제 한국 생활을 배워볼까요?" 팝업이
-  // 화면을 블러로 덮으며 떠서 K-Life 가이드로 잇는다 (피드백 플로우 2→3단계)
-  const [learnPrompt, setLearnPrompt] = useState(false);
-  // 팝업의 "시작하기"를 누르면 페이지를 떠나지 않고 이 자리에서 K-Life
-  // 가이드(식당편)가 이어진다 — 두 페이지를 하나의 학습 흐름으로 합쳤다
+  // "시작하기"를 누르면 페이지를 떠나지 않고 이 자리에서 K-Life 가이드
+  // (식당편)가 이어진다 — 두 페이지를 하나의 학습 흐름으로 합쳤다.
+  // 처음엔 2초 뒤 자동 팝업이었는데 읽는 중에 끼어들어 빠르다는 피드백을
+  // 받아, 상세 끝의 눈에 띄는 버튼으로 바꿨다 (읽기를 방해하지 않는다)
   const [klifeStarted, setKlifeStarted] = useState(false);
-  useEffect(() => {
-    if (!selected || klifeStarted) return; // 닫힘 리셋은 각 클릭 핸들러에서 (효과 내 동기 setState 회피)
-    const id = window.setTimeout(() => setLearnPrompt(true), 2000);
-    return () => window.clearTimeout(id);
-  }, [selected, klifeStarted]);
+  const startKlife = () => {
+    setKlifeStarted(true);
+    // 가이드가 그려진 다음 프레임에 맨 위로
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
+  };
 
   const phraseCategory = selected ? TOPIC_PHRASE_CATEGORY[selected] : undefined;
   const phrases = phraseCategory ? phraseBook?.[phraseCategory]?.slice(0, 6) : undefined;
@@ -178,7 +177,6 @@ export default function NightEtiquette({
             // K-Life 중이면 한 단계만 물러나 에티켓 상세로, 아니면 주제 목록으로
             if (klifeStarted) setKlifeStarted(false);
             else setSelected(null);
-            setLearnPrompt(false);
           }}
           className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-500 transition hover:border-daejeon-blue hover:text-daejeon-blue"
         >
@@ -197,7 +195,7 @@ export default function NightEtiquette({
               return (
                 <button
                   key={id}
-                  onClick={() => { setSelected(id); setLearnPrompt(false); setKlifeStarted(false); }}
+                  onClick={() => { setSelected(id); setKlifeStarted(false); }}
                   className={`group relative h-28 overflow-hidden rounded-2xl border text-left transition sm:h-32 ${
                     selected === id
                       ? "border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
@@ -310,6 +308,19 @@ export default function NightEtiquette({
               </a>
             </div>
           )}
+
+          {/* 다음 단계 안내 — 자동 팝업 대신 상세를 다 본 자리에서 이어지는 버튼 */}
+          <div className="mt-5 flex flex-col items-center justify-between gap-3 rounded-2xl border border-daejeon-blue/25 bg-indigo-50 px-6 py-5 sm:flex-row">
+            <p className="text-base font-extrabold text-slate-900">{t("learnTitle")}</p>
+            <button
+              type="button"
+              onClick={startKlife}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-daejeon-blue px-7 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-500"
+            >
+              {t("learnCta")}
+              <ChevronRight size={15} />
+            </button>
+          </div>
         </div>
       )}
 
@@ -332,35 +343,6 @@ export default function NightEtiquette({
         </div>
       )}
 
-      {/* 학습 유도 — 화면 전체를 블러로 덮고, 팝업만 또렷하게 (피드백 플로우 2단계) */}
-      {learnPrompt && (
-        <div className="fixed inset-0 z-[75] flex items-center justify-center bg-white/40 p-6 backdrop-blur-md">
-          <div className="relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-[0_24px_64px_rgba(15,23,42,0.25)]">
-            <button
-              type="button"
-              onClick={() => setLearnPrompt(false)}
-              aria-label={t("learnLater")}
-              className="absolute right-3 top-3 rounded-full p-1.5 text-slate-400 transition hover:text-slate-700"
-            >
-              <X size={16} />
-            </button>
-            <p className="text-xl font-extrabold text-slate-900">{t("learnTitle")}</p>
-            <button
-              type="button"
-              onClick={() => {
-                setLearnPrompt(false);
-                setKlifeStarted(true);
-                // 팝업이 닫히고 가이드가 그려진 다음 프레임에 맨 위로
-                window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
-              }}
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-8 py-3 text-sm font-bold text-white transition hover:bg-indigo-500"
-            >
-              {t("learnCta")}
-              <ChevronRight size={15} />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

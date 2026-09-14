@@ -18,7 +18,8 @@ const NAV_ITEMS = [
   { href: "/festivals", key: "festivals" },
   { href: "/courses", key: "courses" },
   { href: "/personality", key: "personality" },
-  { href: "/etiquette", key: "etiquette" },
+  // 에티켓+K-Life가 합쳐진 뒤 대표 이름은 K-Life 가이드 (주소는 /etiquette 그대로)
+  { href: "/etiquette", key: "klife" },
   { href: "/community", key: "community" },
   { href: "/stamp-tour", key: "stampTour" },
 ] as const;
@@ -32,7 +33,7 @@ const NAV_ITEMS = [
 const TOUR_KEY: Record<string, string> = {
   spots: "spots",
   courses: "courses",
-  etiquette: "etiquette",
+  klife: "etiquette", // 둘러보기 표적명은 기존 그대로 etiquette
   community: "community",
 };
 
@@ -54,7 +55,7 @@ const MENU_GROUPS = [
   // 인생네컷(콜라주)은 도장투어 페이지 하단으로 옮겨져 도장투어 항목이 겸한다
   { id: "course", labelKey: "groupCourse", items: ["personality", "courses"] },
   { id: "places", labelKey: "groupPlaces", items: ["spots", "festivals", "food", "stay", "shopping"] },
-  { id: "enjoy", labelKey: "groupEnjoy", items: ["etiquette", "nightBike", "stampTour"] },
+  { id: "enjoy", labelKey: "groupEnjoy", items: ["klife", "nightBike", "stampTour"] },
   // 소식 — About 대전을 맨 위로 (팀 피드백)
   { id: "community", labelKey: "groupCommunity", items: ["about", "community", "notices"] },
 ] as const;
