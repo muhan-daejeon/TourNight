@@ -606,15 +606,12 @@
   },
   "festivals": {
     "title": "Festivals & events",
-    "subtitle": "Festival venues registered on TourNight",
+    "subtitle": "Festivals happening now or coming up in Daejeon",
     "scheduleNote": "Dates come from Korea Tourism Organization records and may change by the organizer.",
-    "empty": "No festival venues registered yet.",
+    "empty": "No festivals are running right now.",
     "ongoing": "On now",
     "upcoming": "Upcoming",
-    "ended": "Ended",
-    "dday": "D-{n}",
-    "past": "Annual",
-    "lastYear": "Last year"
+    "dday": "D-{n}"
   },
   "comingSoon": {
     "short": "Coming soon",

@@ -22,8 +22,8 @@ function oneLiner(spot: NightSpot): string {
  * 축제 카드 — 사진 위에 글자를 얹는 어두운 포스터 대신, 사진 아래 흰 캡션
  * 영역에 제목·기간·한 줄 소개가 오는 밝은 카드 (라이트 테마 개편).
  *
- * 축제는 별도 데이터가 아니라 '축제' 카테고리로 등록된 야간 명소라서, 누르면
- * 그 명소 상세로 간다(지도·교통·가이드가 이미 거기 다 있다).
+ * 축제를 누르면 명소 상세로 간다 — 지도·교통·가이드가 이미 거기 다 있다.
+ * 축제는 검수 목록에 없으므로 상세 조회가 축제 목록에서 한 번 더 찾는다.
  */
 /** "20260912" → "9.12" */
 const md = (s: string) => `${+s.slice(4, 6)}.${+s.slice(6, 8)}`;
@@ -38,11 +38,10 @@ export default function FestivalPoster({
   const period = "period" in spot ? spot.period : null;
   const status = "status" in spot ? spot.status : null;
   const daysUntil = "daysUntil" in spot ? spot.daysUntil : null;
+  // 끝난 축제는 아예 받아오지 않으므로 상태는 진행 중 / 예정 둘뿐이다
   const STATUS_STYLE: Record<string, string> = {
     ongoing: "bg-emerald-500 text-white",
     upcoming: "bg-amber-400 text-slate-950",
-    ended: "bg-slate-600 text-white",
-    past: "bg-white/90 text-slate-500",
   };
 
   return (
@@ -65,7 +64,7 @@ export default function FestivalPoster({
           <Sparkles size={10} strokeWidth={2.6} />
           {t("categories.festival")}
         </span>
-        {/* 개최 상태 — 진행 중 / D-n / 종료. 기간을 못 받은 축제는 배지를 달지 않는다 */}
+        {/* 개최 상태 — 진행 중 / D-n */}
         {status && (
           <span
             className={`absolute right-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-extrabold shadow-sm ${STATUS_STYLE[status]}`}
@@ -83,7 +82,6 @@ export default function FestivalPoster({
         </h3>
         {period && (
           <p className="mt-1 text-[12px] font-bold text-daejeon-orange">
-            {status === "past" && <span className="mr-1 font-semibold text-slate-400">{tf("lastYear")}</span>}
             {md(period.start)} – {md(period.end)}
           </p>
         )}

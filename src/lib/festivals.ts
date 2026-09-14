@@ -1,51 +1,106 @@
+import { sql } from "./db";
 import type { NightSpot } from "./kto";
-import { getFestivalPeriod, type FestivalPeriod } from "./kto-live";
+import { getDaejeonFestivals, todayKst, type FestivalPeriod } from "./kto-live";
+import { fillMissingTitles } from "./spots";
 
-/** past = 지난해 회차만 등록된 축제 — 올해 일정이 아직 없다는 뜻이지 끝났다는 뜻이 아니다 */
-export type FestivalStatus = "ongoing" | "upcoming" | "ended" | "past";
+/** 화면에 세우는 축제는 둘뿐이다 — 지금 하는 것과 앞으로 할 것 */
+export type FestivalStatus = "ongoing" | "upcoming";
 
 export interface FestivalWithPeriod extends NightSpot {
-  period: FestivalPeriod | null;
-  status: FestivalStatus | null;
-  /** 예정이면 며칠 남았는지 */
+  period: FestivalPeriod;
+  status: FestivalStatus;
+  /** 예정이면 며칠 남았는지, 진행 중이면 null */
   daysUntil: number | null;
 }
 
-const ymd = (d: Date) =>
-  `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+/** "20260917" → Date. 시차를 타지 않도록 로컬 자정으로 만든다 */
+const parseYmd = (s: string) =>
+  new Date(+s.slice(0, 4), +s.slice(4, 6) - 1, +s.slice(6, 8));
 
-function statusOf(p: FestivalPeriod, today: string): { status: FestivalStatus; daysUntil: number | null } {
-  // 공사에 등록된 기간이 지난해 것이면(올해 일정 미등록) '종료'가 아니라 '지난 회차'로 본다.
-  // 해마다 열리는 축제라 "작년 10.18 – 11.2 개최"가 사용자에게 훨씬 쓸모 있다.
-  if (p.end.slice(0, 4) < today.slice(0, 4)) return { status: "past", daysUntil: null };
-  if (today < p.start) {
-    const a = new Date(+p.start.slice(0, 4), +p.start.slice(4, 6) - 1, +p.start.slice(6, 8));
-    const b = new Date(+today.slice(0, 4), +today.slice(4, 6) - 1, +today.slice(6, 8));
-    return { status: "upcoming", daysUntil: Math.round((a.getTime() - b.getTime()) / 86400000) };
+const daysBetween = (from: string, to: string) =>
+  Math.round((parseYmd(to).getTime() - parseYmd(from).getTime()) / 86400000);
+
+/**
+ * 우리가 채워 둔 축제 이름 번역. 공사 다국어 서비스에는 대전 축제가 거의 없어
+ * (영문 1곳) 국문 목록을 받아 쓰는데, 그러면 이름이 한글로 남는다. 명소와 같은
+ * spot_translations를 쓰므로 이미 번역된 축제는 그대로 재사용된다.
+ */
+async function savedTitles(
+  contentIds: string[],
+  locale: string,
+): Promise<Map<string, string>> {
+  if (locale === "ko" || contentIds.length === 0) return new Map();
+  try {
+    const rows = await sql<{ content_id: string; title: string }[]>`
+      select content_id, title
+      from spot_translations
+      where locale = ${locale} and content_id = any(${contentIds})
+    `;
+    return new Map(rows.map((r) => [r.content_id, r.title]));
+  } catch {
+    // 번역은 부가 정보다 — 못 읽어도 한글 이름으로 축제는 띄운다
+    return new Map();
   }
-  if (today > p.end) return { status: "ended", daysUntil: null };
-  return { status: "ongoing", daysUntil: null };
 }
 
 /**
- * 축제 목록에 개최 기간을 붙이고 진행 중 → 예정(가까운 순) → 종료 → 기간 미상 순으로 정렬.
- * 기간 조회는 부가 정보라 실패해도 축제 자체는 남긴다.
+ * 오늘 기준 진행 중이거나 앞으로 열릴 대전 축제.
+ *
+ * 끝난 축제는 아예 받아오지 않는다 — searchFestival2에 오늘을 넣으면 그날까지
+ * 열려 있는 것만 오기 때문이다. 그래서 화면 쪽에서 따로 거를 필요가 없다.
+ *
+ * 정렬은 진행 중 → 예정(가까운 순). 축제 목록은 부가 화면이므로 조회가
+ * 실패해도 던지지 않고 빈 목록을 준다 (홈이 통째로 500이 나는 것보다 낫다).
  */
-export async function withPeriods(festivals: NightSpot[]): Promise<FestivalWithPeriod[]> {
-  const today = ymd(new Date());
-  const rows = await Promise.all(
-    festivals.map(async (f) => {
-      const period = await getFestivalPeriod(f.contentId).catch(() => null);
-      const st = period ? statusOf(period, today) : { status: null, daysUntil: null };
-      return { ...f, period, ...st };
-    }),
+export async function getUpcomingFestivals(
+  locale = "ko",
+): Promise<FestivalWithPeriod[]> {
+  const today = todayKst();
+
+  let rows;
+  try {
+    rows = await getDaejeonFestivals(today);
+  } catch (err) {
+    console.warn(
+      "[festivals] 축제 조회 실패 — 빈 목록으로 넘깁니다:",
+      err instanceof Error ? err.message : err,
+    );
+    return [];
+  }
+
+  const translated = await savedTitles(
+    rows.map((r) => r.contentId),
+    locale,
   );
-  const rank: Record<string, number> = { ongoing: 0, upcoming: 1, past: 2, ended: 3 };
-  return rows.sort((a, b) => {
-    const ra = a.status ? rank[a.status] : 4;
-    const rb = b.status ? rank[b.status] : 4;
-    if (ra !== rb) return ra - rb;
-    if (a.status === "upcoming" && b.status === "upcoming") return (a.daysUntil ?? 0) - (b.daysUntil ?? 0);
-    return (a.period?.start ?? "").localeCompare(b.period?.start ?? "");
+
+  const out: FestivalWithPeriod[] = rows
+    // 공사가 늦게 내린 값에 대비한 안전망 — 이미 끝난 것은 세우지 않는다
+    .filter((r) => r.period.end >= today)
+    .map((r) => {
+      const upcoming = today < r.period.start;
+      return {
+        contentId: r.contentId,
+        title: translated.get(r.contentId) ?? r.title,
+        addr: r.addr,
+        addrKo: r.addr,
+        mapX: r.mapX,
+        mapY: r.mapY,
+        imageUrl: r.imageUrl,
+        category: "festival" as const,
+        period: r.period,
+        status: (upcoming ? "upcoming" : "ongoing") as FestivalStatus,
+        daysUntil: upcoming ? daysBetween(today, r.period.start) : null,
+      };
+    });
+
+  // 아직 번역이 없는 이름은 뒤에서 채워 다음 방문부터 쓰이게 한다 (기다리지 않는다)
+  fillMissingTitles(out, locale);
+
+  return out.sort((a, b) => {
+    if (a.status !== b.status) return a.status === "ongoing" ? -1 : 1;
+    // 진행 중은 먼저 끝나는 것부터, 예정은 먼저 시작하는 것부터
+    return a.status === "ongoing"
+      ? a.period.end.localeCompare(b.period.end)
+      : a.period.start.localeCompare(b.period.start);
   });
 }
