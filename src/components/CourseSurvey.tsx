@@ -9,8 +9,10 @@ import {
   Car,
   LocateFixed,
   MapPin,
+  Moon,
   Sparkles,
   Users,
+  UtensilsCrossed,
   AlertTriangle,
   X,
 } from "lucide-react";
@@ -36,6 +38,8 @@ const TRANSPORTS = [
 ] as const;
 
 const COMPANIONS = ["solo", "couple", "friends", "family"] as const;
+const PACES = ["light", "lots"] as const;
+const MOODS = ["calm", "lively"] as const;
 const THEMES = ["nature", "city", "science", "festival"] as const;
 
 /** 서버가 돌려주는 맞춤 코스 (courses.ts SurveyCourse) */
@@ -93,6 +97,9 @@ export default function CourseSurvey() {
   );
   const [companion, setCompanion] =
     useState<(typeof COMPANIONS)[number]>("solo");
+  const [pace, setPace] = useState<(typeof PACES)[number]>("lots");
+  const [mood, setMood] = useState<(typeof MOODS)[number]>("calm");
+  const [wantsFood, setWantsFood] = useState(false);
   const [themes, setThemes] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -141,6 +148,9 @@ export default function CourseSurvey() {
           durationMin,
           transport,
           companion,
+          pace,
+          mood,
+          wantsFood,
           categories: themes,
           locale,
           date: today(),
@@ -278,7 +288,54 @@ export default function CourseSurvey() {
           </div>
         </fieldset>
 
-        {/* 5. 테마 (복수) */}
+        {/* 5. 걷는 양 — light면 서버가 이동 시간을 느긋하게 잡아 스팟이 붙는다 */}
+        <fieldset>
+          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-400">
+            <Footprints size={15} className="text-amber-600" />
+            {t("q6")}
+          </legend>
+          <div className="flex flex-wrap gap-2">
+            {PACES.map((p) => (
+              <button key={p} type="button" onClick={() => setPace(p)} className={chip(pace === p)}>
+                {t(`paces.${p}`)}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        {/* 6. 분위기 — 혼잡도 예측을 읽는 방향이 바뀐다 (조용=한산 우대, 활기=붐빔 환영) */}
+        <fieldset>
+          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-400">
+            <Moon size={15} className="text-amber-600" />
+            {t("q7")}
+          </legend>
+          <div className="flex flex-wrap gap-2">
+            {MOODS.map((m) => (
+              <button key={m} type="button" onClick={() => setMood(m)} className={chip(mood === m)}>
+                {t(`moods.${m}`)}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        {/* 7. 야식 — 켜면 서버가 40분을 예산에서 빼고 코스를 짠다 */}
+        <fieldset>
+          <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-400">
+            <UtensilsCrossed size={15} className="text-amber-600" />
+            {t("q8")}
+          </legend>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setWantsFood(true)} className={chip(wantsFood)}>
+              {t("food.yes")}
+            </button>
+            <button type="button" onClick={() => setWantsFood(false)} className={chip(!wantsFood)}>
+              {t("food.no")}
+            </button>
+          </div>
+          {wantsFood && <p className="mt-2 text-xs text-slate-400">{t("food.note")}</p>}
+        </fieldset>
+
+        {/* 8. 테마 (복수) */}
         <fieldset>
           <legend className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-400">
             <Sparkles size={15} className="text-amber-600" />

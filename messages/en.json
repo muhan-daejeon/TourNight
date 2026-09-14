@@ -626,6 +626,9 @@
     "q3": "How will you get around?",
     "q4": "Who are you with?",
     "q5": "What do you want to see?",
+    "q6": "How much walking suits you?",
+    "q7": "What kind of night do you want?",
+    "q8": "Save time for a late-night bite?",
     "myLocation": "My location",
     "locating": "Locating…",
     "gpsNote": "Your location is used only to plan the course and is not stored.",
@@ -668,7 +671,20 @@
     "loginRequired": "Please log in.",
     "limitReached": "You have used today’s limit ({limit} courses).",
     "noCandidates": "Not enough verified night spots near that starting point. Try another one.",
-    "failed": "Could not build a course. Please try again shortly."
+    "failed": "Could not build a course. Please try again shortly.",
+    "paces": {
+      "light": "As little as possible",
+      "lots": "Happy to walk a lot"
+    },
+    "moods": {
+      "calm": "A quiet night",
+      "lively": "A lively night"
+    },
+    "food": {
+      "yes": "Yes, please",
+      "no": "No, thanks",
+      "note": "We set aside 40 minutes to eat, and the tip will say where along the route."
+    }
   },
   "tour": {
     "label": "Quick tour",

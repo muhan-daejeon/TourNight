@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getSurveyCourse,
   type Companion,
+  type Mood,
+  type Pace,
   type Transport,
 } from "@/lib/courses";
 import { getActiveSessionUser } from "@/lib/session";
@@ -19,6 +21,8 @@ const CATEGORIES: NightSpot["category"][] = [
 ];
 const TRANSPORTS: Transport[] = ["walk", "transit", "taxi"];
 const COMPANIONS: Companion[] = ["solo", "couple", "friends", "family"];
+const PACES: Pace[] = ["light", "lots"];
+const MOODS: Mood[] = ["calm", "lively"];
 
 /** 대전 경계에서 넉넉히 잡은 범위 — 엉뚱한 좌표로 전국을 뒤지지 않게 한다 */
 const BOUNDS = { minX: 127.2, maxX: 127.6, minY: 36.15, maxY: 36.5 };
@@ -53,6 +57,9 @@ export async function POST(request: NextRequest) {
   const durationMin = Number(body.durationMin);
   const transport = body.transport as Transport;
   const companion = body.companion as Companion;
+  const pace = body.pace as Pace;
+  const mood = body.mood as Mood;
+  const wantsFood = body.wantsFood === true;
   const locale = String(body.locale ?? "ko");
   const date = String(body.date ?? "");
   const categories = Array.isArray(body.categories)
@@ -72,6 +79,8 @@ export async function POST(request: NextRequest) {
     !DURATIONS.includes(durationMin) ||
     !TRANSPORTS.includes(transport) ||
     !COMPANIONS.includes(companion) ||
+    !PACES.includes(pace) ||
+    !MOODS.includes(mood) ||
     !routing.locales.includes(locale as never) ||
     !/^\d{4}-\d{2}-\d{2}$/.test(date);
   if (invalid) {
@@ -97,6 +106,9 @@ export async function POST(request: NextRequest) {
       durationMin,
       transport,
       companion,
+      pace,
+      mood,
+      wantsFood,
       categories,
       locale,
       date,
@@ -108,6 +120,9 @@ export async function POST(request: NextRequest) {
     logActivity(session.userId, "course_survey", {
       transport,
       companion,
+      pace,
+      mood,
+      wantsFood,
       durationMin,
       categories,
       stops: course.stops.length,

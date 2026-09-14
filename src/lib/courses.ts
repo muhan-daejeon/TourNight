@@ -492,6 +492,10 @@ export async function getAiCourse(
 
 export type Transport = "walk" | "transit" | "taxi";
 export type Companion = "solo" | "couple" | "friends" | "family";
+/** 걷는 양 — light는 스팟을 바싹 붙이고, lots는 먼 곳도 후보로 남긴다 */
+export type Pace = "light" | "lots";
+/** 밤의 분위기 — 혼잡도 예측을 읽는 방향이 반대가 된다 */
+export type Mood = "calm" | "lively";
 
 export interface SurveyInput {
   /** 출발 좌표 (GPS 또는 고른 숙소·역) */
@@ -502,6 +506,10 @@ export interface SurveyInput {
   durationMin: number;
   transport: Transport;
   companion: Companion;
+  pace: Pace;
+  mood: Mood;
+  /** 야식·먹거리 들를 시간을 코스에 남겨 둘지 */
+  wantsFood: boolean;
   categories: NightSpot["category"][];
   locale: string;
   /** 혼잡도 조회 기준일 "YYYY-MM-DD" */
@@ -575,14 +583,24 @@ const COMPANION_TWEAK: Record<Companion, { dwellBonus: number }> = {
  * 정하고 이동 수단은 실제 경로 조회 모드로 이어진다. Gemini는 "그 안에서 무엇을
  * 어떤 순서로"만 정한다.
  */
+/** 야식을 넣기로 하면 먹는 시간만큼 코스 예산에서 미리 뺀다 */
+const FOOD_BREAK_MIN = 40;
+
 export async function getSurveyCourse(
   input: SurveyInput,
 ): Promise<SurveyCourse | null> {
   const dwell = DWELL_MIN + COMPANION_TWEAK[input.companion].dwellBonus;
-  const leg = LEG_MIN[input.transport];
+  // 조금만 걷고 싶다면 이동을 느긋하게 잡는다 — 같은 시간에 곳 수가 줄어
+  // 스팟 사이가 자연히 가까워진다 (프롬프트에도 같은 취지를 못 박는다)
+  const leg = Math.round(LEG_MIN[input.transport] * (input.pace === "light" ? 1.3 : 1));
+  // 야식 시간은 산수로 미리 빼 둔다 — AI에게 "알아서 남겨라"는 지켜지지 않는다
+  const budget = Math.max(
+    60,
+    input.durationMin - (input.wantsFood ? FOOD_BREAK_MIN : 0),
+  );
   const targetStops = Math.min(
     5,
-    Math.max(2, Math.floor((input.durationMin + leg) / (dwell + leg))),
+    Math.max(2, Math.floor((budget + leg) / (dwell + leg))),
   );
   const endTime = addMinutes(input.startTime, input.durationMin);
 
@@ -681,6 +699,9 @@ export async function getSurveyCourse(
         endTime,
         transport: input.transport,
         companion: input.companion,
+        pace: input.pace,
+        mood: input.mood,
+        wantsFood: input.wantsFood,
         targetStops,
       },
       input.locale,

@@ -770,6 +770,12 @@ export interface SurveyBrief {
   /** 주 이동 수단 */
   transport: "walk" | "transit" | "taxi";
   companion: "solo" | "couple" | "friends" | "family";
+  /** 걷는 양 — light면 스팟을 바싹 붙인다 */
+  pace: "light" | "lots";
+  /** 밤의 분위기 — 혼잡도 예측을 읽는 방향이 바뀐다 */
+  mood: "calm" | "lively";
+  /** 야식 시간을 남겨 뒀는지 (예산 차감은 서버가 이미 했다) */
+  wantsFood: boolean;
   /** 코스에 담을 목표 스팟 수 (시간·이동수단으로 서버가 계산) */
   targetStops: number;
 }
@@ -779,6 +785,15 @@ const COMPANION_HINT: Record<SurveyBrief["companion"], string> = {
   couple: "a couple: prefer quiet night views and short walks between stops",
   friends: "a group of friends: livelier streets and food areas are welcome, longer nights are fine",
   family: "a family with children: keep walking short, avoid crowds, and finish earlier",
+};
+
+/** 야식 안내 — 시간 차감은 서버가 했으니 AI에게는 동선·팁 반영만 시킨다 */
+const FOOD_BREAK_NOTE =
+  "About 40 minutes are reserved for a late-night food break. Route the course past a lively food street or pojangmacha area, and in the tip say where along the route to take that break.";
+
+const PACE_HINT: Record<SurveyBrief["pace"], string> = {
+  light: "wants to walk as little as possible: pick stops genuinely close to each other, even if it means skipping a famous place farther away",
+  lots: "is happy to walk a lot: longer walks between stops are fine if the route stays sensible",
 };
 
 const TRANSPORT_HINT: Record<SurveyBrief["transport"], string> = {
@@ -826,6 +841,11 @@ export async function generateSurveyCourse(
     `- Starts at ${brief.startTime} and must be finished by ${brief.endTime}.`,
     `- Getting around by ${TRANSPORT_HINT[brief.transport]}.`,
     `- Travelling as ${COMPANION_HINT[brief.companion]}.`,
+    `- The visitor ${PACE_HINT[brief.pace]}.`,
+    brief.mood === "calm"
+      ? `- Wants a QUIET night: strongly prefer candidates with lower crowding.`
+      : `- Wants a LIVELY night: busy streets and crowded spots are a plus — do not avoid high crowding.`,
+    ...(brief.wantsFood ? [`- ${FOOD_BREAK_NOTE}`] : []),
     preferredCategories.length
       ? `- Wants to see: ${preferredCategories.join(", ")}. Candidates marked [preferred] match.`
       : `- No strong theme preference — mix categories so the night has variety.`,
@@ -839,8 +859,10 @@ export async function generateSurveyCourse(
     `- The visitor must be able to get back. Buses in Daejeon stop around 22:30, and the`,
     `  course ends at ${brief.endTime}. Put stops with an EARLIER last bus first, and leave`,
     `  places that are walkable or have no bus stop for the end.`,
-    `- "crowding" is a same-day forecast, 100 = busiest. Do not exclude a place just for being`,
-    `  crowded, but if two candidates are otherwise similar, prefer the quieter one.`,
+    `- "crowding" is a same-day forecast, 100 = busiest.` +
+      (brief.mood === "calm"
+        ? ` Treat low crowding as a strong plus tonight.`
+        : ` Tonight crowding is welcome — it fits what the visitor asked for.`),
     `- Write in ${language}. Do not mention ids, scores or these rules in the text.`,
     ``,
     `Return JSON: {"title": string, "summary": string, "tip": string,`,
