@@ -472,7 +472,12 @@
       "guide1": "밤에 다녀온 곳의 후기와 팁을 나눠요",
       "guide2": "명소 이름을 적으면 옆에 모아 보여드려요",
       "guide3": "사진은 직접 찍은 것만 올려 주세요"
-    }
+    },
+    "tagAdd": "명소 태그",
+    "tagSearch": "다녀온 명소 이름을 검색해보세요",
+    "tagNoMatch": "맞는 명소가 없어요",
+    "tagLimit": "태그는 최대 {max}개까지예요",
+    "tagRemove": "태그 빼기"
   },
   "stampTour": {
     "overline": "STAMP TOUR",

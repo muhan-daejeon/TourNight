@@ -42,18 +42,23 @@ export function usePhotoAttach(t: {
     }
   }
 
-  /** 사진이 있으면 multipart, 없으면 JSON — fetch 옵션을 만들어 준다 */
-  function requestInit(body: string): RequestInit {
+  /** 사진이 있으면 multipart, 없으면 JSON — fetch 옵션을 만들어 준다.
+      extra는 함께 실을 부가 필드(방문 명소 태그 등) — 댓글은 넘기지 않는다 */
+  function requestInit(
+    body: string,
+    extra?: { contentIds?: string[] },
+  ): RequestInit {
     if (!photo) {
       return {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body }),
+        body: JSON.stringify({ body, ...extra }),
       };
     }
     const form = new FormData();
     form.set("body", body);
     form.set("media", photo.file);
+    if (extra?.contentIds?.length) form.set("contentIds", JSON.stringify(extra.contentIds));
     return { method: "POST", body: form };
   }
 

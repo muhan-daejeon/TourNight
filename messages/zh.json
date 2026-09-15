@@ -472,7 +472,12 @@
       "guide1": "分享夜游去过的地方的心得和小贴士",
       "guide2": "写上景点名称，就会在这里汇总",
       "guide3": "请只上传自己拍摄的照片"
-    }
+    },
+    "tagAdd": "地点标签",
+    "tagSearch": "搜索您去过的景点名称",
+    "tagNoMatch": "没有匹配的景点",
+    "tagLimit": "最多可添加{max}个标签",
+    "tagRemove": "移除标签"
   },
   "stampTour": {
     "overline": "STAMP TOUR",

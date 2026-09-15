@@ -55,6 +55,8 @@ export default async function CommunityPage({
             // 인증 메일 발신 주소 — 수신 허용 목록에 넣으라고 화면에 띄운다.
             // 중국·일본 메일함이 모르는 발신자를 잘 거르기 때문에 필요하다
             mailFrom={mailFrom()}
+            // 태그 후보 — 이름과 id만 추려 보낸다 (직렬화 가볍게)
+            tagSpots={spots.map((s) => ({ contentId: s.contentId, title: s.title }))}
           />
           <CommunitySidebar popular={popular} posts={posts} spots={spots} />
         </div>
