@@ -217,12 +217,15 @@ function ResultDetail({
     return { id: personaCourseId(primary), stops, legs: [], totalM: 0 } as Course;
   }, [spots, primary]);
 
+  // 이 성향을 위해 짜 둔 코스만 보여준다 — 카테고리로 거른 일반 코스를
+  // 섞으면 "네 성향의 코스"라는 메시지가 흐려진다. 수제 코스를 아직 못
+  // 만든 경우(명소 누락 등)에만 카테고리 매칭으로 대신한다
   const recCourses = useMemo(() => {
+    if (personaCourse) return [personaCourse];
     const match = courses.filter((c) =>
       c.stops.some((s) => categories.includes(s.category)),
     );
-    const generic = (match.length ? match : courses).slice(0, personaCourse ? 2 : 3);
-    return personaCourse ? [personaCourse, ...generic] : generic;
+    return (match.length ? match : courses).slice(0, 3);
   }, [courses, categories, personaCourse]);
 
   const recSpots = useMemo(() => {
