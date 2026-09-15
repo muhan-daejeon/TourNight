@@ -22,6 +22,7 @@ import {
 import { PERSONA_MASCOT } from "@/lib/persona-mascot";
 import { PERSONA_COURSES, personaCourseId } from "@/lib/persona-courses";
 import PersonalityRadar from "./PersonalityRadar";
+import CourseMap from "./CourseMap";
 
 /**
  * 성향 테스트 결과 화면 (요약 + 상세 분석 + 탭).
@@ -331,6 +332,15 @@ function ResultDetail({
                 </div>
               ) : (
                 <p className="text-sm text-slate-400">{t("noCourses")}</p>
+              )}
+
+              {/* 수제 코스의 전체 동선을 지도에서 바로 — 카드만으로는 루트가
+                  머리에 안 그려진다. 실제 경로는 코스 페이지에서, 여기서는
+                  경유지를 직선으로 이어 흐름만 보여준다 */}
+              {personaCourse && (
+                <div className="mt-4 h-72 lg:h-80">
+                  <CourseMap course={personaCourse} mode="straight" />
+                </div>
               )}
               <Link
                 href={{
