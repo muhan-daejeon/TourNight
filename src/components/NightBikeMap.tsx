@@ -6,6 +6,7 @@ import { ArrowRight, Check, Copy, MapPin, RefreshCw, Route } from "lucide-react"
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { TASHU_COURSES, distanceM, type BikeLocale } from "@/lib/tashu-courses";
+import { loadKakaoMaps } from "@/lib/kakaoMaps";
 
 /** Google Play 로고 — 대각선 그라데이션(파랑→초록→노랑→빨강)을 준 재생 버튼
  * 모양으로, 실제 로고의 4색 구성을 간략화해 작은 크기에서도 알아볼 수 있게 했다 */
@@ -178,82 +179,76 @@ export default function NightBikeMap() {
     const container = containerRef.current;
     if (!container) return;
 
-    const draw = () => {
-      const { kakao } = window as KakaoNS;
-      kakao.maps.load(() => {
-        if (!mapRef.current) {
-          mapRef.current = new kakao.maps.Map(container, {
-            center: new kakao.maps.LatLng(DAEJEON_CENTER.lat, DAEJEON_CENTER.lng),
-            // 처음부터 너무 멀리서 보면(레벨 6+) 클러스터러 기본 뭉치 아이콘만 잔뜩
-            // 보여서 "대여소마다 몇 대인지" 요청과 어긋난다 — 조금 당겨서 시작해
-            // 대부분의 개별 배지가 바로 보이게 하고, 사용자가 직접 축소할 때만 뭉친다
-            level: 4,
-          });
-          locateUser(kakao);
-          mapRef.current.addControl(
-            new kakao.maps.ZoomControl(),
-            kakao.maps.ControlPosition.RIGHT,
+    let cancelled = false;
+    loadKakaoMaps().then((kakao) => {
+      if (cancelled || !containerRef.current) return;
+
+      if (!mapRef.current) {
+        mapRef.current = new kakao.maps.Map(container, {
+          center: new kakao.maps.LatLng(DAEJEON_CENTER.lat, DAEJEON_CENTER.lng),
+          // 처음부터 너무 멀리서 보면(레벨 6+) 클러스터러 기본 뭉치 아이콘만 잔뜩
+          // 보여서 "대여소마다 몇 대인지" 요청과 어긋난다 — 조금 당겨서 시작해
+          // 대부분의 개별 배지가 바로 보이게 하고, 사용자가 직접 축소할 때만 뭉친다
+          level: 4,
+        });
+        locateUser(kakao);
+        mapRef.current.addControl(
+          new kakao.maps.ZoomControl(),
+          kakao.maps.ControlPosition.RIGHT,
+        );
+      }
+      const map = mapRef.current;
+
+      clustererRef.current?.clear();
+
+      const imageCache = new Map<number, KakaoNS>();
+      const getImage = (count: number) => {
+        if (!imageCache.has(count)) {
+          imageCache.set(
+            count,
+            new kakao.maps.MarkerImage(pinSvg(count), new kakao.maps.Size(28, 28), {
+              offset: new kakao.maps.Point(14, 14),
+            }),
           );
         }
-        const map = mapRef.current;
+        return imageCache.get(count);
+      };
 
-        clustererRef.current?.clear();
-
-        const imageCache = new Map<number, KakaoNS>();
-        const getImage = (count: number) => {
-          if (!imageCache.has(count)) {
-            imageCache.set(
-              count,
-              new kakao.maps.MarkerImage(pinSvg(count), new kakao.maps.Size(28, 28), {
-                offset: new kakao.maps.Point(14, 14),
-              }),
-            );
-          }
-          return imageCache.get(count);
-        };
-
-        const infoWindow = new kakao.maps.InfoWindow({ removable: true });
-        const markers = stations.map((s) => {
-          const marker = new kakao.maps.Marker({
-            position: new kakao.maps.LatLng(s.lat, s.lng),
-            image: getImage(s.parkingCount),
-            title: `${s.name} (${s.parkingCount})`,
-          });
-          kakao.maps.event.addListener(marker, "click", () => {
-            infoWindow.setContent(
-              `<div style="padding:7px 11px;font-size:12px;line-height:1.5;white-space:nowrap">
-                 <b>${esc(s.name)}</b><br/>
-                 ${t("available", { count: s.parkingCount })}
-               </div>`,
-            );
-            infoWindow.open(map, marker);
-          });
-          return marker;
+      const infoWindow = new kakao.maps.InfoWindow({ removable: true });
+      const markers = stations.map((s) => {
+        const marker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(s.lat, s.lng),
+          image: getImage(s.parkingCount),
+          title: `${s.name} (${s.parkingCount})`,
         });
-
-        if (!clustererRef.current) {
-          clustererRef.current = new kakao.maps.MarkerClusterer({
-            map,
-            averageCenter: true,
-            // 기본(4) 근처에서는 뭉치지 않고 개별 배지가 보이게, 시 전체를 보듯
-            // 멀리 축소했을 때만(7+) 클러스터러가 묶는다
-            minLevel: 7,
-            gridSize: 70,
-          });
-        }
-        clustererRef.current.addMarkers(markers);
+        kakao.maps.event.addListener(marker, "click", () => {
+          infoWindow.setContent(
+            `<div style="padding:7px 11px;font-size:12px;line-height:1.5;white-space:nowrap">
+               <b>${esc(s.name)}</b><br/>
+               ${t("available", { count: s.parkingCount })}
+             </div>`,
+          );
+          infoWindow.open(map, marker);
+        });
+        return marker;
       });
-    };
 
-    if ((window as KakaoNS).kakao?.maps?.MarkerClusterer) {
-      draw();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY}&autoload=false&libraries=clusterer`;
-    script.async = true;
-    script.onload = draw;
-    document.head.appendChild(script);
+      if (!clustererRef.current) {
+        clustererRef.current = new kakao.maps.MarkerClusterer({
+          map,
+          averageCenter: true,
+          // 기본(4) 근처에서는 뭉치지 않고 개별 배지가 보이게, 시 전체를 보듯
+          // 멀리 축소했을 때만(7+) 클러스터러가 묶는다
+          minLevel: 7,
+          gridSize: 70,
+        });
+      }
+      clustererRef.current.addMarkers(markers);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [stations, t]);
 
   return (
@@ -290,8 +285,9 @@ export default function NightBikeMap() {
       </div>
 
       {/* 타슈 소개(About 대전)로 가는 순 텍스트 링크 — 박스 없이, "추천 타슈
-          코스" 제목(coursesTitle)과 같은 크기, 검정 글자. 위아래 여백 30px씩 */}
-      <p className="mt-[20px] text-center">
+          코스" 제목(coursesTitle)과 같은 크기, 검정 글자. 위아래 요소와 간격을
+          띄우기 위해 위아래 여백을 넉넉히 둔다 */}
+      <p className="mt-12 mb-8 text-center">
         <Link
           href="/about#tashu"
           className="inline-flex items-center gap-1.5 text-2xl font-extrabold tracking-tight text-slate-900 hover:text-daejeon-blue sm:text-3xl"

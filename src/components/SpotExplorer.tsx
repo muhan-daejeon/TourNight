@@ -133,31 +133,16 @@ export default function SpotExplorer({
   const activeSelectedId =
     selectedId && visibleIds.has(selectedId) ? selectedId : null;
 
-  const steps = ["howToStep1", "howToStep2", "howToStep3"] as const;
-
   return (
     <div>
-      {/* 코스 만드는 법 — 처음 온 사람을 위한 3단계 안내 */}
+      {/* 코스 만드는 법 — 처음 온 사람을 위한 안내 */}
       {showHowTo && (
         <div className="relative mb-4 overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
           <p className="flex items-center gap-2 pr-8 text-sm font-bold text-amber-600">
             <Route size={16} />
             {t("howToTitle")}
           </p>
-          <ol className="mt-3 grid gap-2 sm:grid-cols-3">
-            {steps.map((key, i) => (
-              <li key={key} className="flex items-start gap-2">
-                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[11px] font-extrabold text-slate-950">
-                  {i + 1}
-                </span>
-                <span className="text-[13px] leading-snug text-slate-400">
-                  {t.rich(key, {
-                    b: (c) => <b className="font-bold text-slate-900">{c}</b>,
-                  })}
-                </span>
-              </li>
-            ))}
-          </ol>
+          <p className="mt-3 text-sm font-light text-slate-900">{t("howToNotice")}</p>
           <button
             type="button"
             onClick={closeHowTo}

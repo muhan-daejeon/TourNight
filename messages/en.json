@@ -104,9 +104,7 @@
     "bookmarkRemove": "Remove from saved",
     "bookmarkFilter": "Saved {count}",
     "howToTitle": "Pick the places you like and build your own course",
-    "howToStep1": "Tap <b>Add</b> on a spot photo to pick where you want to go",
-    "howToStep2": "Then tap <b>Plan course</b> in the bar below",
-    "howToStep3": "AI sets the order and shows routes and travel times",
+    "howToNotice": "You can pull in the places you save here when you plan a course.",
     "howToClose": "Close",
     "basketOne": "One place is enough - we'll link nearby spots into a course",
     "heroPersonaOverline": "Daejeon nights - find your own color",
@@ -126,7 +124,7 @@
     "aboutBody": "A city of science, of bread and kalguksu - and at night, of glowing bridges over Gapcheon and the shining Hanbit Tower. Just 1 hour from Seoul by KTX, right at the heart of Korea.",
     "aboutKkum": "Kkumdori, the little yellow fairy, has been Daejeon's mascot since Expo '93 - the face of the city, symbolizing dreams and hope.",
     "aboutCta": "Start your journey with Kkumdori",
-    "enjoyTitle": "Enjoy TourNight",
+    "enjoyTitle": "Features you'll only find on TourNight",
     "enjoy1": "My Travel Persona Test",
     "enjoy1Desc": "Answer 12 quick questions to find out what kind of night traveler you are - and meet the Kkumdori character that matches you, with night courses to follow.",
     "enjoy1Cta": "Find my travel type",
@@ -515,6 +513,17 @@
       "uploadError": "Couldn't upload the photo. Please try again.",
       "photoRejected": "This photo can't be uploaded. Please choose another.",
       "stamped": "Stamped"
+    },
+    "list": {
+      "title": "Ggumdol's Night Trip",
+      "subtitle": "Capture the 4 photo spots in order",
+      "progress": "{done}/4 done",
+      "spotLabel": "Spot {n}",
+      "statusDone": "Photo captured",
+      "statusCurrent": "Upload a photo for this spot now",
+      "statusLocked": "Not visited yet",
+      "completeButton": "Complete my four-cut",
+      "notice": "Upload a photo at the spot you selected!\nYou can't upload if you're in a different location."
     },
     "collage": {
       "title": "Ggumdol Four-Cut",
