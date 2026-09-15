@@ -640,15 +640,12 @@
   },
   "festivals": {
     "title": "축제 & 행사",
-    "subtitle": "투어나잇에 등록된 대전의 축제 명소",
+    "subtitle": "지금 열리고 있거나 곧 열릴 대전의 축제",
     "scheduleNote": "개최 기간은 한국관광공사 등록 정보 기준이며 주최측 사정으로 바뀔 수 있습니다.",
-    "empty": "아직 등록된 축제 명소가 없습니다.",
+    "empty": "지금 열리는 축제가 없습니다.",
     "ongoing": "진행 중",
     "upcoming": "예정",
-    "ended": "종료",
-    "dday": "D-{n}",
-    "past": "매년 개최",
-    "lastYear": "작년"
+    "dday": "D-{n}"
   },
   "comingSoon": {
     "short": "준비 중",

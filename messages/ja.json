@@ -615,15 +615,12 @@
   },
   "festivals": {
     "title": "祭り・イベント",
-    "subtitle": "TourNight に登録された大田の祭り会場",
+    "subtitle": "今ひらかれている、またはこれから始まる大田のお祭り",
     "scheduleNote": "開催期間は韓国観光公社の登録情報に基づき、主催者の都合で変わることがあります。",
-    "empty": "登録された祭り会場はまだありません。",
+    "empty": "いま開催中のお祭りはありません。",
     "ongoing": "開催中",
     "upcoming": "開催予定",
-    "ended": "終了",
-    "dday": "あと{n}日",
-    "past": "毎年開催",
-    "lastYear": "昨年"
+    "dday": "あと{n}日"
   },
   "comingSoon": {
     "short": "準備中",

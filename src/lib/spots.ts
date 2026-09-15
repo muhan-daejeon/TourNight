@@ -1,6 +1,11 @@
 import { sql } from "./db";
 import { MOCK_NIGHT_SPOTS, type NightSpot } from "./kto";
-import { getKtoSpots, getKtoOverview, type KtoSpot } from "./kto-live";
+import {
+  getKtoSpots,
+  getKtoOverview,
+  getDaejeonFestivals,
+  type KtoSpot,
+} from "./kto-live";
 import { getCongestionRows, normName } from "./kto-stats";
 import { routing } from "@/i18n/routing";
 
@@ -152,10 +157,12 @@ export async function getVerifiedNightSpots(locale = "ko"): Promise<NightSpot[]>
  *
  * 화면을 기다리게 하지 않으려고 결과를 기다리지 않는다(fire-and-forget).
  * 같은 이름을 두 번 부르지 않도록 진행 중인 언어는 표시해 둔다.
+ *
+ * 축제도 같은 spot_translations를 쓰므로 festivals.ts에서 함께 부른다.
  */
 const filling = new Set<string>();
 
-function fillMissingTitles(spots: NightSpot[], locale: string): void {
+export function fillMissingTitles(spots: NightSpot[], locale: string): void {
   if (locale === "ko" || filling.has(locale)) return;
   // /robots.txt 같은 요청도 [locale] 라우트로 들어와 엉뚱한 로케일로 저장된 적이 있다
   if (!SUPPORTED.has(locale)) return;
@@ -196,13 +203,36 @@ function fillMissingTitles(spots: NightSpot[], locale: string): void {
   })();
 }
 
-export function pickFestivals(spots: NightSpot[]): NightSpot[] {
-  return spots.filter((s) => s.category === "festival");
-}
-
 export interface SpotDetail extends NightSpot {
   /** KTO 공식 소개문 (없으면 null → Gemini 가이드가 대신함) */
   officialOverview: string | null;
+}
+
+/**
+ * 검수 목록에서 먼저 찾고, 없으면 축제에서 한 번 더 찾는다.
+ *
+ * 축제는 야간 검수(night_spots)를 거치지 않고 공사 축제 목록에서 바로 오므로
+ * 검수 목록에 없다. 그대로 두면 축제 카드를 눌렀을 때 상세가 404가 난다.
+ */
+async function withFestivalFallback(
+  spots: NightSpot[],
+  contentId: string,
+): Promise<NightSpot | undefined> {
+  const hit = spots.find((s) => s.contentId === contentId);
+  if (hit) return hit;
+  const festivals = await getDaejeonFestivals().catch(() => []);
+  const f = festivals.find((x) => x.contentId === contentId);
+  if (!f) return undefined;
+  return {
+    contentId: f.contentId,
+    title: f.title,
+    addr: f.addr,
+    addrKo: f.addr,
+    mapX: f.mapX,
+    mapY: f.mapY,
+    imageUrl: f.imageUrl,
+    category: "festival",
+  };
 }
 
 /** 상세 페이지용 단건 조회 — 소개문도 실시간으로 받는다 */
@@ -211,7 +241,7 @@ export async function getSpot(
   locale = "ko",
 ): Promise<SpotDetail | null> {
   const spots = await getVerifiedNightSpots(locale);
-  const spot = spots.find((s) => s.contentId === contentId);
+  const spot = (await withFestivalFallback(spots, contentId)) ?? null;
   if (!spot) return null;
 
   // 수동 큐레이션 명소는 KTO에 없어 소개문도 없다 (Gemini 가이드가 채운다)

@@ -62,6 +62,9 @@ interface ListItem {
   cat1?: string;
   cat3?: string;
   tel?: string;
+  /** searchFestival2 응답에만 실려 오는 행사 기간 */
+  eventstartdate?: string;
+  eventenddate?: string;
 }
 
 /** KTO 원천 명소 한 건 — DB에 저장하지 않고 요청 때마다 받는다 */
@@ -371,31 +374,79 @@ export const getLocalDetail = (kind: LocalKind, contentId: string, locale: strin
   )();
 
 
-/* ── 축제 기간 ─────────────────────────────────────────────── */
+/* ── 축제 ──────────────────────────────────────────────────── */
 
 export interface FestivalPeriod {
   start: string; // YYYYMMDD
   end: string; // YYYYMMDD
 }
 
+/** 축제 한 건 — 기간까지 목록 응답에 함께 실려 온다 */
+export interface KtoFestival {
+  contentId: string;
+  title: string;
+  addr: string;
+  mapX: number;
+  mapY: number;
+  imageUrl: string | null;
+  period: FestivalPeriod;
+}
+
+const isYmd = (s: string) => /^[0-9]{8}$/.test(s);
+
 /**
- * 축제 개최 기간. 목록(areaBasedList2)에는 날짜가 없고 상세(detailIntro2)에만 있다.
- * 날짜는 언어와 무관하므로 항상 국문 상세로 묻는다 — 언어 서비스는 축제 등재가
- * 거의 없어(영문 1곳) 짝을 못 찾고, 언어마다 따로 물으면 호출만 4배다.
- * 하루에 바뀔 일이 없어 24시간 캐시.
+ * 한국 기준 오늘(YYYYMMDD).
+ *
+ * 서버는 UTC로 도는데(Vercel), 한국 아침 9시 이전이면 UTC로는 아직 어제라
+ * 하루 지난 목록을 보게 된다. 9시간을 더해 UTC 게터로 읽어 그 어긋남을 없앤다.
  */
-export const getFestivalPeriod = (contentId: string) =>
+export function todayKst(): string {
+  const d = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+
+/**
+ * 대전 축제 목록.
+ *
+ * 축제 전용 searchFestival2를 쓴다. 예전에는 명소 목록(areaBasedList2,
+ * contentTypeId=15)에서 축제를 걸러 썼는데 대전이 4건뿐이었고, 날짜가 없어
+ * 축제마다 detailIntro2를 한 번씩 더 불러야 했다. 이 오퍼레이션은 목록에
+ * 기간이 함께 실려 와 그 추가 호출이 통째로 사라진다.
+ *
+ * areaCode를 넣지 않는다 — 공사 쪽 지역 필터가 망가져 있다. 지역을 걸면
+ * 대전·서울 모두 0건이 나오는데(날짜를 빼면 역시 0건), 지역 없이 부르면
+ * 전국 목록에 두 지역 축제가 멀쩡히 들어 있다. 그래서 전국을 받아 주소로
+ * 직접 거른다. 좌표 사각형으로 자르면 맞닿은 세종시가 딸려 와 주소를 쓴다.
+ *
+ * eventStartDate는 "그날 시작하는 것"이 아니라 "그날 이후까지 열려 있는 것"을
+ * 고른다 — 오늘을 넣으면 이미 진행 중인 장기 축제도 함께 온다. 끝난 축제는
+ * 애초에 받지 않으므로 화면에서 따로 걸러낼 필요가 없다.
+ *
+ * 하루에 바뀔 일이 없어 24시간 캐시하고, 날짜가 바뀌면 키도 바뀐다.
+ */
+export const getDaejeonFestivals = (today: string = todayKst()) =>
   unstable_cache(
-    async (): Promise<FestivalPeriod | null> => {
-      const rows = await call(SERVICE.ko, "detailIntro2", {
-        contentId,
-        contentTypeId: "15",
+    async (): Promise<KtoFestival[]> => {
+      // 전국이 700건대라 1000이면 한 번에 다 온다 (2026-09 기준 712건)
+      const items = await call(SERVICE.ko, "searchFestival2", {
+        numOfRows: "1000",
+        pageNo: "1",
+        eventStartDate: today,
       });
-      const r = (rows[0] ?? {}) as unknown as Record<string, string>;
-      const start = (r.eventstartdate ?? "").trim();
-      const end = (r.eventenddate ?? "").trim();
-      return /^\d{8}$/.test(start) && /^\d{8}$/.test(end) ? { start, end } : null;
+      return items
+        .filter((i) => (i.addr1 ?? "").includes("대전"))
+        .filter((i) => isYmd(i.eventstartdate ?? "") && isYmd(i.eventenddate ?? ""))
+        .filter((i) => Number.isFinite(Number(i.mapx)) && Number.isFinite(Number(i.mapy)))
+        .map((i) => ({
+          contentId: i.contentid,
+          title: i.title,
+          addr: i.addr1 ?? "",
+          mapX: Number(i.mapx),
+          mapY: Number(i.mapy),
+          imageUrl: i.firstimage || null,
+          period: { start: i.eventstartdate!, end: i.eventenddate! },
+        }));
     },
-    ["kto-festival-period", contentId],
+    ["kto-festivals", today],
     { revalidate: 86400, tags: ["kto-spots"] },
   )();
