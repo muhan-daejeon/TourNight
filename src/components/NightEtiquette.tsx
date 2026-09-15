@@ -214,17 +214,20 @@ export default function NightEtiquette({
                         : "bg-gradient-to-t from-slate-950 via-slate-950/45 to-slate-950/10"
                     }`}
                   />
+                  {/* 사진 + 어두운 그라데이션 위라 글자는 흰색이어야 읽힌다 —
+                      라이트 테마 전환 때 여기까지 검정(text-slate-900)으로 바뀌어
+                      밝은 사진에서 라벨이 통째로 사라져 보였다 */}
                   <span className="absolute inset-x-0 bottom-0 flex items-center gap-1.5 p-2.5 text-[13px] font-bold leading-tight sm:text-sm">
                     <Icon
                       size={14}
                       strokeWidth={2.2}
-                      className={`shrink-0 ${selected === id ? "text-amber-600" : "text-amber-600/70"}`}
+                      className={`shrink-0 ${selected === id ? "text-amber-400" : "text-amber-300/90"}`}
                     />
                     <span
                       className={
                         selected === id
-                          ? "text-amber-700"
-                          : "text-slate-900 group-hover:text-amber-700"
+                          ? "text-amber-300"
+                          : "text-white group-hover:text-amber-300"
                       }
                     >
                       {t(`topics.${id}`)}
