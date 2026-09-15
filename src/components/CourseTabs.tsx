@@ -14,9 +14,13 @@ import CourseSurvey from "./CourseSurvey";
  * 기존 추천/AI 코스 흐름(CourseExplorer)을 보여준다.
  */
 export default function CourseTabs({ courses }: { courses: Course[] }) {
-  const fromParam = useSearchParams().get("from");
+  const params = useSearchParams();
+  const fromParam = params.get("from");
+  // 성향 결과의 "추천 루트 보기"(?course=<id>)도 추천 코스 화면으로 —
+  // CourseExplorer가 그 코스를 골라 지도·경유지를 바로 펼친다
+  const courseParam = params.get("course");
 
-  if (fromParam) {
+  if (fromParam || courseParam) {
     return <CourseExplorer courses={courses} />;
   }
   return <CourseSurvey />;
