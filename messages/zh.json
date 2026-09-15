@@ -104,9 +104,7 @@
     "bookmarkRemove": "取消收藏",
     "bookmarkFilter": "已收藏 {count}",
     "howToTitle": "选择喜欢的地点，打造专属路线",
-    "howToStep1": "点击景点照片上的<b>添加</b>，选出想去的地方",
-    "howToStep2": "再点下方出现的<b>生成路线</b>",
-    "howToStep3": "AI 会安排顺序，并给出交通路线和所需时间",
+    "howToNotice": "生成路线时，可以直接调用您在这里保存的地点。",
     "howToClose": "关闭",
     "basketOne": "只选一处也可以 - 我们会串联附近景点生成路线",
     "heroPersonaOverline": "大田之夜，寻找专属你的色彩",
@@ -126,7 +124,7 @@
     "aboutBody": "科学之城,也是面包与刀削面之城;入夜后,甲川的桥梁与韩光塔熠熠生辉。从首尔乘KTX仅1小时,大田就在韩国的正中心。",
     "aboutKkum": "黄色小精灵Kkumdori自1993年大田世博会起就是大田的吉祥物,象征梦想与希望的城市之脸。",
     "aboutCta": "和Kkumdori一起开始旅程吧",
-    "enjoyTitle": "尽情享受TourNight",
+    "enjoyTitle": "只有在TourNight才能体验的功能",
     "enjoy1": "我的旅行性格测试",
     "enjoy1Desc": "回答12个问题,看看你是哪种夜晚旅行者 - 还有与你相似的梦之子角色,以及最适合你的大田夜游路线。",
     "enjoy1Cta": "测测我的旅行类型",
@@ -516,6 +514,17 @@
       "uploadError": "照片上传失败，请重试。",
       "photoRejected": "这张照片无法上传，请选择其他照片。",
       "stamped": "已盖章"
+    },
+    "list": {
+      "title": "梦多尔的深夜旅行",
+      "subtitle": "请按顺序拍摄4个拍照地点",
+      "progress": "{done}/4 已完成",
+      "spotLabel": "地点{n}",
+      "statusDone": "拍摄完成",
+      "statusCurrent": "现在请上传这个地点的照片",
+      "statusLocked": "还未到访",
+      "completeButton": "完成梦多尔四格照",
+      "notice": "请在您选择的地点上传照片！\n如果所在位置不同，将无法上传照片。"
     },
     "collage": {
       "title": "梦多尔四格照",

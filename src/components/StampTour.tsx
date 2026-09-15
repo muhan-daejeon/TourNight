@@ -4,20 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { ArrowRight, Check, Download, Loader2, MapPin, RotateCcw, X } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Download, Loader2, MapPin, RotateCcw, X } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { renderCollageFromUrls } from "@/lib/collage";
+import { loadKakaoMaps } from "@/lib/kakaoMaps";
 
 /**
  * 도장투어 with 꿈돌이 → 꿈돌네컷.
  *
  * 흐름: (아직 안 골랐다면) 위치 정보 동의 → 갈 곳 4곳 검색·선택 → 저장 →
- * 민트 네온 도장 4개(지그재그 선으로 연결). 도장을 누르면 GPS로 그 장소
- * 근처인지 확인한 뒤에만 사진을 올릴 수 있고, 올린 사진은 우측 "꿈돌이와
- * 심야여행" 네컷 프레임의 그 칸을 채운다. 4칸이 다 차면 다운로드할 수 있다.
+ * 스팟 리스트 카드(순서대로 4곳). 지금 차례인 스팟만 누를 수 있고, GPS로
+ * 그 장소 근처인지 확인한 뒤에만 사진을 올릴 수 있다. 올린 사진은 우측
+ * "꿈돌이와 심야여행" 네컷 프레임의 그 칸을 채우고, 4칸이 다 차면
+ * 카드 안의 버튼으로 완성한 네컷을 내려받을 수 있다.
  *
  * 이미 골라 둔 계정은 /api/stamp-tour가 바로 그 결과를 주므로 동의·선택
- * 단계를 건너뛰고 곧장 도장 화면으로 간다.
+ * 단계를 건너뛰고 곧장 스팟 리스트로 간다.
  */
 
 interface StampStop {
@@ -40,7 +42,6 @@ interface PickedPlace {
 const DAEJEON_CENTER = { lat: 36.3504, lng: 127.3845 };
 /** 이 반경(m) 안이면 "그 장소에 있다"고 본다 — 명소 하나가 꽤 넓을 수 있어 넉넉히 잡는다 */
 const STAMP_RADIUS_M = 300;
-const MINT = "#35b597";
 
 function haversineMeters(
   a: { lat: number; lng: number },
@@ -139,22 +140,15 @@ function PlacePickerModal({
   const kakaoRef = useRef<KakaoNS>(null);
 
   useEffect(() => {
-    function init() {
-      const { kakao } = window as KakaoNS;
-      kakao.maps.load(() => {
-        kakaoRef.current = kakao;
-        placesRef.current = new kakao.maps.services.Places();
-      });
-    }
-    if ((window as KakaoNS).kakao?.maps?.services) {
-      init();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY}&autoload=false&libraries=services`;
-    script.async = true;
-    script.onload = init;
-    document.head.appendChild(script);
+    let cancelled = false;
+    loadKakaoMaps().then((kakao) => {
+      if (cancelled) return;
+      kakaoRef.current = kakao;
+      placesRef.current = new kakao.maps.services.Places();
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function search(e: React.FormEvent) {
@@ -333,27 +327,36 @@ function PlacePickerModal({
   );
 }
 
-/** 도장 4개(민트 네온) — 지그재그 선으로 연결, 배경 없이 */
-function StampRoad({
+/** 스팟 4곳을 순서대로 담는 리스트 카드 — 지금 차례인 스팟만 누를 수 있다 */
+function StampList({
   tour,
   onUpdate,
+  onComplete,
+  completing,
 }: {
   tour: StampTourData;
   onUpdate: (t: StampTourData) => void;
+  onComplete: () => void;
+  completing: boolean;
 }) {
-  const t = useTranslations("stampTour.road");
+  const t = useTranslations("stampTour");
+  const tList = useTranslations("stampTour.list");
+  const tRoad = useTranslations("stampTour.road");
   const [checkingSlot, setCheckingSlot] = useState<number | null>(null);
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const doneCount = tour.stops.filter((s) => !!s.photoUrl).length;
+  // 아직 못 찍은 것 중 가장 앞 순서 — "순서대로" 담으므로 그 자리만 지금 누를 수 있다
+  const nextIndex = tour.stops.findIndex((s) => !s.photoUrl);
 
   // 파일 선택창은 탭한 그 순간(동기적으로) 열어야 한다 — GPS 확인처럼 비동기
   // 콜백 안에서 뒤늦게 .click()을 부르면, 모바일 브라우저(특히 iOS/일부
   // 안드로이드)가 "사용자가 직접 누른 게 아니다"로 보고 조용히 막아버린다.
   // 그래서 사진 선택창은 즉시 열고, 위치 확인은 사진을 고른 "뒤"(handleFile)
   // 에서 한다. GPS가 안 맞으면 그때 업로드를 취소한다
-  function handleStampClick(slot: number) {
-    const stop = tour.stops[slot];
-    if (stop.photoUrl || checkingSlot !== null || uploadingSlot !== null) return;
+  function handleSpotClick(slot: number) {
+    if (slot !== nextIndex || checkingSlot !== null || uploadingSlot !== null) return;
     fileInputRefs.current[slot]?.click();
   }
 
@@ -362,7 +365,7 @@ function StampRoad({
     const stop = tour.stops[slot];
 
     if (!("geolocation" in navigator)) {
-      alert(t("gpsError"));
+      alert(tRoad("gpsError"));
       return;
     }
     setCheckingSlot(slot);
@@ -375,7 +378,7 @@ function StampRoad({
     });
     setCheckingSlot(null);
     if (!pos) {
-      alert(t("gpsError"));
+      alert(tRoad("gpsError"));
       return;
     }
     const dist = haversineMeters(
@@ -383,7 +386,7 @@ function StampRoad({
       { lat: stop.lat, lng: stop.lng },
     );
     if (dist > STAMP_RADIUS_M) {
-      alert(t("tooFar", { name: stop.name }));
+      alert(tRoad("tooFar", { name: stop.name }));
       return;
     }
 
@@ -394,95 +397,86 @@ function StampRoad({
       form.append("photo", file);
       const res = await fetch("/api/stamp-tour/stamp", { method: "POST", body: form });
       if (res.status === 422) {
-        alert(t("photoRejected"));
+        alert(tRoad("photoRejected"));
         return;
       }
       if (!res.ok) throw new Error();
       const data = await res.json();
       onUpdate(data.tour);
     } catch {
-      alert(t("uploadError"));
+      alert(tRoad("uploadError"));
     } finally {
       setUploadingSlot(null);
     }
   }
 
-  // 4칸의 자리(0~100 기준 %)와 그 사이를 잇는 지그재그 선
-  const NODES = [
-    { x: 20, y: 16 },
-    { x: 78, y: 30 },
-    { x: 18, y: 58 },
-    { x: 74, y: 78 },
-  ];
-  const PATH = "M20,16 C55,12 85,20 78,30 C72,48 26,44 18,58 C12,70 56,74 74,78";
-
   return (
-    <div className="mx-auto w-full max-w-sm">
-      <div className="relative aspect-[3/4] w-full">
-        {/* 도장을 잇는 선 — 굵고 옅은 층(후광) + 가늘고 밝은 층(중심선)을
-            겹쳐 네온 느낌을 낸다. 전체가 함께 밝아졌다 옅어졌다 한다 */}
-        <svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          className="tn-mint-path pointer-events-none absolute inset-0 h-full w-full"
-        >
-          <path
-            d={PATH}
-            fill="none"
-            stroke={MINT}
-            strokeWidth="5"
-            strokeLinecap="round"
-            opacity="0.5"
-            vectorEffect="non-scaling-stroke"
-            style={{ filter: "blur(3px)" }}
-          />
-          <path
-            d={PATH}
-            fill="none"
-            stroke={MINT}
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
+    <div className="mx-auto w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-extrabold text-slate-900">{tList("title")}</h3>
+          <p className="mt-1 text-sm text-slate-500">{tList("subtitle")}</p>
+        </div>
+        <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-daejeon-green">
+          {tList("progress", { done: doneCount })}
+        </span>
+      </div>
 
-        {NODES.map((pos, i) => {
-          const stop = tour.stops[i];
+      <ul className="mt-5 space-y-3">
+        {tour.stops.map((stop, i) => {
           const done = !!stop.photoUrl;
+          const isNext = i === nextIndex;
           const busy = checkingSlot === i || uploadingSlot === i;
+          const status = done
+            ? tList("statusDone")
+            : isNext
+              ? tList("statusCurrent")
+              : tList("statusLocked");
+
           return (
-            <div
+            <li
               key={i}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+              className={`flex items-center gap-3 rounded-2xl px-3 py-3 transition ${
+                isNext ? "bg-blue-50 ring-1 ring-daejeon-blue/30" : "bg-slate-50"
+              }`}
             >
+              <span
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                  done
+                    ? "bg-daejeon-green text-white"
+                    : isNext
+                      ? "bg-daejeon-blue text-white"
+                      : "bg-slate-200 text-slate-400"
+                }`}
+              >
+                {done ? <Check size={16} strokeWidth={3} /> : isNext ? <MapPin size={16} /> : i + 1}
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-slate-900">
+                  {tList("spotLabel", { n: i + 1 })} · {stop.name}
+                </p>
+                <p className="mt-0.5 truncate text-xs text-slate-500">{status}</p>
+              </div>
+
               <button
                 type="button"
-                onClick={() => handleStampClick(i)}
-                disabled={done || checkingSlot !== null || uploadingSlot !== null}
-                aria-label={done ? t("stamped") : t("tapToStamp")}
-                className="tn-mint-stamp relative flex h-16 w-16 items-center justify-center rounded-full bg-white transition disabled:cursor-not-allowed sm:h-[72px] sm:w-[72px]"
+                onClick={() => handleSpotClick(i)}
+                disabled={!isNext || busy}
+                aria-label={status}
+                className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white transition ${
+                  isNext ? "ring-2 ring-daejeon-blue" : "ring-1 ring-slate-200"
+                } disabled:cursor-not-allowed`}
               >
                 {done ? (
-                  <>
-                    <Image
-                      src={stop.photoUrl!}
-                      alt=""
-                      fill
-                      sizes="72px"
-                      className="rounded-full object-cover"
-                    />
-                    <span
-                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-white"
-                      style={{ backgroundColor: MINT }}
-                    >
-                      <Check size={12} strokeWidth={3} />
-                    </span>
-                  </>
+                  <Image src={stop.photoUrl!} alt="" fill sizes="44px" className="object-cover" />
                 ) : busy ? (
-                  <Loader2 size={20} className="animate-spin" style={{ color: MINT }} />
+                  <Loader2 size={16} className="animate-spin text-daejeon-blue" />
+                ) : isNext ? (
+                  <MapPin size={16} className="text-daejeon-blue" />
                 ) : null}
               </button>
+
               <input
                 ref={(el) => {
                   fileInputRefs.current[i] = el;
@@ -498,35 +492,30 @@ function StampRoad({
                   handleFile(i, file);
                 }}
               />
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
 
-      <style>{`
-        /* 도장 — 테두리 없이 네온 후광만(밝기가 은은하게 오르내림) */
-        .tn-mint-stamp {
-          animation: tn-mint-glow 1.8s ease-in-out infinite;
-        }
-        @keyframes tn-mint-glow {
-          0%, 100% { box-shadow: 0 0 6px rgba(53, 181, 151, 0.55), 0 0 16px rgba(53, 181, 151, 0.3); }
-          50% { box-shadow: 0 0 14px rgba(53, 181, 151, 0.9), 0 0 32px rgba(53, 181, 151, 0.5); }
-        }
-        /* 도장을 잇는 선 — 같은 리듬으로 후광·중심선이 함께 밝아진다 */
-        .tn-mint-path {
-          animation: tn-mint-path-glow 1.8s ease-in-out infinite;
-        }
-        @keyframes tn-mint-path-glow {
-          0%, 100% { opacity: 0.65; }
-          50% { opacity: 1; }
-        }
-      `}</style>
+      <button
+        type="button"
+        onClick={onComplete}
+        disabled={completing || !tour.complete}
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-daejeon-blue py-3 text-sm font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <Download size={15} />
+        {completing ? t("collage.downloading") : tList("completeButton")}
+      </button>
+      <div className="mt-2 flex justify-center lg:hidden">
+        <ChevronDown size={18} className="text-slate-300" />
+      </div>
     </div>
   );
 }
 
 export default function StampTour() {
   const t = useTranslations("stampTour");
+  const tList = useTranslations("stampTour.list");
   const router = useRouter();
   const [phase, setPhase] = useState<"loading" | "consent" | "picker" | "main">("loading");
   const [tour, setTour] = useState<StampTourData | null>(null);
@@ -657,21 +646,20 @@ export default function StampTour() {
           </button>
 
           <div className="mt-6 grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
-            {/* 좌측 — 도장 4개 + 다운로드 버튼 */}
-            <div>
-              <StampRoad tour={tour} onUpdate={setTour} />
-              <div className="mt-8 text-center">
-                <button
-                  type="button"
-                  onClick={download}
-                  disabled={rendering || !tour.complete}
-                  className="inline-flex items-center gap-2 rounded-full border-2 px-6 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
-                  style={{ borderColor: MINT, color: MINT }}
-                >
-                  <Download size={15} />
-                  {rendering ? t("collage.downloading") : t("collage.download")}
-                </button>
-              </div>
+            {/* 좌측 — 안내 문구 + 스팟 4곳을 순서대로 담는 리스트 카드(다운로드
+                버튼 포함). 카드를 화면 아래쪽으로 살짝 내리고, 그 위에 민트색
+                안내 문구를 둔다 — 문구는 카드(max-w-sm)와 같은 너비로 가운데
+                맞춰 카드의 x축 중앙에 오도록 하고, 문구 자체도 가운데 정렬한다 */}
+            <div className="lg:mt-10">
+              <p className="mx-auto mb-4 w-full max-w-sm whitespace-pre-line text-center text-sm font-light leading-relaxed text-daejeon-green">
+                {tList("notice")}
+              </p>
+              <StampList
+                tour={tour}
+                onUpdate={setTour}
+                onComplete={download}
+                completing={rendering}
+              />
             </div>
 
             {/* 우측 — 큰 네컷 프레임(미리보기 전용) */}

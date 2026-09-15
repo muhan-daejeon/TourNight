@@ -68,12 +68,10 @@ export default function NoticeBoard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">공지사항</h1>
-
       {/* 분류선택 · 검색범위 · 검색어 · 검색 */}
       <form
         onSubmit={runSearch}
-        className="mt-6 flex flex-wrap items-center justify-end gap-2 border-b-2 border-slate-800 pb-6"
+        className="flex flex-wrap items-center justify-end gap-2 border-b-2 border-slate-800 pb-6"
       >
         <select
           value={category}

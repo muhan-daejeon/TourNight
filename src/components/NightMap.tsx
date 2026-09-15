@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { NightSpot } from "@/lib/kto";
+import { loadKakaoMaps } from "@/lib/kakaoMaps";
 
 // 대전 중심 좌표
 const DAEJEON_CENTER = { lat: 36.3504, lng: 127.3845 };
@@ -98,56 +99,49 @@ export default function NightMap({
     const container = containerRef.current;
     if (!container || mapRef.current) return;
 
-    const init = () => {
-      const { kakao } = window as KakaoNS;
-      kakao.maps.load(() => {
-        kakaoRef.current = kakao;
-        // 단일 스팟(상세 페이지)이면 해당 위치에 바로 포커스
-        const single = spots.length === 1 ? spots[0] : null;
-        const map = new kakao.maps.Map(container, {
-          center: single
-            ? new kakao.maps.LatLng(single.mapY, single.mapX)
-            : new kakao.maps.LatLng(DAEJEON_CENTER.lat, DAEJEON_CENTER.lng),
-          level: single ? 5 : 8,
-        });
-        map.addControl(
-          new kakao.maps.ZoomControl(),
-          kakao.maps.ControlPosition.RIGHT,
-        );
-        // 빈 지도 클릭 시 선택 해제
-        kakao.maps.event.addListener(map, "click", () =>
-          onSelectRef.current?.(null),
-        );
-        mapRef.current = map;
+    let cancelled = false;
+    loadKakaoMaps().then((kakao) => {
+      if (cancelled || !containerRef.current) return;
+      kakaoRef.current = kakao;
+      // 단일 스팟(상세 페이지)이면 해당 위치에 바로 포커스
+      const single = spots.length === 1 ? spots[0] : null;
+      const map = new kakao.maps.Map(container, {
+        center: single
+          ? new kakao.maps.LatLng(single.mapY, single.mapX)
+          : new kakao.maps.LatLng(DAEJEON_CENTER.lat, DAEJEON_CENTER.lng),
+        level: single ? 5 : 8,
+      });
+      map.addControl(
+        new kakao.maps.ZoomControl(),
+        kakao.maps.ControlPosition.RIGHT,
+      );
+      // 빈 지도 클릭 시 선택 해제
+      kakao.maps.event.addListener(map, "click", () =>
+        onSelectRef.current?.(null),
+      );
+      mapRef.current = map;
 
-        spots.forEach((spot) => {
-          const marker = new kakao.maps.Marker({
-            position: new kakao.maps.LatLng(spot.mapY, spot.mapX),
-            title: spot.title,
-            image: markerImage(spot.category, false),
-          });
-          marker.setMap(map);
-          kakao.maps.event.addListener(marker, "click", () =>
-            onSelectRef.current?.(spot.contentId),
-          );
-          markersRef.current.set(spot.contentId, {
-            marker,
-            category: spot.category,
-            spot,
-          });
+      spots.forEach((spot) => {
+        const marker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(spot.mapY, spot.mapX),
+          title: spot.title,
+          image: markerImage(spot.category, false),
+        });
+        marker.setMap(map);
+        kakao.maps.event.addListener(marker, "click", () =>
+          onSelectRef.current?.(spot.contentId),
+        );
+        markersRef.current.set(spot.contentId, {
+          marker,
+          category: spot.category,
+          spot,
         });
       });
-    };
+    });
 
-    if ("kakao" in window) {
-      init();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY}&autoload=false`;
-    script.async = true;
-    script.onload = init;
-    document.head.appendChild(script);
+    return () => {
+      cancelled = true;
+    };
   }, [spots]);
 
   // 컨테이너 크기 변화(반응형 높이 전환 등)를 지도에 반영.
