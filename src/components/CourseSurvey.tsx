@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  ChevronDown,
+  ChevronUp,
   Clock,
   Footprints,
   Bus,
@@ -556,6 +558,16 @@ function CourseEditor({
     stops.length !== course.stops.length ||
     stops.some((st, i) => course.stops[i]?.contentId !== st.contentId);
 
+  // 순서 바꾸기 — i번째를 위/아래로 한 칸씩
+  const move = (i: number, dir: -1 | 1) =>
+    setStops((prev) => {
+      const j = i + dir;
+      if (j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+
   return (
     <div className="mt-8 border-t border-slate-200 pt-6">
       <p className="text-base font-bold text-slate-900">{tc("editTitle")}</p>
@@ -581,6 +593,27 @@ function CourseEditor({
                 {st.title}
               </span>
               <span className="block truncate text-xs text-slate-400">{st.addr}</span>
+            </span>
+            {/* 순서 바꾸기 — 드래그 대신 화살표: 폰에서도 확실하고 접근성도 낫다 */}
+            <span className="flex shrink-0 flex-col">
+              <button
+                type="button"
+                onClick={() => move(i, -1)}
+                disabled={i === 0}
+                aria-label={tc("editMoveUp")}
+                className="rounded-full p-1 text-slate-400 transition enabled:hover:text-daejeon-blue disabled:opacity-30"
+              >
+                <ChevronUp size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => move(i, 1)}
+                disabled={i === stops.length - 1}
+                aria-label={tc("editMoveDown")}
+                className="rounded-full p-1 text-slate-400 transition enabled:hover:text-daejeon-blue disabled:opacity-30"
+              >
+                <ChevronDown size={14} />
+              </button>
             </span>
             <button
               type="button"

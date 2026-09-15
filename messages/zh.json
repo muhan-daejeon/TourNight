@@ -210,7 +210,9 @@
     "editTitle": "打磨我的路线",
     "editHint": "可从推荐中移除,或从收藏中添加",
     "editRemove": "从路线移除",
-    "editedNote": "你已编辑途经点 - 请在地图App再次确认顺序与路线。"
+    "editedNote": "你已编辑途经点 - 请在地图App再次确认顺序与路线。",
+    "editMoveUp": "上移",
+    "editMoveDown": "下移"
   },
   "etiquette": {
     "title": "夜间礼仪",
