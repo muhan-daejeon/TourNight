@@ -32,7 +32,8 @@ const SLIDES: {
 }[] = [
   { key: 1, href: "/personality", bar: "bg-daejeon-blue", cta: "text-daejeon-blue", image: "/mystyle.jpg" },
   { key: 2, href: "/stamp-tour", bar: "bg-daejeon-green", cta: "text-daejeon-green", image: "/picture.png" },
-  { key: 3, href: "/klife/restaurant", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/klife.jpg" },
+  // K-Life 카드는 통합 페이지(/etiquette)로 — 이미지는 팀 디자인 유지
+  { key: 3, href: "/etiquette", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/klife.jpg" },
 ];
 
 const GAP = 12; // gap-3 — 스크롤 한 걸음 계산에 쓴다
