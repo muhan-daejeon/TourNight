@@ -212,7 +212,9 @@
     "editTitle": "내 코스 다듬기",
     "editHint": "추천에서 빼거나, 찜한 장소를 더할 수 있어요",
     "editRemove": "코스에서 빼기",
-    "editedNote": "경유지를 수정했어요 - 순서와 이동은 지도 앱에서 한 번 더 확인해 주세요."
+    "editedNote": "경유지를 수정했어요 - 순서와 이동은 지도 앱에서 한 번 더 확인해 주세요.",
+    "editMoveUp": "위로",
+    "editMoveDown": "아래로"
   },
   "etiquette": {
     "title": "나이트 에티켓",
