@@ -39,7 +39,7 @@
   "home": {
     "heroTitle": "Unfold Your Dream Tonight",
     "heroSubtitle": "Night views, starlight and festivals in Daejeon - the city of Kkumdori, where dreams come alive",
-    "spotsSection": "Where to tonight?",
+    "spotsSection": "Where to <hl>tonight?</hl>",
     "searchPlaceholder": "Search by name or area",
     "noResults": "No spots found",
     "viewDetail": "View details",

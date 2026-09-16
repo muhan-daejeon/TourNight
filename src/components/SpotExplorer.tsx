@@ -137,7 +137,7 @@ export default function SpotExplorer({
     <div>
       {/* 코스 만드는 법 — 처음 온 사람을 위한 안내 */}
       {showHowTo && (
-        <div className="relative mb-4 overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-amber-400 bg-white px-5 py-4">
           <p className="flex items-center gap-2 pr-8 text-sm font-bold text-amber-600">
             <Route size={16} />
             {t("howToTitle")}

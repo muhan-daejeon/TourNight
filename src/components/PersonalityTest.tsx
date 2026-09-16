@@ -136,7 +136,7 @@ export default function PersonalityTest({
         <button
           type="button"
           onClick={() => { startedRef.current = true; setPhase("quiz"); }}
-          className="mt-8 inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-10 py-4 text-base font-bold text-white shadow-[0_8px_28px_rgba(0,78,162,0.35)] transition hover:bg-indigo-500"
+          className="mt-8 inline-flex items-center gap-2 rounded-full bg-daejeon-orange px-10 py-4 text-base font-bold text-white shadow-[0_8px_28px_rgba(0,78,162,0.35)] transition hover:opacity-90"
         >
           {t("start")}
           <ArrowRight size={17} />
@@ -147,7 +147,7 @@ export default function PersonalityTest({
           <div className="tn-parade flex w-max items-end gap-8 sm:gap-12">
             {marquee.map((ty, i) => (
               <div key={i} className="flex w-32 shrink-0 flex-col items-center gap-2 sm:w-40">
-                <span className="rounded-full bg-daejeon-blue px-3 py-1 text-[11px] font-extrabold text-white shadow">
+                <span className="rounded-full bg-daejeon-orange px-3 py-1 text-[11px] font-extrabold text-white shadow">
                   {t(`axes.${ty}`)}
                 </span>
                 <Image
@@ -259,13 +259,13 @@ export default function PersonalityTest({
                 onClick={() => choose(key)}
                 className={`flex w-full items-center gap-3.5 rounded-2xl border px-5 py-4 text-left transition-all duration-150 ${
                   on
-                    ? "scale-[1.01] border-daejeon-blue bg-indigo-50"
-                    : "border-slate-200 bg-white hover:scale-[1.02] hover:border-indigo-300 hover:shadow-md"
+                    ? "scale-[1.01] border-daejeon-orange bg-daejeon-orange"
+                    : "border-slate-200 bg-white hover:scale-[1.02] hover:border-daejeon-orange/50 hover:shadow-md"
                 }`}
               >
                 <span
                   className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold uppercase ${
-                    on ? "bg-daejeon-blue text-white" : "bg-slate-100 text-slate-500"
+                    on ? "bg-white text-daejeon-orange" : "bg-slate-100 text-slate-500"
                   }`}
                 >
                   {key}

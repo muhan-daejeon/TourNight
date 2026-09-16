@@ -272,7 +272,7 @@ export default function NightEtiquette({
 
           {/* 이 상황에서 바로 쓰는 한국어 — 에티켓(행동)과 표현(말)을 한 흐름으로 */}
           {phraseCategory && phrases && phrases.length > 0 && (
-            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+            <div className="mt-4 rounded-2xl border border-amber-400 bg-white p-5">
               <p className="flex items-center gap-2 text-sm font-bold text-amber-600">
                 <Languages size={15} />
                 {t("situationPhrases")}
@@ -313,12 +313,12 @@ export default function NightEtiquette({
           )}
 
           {/* 다음 단계 안내 — 자동 팝업 대신 상세를 다 본 자리에서 이어지는 버튼 */}
-          <div className="mt-5 flex flex-col items-center justify-between gap-3 rounded-2xl border border-daejeon-blue/25 bg-indigo-50 px-6 py-5 sm:flex-row">
+          <div className="mt-5 flex flex-col items-center justify-between gap-3 rounded-2xl border border-amber-400 bg-white px-6 py-5 sm:flex-row">
             <p className="text-base font-extrabold text-slate-900">{t("learnTitle")}</p>
             <button
               type="button"
               onClick={startKlife}
-              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-daejeon-blue px-7 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-500"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-daejeon-orange px-7 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
             >
               {t("learnCta")}
               <ChevronRight size={15} />

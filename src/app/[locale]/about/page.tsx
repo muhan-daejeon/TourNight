@@ -153,7 +153,7 @@ export default async function AboutPage({
       <PageBody>
         {/* ① 대전은 어느 도시인가요? */}
         <section className="mx-auto max-w-3xl py-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight text-daejeon-blue sm:text-3xl">
+          <h2 className="text-2xl font-extrabold tracking-tight text-daejeon-orange sm:text-3xl">
             {t("cityTitle")}
           </h2>
           <p className="mt-5 whitespace-pre-line text-[18px] leading-relaxed text-slate-600">
@@ -175,7 +175,7 @@ export default async function AboutPage({
 
         {/* ② 대전의 캐릭터, 꿈씨패밀리 — 제목 색은 "대전은 어느 도시인가요?"와 통일 */}
         <section className="mx-auto max-w-3xl py-10 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight text-daejeon-blue sm:text-3xl">
+          <h2 className="text-2xl font-extrabold tracking-tight text-daejeon-orange sm:text-3xl">
             {t("familyTitle")}
           </h2>
           <p className="mx-auto mt-5 max-w-xl whitespace-pre-line text-[18px] leading-relaxed text-slate-600">
@@ -200,7 +200,7 @@ export default async function AboutPage({
         {/* ③ 무료 자전거 타슈 — 제목 색은 "대전은 어느 도시인가요?"와 통일 */}
         <section id="tashu" className="py-10">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="flex items-center justify-center gap-2 text-2xl font-extrabold tracking-tight text-daejeon-blue sm:text-3xl">
+            <h2 className="flex items-center justify-center gap-2 text-2xl font-extrabold tracking-tight text-daejeon-orange sm:text-3xl">
               <Bike size={26} />
               {t("tashuTitle")}
             </h2>

@@ -39,7 +39,7 @@
   "home": {
     "heroTitle": "今夜、君の夢を広げよう",
     "heroSubtitle": "クムドリの街・大田で、夜景と星空と祭りが夢見る夜を",
-    "spotsSection": "今夜、どこへ行きましょう？",
+    "spotsSection": "<hl>今夜、</hl>どこへ行きましょう？",
     "searchPlaceholder": "名前・エリアで検索",
     "noResults": "該当する名所がありません",
     "viewDetail": "詳しく見る",

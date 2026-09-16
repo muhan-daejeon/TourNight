@@ -176,7 +176,7 @@ export default function KLifeGuide({
                 aria-current={on ? "step" : undefined}
                 className={`flex min-w-[76px] shrink-0 flex-col items-center gap-1 rounded-xl border px-2.5 py-2 transition sm:min-w-[92px] ${
                   on
-                    ? "border-amber-400 bg-amber-50 shadow-[0_0_16px_rgba(251,191,36,0.15)]"
+                    ? "border-amber-400 bg-white shadow-[0_0_16px_rgba(251,191,36,0.15)]"
                     : i < active
                       ? "border-slate-200 bg-slate-100"
                       : "border-slate-200 bg-transparent hover:bg-slate-100"
@@ -517,7 +517,7 @@ function PhraseCard({
     <div
       className={`rounded-2xl border p-4 ${
         main
-          ? "border-amber-300 bg-amber-50 sm:p-5"
+          ? "border-amber-400 bg-white sm:p-5"
           : "border-slate-200 bg-white"
       }`}
     >
@@ -547,7 +547,7 @@ function PhraseCard({
           onClick={onSave}
           className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
             savedNow
-              ? "bg-amber-100 text-amber-600"
+              ? "bg-amber-100 text-white"
               : "bg-slate-100 text-slate-400 hover:bg-slate-200"
           }`}
         >
