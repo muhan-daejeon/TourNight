@@ -19,7 +19,7 @@
     "festivals": "庆典·活动",
     "food": "美食",
     "stay": "住宿",
-    "shopping": "夜市 · 购物",
+    "shopping": "市场 · 购物",
     "menu": "全部菜单",
     "groupExplore": "探索",
     "groupGuide": "旅行指南",
@@ -524,12 +524,14 @@
       "title": "梦多尔的深夜旅行",
       "subtitle": "请按顺序拍摄4个拍照地点",
       "progress": "{done}/4 已完成",
-      "spotLabel": "地点{n}",
       "statusDone": "拍摄完成",
       "statusCurrent": "现在请上传这个地点的照片",
       "statusLocked": "还未到访",
       "completeButton": "完成梦多尔四格照",
-      "notice": "请在您选择的地点上传照片！\n如果所在位置不同，将无法上传照片。"
+      "notice": "请在您选择的地点上传照片！\n如果所在位置不同，将无法上传照片。",
+      "reselectSpot": "（重新选择地点）",
+      "reselectTitle": "更换其他地点",
+      "reselectSaveError": "更换地点失败，请稍后重试。"
     },
     "collage": {
       "title": "梦多尔四格照",

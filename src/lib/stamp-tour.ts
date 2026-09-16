@@ -94,6 +94,43 @@ export async function createStampTour(
   return toStampTour(stops);
 }
 
+export type StampSlotPlaceResult =
+  | { ok: true; tour: StampTour }
+  | { ok: false; error: "not-found" | "invalid-slot" | "already-photographed" };
+
+/**
+ * slot(0~3) 하나만 다른 장소로 바꾼다 — "지금 이 스팟 사진을 등록해주세요"나
+ * "아직 방문 전이에요" 옆의 (장소 다시 선택)에서 쓴다. 이미 그 칸에 인증사진이
+ * 있으면 바꿀 수 없다(사진과 장소가 어긋나면 안 되므로).
+ */
+export async function updateStampSlotPlace(
+  userId: number,
+  slot: number,
+  place: { name: string; lat: number; lng: number },
+): Promise<StampSlotPlaceResult> {
+  return sql.begin(async (tx) => {
+    const rows = await tx<{ stops: StopRow[] }[]>`
+      select stops from stamp_tours where user_id = ${userId} for update
+    `;
+    if (!rows.length) return { ok: false as const, error: "not-found" as const };
+    const stops = rows[0].stops;
+    if (!Number.isInteger(slot) || slot < 0 || slot >= stops.length) {
+      return { ok: false as const, error: "invalid-slot" as const };
+    }
+    if (stops[slot].photoPath) {
+      return { ok: false as const, error: "already-photographed" as const };
+    }
+
+    stops[slot] = { name: place.name, lat: place.lat, lng: place.lng, photoPath: null };
+    await tx`
+      update stamp_tours
+      set stops = ${tx.json(stops as unknown as Parameters<typeof sql.json>[0])}, updated_at = now()
+      where user_id = ${userId}
+    `;
+    return { ok: true as const, tour: toStampTour(stops) };
+  });
+}
+
 export type StampPhotoResult =
   | { ok: true; tour: StampTour }
   | { ok: false; error: "not-found" | "invalid-slot" };

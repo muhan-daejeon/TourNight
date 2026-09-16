@@ -327,6 +327,156 @@ function PlacePickerModal({
   );
 }
 
+/** 스팟 하나만 다른 장소로 바꾸는 검색 팝업 — 이미 고른 나머지와 겹치지 않게 막는다 */
+function SinglePlacePickerModal({
+  excludePlaces,
+  onComplete,
+  onClose,
+}: {
+  excludePlaces: { name: string; lat: number; lng: number }[];
+  onComplete: (place: PickedPlace) => void;
+  onClose: () => void;
+}) {
+  const t = useTranslations("stampTour.picker");
+  const tList = useTranslations("stampTour.list");
+  const [keyword, setKeyword] = useState("");
+  const [results, setResults] = useState<PickedPlace[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const placesRef = useRef<KakaoNS>(null);
+  const kakaoRef = useRef<KakaoNS>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadKakaoMaps().then((kakao) => {
+      if (cancelled) return;
+      kakaoRef.current = kakao;
+      placesRef.current = new kakao.maps.services.Places();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function search(e: React.FormEvent) {
+    e.preventDefault();
+    const q = keyword.trim();
+    if (!q || !placesRef.current) return;
+    setSearching(true);
+    setSearchError(false);
+    setSearched(true);
+    const kakao = kakaoRef.current;
+    placesRef.current.keywordSearch(
+      q,
+      (data: KakaoNS[], status: string) => {
+        setSearching(false);
+        if (status === kakao.maps.services.Status.OK) {
+          setResults(
+            data.slice(0, 8).map((d) => ({
+              name: d.place_name,
+              addr: d.road_address_name || d.address_name,
+              lat: Number(d.y),
+              lng: Number(d.x),
+            })),
+          );
+        } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+          setResults([]);
+        } else {
+          setResults([]);
+          setSearchError(true);
+        }
+      },
+      {
+        location: new kakao.maps.LatLng(DAEJEON_CENTER.lat, DAEJEON_CENTER.lng),
+        radius: 20000,
+      },
+    );
+  }
+
+  function pick(place: PickedPlace) {
+    if (
+      excludePlaces.some((c) => c.name === place.name && c.lat === place.lat && c.lng === place.lng)
+    ) {
+      alert(t("alreadyPicked"));
+      return;
+    }
+    onComplete(place);
+  }
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={tList("reselectTitle")}
+      className="fixed inset-0 z-[70] overflow-y-auto bg-white/90 p-4 py-8 backdrop-blur-sm"
+    >
+      <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="닫기"
+          className="absolute right-5 top-5 text-slate-500 transition hover:text-slate-900"
+        >
+          <X size={16} />
+        </button>
+
+        <h2 className="pr-8 text-lg font-bold text-slate-900">{tList("reselectTitle")}</h2>
+
+        <form onSubmit={search} className="mt-4 flex gap-2">
+          <input
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="flex-1 rounded-lg border border-slate-200 bg-slate-950/60 px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-300/60"
+          />
+          <button
+            type="submit"
+            disabled={searching || !keyword.trim()}
+            className="shrink-0 rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-400 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {searching ? t("searching") : t("searchButton")}
+          </button>
+        </form>
+
+        {searched && !searching && (
+          <ul className="mt-3 max-h-64 space-y-1.5 overflow-y-auto rounded-xl border border-slate-200 bg-white/[0.02] p-2">
+            {searchError ? (
+              <li className="px-2 py-3 text-center text-xs text-rose-400">{t("searchError")}</li>
+            ) : results.length === 0 ? (
+              <li className="px-2 py-3 text-center text-xs text-slate-500">{t("searchEmpty")}</li>
+            ) : (
+              results.map((r, i) => (
+                <li
+                  key={`${r.name}-${i}`}
+                  className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 transition hover:bg-slate-100"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-slate-900">
+                      {r.name}
+                    </span>
+                    <span className="block truncate text-xs text-slate-500">{r.addr}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => pick(r)}
+                    className="shrink-0 rounded-full border border-amber-300/40 px-3 py-1 text-xs font-semibold text-amber-600 transition hover:bg-amber-50"
+                  >
+                    {t("select")}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        )}
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 /** 스팟 4곳을 순서대로 담는 리스트 카드 — 지금 차례인 스팟만 누를 수 있다 */
 function StampList({
   tour,
@@ -344,6 +494,7 @@ function StampList({
   const tRoad = useTranslations("stampTour.road");
   const [checkingSlot, setCheckingSlot] = useState<number | null>(null);
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
+  const [reselectSlot, setReselectSlot] = useState<number | null>(null);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const doneCount = tour.stops.filter((s) => !!s.photoUrl).length;
@@ -410,8 +561,27 @@ function StampList({
     }
   }
 
+  async function handleReselect(slot: number, place: PickedPlace) {
+    try {
+      const res = await fetch("/api/stamp-tour", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          slot,
+          place: { name: place.name, lat: place.lat, lng: place.lng },
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      onUpdate(data.tour);
+      setReselectSlot(null);
+    } catch {
+      alert(tList("reselectSaveError"));
+    }
+  }
+
   return (
-    <div className="mx-auto w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="mx-auto w-full max-w-[31.2rem] rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-extrabold text-slate-900">{tList("title")}</h3>
@@ -453,10 +623,19 @@ function StampList({
               </span>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-slate-900">
-                  {tList("spotLabel", { n: i + 1 })} · {stop.name}
-                </p>
-                <p className="mt-0.5 truncate text-xs text-slate-500">{status}</p>
+                <p className="truncate text-sm font-bold text-slate-900">{stop.name}</p>
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <p className="truncate text-xs text-slate-500">{status}</p>
+                  {!done && (
+                    <button
+                      type="button"
+                      onClick={() => setReselectSlot(i)}
+                      className="shrink-0 text-xs font-semibold text-blue-950 transition hover:underline"
+                    >
+                      {tList("reselectSpot")}
+                    </button>
+                  )}
+                </div>
               </div>
 
               <button
@@ -509,6 +688,16 @@ function StampList({
       <div className="mt-2 flex justify-center lg:hidden">
         <ChevronDown size={18} className="text-slate-300" />
       </div>
+
+      {reselectSlot !== null && (
+        <SinglePlacePickerModal
+          excludePlaces={tour.stops
+            .filter((_, idx) => idx !== reselectSlot)
+            .map((s) => ({ name: s.name, lat: s.lat, lng: s.lng }))}
+          onComplete={(place) => handleReselect(reselectSlot, place)}
+          onClose={() => setReselectSlot(null)}
+        />
+      )}
     </div>
   );
 }
@@ -648,10 +837,12 @@ export default function StampTour() {
           <div className="mt-6 grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
             {/* 좌측 — 안내 문구 + 스팟 4곳을 순서대로 담는 리스트 카드(다운로드
                 버튼 포함). 카드를 화면 아래쪽으로 살짝 내리고, 그 위에 민트색
-                안내 문구를 둔다 — 문구는 카드(max-w-sm)와 같은 너비로 가운데
-                맞춰 카드의 x축 중앙에 오도록 하고, 문구 자체도 가운데 정렬한다 */}
+                네온사인 안내 문구를 둔다 — 문구는 카드(원래 너비의 1.3배)와 같은
+                너비로 가운데 맞춰 카드의 x축 중앙에 오도록 하고, 문구 자체도
+                가운데 정렬한다. 문구만 30px 위로 올리되, 그만큼을 margin-bottom
+                으로 보충해 바로 아래 카드는 원래 자리 그대로 있게 한다 */}
             <div className="lg:mt-10">
-              <p className="mx-auto mb-4 w-full max-w-sm whitespace-pre-line text-center text-sm font-light leading-relaxed text-daejeon-green">
+              <p className="tn-notice-neon mx-auto mt-[-30px] mb-[calc(1rem+30px)] w-full max-w-[31.2rem] whitespace-pre-line text-center text-sm font-light leading-relaxed text-daejeon-green">
                 {tList("notice")}
               </p>
               <StampList
@@ -689,6 +880,16 @@ export default function StampTour() {
           onClose={() => (tour ? setPhase("main") : router.push("/"))}
         />
       )}
+
+      <style>{`
+        .tn-notice-neon {
+          animation: tn-notice-neon-glow 2s ease-in-out infinite;
+        }
+        @keyframes tn-notice-neon-glow {
+          0%, 100% { text-shadow: 0 0 4px rgba(53, 181, 151, 0.5), 0 0 10px rgba(53, 181, 151, 0.25); }
+          50% { text-shadow: 0 0 10px rgba(53, 181, 151, 0.9), 0 0 22px rgba(53, 181, 151, 0.55); }
+        }
+      `}</style>
     </>
   );
 }

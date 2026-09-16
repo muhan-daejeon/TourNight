@@ -19,7 +19,7 @@
     "festivals": "祭り・イベント",
     "food": "グルメ",
     "stay": "宿泊",
-    "shopping": "夜市・買い物",
+    "shopping": "市場・買い物",
     "menu": "メニュー一覧",
     "groupExplore": "見どころ",
     "groupGuide": "旅のガイド",
@@ -524,12 +524,14 @@
       "title": "クムドリと夜の旅",
       "subtitle": "4つのフォトスポットを順番に集めましょう",
       "progress": "{done}/4 完了",
-      "spotLabel": "スポット{n}",
       "statusDone": "撮影完了",
       "statusCurrent": "今このスポットの写真を登録してください",
       "statusLocked": "まだ訪れていません",
       "completeButton": "クムドル4カットを完成させる",
-      "notice": "選んだスポットで写真を登録してください！\n場所が違うと写真をアップロードできません。"
+      "notice": "選んだスポットで写真を登録してください！\n場所が違うと写真をアップロードできません。",
+      "reselectSpot": "（場所を選び直す）",
+      "reselectTitle": "別の場所に変更する",
+      "reselectSaveError": "場所を変更できませんでした。しばらくしてからもう一度お試しください。"
     },
     "collage": {
       "title": "クムドル4カット",

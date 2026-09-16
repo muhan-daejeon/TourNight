@@ -19,7 +19,7 @@
     "festivals": "Festivals",
     "food": "Food",
     "stay": "Stay",
-    "shopping": "Night Markets",
+    "shopping": "Markets",
     "menu": "All menu",
     "groupExplore": "Explore",
     "groupGuide": "Travel Guide",
@@ -524,12 +524,14 @@
       "title": "Ggumdol's Night Trip",
       "subtitle": "Capture the 4 photo spots in order",
       "progress": "{done}/4 done",
-      "spotLabel": "Spot {n}",
       "statusDone": "Photo captured",
       "statusCurrent": "Upload a photo for this spot now",
       "statusLocked": "Not visited yet",
       "completeButton": "Complete my four-cut",
-      "notice": "Upload a photo at the spot you selected!\nYou can't upload if you're in a different location."
+      "notice": "Upload a photo at the spot you selected!\nYou can't upload if you're in a different location.",
+      "reselectSpot": "(Change place)",
+      "reselectTitle": "Pick a different place",
+      "reselectSaveError": "Couldn't change the place. Please try again in a moment."
     },
     "collage": {
       "title": "Ggumdol Four-Cut",

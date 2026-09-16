@@ -19,7 +19,7 @@
     "festivals": "축제&행사",
     "food": "맛집",
     "stay": "숙소",
-    "shopping": "야시장 · 쇼핑",
+    "shopping": "시장 · 쇼핑",
     "menu": "전체 메뉴",
     "groupExplore": "둘러보기",
     "groupGuide": "여행 가이드",
@@ -524,12 +524,14 @@
       "title": "꿈돌이와 심야 여행",
       "subtitle": "포토 스팟 4곳을 순서대로 담아보세요",
       "progress": "{done}/4 완료",
-      "spotLabel": "스팟 {n}",
       "statusDone": "촬영 완료",
       "statusCurrent": "지금 이 스팟 사진을 등록해주세요",
       "statusLocked": "아직 방문 전이에요",
       "completeButton": "꿈돌네컷 완성하기",
-      "notice": "선택한 스팟에서 사진을 등록해주세요!\n위치가 다르면 사진을 올릴 수 없어요."
+      "notice": "선택한 스팟에서 사진을 등록해주세요!\n위치가 다르면 사진을 올릴 수 없어요.",
+      "reselectSpot": "(장소 다시 선택)",
+      "reselectTitle": "다른 장소로 바꿔보세요",
+      "reselectSaveError": "장소를 바꾸지 못했어요. 잠시 후 다시 시도해주세요."
     },
     "collage": {
       "title": "꿈돌네컷",
