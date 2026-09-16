@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -59,7 +59,6 @@ function Visual({ image }: { image: string }) {
 export default function FeatureShowcase() {
   const t = useTranslations("home");
   const track = useRef<HTMLDivElement>(null);
-  const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 화면에 보이는 위치는 복제분까지 포함한 EXTENDED 기준 — 1~3이 진짜 슬라이드
   const [pos, setPos] = useState(1);
 
@@ -84,17 +83,23 @@ export default function FeatureShowcase() {
     el.scrollBy({ left: dir * panelWidth(), behavior: "smooth" });
   };
 
-  // 스크롤이 멎을 때마다(짧은 디바운스) 복제 장에 도착했는지 확인하고,
-  // 도착했으면 대응하는 진짜 장으로 애니메이션 없이 순간 이동한다
+  // 스크롤 도중에는 위치만 계속 갱신(좌측 텍스트가 그 자리에서 바로 바뀌게)
   const onScroll = () => {
     const el = track.current;
     if (!el) return;
-    const w = panelWidth();
-    const i = Math.round(el.scrollLeft / w);
-    setPos(i);
+    setPos(Math.round(el.scrollLeft / panelWidth()));
+  };
 
-    if (settleTimer.current) clearTimeout(settleTimer.current);
-    settleTimer.current = setTimeout(() => {
+  // 스크롤이 완전히 멎는 순간(neutral 이벤트라 임의의 디바운스 대기가 없다)
+  // 복제 장에 도착했는지 확인하고, 도착했으면 대응하는 진짜 장으로 애니메이션
+  // 없이 순간 이동한다 — setTimeout 디바운스로 기다리면 특히 마지막→처음으로
+  // 넘어갈 때 그만큼 더 늦게 반응하는 게 느껴져서, 늦지 않게 곧장 처리한다
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    const onScrollEnd = () => {
+      const w = panelWidth();
+      const i = Math.round(el.scrollLeft / w);
       if (i === 0) {
         el.scrollLeft = w * SLIDES.length; // 복제(마지막) → 진짜 마지막
         setPos(SLIDES.length);
@@ -102,8 +107,10 @@ export default function FeatureShowcase() {
         el.scrollLeft = w; // 복제(처음) → 진짜 처음
         setPos(1);
       }
-    }, 120);
-  };
+    };
+    el.addEventListener("scrollend", onScrollEnd);
+    return () => el.removeEventListener("scrollend", onScrollEnd);
+  }, []);
 
   const slide = SLIDES[(pos - 1 + SLIDES.length) % SLIDES.length];
 
@@ -111,7 +118,7 @@ export default function FeatureShowcase() {
     <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
       {/* ── 좌: 기능 소개 — 스크롤 위치에 맞춰 그대로 바뀐다 (전환 효과 없음) ── */}
       <div>
-        <p className="text-[16px] font-light tracking-wide text-slate-400">
+        <p className="tn-enjoy-neon text-[16px] font-light tracking-wide text-daejeon-green">
           {t("enjoyTitle")}
         </p>
         <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl">
@@ -167,6 +174,16 @@ export default function FeatureShowcase() {
           </button>
         </div>
       </div>
+
+      <style>{`
+        .tn-enjoy-neon {
+          animation: tn-enjoy-neon-glow 2s ease-in-out infinite;
+        }
+        @keyframes tn-enjoy-neon-glow {
+          0%, 100% { text-shadow: 0 0 4px rgba(53, 181, 151, 0.5), 0 0 10px rgba(53, 181, 151, 0.25); }
+          50% { text-shadow: 0 0 10px rgba(53, 181, 151, 0.9), 0 0 22px rgba(53, 181, 151, 0.55); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -101,7 +101,7 @@ export default async function HomePage({
       )}
 
       {/* ── 소식 · 인기글 · SNS ── */}
-      <section className="mx-auto max-w-7xl px-6 pb-14">
+      <section className="mx-auto max-w-7xl px-6 pb-14 mt-[60px]">
         <div id="news" className="grid scroll-mt-24 gap-10 lg:grid-cols-[1.5fr_1fr_1fr]">
           {/* 투어나잇 소식 */}
           <div className="min-w-0">
