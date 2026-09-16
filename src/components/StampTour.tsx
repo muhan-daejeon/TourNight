@@ -607,7 +607,7 @@ function StampList({
             <li
               key={i}
               className={`flex items-center gap-3 rounded-2xl px-3 py-3 transition ${
-                isNext ? "bg-blue-50 ring-1 ring-daejeon-blue/30" : "bg-slate-50"
+                isNext ? "bg-daejeon-orange/10 ring-1 ring-daejeon-orange/30" : "bg-slate-50"
               }`}
             >
               <span
@@ -615,7 +615,7 @@ function StampList({
                   done
                     ? "bg-daejeon-green text-white"
                     : isNext
-                      ? "bg-daejeon-blue text-white"
+                      ? "bg-daejeon-orange text-white"
                       : "bg-slate-200 text-slate-400"
                 }`}
               >
@@ -630,7 +630,7 @@ function StampList({
                     <button
                       type="button"
                       onClick={() => setReselectSlot(i)}
-                      className="shrink-0 text-xs font-semibold text-blue-950 transition hover:underline"
+                      className="shrink-0 text-xs font-semibold text-daejeon-orange transition hover:underline"
                     >
                       {tList("reselectSpot")}
                     </button>
@@ -644,15 +644,15 @@ function StampList({
                 disabled={!isNext || busy}
                 aria-label={status}
                 className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white transition ${
-                  isNext ? "ring-2 ring-daejeon-blue" : "ring-1 ring-slate-200"
+                  isNext ? "ring-2 ring-daejeon-orange" : "ring-1 ring-slate-200"
                 } disabled:cursor-not-allowed`}
               >
                 {done ? (
                   <Image src={stop.photoUrl!} alt="" fill sizes="44px" className="object-cover" />
                 ) : busy ? (
-                  <Loader2 size={16} className="animate-spin text-daejeon-blue" />
+                  <Loader2 size={16} className="animate-spin text-daejeon-orange" />
                 ) : isNext ? (
-                  <MapPin size={16} className="text-daejeon-blue" />
+                  <MapPin size={16} className="text-daejeon-orange" />
                 ) : null}
               </button>
 
@@ -680,7 +680,7 @@ function StampList({
         type="button"
         onClick={onComplete}
         disabled={completing || !tour.complete}
-        className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-daejeon-blue py-3 text-sm font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-daejeon-orange py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Download size={15} />
         {completing ? t("collage.downloading") : tList("completeButton")}

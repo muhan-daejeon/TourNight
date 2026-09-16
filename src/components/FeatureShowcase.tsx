@@ -30,8 +30,8 @@ const SLIDES: {
   cta: string; // 바로가기 글자색
   image: string; // 슬라이드 대표 이미지
 }[] = [
-  { key: 1, href: "/personality", bar: "bg-daejeon-blue", cta: "text-daejeon-blue", image: "/mystyle.jpg" },
-  { key: 2, href: "/stamp-tour", bar: "bg-daejeon-green", cta: "text-daejeon-green", image: "/picture.png" },
+  { key: 1, href: "/personality", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/mystyle.jpg" },
+  { key: 2, href: "/stamp-tour", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/picture.png" },
   // K-Life 카드는 통합 페이지(/etiquette)로 — 이미지는 팀 디자인 유지
   { key: 3, href: "/etiquette", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/klife.jpg" },
 ];

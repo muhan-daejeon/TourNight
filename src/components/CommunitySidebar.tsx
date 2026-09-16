@@ -134,7 +134,7 @@ export default async function CommunitySidebar({
       )}
 
       {/* 가이드 */}
-      <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+      <section className="rounded-2xl border border-amber-400 bg-white p-4">
         <h2 className="text-sm font-bold text-amber-600">{t("guideTitle")}</h2>
         <ul className="mt-2 space-y-1 text-xs leading-relaxed text-slate-400">
           <li>· {t("guide1")}</li>

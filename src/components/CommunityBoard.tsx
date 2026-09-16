@@ -278,7 +278,7 @@ function VerifyPrompt({ mailFrom }: { mailFrom: string | null }) {
           : null;
 
   return (
-    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+    <div className="rounded-xl border border-amber-400 bg-white px-4 py-3.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-start gap-2.5">
           <MailCheck size={16} className="mt-0.5 shrink-0 text-amber-600" />
@@ -368,7 +368,7 @@ function TranslatableBody({
   // 버튼은 괄호 없이 "번역"만 — 둥근 사각형(pill)에 연한 노란 배경을 준 배지로,
   // 문장 옆 텍스트 링크가 아니라 눈에 띄는 하나의 버튼으로 보이게 한다
   const pillClass =
-    "ml-1.5 inline-flex items-center whitespace-nowrap rounded-full bg-amber-200 px-2.5 py-0.5 align-middle text-[11px] font-bold text-amber-900 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60";
+    "ml-1.5 inline-flex items-center whitespace-nowrap rounded-full bg-amber-200 px-2.5 py-0.5 align-middle text-[11px] font-bold text-white transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
     <p className={className}>

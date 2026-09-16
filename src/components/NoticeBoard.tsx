@@ -104,7 +104,7 @@ export default function NoticeBoard() {
         />
         <button
           type="submit"
-          className="flex items-center gap-1.5 rounded-lg bg-daejeon-blue px-6 py-2.5 text-sm font-bold text-white transition hover:bg-blue-800"
+          className="flex items-center gap-1.5 rounded-lg bg-daejeon-green px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
         >
           <Search size={14} />
           검색
