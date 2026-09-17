@@ -340,8 +340,12 @@ async function togetherLookup(ids: string[]) {
  * stops 순서대로 구간 거리·together를 채워 Course 형태로 만든다.
  * withRoutes를 주면 각 구간의 실제 도보·대중교통 경로도 함께 붙인다
  * (AI 코스에서만 사용 — 추천 코스 목록까지 하면 호출이 과해진다).
+ *
+ * 명소가 아닌 코스(타슈 추천 코스 등)에서도 같은 방식으로 Course를
+ * 만들 수 있게 export한다 — 코스 만들기와 지도·이동수단 화면을 그대로
+ * 재사용하기 위함.
  */
-async function toCourse(
+export async function toCourse(
   stops: CourseStop[],
   withRoutes = false,
 ): Promise<Omit<Course, "id">> {

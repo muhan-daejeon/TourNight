@@ -231,6 +231,17 @@ export default function Header() {
   // "/"는 startsWith로 보면 모든 경로에 걸리므로 정확히 일치할 때만 현재 탭이다
   const isActive = (href: string) => isActiveHref(pathname, href);
 
+  // 지금 보고 있는 바로 그 페이지의 메뉴를 다시 누르면 Next Link는 같은 경로라
+  // 아무 일도 하지 않는다. 목록 화면은 검색어·필터 같은 상태를 자체적으로
+  // 들고 있어서(예: 야간 명소의 카테고리 칩) "처음으로 되돌리기" 용도로 같은
+  // 메뉴를 다시 누르는 경우가 있다 — 그때는 새로고침으로 그 상태를 지운다
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (pathname === href) {
+      e.preventDefault();
+      window.location.reload();
+    }
+  };
+
 
   return (
     // 온보딩 투어의 흐림막(z-[55])보다 위에 둔다 — 안 그러면 투어 중 헤더 전체가
@@ -428,6 +439,7 @@ export default function Header() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={(e) => handleNavClick(e, item.href)}
                     className={`whitespace-nowrap rounded-lg px-2 py-1.5 text-center text-base transition ${linkClass(isActive(item.href))}`}
                   >
                     {t(`nav.${key}`)}
@@ -455,6 +467,7 @@ export default function Header() {
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={(e) => handleNavClick(e, item.href)}
                       className={`block text-sm font-light ${linkClass(isActive(item.href))}`}
                     >
                       {t(`nav.${key}`)}

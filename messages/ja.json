@@ -38,8 +38,8 @@
     "saved": "マイリスト"
   },
   "home": {
-    "heroTitle": "今夜、君の夢を広げよう",
-    "heroSubtitle": "クムドリの街・大田で、夜景と星空と祭りが夢見る夜を",
+    "heroTitle": "今夜、TourNight",
+    "heroSubtitle": "クムドリの街・大田で、君の夢を広げよう",
     "spotsSection": "<hl>今夜、</hl>どこへ行きましょう？",
     "searchPlaceholder": "名前・エリアで検索",
     "noResults": "該当する名所がありません",
@@ -165,7 +165,7 @@
     "dataNote": "国土交通部 公共交通情報に基づく"
   },
   "courses": {
-    "title": "おすすめコース",
+    "title": "AIおすすめコース",
     "subtitle": "大田の夜景スポットをつなぐドライブコース。実際に一緒に訪問される区間（車両移動データ）は「一緒に訪問」で結びました。",
     "courseTitle": "{name}コース",
     "stopsCount": "{count}か所",
@@ -517,7 +517,14 @@
       "complete": "選択完了",
       "needFour": "4つの場所を選んでください。",
       "alreadyFour": "すでに4か所選んでいます。1つ削除してから選び直してください。",
-      "alreadyPicked": "すでに選択済みの場所です。"
+      "alreadyPicked": "すでに選択済みの場所です。",
+      "browseTitle": "夜景スポットから選ぶ",
+      "browseLoading": "スポットを読み込み中…",
+      "sectionOther": "その他",
+      "sectionBookmarks": "保存したスポット",
+      "sectionCourses": "保存したコース",
+      "sectionBookmarksEmpty": "まだ保存したスポットがありません。",
+      "sectionCoursesEmpty": "まだ保存したコースがありません。"
     },
     "road": {
       "stampLabel": "{n}番目のスタンプ",
@@ -569,7 +576,7 @@
       "source": "携帯通信データに基づく7日間予測 · %は最繁忙期(100)比の集中率",
       "unavailable": "この場所は混雑予測の提供対象外です。"
     },
-    "generating": "AIがこの場所のナイトガイドを作成中…",
+    "generating": "公式紹介文を読み込み中…",
     "more": "もっと見る",
     "less": "閉じる",
     "areaVisitors": {
@@ -1178,7 +1185,8 @@
     "coursesSub": "ステーションからすぐ出発できるナイトライド",
     "nearestBadge": "今いる場所から一番近いコース!",
     "courseMeta": "{km}km · 約{min}分",
-    "courseStart": "出発 {name}"
+    "courseStart": "出発 {name}",
+    "selectCourseHint": "コースを選ぶと、ここに実際のルートが表示されます"
   },
   "klife": {
     "restaurantTitle": "K-Lifeガイド · 食堂編",

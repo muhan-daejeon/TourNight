@@ -19,11 +19,12 @@ import {
 } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { NightSpot } from "@/lib/kto";
-import type { LocalSpot } from "@/lib/kto-live";
 import NightMap from "./NightMap";
 import { useBookmarks } from "./useBookmarks";
 
-const CATEGORIES = ["all", "science", "nature", "festival", "city"] as const;
+// 축제·맛집·숙소는 각자 전용 탭(장소 소개 메뉴)이 따로 있어 여기서는 뺀다 —
+// 야간 명소 페이지는 '명소' 카테고리끼리만 거른다
+const CATEGORIES = ["all", "science", "nature", "city"] as const;
 
 const CATEGORY_ICON: Record<string, LucideIcon> = {
   science: Telescope,
@@ -47,16 +48,7 @@ const CATEGORY_SCENE: Record<string, string> = {
   city: "from-amber-950 via-slate-900 to-orange-950",
 };
 
-export default function SpotExplorer({
-  spots,
-  food = [],
-  stay = [],
-}: {
-  spots: NightSpot[];
-  /** 명소 화면에 함께 노출하는 맛집·숙소 (피드백 7) — 칩으로 전환해 본다 */
-  food?: LocalSpot[];
-  stay?: LocalSpot[];
-}) {
+export default function SpotExplorer({ spots }: { spots: NightSpot[] }) {
   const t = useTranslations("home");
   const ts = useTranslations("saved");
   const router = useRouter();
@@ -68,9 +60,7 @@ export default function SpotExplorer({
   const planCourse = (ids: string[]) =>
     router.push(
       `/courses?from=${encodeURIComponent(ids.join(","))}` +
-        (category === "all" || category === "food" || category === "stay"
-          ? ""
-          : `&category=${category}`),
+        (category === "all" ? "" : `&category=${category}`),
     );
   const [onlyBookmarked, setOnlyBookmarked] = useState(false);
 
@@ -113,17 +103,6 @@ export default function SpotExplorer({
       );
     });
   }, [spots, category, query, onlyBookmarked, bookmarks]);
-
-  // 맛집/숙소 칩이 켜져 있으면 명소 대신 그 목록을 보여준다 (검색어 공유)
-  const localList = category === "food" ? food : category === "stay" ? stay : null;
-  const localFiltered = useMemo(() => {
-    if (!localList) return null;
-    const q = query.trim().toLowerCase();
-    if (!q) return localList;
-    return localList.filter(
-      (s) => s.title.toLowerCase().includes(q) || (s.addr ?? "").toLowerCase().includes(q),
-    );
-  }, [localList, query]);
 
   // 지도 마커 표시 여부 판단용 — 현재 필터를 통과한 스팟 ID 집합
   const visibleIds = useMemo(
@@ -192,22 +171,6 @@ export default function SpotExplorer({
             </button>
           );
         })}
-        {/* 맛집·숙소 — KTO 로컬 목록으로 전환 (피드백 7) */}
-        {([["food", food.length], ["stay", stay.length]] as const)
-          .filter(([, n]) => n > 0)
-          .map(([c]) => (
-            <button
-              key={c}
-              onClick={() => setCategory(c)}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition ${
-                category === c
-                  ? "border-amber-400 bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.3)]"
-                  : "border-slate-200 bg-slate-100 text-slate-400 backdrop-blur hover:border-slate-300 hover:text-slate-900"
-              }`}
-            >
-              {t(`categories.${c}`)}
-            </button>
-          ))}
         {/* 찜한 곳만 — 하나도 없으면 눌러도 빈 목록이라 아예 띄우지 않는다 */}
         {bookmarks.length > 0 && (
           <button
@@ -235,43 +198,12 @@ export default function SpotExplorer({
             content-start가 없으면 스팟이 적은 카테고리에서 카드가 옆 지도 높이만큼
             늘어나 사진 아래에 빈 공간이 생긴다 */}
         <div className="order-2 grid content-start items-start gap-3 sm:grid-cols-2 lg:order-1">
-          {localFiltered &&
-            localFiltered.map((ls) => (
-              <Link
-                key={ls.contentId}
-                href={`/${category === "food" ? "food" : "stay"}/${ls.contentId}`}
-                className="glass-card group overflow-hidden rounded-2xl"
-              >
-                <div className="relative h-44 w-full overflow-hidden bg-slate-200 sm:h-52">
-                  {ls.imageUrl && (
-                    <Image
-                      src={ls.imageUrl}
-                      alt={ls.title}
-                      fill
-                      sizes="(min-width: 1024px) 40vw, 100vw"
-                      className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                    />
-                  )}
-                </div>
-                <div className="p-3.5">
-                  <h3 className="line-clamp-1 text-[15px] font-bold text-slate-900 group-hover:text-daejeon-orange">
-                    {ls.title}
-                  </h3>
-                  <p className="mt-0.5 line-clamp-1 text-sm text-slate-500">{ls.addr}</p>
-                </div>
-              </Link>
-            ))}
-          {localFiltered && localFiltered.length === 0 && (
+          {filtered.length === 0 && (
             <p className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
               {t("noResults")}
             </p>
           )}
-          {!localFiltered && filtered.length === 0 && (
-            <p className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
-              {t("noResults")}
-            </p>
-          )}
-          {!localFiltered && filtered.map((spot, si) => {
+          {filtered.map((spot, si) => {
             const Icon = CATEGORY_ICON[spot.category];
             return (
               <article
@@ -370,16 +302,8 @@ export default function SpotExplorer({
           className="order-1 h-80 lg:order-2 lg:sticky lg:top-20 lg:h-[620px]"
         >
           <NightMap
-            spots={
-              localFiltered
-                ? localFiltered.map((ls) => ({ ...ls, category: "city" as const }))
-                : spots
-            }
-            visibleIds={
-              localFiltered
-                ? new Set(localFiltered.map((ls) => ls.contentId))
-                : visibleIds
-            }
+            spots={spots}
+            visibleIds={visibleIds}
             selectedId={activeSelectedId}
             onSelect={setSelectedId}
             // 코스 페이지에서 이 스팟을 거치는 AI 코스를 만들어 추천 코스와 함께 보여준다.

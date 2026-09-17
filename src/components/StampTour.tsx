@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import { ArrowRight, Check, ChevronDown, Download, Loader2, MapPin, RotateCcw, X } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Download, Heart, Loader2, MapPin, Plus, RotateCcw, Route, X } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { renderCollageFromUrls } from "@/lib/collage";
 import { loadKakaoMaps } from "@/lib/kakaoMaps";
+import { CHOSUNG_INDEX, indexChar } from "@/lib/hangul";
+import type { NightSpot } from "@/lib/kto";
+import { useBookmarks } from "./useBookmarks";
+import { useSavedCourses } from "./useSavedCourses";
 
 /**
  * 도장투어 with 꿈돌이 → 꿈돌네컷.
@@ -130,6 +134,7 @@ function PlacePickerModal({
   onClose: () => void;
 }) {
   const t = useTranslations("stampTour.picker");
+  const locale = useLocale();
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState<PickedPlace[]>([]);
   const [searching, setSearching] = useState(false);
@@ -150,6 +155,74 @@ function PlacePickerModal({
       cancelled = true;
     };
   }, []);
+
+  // 검색만으로는 뭐가 있는지 둘러볼 수 없다는 피드백 — 검증된 야간 명소 전체를
+  // 초성 색인으로 훑어볼 수 있게 아래에 덧붙인다. 명소 목록은 SavedSpots과
+  // 같은 경량 API(/api/spots/list)를 쓴다
+  const [allSpots, setAllSpots] = useState<NightSpot[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/spots/list?locale=${locale}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => {
+        if (!cancelled) setAllSpots(d.spots ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setAllSpots([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [locale]);
+
+  const { ids: bookmarkIds } = useBookmarks();
+  const { courses: savedCourses } = useSavedCourses();
+  const listRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  /** 초성별 + "내가 찜한 장소" + "내가 만든 코스" 섹션. 마지막 두 개는 항상
+   * 목록 끝(ㅎ 다음)에 둔다 — 비어 있어도 자리 자체는 유지해 위치가
+   * 안정적이다(둘러보다 보면 그 자리로 손이 기억한다) */
+  const sections = useMemo(() => {
+    const spots = allSpots ?? [];
+    const byId = new Map(spots.map((s) => [s.contentId, s]));
+
+    const groups = new Map<string, NightSpot[]>();
+    for (const s of spots) {
+      const key = indexChar(s.title) ?? "#";
+      (groups.get(key) ?? groups.set(key, []).get(key)!).push(s);
+    }
+    for (const list of groups.values()) {
+      list.sort((a, b) => a.title.localeCompare(b.title, "ko"));
+    }
+
+    const alpha: { key: string; label: string; items: NightSpot[] }[] = CHOSUNG_INDEX.filter(
+      (k) => groups.has(k),
+    ).map((k) => ({ key: k, label: k, items: groups.get(k)! }));
+    const other = groups.get("#");
+    if (other?.length) alpha.push({ key: "#", label: t("sectionOther"), items: other });
+
+    const bookmarked = bookmarkIds
+      .map((id) => byId.get(id))
+      .filter((s): s is NightSpot => !!s);
+
+    const courseStopIds = Array.from(
+      new Set(savedCourses.flatMap((c) => c.stops.map((s) => s.contentId))),
+    );
+    const fromCourses = courseStopIds
+      .map((id) => byId.get(id))
+      .filter((s): s is NightSpot => !!s);
+
+    return [
+      ...alpha,
+      { key: "bookmarks", label: t("sectionBookmarks"), items: bookmarked },
+      { key: "courses", label: t("sectionCourses"), items: fromCourses },
+    ];
+  }, [allSpots, bookmarkIds, savedCourses, t]);
+
+  function jumpTo(key: string) {
+    sectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function search(e: React.FormEvent) {
     e.preventDefault();
@@ -219,7 +292,7 @@ function PlacePickerModal({
       aria-label={t("title")}
       className="fixed inset-0 z-[70] overflow-y-auto bg-white/90 p-4 py-8 backdrop-blur-sm"
     >
-      <div className="relative mx-auto w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6">
+      <div className="relative mx-auto w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-6">
         <button
           type="button"
           onClick={onClose}
@@ -290,6 +363,86 @@ function PlacePickerModal({
             )}
           </ul>
         )}
+
+        {/* 검색만으로는 뭐가 있는지 훑어볼 수 없다는 피드백 — 검증된 야간
+            명소 전체를 초성 색인으로 둘러볼 수 있게 덧붙인다. 왼쪽 글자를
+            누르면 오른쪽 목록이 그 칸으로 스크롤된다 */}
+        <div className="mt-5 border-t border-slate-200 pt-4">
+          <p className="text-xs font-semibold text-slate-400">{t("browseTitle")}</p>
+          {allSpots === null ? (
+            <p className="mt-3 text-xs text-slate-400">{t("browseLoading")}</p>
+          ) : (
+            <div className="mt-2 flex gap-2">
+              <div className="flex shrink-0 flex-col items-center gap-0.5">
+                {sections.map((s) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => jumpTo(s.key)}
+                    title={s.label}
+                    className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-slate-400 transition hover:bg-amber-50 hover:text-amber-600"
+                  >
+                    {s.key === "bookmarks" ? (
+                      <Heart size={12} />
+                    ) : s.key === "courses" ? (
+                      <Route size={12} />
+                    ) : (
+                      s.label
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div
+                ref={listRef}
+                className="max-h-64 min-w-0 flex-1 overflow-y-auto rounded-xl border border-slate-200"
+              >
+                {sections.map((s) => (
+                  <div
+                    key={s.key}
+                    ref={(el) => {
+                      sectionRefs.current[s.key] = el;
+                    }}
+                  >
+                    <p className="sticky top-0 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-500">
+                      {s.label}
+                    </p>
+                    {s.items.length === 0 ? (
+                      <p className="px-3 py-2.5 text-xs text-slate-400">
+                        {s.key === "bookmarks"
+                          ? t("sectionBookmarksEmpty")
+                          : s.key === "courses"
+                            ? t("sectionCoursesEmpty")
+                            : t("searchEmpty")}
+                      </p>
+                    ) : (
+                      <ul>
+                        {s.items.map((sp) => (
+                          <li key={`${s.key}-${sp.contentId}`}>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                addChosen({ name: sp.title, lat: sp.mapY, lng: sp.mapX, addr: sp.addr })
+                              }
+                              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition hover:bg-amber-50"
+                            >
+                              <span className="min-w-0">
+                                <span className="block truncate text-sm font-semibold text-slate-900">
+                                  {sp.title}
+                                </span>
+                                <span className="block truncate text-xs text-slate-500">{sp.addr}</span>
+                              </span>
+                              <Plus size={14} className="shrink-0 text-amber-600" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="mt-5 border-t border-slate-200 pt-4">
           <p className="text-xs font-semibold text-slate-400">{t("selectedListTitle")}</p>

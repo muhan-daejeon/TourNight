@@ -126,12 +126,13 @@ export default function CourseMap({
             ([lng, lat]) => new kakao.maps.LatLng(lat, lng),
           );
           path.forEach((p: KakaoNS) => bounds.extend(p));
-          // 도보는 초록 점선, 탈것은 수단별 색 실선 — 직선 폴백(흐린 회색)과 확실히 구분된다
+          // 도보는 초록 실선, 탈것은 수단별 색 실선 — 색으로 이미 구분되니
+          // 점선까지 쓸 필요는 없다(점선은 아래 직선 폴백 전용으로 남긴다)
           const isWalk = seg.mode === "WALK";
           line(
             path,
             isWalk ? "#34d399" : (MODE_COLOR[seg.mode] ?? "#38bdf8"),
-            isWalk,
+            false,
             isWalk ? 5 : 6,
           );
 

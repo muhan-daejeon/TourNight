@@ -5,8 +5,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight, Check, Copy, MapPin, RefreshCw, Route } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { TASHU_COURSES, distanceM, type BikeLocale } from "@/lib/tashu-courses";
+import { TASHU_COURSES, distanceM, type BikeLocale, type TashuCourse } from "@/lib/tashu-courses";
 import { loadKakaoMaps } from "@/lib/kakaoMaps";
+import type { Course } from "@/lib/courses";
 
 /** Google Play 로고 — 대각선 그라데이션(파랑→초록→노랑→빨강)을 준 재생 버튼
  * 모양으로, 실제 로고의 4색 구성을 간략화해 작은 크기에서도 알아볼 수 있게 했다 */
@@ -86,6 +87,10 @@ export default function NightBikeMap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<KakaoNS>(null);
   const clustererRef = useRef<KakaoNS>(null);
+  // 코스 카드를 누르면 그리는 경로 — 새 코스를 고르면 이전 것부터 지운다
+  const routeLineRef = useRef<KakaoNS[]>([]);
+  const routeMarkersRef = useRef<KakaoNS[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [stations, setStations] = useState<TashuStation[] | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -148,6 +153,85 @@ export default function NightBikeMap() {
       () => {}, // 거부·실패 시 조용히 기본 화면 유지
       { enableHighAccuracy: true, timeout: 8000 },
     );
+  }
+
+  /** 추천 코스 카드를 누르면 출발지→경유지를 실제 보행로를 따라 잇는다
+   * (피드백: 직선 말고 실제 자전거·보행도로처럼 짜달라, 표현 방식은 코스
+   * 만들기가 실제 경로를 가져오는 방식과 같게). 카카오맵 SDK 자체엔
+   * 길찾기가 없어, 코스 만들기와 똑같은 소스(toCourse→TMap 보행자 경로,
+   * /api/tashu/course)에서 실제 경로를 받아 쓴다 — 인도·차도를 따라가므로
+   * 좌표를 일직선으로 잇는 것보다 실제 라이딩 동선에 가깝다. 코스
+   * 만들기의 이동수단 탭 UI까지 그대로 가져오지는 않는다 — 자전거 코스에
+   * 버스·택시 탭은 맞지 않는다. 구간별로 서버에 캐시돼 다시 누르면 즉시 온다.
+   * 이전에 그려 둔 경로가 있으면 먼저 지운다 */
+  async function showCourseRoute(tashu: TashuCourse) {
+    const { kakao } = window as KakaoNS;
+    const map = mapRef.current;
+    if (!kakao?.maps || !map) return;
+
+    routeLineRef.current.forEach((line: KakaoNS) => line.setMap(null));
+    routeLineRef.current = [];
+    routeMarkersRef.current.forEach((m) => m.setMap(null));
+    routeMarkersRef.current = [];
+
+    setSelectedCourseId(tashu.id);
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    const points = [tashu.start, ...tashu.stops];
+    let legs: ([number, number][] | null)[] = points.slice(0, -1).map(() => null);
+    try {
+      const res = await fetch(`/api/tashu/course?courseId=${tashu.id}&locale=${bikeLocale}`);
+      if (res.ok) {
+        const course = (await res.json()).course as Course | null;
+        legs =
+          course?.legs.map((leg) =>
+            leg.walk?.status === "ok" && leg.walk.legs.length
+              ? leg.walk.legs.flatMap((seg) => seg.path)
+              : null,
+          ) ?? legs;
+      }
+    } catch {
+      // 실패하면 아래에서 직선으로 대신 잇는다
+    }
+
+    const bounds = new kakao.maps.LatLngBounds();
+    const lines: KakaoNS[] = [];
+    legs.forEach((leg, i) => {
+      // 실제 경로가 있으면 그 좌표열([경도, 위도])을, 없으면 두 지점을 직선으로
+      const path = leg?.length
+        ? leg.map(([lng, lat]) => new kakao.maps.LatLng(lat, lng))
+        : [points[i], points[i + 1]].map((p) => new kakao.maps.LatLng(p.lat, p.lng));
+      path.forEach((p: KakaoNS) => bounds.extend(p));
+      const pl = new kakao.maps.Polyline({
+        path,
+        strokeWeight: 5,
+        strokeColor: "#35b597",
+        strokeOpacity: 0.9,
+        strokeStyle: leg?.length ? "solid" : "shortdash",
+      });
+      pl.setMap(map);
+      lines.push(pl);
+    });
+    routeLineRef.current = lines;
+
+    points.forEach((p, i) => {
+      const pos = new kakao.maps.LatLng(p.lat, p.lng);
+      bounds.extend(pos);
+      const overlay = new kakao.maps.CustomOverlay({
+        position: pos,
+        yAnchor: 0.5,
+        zIndex: 10,
+        content: `<div style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:9999px;background:${
+          i === 0 ? "#f39800" : "#35b597"
+        };color:#fff;font-size:11px;font-weight:800;border:2px solid #fff;box-shadow:0 2px 6px rgba(15,23,42,.35);">${
+          i === 0 ? "S" : i
+        }</div>`,
+        map,
+      });
+      routeMarkersRef.current.push(overlay);
+    });
+
+    map.setBounds(bounds, 60);
   }
 
   function refresh() {
@@ -313,21 +397,14 @@ export default function NightBikeMap() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {orderedCourses.map((c, i) => {
             const nearest = i === 0 && !!userPos;
+            const selected = selectedCourseId === c.id;
             return (
               <button
                 key={c.id}
                 type="button"
-                onClick={() => {
-                  const { kakao } = window as KakaoNS;
-                  const map = mapRef.current;
-                  if (kakao?.maps && map) {
-                    map.setCenter(new kakao.maps.LatLng(c.start.lat, c.start.lng));
-                    map.setLevel(5);
-                    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  }
-                }}
+                onClick={() => showCourseRoute(c)}
                 className={`group relative overflow-hidden rounded-2xl border bg-white text-left transition hover:-translate-y-0.5 hover:shadow-lg ${
-                  nearest ? "tn-neon border-emerald-400" : "border-slate-200"
+                  nearest ? "tn-neon border-emerald-400" : selected ? "border-daejeon-blue ring-2 ring-daejeon-blue/30" : "border-slate-200"
                 }`}
               >
                 {nearest && (

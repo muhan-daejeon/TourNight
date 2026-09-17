@@ -52,7 +52,7 @@ export default async function LocalSpotDetail({
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-slate-950/20" />
         <div className="absolute inset-x-0 bottom-0">
           <div className="mx-auto max-w-6xl px-4 pb-8">
-            <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-4xl">
+            <h1 className="text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-4xl">
               {spot.title}
             </h1>
             <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-400">

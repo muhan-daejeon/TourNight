@@ -12,20 +12,18 @@ const MAX_W: Record<Width, string> = {
 /**
  * 하위 페이지 공통 헤더.
  *
- * 홈이 시안대로 개편되면서 나머지 탭과 인상이 갈렸다. 홈 첫 화면처럼 사진을 깔고
- * 그 위에 제목을 얹되(rounded-3xl), 하위 페이지는 내용이 주인공이므로 높이를
- * 절반으로 줄인다.
+ * 예전엔 제목 위에 영문 오버라인(CULTURE 등)이 있었는데, 장식 이상의
+ * 역할이 없어 뺀다. 제목·부제는 다시 원래처럼 위아래로 쌓되(한 줄에
+ * 나란히 두는 실험은 되돌린다), 박스 높이는 오버라인이 빠진 만큼만
+ * 살짝 줄인다.
  */
 export default function PageHero({
-  overline,
   title,
   subtitle,
   image,
   width = "wide",
   children,
 }: {
-  /** 상단 영문 라벨 */
-  overline: string;
   title: string;
   subtitle?: string;
   /** 배경 사진 (public 경로). 페이지 성격에 맞는 야경 사진을 넣는다 */
@@ -34,10 +32,13 @@ export default function PageHero({
   width?: Width;
   /** 제목 아래 배치할 요소 (필터·검색 등) */
   children?: ReactNode;
+  /** 예전 오버라인 — 더는 화면에 그리지 않는다. 남은 호출부를 한 번에
+   * 지우지 않아도 되도록 프롭만 조용히 받아 둔다 */
+  overline?: string;
 }) {
   return (
     <div className={`mx-auto px-4 pt-6 ${MAX_W[width]}`}>
-      <div className="relative flex min-h-[190px] flex-col justify-center overflow-hidden rounded-3xl border border-slate-200 px-7 py-9 sm:min-h-[210px] sm:px-10">
+      <div className="relative flex min-h-[160px] flex-col justify-center overflow-hidden rounded-3xl border border-slate-200 px-7 py-7 sm:min-h-[180px] sm:px-10">
         <Image
           src={image}
           alt=""
@@ -50,8 +51,7 @@ export default function PageHero({
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/30" />
         {/* 사진 위 텍스트 — 본문이 라이트로 바뀌어도 여기는 밝은 색을 명시한다 */}
         <div className="relative text-white">
-          <p className="overline-label !text-amber-300">{overline}</p>
-          <h1 className="mt-2 text-3xl font-extrabold tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-4xl">
+          <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-4xl">
             {title}
           </h1>
           {subtitle && (
@@ -59,7 +59,7 @@ export default function PageHero({
               {subtitle}
             </p>
           )}
-          {children && <div className="mt-6">{children}</div>}
+          {children && <div className="mt-5">{children}</div>}
         </div>
       </div>
     </div>

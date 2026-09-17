@@ -1,8 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import ProfileForm from "@/components/ProfileForm";
-import MyPhrases from "@/components/MyPhrases";
-import SavedSpots from "@/components/SavedSpots";
-import { RESTAURANT_STEPS } from "@/lib/klife-restaurant";
+import LogoutButton from "@/components/LogoutButton";
 
 export default async function ProfilePage({
   params,
@@ -28,11 +26,15 @@ export default async function ProfilePage({
       </p>
       <ProfileForm welcome={welcome} />
 
-      {/* 찜한 장소 — 명소 카드의 저장 버튼으로 모은 곳들 (피드백 8) */}
-      <SavedSpots mode="grid" />
+      {/* 찜한 장소·코스는 헤더 하트 아이콘 → /saved로 옮겼다 (중복 제거).
+          내가 저장한 표현(MyPhrases)은 K-Life 가이드에만 남기고 여기선 뺀다 */}
 
-      {/* K-Life 가이드 하단과 같은 내용 — 시나리오가 늘면 이 배열에 추가한다 */}
-      <MyPhrases scenarios={[{ scenario: "restaurant", steps: RESTAURANT_STEPS }]} />
+      {/* 새로 가입한 직후(welcome)엔 로그아웃할 이유가 없다 */}
+      {!welcome && (
+        <div className="mt-10 border-t border-slate-200 pt-6">
+          <LogoutButton />
+        </div>
+      )}
     </div>
   );
 }
