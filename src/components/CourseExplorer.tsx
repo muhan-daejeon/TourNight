@@ -20,9 +20,12 @@ import {
   Heart,
 } from "lucide-react";
 import CourseMap, { type MapMode } from "./CourseMap";
+import CourseCustomizer from "./CourseCustomizer";
 import { useSavedCourses, toSavedCourse } from "./useSavedCourses";
+import { useCourseEdits, applyEdit } from "./useCourseEdits";
 import { TransitLine } from "./TransitInfo";
-import type { AiCourse, Course } from "@/lib/courses";
+import type { AiCourse, Course, CourseStop } from "@/lib/courses";
+import type { PersonalityType } from "@/lib/personality-test";
 import { TAXI_NIGHT_SURCHARGE, pickBestMode } from "@/lib/transit-format";
 
 /**
@@ -372,9 +375,22 @@ const CATEGORY_TEXT: Record<string, string> = {
   city: "text-amber-600",
 };
 
-export default function CourseExplorer({ courses }: { courses: Course[] }) {
+/** persona-explorer → explorer (성향 이름표를 붙일 코스인지) */
+function personaOf(id: string): PersonalityType | null {
+  return id.startsWith("persona-") ? (id.slice(8) as PersonalityType) : null;
+}
+
+export default function CourseExplorer({
+  courses,
+  spots = [],
+}: {
+  courses: Course[];
+  /** 코스에 더할 수 있는 명소 전체 (코스 다듬기의 후보) */
+  spots?: CourseStop[];
+}) {
   const t = useTranslations("courses");
   const home = useTranslations("home");
+  const tp = useTranslations("personality");
   const ts = useTranslations("saved");
   const locale = useLocale();
   // 지도의 '코스 짜기'로 넘어오면 ?from=<contentId>(+켜둔 카테고리 필터)가 붙는다
@@ -400,6 +416,8 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const [selId, setSelId] = useState<string | null>(null);
   // 코스 찜 — 브라우저에 담아 두고 헤더의 하트(찜 모아보기)에서 다시 본다
   const { courses: savedCourses, toggle: toggleSaved } = useSavedCourses();
+  // 내가 고친 코스 순서 — 새로고침해도 남도록 브라우저에 담아 둔다
+  const { edits, setIds, reset: resetEdit } = useCourseEdits();
   // 지도에 그릴 이동수단 — 실제 경로가 붙은 AI 코스에서만 전환할 수 있다
   const [mapMode, setMapMode] = useState<MapMode>("best");
 
@@ -477,7 +495,13 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
     );
   }
 
-  const all: Course[] = aiCourse ? [aiCourse, ...courses] : courses;
+  // 고쳐 둔 순서가 있으면 그걸 입혀 보여준다. 원본(aiCourse·courses)은 그대로 둬야
+  // "처음 추천으로" 되돌릴 수 있다.
+  const aiView = aiCourse
+    ? (applyEdit(aiCourse, edits[aiCourse.id], spots) as AiCourse)
+    : null;
+  const courseViews = courses.map((c) => applyEdit(c, edits[c.id], spots));
+  const all: Course[] = aiView ? [aiView, ...courseViews] : courseViews;
   // 선택 없음(null)을 허용한다. 예전에는 ?? all[0]로 항상 하나가 켜져 있어서
   // 코스를 고르지 않은 상태를 만들 수 없었다.
   const course = all.find((c) => c.id === selId) ?? null;
@@ -524,11 +548,11 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
           </p>
         )}
 
-        {aiCourse && (
+        {aiView && (
           <button
             type="button"
-            onClick={() => toggleCourse(aiCourse.id)}
-            className={cardClass(course?.id === aiCourse.id)}
+            onClick={() => toggleCourse(aiView.id)}
+            className={cardClass(course?.id === aiView.id)}
           >
             <div className="flex items-center justify-between gap-2">
               <span className="flex flex-wrap items-center gap-1.5">
@@ -537,43 +561,43 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                   {t("aiBadge")}
                 </span>
                 {/* 홈에서 켜둔 카테고리 필터를 우선했음을 알림 */}
-                {aiCourse.prefCategory && (
+                {aiView.prefCategory && (
                   <span className="rounded-full border border-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-400">
                     {t("aiCategoryPref", {
-                      category: home(`categories.${aiCourse.prefCategory}`),
+                      category: home(`categories.${aiView.prefCategory}`),
                     })}
                   </span>
                 )}
               </span>
               <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-600">
                 <Route size={13} />
-                {formatDistance(aiCourse.totalM)}
+                {formatDistance(aiView.totalM)}
               </span>
             </div>
-            <h3 className="mt-2 font-bold text-slate-900">{aiCourse.title}</h3>
+            <h3 className="mt-2 font-bold text-slate-900">{aiView.title}</h3>
             <p className="mt-0.5 text-xs text-slate-500">
-              {t("stopsCount", { count: aiCourse.stops.length })} ·{" "}
+              {t("stopsCount", { count: aiView.stops.length })} ·{" "}
               {(() => {
                 // 여러 곳을 담아 만든 코스면 "첫 곳 외 N곳 포함"으로 표시
                 const name =
-                  aiCourse.stops.find((s) => s.contentId === aiCourse.anchorId)
+                  aiView.stops.find((s) => s.contentId === aiView.anchorId)
                     ?.title ?? "";
-                const extra = (aiCourse.anchorIds?.length ?? 1) - 1;
+                const extra = (aiView.anchorIds?.length ?? 1) - 1;
                 return extra > 0
                   ? t("aiAnchorMulti", { name, count: extra })
                   : t("aiAnchor", { name });
               })()}
             </p>
-            {aiCourse.summary && (
+            {aiView.summary && (
               <p className="mt-2 text-[13px] leading-relaxed text-slate-400">
-                {aiCourse.summary}
+                {aiView.summary}
               </p>
             )}
 
             {/* 스팟별 방문 이유 (거리 폴백 코스는 이유가 없어 순서만 보여준다) */}
-            {aiCourse.notes.some(Boolean) ? (
+            {aiView.notes.some(Boolean) ? (
               <ol className="mt-3 space-y-2">
-                {aiCourse.stops.map((s, i) => (
+                {aiView.stops.map((s, i) => (
                   <li key={s.contentId} className="flex gap-2.5">
                     <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[11px] font-bold text-amber-600">
                       {i + 1}
@@ -586,51 +610,51 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                         >
                           {home(`categories.${s.category}`)}
                         </span>
-                        {i > 0 && aiCourse.legs[i - 1] && (
+                        {i > 0 && aiView.legs[i - 1] && (
                           <span className="text-[11px] font-medium text-slate-500">
-                            {formatDistance(aiCourse.legs[i - 1].distanceM)}
+                            {formatDistance(aiView.legs[i - 1].distanceM)}
                           </span>
                         )}
-                        {i > 0 && aiCourse.legs[i - 1]?.together && (
+                        {i > 0 && aiView.legs[i - 1]?.together && (
                           <span className="flex items-center gap-0.5 rounded-full bg-amber-300/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">
                             <Users size={9} />
                             {t("together")}
                           </span>
                         )}
                       </p>
-                      {aiCourse.notes[i] && (
+                      {aiView.notes[i] && (
                         <p className="mt-0.5 text-[12px] leading-relaxed text-slate-400">
-                          {aiCourse.notes[i]}
+                          {aiView.notes[i]}
                         </p>
                       )}
                       <span className="mt-1 flex">
-                        <TransitLine transit={aiCourse.transit?.[i] ?? null} />
+                        <TransitLine transit={aiView.transit?.[i] ?? null} />
                       </span>
                     </div>
                   </li>
                 ))}
               </ol>
             ) : (
-              <StopChain course={aiCourse} t={t} />
+              <StopChain course={aiView} t={t} />
             )}
 
-            {aiCourse.tip && (
+            {aiView.tip && (
               <p className="mt-3 flex gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-[12px] leading-relaxed text-slate-400">
                 <Lightbulb size={13} className="mt-0.5 shrink-0 text-amber-600" />
-                {aiCourse.tip}
+                {aiView.tip}
               </p>
             )}
             {/* 코스가 끝나는 곳 인근 숙소 — 야간 소비를 숙박으로 연결 */}
-            {aiCourse.stays.length > 0 && (
+            {aiView.stays.length > 0 && (
               <div className="mt-3 border-t border-slate-200 pt-3">
                 <p className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-400">
                   <BedDouble size={13} className="text-amber-600" />
                   {t("staysNear", {
-                    name: aiCourse.stops[aiCourse.stops.length - 1].title,
+                    name: aiView.stops[aiView.stops.length - 1].title,
                   })}
                 </p>
                 <div className="mt-2 flex gap-2 overflow-x-auto">
-                  {aiCourse.stays.map((s) => (
+                  {aiView.stays.map((s) => (
                     <a
                       key={s.contentId}
                       href={`https://map.kakao.com/link/to/${encodeURIComponent(s.title)},${s.mapY},${s.mapX}`}
@@ -663,7 +687,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             )}
 
             <p className="mt-2 text-[11px] text-slate-400">
-              {aiCourse.source === "ai" ? t("aiNote") : t("aiFallbackNote")}
+              {aiView.source === "ai" ? t("aiNote") : t("aiFallbackNote")}
             </p>
           </button>
         )}
@@ -678,13 +702,27 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
           />
         )}
 
+        {/* AI 코스도 내 손으로 고칠 수 있다 */}
+        {aiCourse && aiView && course?.id === aiView.id && (
+          <CourseCustomizer
+            course={aiView}
+            baseIds={aiCourse.stops.map((st) => st.contentId)}
+            pool={spots}
+            onChange={(ids) => setIds(aiView.id, ids)}
+            onReset={() => resetEdit(aiView.id)}
+          />
+        )}
+
         {/* 기본 추천 코스 */}
-        {aiCourse && courses.length > 0 && (
+        {aiView && courseViews.length > 0 && (
           <p className="px-1 pt-2 text-xs font-semibold text-slate-500">
             {t("presetHeading")}
           </p>
         )}
-        {courses.map((c, ci) => (
+        {courseViews.map((c, ci) => {
+          // 성향 코스는 "○○형" 이름표를 달아 어떤 사람 취향인지 바로 보이게 한다
+          const persona = personaOf(c.id);
+          return (
           // 둘러보기에서 첫 코스 카드도 함께 밝힌다. 탭 줄만 비추면 "여기서 코스를
           // 고른다"까지만 보이고, 코스가 실제로 어떻게 짜이는지는 안 보인다.
           <div key={c.id} data-tour={ci === 0 ? "courses" : undefined}>
@@ -693,9 +731,17 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             onClick={() => toggleCourse(c.id)}
             className={cardClass(course?.id === c.id)}
           >
+            {persona && (
+              <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-daejeon-blue px-2 py-0.5 text-[11px] font-bold text-white">
+                <Sparkles size={10} />
+                {t("personaBadge")}
+              </span>
+            )}
             <div className="flex items-center justify-between gap-2">
               <h3 className="font-bold text-slate-900">
-                {t("courseTitle", { name: c.stops[0].title })}
+                {persona
+                  ? tp(`types.${persona}.tagline`)
+                  : t("courseTitle", { name: c.stops[0].title })}
               </h3>
               <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-600">
                 <Route size={13} />
@@ -704,6 +750,7 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
             </div>
             <p className="mt-0.5 text-xs text-slate-500">
               {t("stopsCount", { count: c.stops.length })}
+              {persona ? ` · ${tp(`types.${persona}.name`)}` : ""}
             </p>
             <StopChain course={c} t={t} />
           </button>
@@ -718,10 +765,25 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
               />
             </div>
           )}
+          {/* 고른 코스만 다듬기를 펼친다 — 모든 카드에 달면 목록이 길어진다 */}
+          {course?.id === c.id && (
+            <CourseCustomizer
+              course={c}
+              baseIds={
+                (courses.find((o) => o.id === c.id) ?? c).stops.map(
+                  (st) => st.contentId,
+                )
+              }
+              pool={spots}
+              onChange={(ids) => setIds(c.id, ids)}
+              onReset={() => resetEdit(c.id)}
+            />
+          )}
           </div>
-        ))}
+          );
+        })}
 
-        {!courses.length && aiState !== "loading" && (
+        {!courseViews.length && aiState !== "loading" && (
           <p className="rounded-2xl border border-slate-200 bg-slate-100 p-4 text-sm text-slate-500">
             {t("empty")}
           </p>

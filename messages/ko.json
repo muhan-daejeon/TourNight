@@ -181,7 +181,7 @@
     "aiCategoryPref": "{category} 위주",
     "aiNote": "선택한 명소와 인근 야간 명소로 Gemini가 구성한 코스",
     "aiFallbackNote": "AI 응답을 받지 못해 가까운 명소 순서로 구성했어요",
-    "presetHeading": "다른 추천 코스",
+    "presetHeading": "내 성향 맞춤 코스",
     "modeBest": "추천",
     "modeStraight": "직선",
     "modeTransit": "대중교통",
@@ -214,7 +214,18 @@
     "editedNote": "경유지를 수정했어요 - 순서와 이동은 지도 앱에서 한 번 더 확인해 주세요.",
     "personaBadge": "성향 맞춤",
     "editMoveUp": "위로",
-    "editMoveDown": "아래로"
+    "editMoveDown": "아래로",
+    "editedBadge": "수정함",
+    "editHintAll": "명소를 더하거나 빼고, 가고 싶은 순서로 바꿔 보세요.",
+    "editAddTitle": "명소 추가",
+    "editSearch": "명소 이름이나 주소로 찾기",
+    "editNoMatch": "더할 만한 명소가 없어요.",
+    "editReset": "처음 추천으로 되돌리기",
+    "editSavedNote": "고친 코스는 이 브라우저에 저장돼 새로고침해도 그대로예요.",
+    "personaLoading": "내 여행 성향을 확인하고 있어요…",
+    "personaNeededTitle": "성향 테스트를 먼저 해 주세요",
+    "personaNeededBody": "여행 성향을 알면 그 취향에 맞춰 짜 둔 야간 코스를 바로 보여드려요.",
+    "personaNeededCta": "성향 테스트 하러 가기"
   },
   "etiquette": {
     "title": "나이트 에티켓",

@@ -181,7 +181,7 @@
     "aiCategoryPref": "{category}中心",
     "aiNote": "選んだスポットと周辺の夜スポットから Gemini が構成したコース",
     "aiFallbackNote": "AI の応答が得られず、近い順で構成しました",
-    "presetHeading": "その他のおすすめコース",
+    "presetHeading": "あなたのタイプに合わせたコース",
     "modeBest": "おすすめ",
     "modeStraight": "直線",
     "modeTransit": "公共交通",
@@ -214,7 +214,18 @@
     "editedNote": "経由地を編集しました - 順序と移動は地図アプリでご確認ください。",
     "personaBadge": "あなた好み",
     "editMoveUp": "上へ",
-    "editMoveDown": "下へ"
+    "editMoveDown": "下へ",
+    "editedBadge": "編集済み",
+    "editHintAll": "スポットを足したり外したり、回りたい順に並べ替えてください。",
+    "editAddTitle": "スポットを追加",
+    "editSearch": "名前や住所で探す",
+    "editNoMatch": "追加できるスポットがありません。",
+    "editReset": "最初のおすすめに戻す",
+    "editSavedNote": "編集した内容はこのブラウザに保存され、更新しても残ります。",
+    "personaLoading": "あなたの旅のタイプを確認しています…",
+    "personaNeededTitle": "まずはタイプ診断をどうぞ",
+    "personaNeededBody": "旅のタイプがわかると、その好みに合わせて組んだ夜のコースをすぐにご案内できます。",
+    "personaNeededCta": "タイプ診断へ"
   },
   "etiquette": {
     "title": "ナイトエチケット",

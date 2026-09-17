@@ -181,7 +181,7 @@
     "aiCategoryPref": "{category}-focused",
     "aiNote": "Planned by Gemini from your spot and nearby night spots",
     "aiFallbackNote": "AI was unavailable, so stops are ordered by distance",
-    "presetHeading": "Other recommended courses",
+    "presetHeading": "Course for your travel style",
     "modeBest": "Best",
     "modeStraight": "Straight",
     "modeTransit": "Transit",
@@ -214,7 +214,18 @@
     "editedNote": "You've edited the stops - double-check order and routes in a map app.",
     "personaBadge": "For your style",
     "editMoveUp": "Move up",
-    "editMoveDown": "Move down"
+    "editMoveDown": "Move down",
+    "editedBadge": "Edited",
+    "editHintAll": "Add or drop spots and put them in the order you want to visit.",
+    "editAddTitle": "Add a spot",
+    "editSearch": "Search by name or address",
+    "editNoMatch": "No spots left to add.",
+    "editReset": "Back to the original",
+    "editSavedNote": "Your edits are kept in this browser, so they survive a refresh.",
+    "personaLoading": "Checking your travel style…",
+    "personaNeededTitle": "Take the style test first",
+    "personaNeededBody": "Once we know your travel style, we can show the night course built for it.",
+    "personaNeededCta": "Take the test"
   },
   "etiquette": {
     "title": "Night Etiquette",

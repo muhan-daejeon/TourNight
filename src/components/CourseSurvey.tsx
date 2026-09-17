@@ -752,8 +752,10 @@ function CourseEditor({
         ))}
       </ol>
 
+      {/* amber 스케일은 이 테마에서 50~950이 같은 주황이라 배경·글자에 함께
+          쓰면 글자가 묻힌다 */}
       {edited && (
-        <p className="mt-3 rounded-xl bg-amber-50 px-3.5 py-2.5 text-xs leading-relaxed text-amber-700">
+        <p className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs leading-relaxed text-slate-500">
           {tc("editedNote")}
         </p>
       )}
