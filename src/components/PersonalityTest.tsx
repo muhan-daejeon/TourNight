@@ -272,13 +272,13 @@ export default function PersonalityTest({
                 }`}
               >
                 <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold uppercase ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-extrabold uppercase ${
                     on ? "bg-white text-daejeon-orange" : "bg-slate-100 text-slate-500"
                   }`}
                 >
                   {key}
                 </span>
-                <span className={`text-sm leading-relaxed sm:text-[15px] ${on ? "font-semibold text-slate-900" : "text-slate-600"}`}>
+                <span className={`text-base leading-relaxed sm:text-lg ${on ? "font-semibold text-slate-900" : "text-slate-600"}`}>
                   {t(`questions.${q.id}.${key}`)}
                 </span>
               </button>

@@ -39,7 +39,7 @@
   },
   "home": {
     "heroTitle": "TourNight, 너의 꿈을 펼쳐 봐",
-    "heroSubtitle": "꿈돌이의 도시 대전에서 야경과 별빛, 축제로 꿈꾸는 밤을",
+    "heroSubtitle": "꿈돌이의 도시 대전에서 야경과 별빛, 축제로 만나는 TourNight",
     "spotsSection": "<hl>오늘 밤,</hl> 어디로 갈까요?",
     "searchPlaceholder": "명소 이름·지역으로 검색",
     "noResults": "검색 결과가 없습니다",
@@ -165,7 +165,7 @@
     "dataNote": "국토교통부 대중교통 정보 기준"
   },
   "courses": {
-    "title": "추천 코스",
+    "title": "AI 추천 코스",
     "subtitle": "대전 야경 명소를 잇는 드라이브 코스. 차량 이동 통계로 실제 함께 방문되는 구간은 '함께 방문'으로 이었습니다.",
     "courseTitle": "{name} 코스",
     "stopsCount": "{count}곳",

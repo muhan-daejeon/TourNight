@@ -39,7 +39,7 @@
   },
   "home": {
     "heroTitle": "TourNight、君の夢を広げよう",
-    "heroSubtitle": "クムドリの街・大田で、夜景と星空と祭りが夢見る夜を",
+    "heroSubtitle": "クムドリの街・大田で、夜景と星空と祭りに出会う、TourNight",
     "spotsSection": "<hl>今夜、</hl>どこへ行きましょう？",
     "searchPlaceholder": "名前・エリアで検索",
     "noResults": "該当する名所がありません",
@@ -165,7 +165,7 @@
     "dataNote": "国土交通部 公共交通情報に基づく"
   },
   "courses": {
-    "title": "おすすめコース",
+    "title": "AIおすすめコース",
     "subtitle": "大田の夜景スポットをつなぐドライブコース。実際に一緒に訪問される区間（車両移動データ）は「一緒に訪問」で結びました。",
     "courseTitle": "{name}コース",
     "stopsCount": "{count}か所",
