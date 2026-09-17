@@ -705,7 +705,8 @@
     "foodDistance": "{m}m from the route",
     "foodHours": "Hours",
     "foodRestDay": "Closed",
-    "foodNote": "Hours come from Korea Tourism Organization records and may differ late at night — please check before you go."
+    "foodNote": "Hours come from Korea Tourism Organization records and may differ late at night — please check before you go.",
+    "foodOnMap": "Also shown on the map with 🍴"
   },
   "tour": {
     "label": "Quick tour",

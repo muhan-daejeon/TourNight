@@ -58,6 +58,8 @@ interface SurveyCourse extends Course {
     title: string;
     addr: string;
     distM: number;
+    mapX: number;
+    mapY: number;
     hours: string | null;
     restDay: string | null;
   }[];
@@ -443,7 +445,7 @@ function SurveyResult({
       </div>
 
       <div className="mt-5 h-80 sm:h-[420px]">
-        <CourseMap course={course} mode={mode} />
+        <CourseMap course={course} mode={mode} foods={course.foods} />
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
@@ -537,6 +539,7 @@ function SurveyResult({
             <UtensilsCrossed size={15} />
             {t("foodTitle")}
           </p>
+          <p className="mt-1 text-xs text-amber-700/80">{t("foodOnMap")}</p>
           <ul className="mt-3 space-y-2.5">
             {course.foods.map((f) => (
               <li key={f.contentId} className="rounded-xl bg-white px-3.5 py-3">
