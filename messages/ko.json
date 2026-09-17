@@ -181,7 +181,6 @@
     "aiCategoryPref": "{category} 위주",
     "aiNote": "선택한 명소와 인근 야간 명소로 Gemini가 구성한 코스",
     "aiFallbackNote": "AI 응답을 받지 못해 가까운 명소 순서로 구성했어요",
-    "presetHeading": "내 성향 맞춤 코스",
     "modeBest": "추천",
     "modeStraight": "직선",
     "modeTransit": "대중교통",
@@ -209,10 +208,8 @@
     "tabPersona": "성향 테스트",
     "tabAi": "AI 코스 만들기",
     "editTitle": "내 코스 다듬기",
-    "editHint": "추천에서 빼거나, 찜한 장소를 더할 수 있어요",
     "editRemove": "코스에서 빼기",
     "editedNote": "경유지를 수정했어요 - 순서와 이동은 지도 앱에서 한 번 더 확인해 주세요.",
-    "personaBadge": "성향 맞춤",
     "editMoveUp": "위로",
     "editMoveDown": "아래로",
     "editedBadge": "수정함",
@@ -221,11 +218,7 @@
     "editSearch": "명소 이름이나 주소로 찾기",
     "editNoMatch": "더할 만한 명소가 없어요.",
     "editReset": "처음 추천으로 되돌리기",
-    "editSavedNote": "고친 코스는 이 브라우저에 저장돼 새로고침해도 그대로예요.",
-    "personaLoading": "내 여행 성향을 확인하고 있어요…",
-    "personaNeededTitle": "성향 테스트를 먼저 해 주세요",
-    "personaNeededBody": "여행 성향을 알면 그 취향에 맞춰 짜 둔 야간 코스를 바로 보여드려요.",
-    "personaNeededCta": "성향 테스트 하러 가기"
+    "editSavedNote": "고친 코스는 이 브라우저에 저장돼 새로고침해도 그대로예요."
   },
   "etiquette": {
     "title": "나이트 에티켓",
@@ -800,7 +793,6 @@
     "recommendCta": "추천 코스 보러가기",
     "seeSpots": "야간 명소 둘러보기",
     "restart": "다시 하기",
-    "noCourses": "지금은 추천할 코스가 준비되지 않았어요. 코스 페이지에서 직접 만들어보세요.",
     "questions": {
       "q1": {
         "text": "드디어 대전역 도착! 체크인하고 나니 밤까지 3시간 정도 남았다. 자, 첫 코스는?",
@@ -1099,11 +1091,9 @@
     "keywordsTitle": "성향 키워드",
     "strengthsTitle": "당신의 강점",
     "traitsHeading": "이런 분이에요!",
-    "matchedCourseCta": "맞춤 코스 보기",
     "noSpots": "지금은 추천할 명소가 준비되지 않았어요.",
     "tabs": {
       "traits": "성향 특징",
-      "courses": "추천 코스",
       "spots": "추천 스팟",
       "tips": "여행 팁"
     },
@@ -1115,8 +1105,7 @@
       "culturist": "문화·지식",
       "foodie": "미식",
       "trendsetter": "자기표현"
-    },
-    "seeCourses": "추천 코스 보기"
+    }
   },
   "local": {
     "food": {
@@ -1151,7 +1140,6 @@
     "sortAccess": "야경 접근성순",
     "withinKm": "1km 안 야간 명소 {n}곳",
     "nearestSpot": "가까운 야간 명소",
-    "planNearby": "이 근처 코스",
     "areas": {
       "yuseong": "유성온천",
       "dunsan": "둔산 · 시청",

@@ -25,7 +25,6 @@ import { useSavedCourses, toSavedCourse } from "./useSavedCourses";
 import { useCourseEdits, applyEdit } from "./useCourseEdits";
 import { TransitLine } from "./TransitInfo";
 import type { AiCourse, Course, CourseStop } from "@/lib/courses";
-import type { PersonalityType } from "@/lib/personality-test";
 import { TAXI_NIGHT_SURCHARGE, pickBestMode } from "@/lib/transit-format";
 
 /**
@@ -375,32 +374,27 @@ const CATEGORY_TEXT: Record<string, string> = {
   city: "text-amber-600",
 };
 
-/** persona-explorer → explorer (성향 이름표를 붙일 코스인지) */
-function personaOf(id: string): PersonalityType | null {
-  return id.startsWith("persona-") ? (id.slice(8) as PersonalityType) : null;
-}
-
+/**
+ * 명소 지도의 "코스 만들기"(?from=)로 들어와 AI가 짠 코스를 보는 화면.
+ *
+ * 예전에는 좌표로 묶어 자동 생성한 추천 코스 목록도 아래에 깔렸는데, 어떤
+ * 기준으로 묶였는지가 화면에서 읽히지 않아 뺐다. 성향별 수제 코스는 성향
+ * 결과 화면에서 바로 펼쳐 보여준다.
+ */
 export default function CourseExplorer({
-  courses,
   spots = [],
 }: {
-  courses: Course[];
   /** 코스에 더할 수 있는 명소 전체 (코스 다듬기의 후보) */
   spots?: CourseStop[];
 }) {
   const t = useTranslations("courses");
   const home = useTranslations("home");
-  const tp = useTranslations("personality");
   const ts = useTranslations("saved");
   const locale = useLocale();
   // 지도의 '코스 짜기'로 넘어오면 ?from=<contentId>(+켜둔 카테고리 필터)가 붙는다
   const searchParams = useSearchParams();
   const fromContentId = searchParams.get("from");
   const fromCategory = searchParams.get("category");
-  // 둘러보기로 들어온 단계인지 (?tour=n)
-  const tourParam = searchParams.get("tour");
-  // 성향 결과의 "추천 루트 보기"로 들어오면 ?course=<id>가 붙는다
-  const courseParam = searchParams.get("course");
 
   // 저장된 코스 복원은 아래 effect에서 마운트 후에 한다.
   // useState 초기값에서 localStorage를 읽으면 서버 HTML(코스 없음)과
@@ -420,26 +414,6 @@ export default function CourseExplorer({
   const { edits, setIds, reset: resetEdit } = useCourseEdits();
   // 지도에 그릴 이동수단 — 실제 경로가 붙은 AI 코스에서만 전환할 수 있다
   const [mapMode, setMapMode] = useState<MapMode>("best");
-
-  /**
-   * 둘러보기로 이 페이지에 들어오면 첫 코스를 미리 골라 둔다.
-   *
-   * 고르기 전에는 지도 자리가 안내 문구라, 코스를 밝혀 봐야 목록만 보이고
-   * "실제로 어떤 동선인지"는 안 보인다. 한 번만 골라 주고, 그 뒤 사용자가
-   * 직접 해제하면 그대로 둔다 (매 렌더마다 되살리면 해제가 안 된다).
-   */
-  const [tourPicked, setTourPicked] = useState<string | null>(null);
-  if (tourParam && tourPicked !== tourParam) {
-    setTourPicked(tourParam);
-    if (!selId && courses.length) setSelId(courses[0].id);
-  }
-
-  // 성향 결과에서 특정 코스로 — 같은 한 번만 고르기 패턴 (해제를 막지 않는다)
-  const [coursePicked, setCoursePicked] = useState<string | null>(null);
-  if (courseParam && coursePicked !== courseParam) {
-    setCoursePicked(courseParam);
-    if (courses.some((c) => c.id === courseParam)) setSelId(courseParam);
-  }
 
   // 클라이언트 이동으로 from·카테고리가 바뀌면 렌더 중에 초기화 (effect 안 setState 회피)
   const reqKey = `${fromContentId}|${fromCategory}`;
@@ -489,22 +463,14 @@ export default function CourseExplorer({
     return () => controller.abort();
   }, [fromContentId, fromCategory, locale]);
 
-  if (!courses.length && !fromContentId) {
-    return (
-      <p className="py-16 text-center text-sm text-slate-500">{t("empty")}</p>
-    );
-  }
-
-  // 고쳐 둔 순서가 있으면 그걸 입혀 보여준다. 원본(aiCourse·courses)은 그대로 둬야
+  // 고쳐 둔 순서가 있으면 그걸 입혀 보여준다. 원본(aiCourse)은 그대로 둬야
   // "처음 추천으로" 되돌릴 수 있다.
   const aiView = aiCourse
     ? (applyEdit(aiCourse, edits[aiCourse.id], spots) as AiCourse)
     : null;
-  const courseViews = courses.map((c) => applyEdit(c, edits[c.id], spots));
-  const all: Course[] = aiView ? [aiView, ...courseViews] : courseViews;
   // 선택 없음(null)을 허용한다. 예전에는 ?? all[0]로 항상 하나가 켜져 있어서
   // 코스를 고르지 않은 상태를 만들 수 없었다.
-  const course = all.find((c) => c.id === selId) ?? null;
+  const course = aiView && aiView.id === selId ? aiView : null;
   /** 같은 카드를 다시 누르면 선택 해제 */
   const toggleCourse = (id: string) =>
     setSelId((prev) => (prev === id ? null : id));
@@ -711,82 +677,6 @@ export default function CourseExplorer({
             onChange={(ids) => setIds(aiView.id, ids)}
             onReset={() => resetEdit(aiView.id)}
           />
-        )}
-
-        {/* 기본 추천 코스 */}
-        {aiView && courseViews.length > 0 && (
-          <p className="px-1 pt-2 text-xs font-semibold text-slate-500">
-            {t("presetHeading")}
-          </p>
-        )}
-        {courseViews.map((c, ci) => {
-          // 성향 코스는 "○○형" 이름표를 달아 어떤 사람 취향인지 바로 보이게 한다
-          const persona = personaOf(c.id);
-          return (
-          // 둘러보기에서 첫 코스 카드도 함께 밝힌다. 탭 줄만 비추면 "여기서 코스를
-          // 고른다"까지만 보이고, 코스가 실제로 어떻게 짜이는지는 안 보인다.
-          <div key={c.id} data-tour={ci === 0 ? "courses" : undefined}>
-          <button
-            type="button"
-            onClick={() => toggleCourse(c.id)}
-            className={cardClass(course?.id === c.id)}
-          >
-            {persona && (
-              <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-daejeon-blue px-2 py-0.5 text-[11px] font-bold text-white">
-                <Sparkles size={10} />
-                {t("personaBadge")}
-              </span>
-            )}
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="font-bold text-slate-900">
-                {persona
-                  ? tp(`types.${persona}.tagline`)
-                  : t("courseTitle", { name: c.stops[0].title })}
-              </h3>
-              <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-600">
-                <Route size={13} />
-                {formatDistance(c.totalM)}
-              </span>
-            </div>
-            <p className="mt-0.5 text-xs text-slate-500">
-              {t("stopsCount", { count: c.stops.length })}
-              {persona ? ` · ${tp(`types.${persona}.name`)}` : ""}
-            </p>
-            <StopChain course={c} t={t} />
-          </button>
-          {/* 고른 코스면 그 아래에 이동 정보를 펼친다 */}
-          {course?.id === c.id && hasRealRoute && (
-            <div className="mt-3">
-              <RoutePanel
-                course={c}
-                mode={mapMode}
-                setMode={setMapMode}
-                t={t}
-              />
-            </div>
-          )}
-          {/* 고른 코스만 다듬기를 펼친다 — 모든 카드에 달면 목록이 길어진다 */}
-          {course?.id === c.id && (
-            <CourseCustomizer
-              course={c}
-              baseIds={
-                (courses.find((o) => o.id === c.id) ?? c).stops.map(
-                  (st) => st.contentId,
-                )
-              }
-              pool={spots}
-              onChange={(ids) => setIds(c.id, ids)}
-              onReset={() => resetEdit(c.id)}
-            />
-          )}
-          </div>
-          );
-        })}
-
-        {!courseViews.length && aiState !== "loading" && (
-          <p className="rounded-2xl border border-slate-200 bg-slate-100 p-4 text-sm text-slate-500">
-            {t("empty")}
-          </p>
         )}
 
         <p className="flex items-center gap-1.5 px-1 pt-1 text-[11px] text-slate-400">

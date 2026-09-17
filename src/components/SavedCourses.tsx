@@ -13,16 +13,13 @@ const dist = (m: number) =>
 /**
  * 찜한 코스 목록 (찜 모아보기 페이지).
  *
- * 코스마다 어디서 왔는지(추천·AI·설문·성향)에 따라 다시 여는 주소가 다르다.
- * 추천·성향 코스는 코스 페이지가 id로 되살릴 수 있지만, AI·설문 코스는
- * 서버에 없어 되살릴 수 없다 — 그래서 경유지 이름만 보여주고 첫 스팟
- * 상세로 보낸다 (아무 데도 못 가는 것보다 낫다).
+ * 코스를 통째로 되살릴 수 있는 화면이 저마다 다르다. 성향 코스는 성향 결과
+ * 화면이 자기 코스를 펼쳐 주므로 거기로 보내고, AI·설문 코스는 서버에 없어
+ * 되살릴 수 없어서 경유지 이름만 보여주고 첫 스팟 상세로 보낸다 (아무 데도
+ * 못 가는 것보다 낫다).
  */
 function reopenHref(c: SavedCourse) {
-  if (c.kind === "persona")
-    return { pathname: "/courses", query: { persona: c.id.replace(/^persona-/, ""), course: c.id } };
-  if (c.kind === "recommended")
-    return { pathname: "/courses", query: { course: c.id } };
+  if (c.kind === "persona") return { pathname: "/personality" };
   return { pathname: `/spots/${c.stops[0]?.contentId ?? ""}` };
 }
 

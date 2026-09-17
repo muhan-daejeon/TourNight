@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  ChevronDown,
-  ChevronUp,
   Heart,
   Clock,
   Footprints,
@@ -17,13 +15,12 @@ import {
   Users,
   UtensilsCrossed,
   AlertTriangle,
-  X,
 } from "lucide-react";
-import type { Course } from "@/lib/courses";
+import type { Course, CourseStop } from "@/lib/courses";
 import CourseMap, { type MapMode } from "./CourseMap";
+import CourseCustomizer from "./CourseCustomizer";
 import { useSavedCourses, toSavedCourse } from "./useSavedCourses";
-import SavedSpots from "./SavedSpots";
-import type { NightSpot } from "@/lib/kto";
+import { useCourseEdits, applyEdit } from "./useCourseEdits";
 
 /** 출발지를 직접 고를 때 쓰는 대전 주요 거점 — GPS를 못 쓰거나 거부했을 때 */
 const ANCHORS = [
@@ -131,7 +128,12 @@ const chip = (on: boolean) =>
       : "border-slate-200 bg-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-900"
   }`;
 
-export default function CourseSurvey() {
+export default function CourseSurvey({
+  spots = [],
+}: {
+  /** 코스 다듬기에서 더할 수 있는 명소 전체 */
+  spots?: CourseStop[];
+} = {}) {
   const t = useTranslations("survey");
   const tc = useTranslations("courses");
   const locale = useLocale();
@@ -444,7 +446,15 @@ export default function CourseSurvey() {
         )}
       </div>
 
-      {course && <SurveyResult course={course} mode={mode} onMode={setMode} tc={tc} />}
+      {course && (
+        <SurveyResult
+          course={course}
+          mode={mode}
+          onMode={setMode}
+          tc={tc}
+          spots={spots}
+        />
+      )}
     </div>
   );
 }
@@ -455,11 +465,13 @@ function SurveyResult({
   mode,
   onMode,
   tc,
+  spots,
 }: {
   course: SurveyCourse;
   mode: MapMode;
   onMode: (m: MapMode) => void;
   tc: ReturnType<typeof useTranslations>;
+  spots: CourseStop[];
 }) {
   const t = useTranslations("survey");
   const ts = useTranslations("saved");
@@ -469,6 +481,9 @@ function SurveyResult({
   // 설문 코스는 서버에 없어 되살릴 수 없으므로 경유지만 담긴다
   const { courses: savedCourses, toggle: toggleSaved } = useSavedCourses();
   const savedNow = savedCourses.some((c) => c.id === course.id);
+  // 내가 고친 순서 — 아래 다듬기 패널이 이 값을 보여주고 고친다
+  const { edits, setIds, reset: resetEdit } = useCourseEdits();
+  const edited = applyEdit(course, edits[course.id], spots);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-slate-100 p-6">
@@ -644,133 +659,22 @@ function SurveyResult({
         </div>
       )}
 
-      {/* 내 코스 다듬기 — 추천에서 빼거나, 찜한 장소에서 더한다 (피드백 8·10).
-          코스가 새로 오면 key로 편집 상태도 처음부터 */}
-      <CourseEditor
-        key={course.stops.map((st) => st.contentId).join("|")}
-        course={course}
-        tc={tc}
-      />
+      {/* 내 코스 다듬기 (피드백 8·10) — 코스 화면·성향 결과와 같은 패널을 쓴다.
+          고친 결과는 브라우저에 남아 새로고침해도 그대로다.
+
+          위쪽 일정표(도착 시각·체류)는 처음 짠 순서로 계산된 값이라 여기서
+          바꾼 순서를 따라가지 않는다. 다시 계산하려면 이동 시간을 서버에서
+          새로 받아야 해서, 대신 편집 안내로 "지도 앱에서 한 번 더 확인"을
+          붙여 둔다. */}
+      <div className="mt-8 border-t border-slate-200 pt-6">
+        <CourseCustomizer
+          course={edited}
+          baseIds={course.stops.map((st) => st.contentId)}
+          pool={spots}
+          onChange={(ids) => setIds(course.id, ids)}
+          onReset={() => resetEdit(course.id)}
+        />
+      </div>
     </section>
-  );
-}
-
-/** 편집 중인 경유지 — 원본 CourseStop과 찜에서 더한 명소의 공통 최소형 */
-interface EditStop {
-  contentId: string;
-  title: string;
-  addr: string;
-  imageUrl: string | null;
-}
-
-function CourseEditor({
-  course,
-  tc,
-}: {
-  course: SurveyCourse;
-  tc: ReturnType<typeof useTranslations>;
-}) {
-  const [stops, setStops] = useState<EditStop[]>(
-    course.stops.map((st) => ({
-      contentId: st.contentId,
-      title: st.title,
-      addr: st.addr,
-      imageUrl: st.imageUrl,
-    })),
-  );
-  const edited =
-    stops.length !== course.stops.length ||
-    stops.some((st, i) => course.stops[i]?.contentId !== st.contentId);
-
-  // 순서 바꾸기 — i번째를 위/아래로 한 칸씩
-  const move = (i: number, dir: -1 | 1) =>
-    setStops((prev) => {
-      const j = i + dir;
-      if (j < 0 || j >= prev.length) return prev;
-      const next = [...prev];
-      [next[i], next[j]] = [next[j], next[i]];
-      return next;
-    });
-
-  return (
-    <div className="mt-8 border-t border-slate-200 pt-6">
-      <p className="text-base font-bold text-slate-900">{tc("editTitle")}</p>
-      <p className="mt-0.5 text-xs text-slate-400">{tc("editHint")}</p>
-
-      <ol className="mt-4 space-y-2">
-        {stops.map((st, i) => (
-          <li
-            key={st.contentId}
-            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5"
-          >
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-daejeon-blue text-[11px] font-extrabold text-white">
-              {i + 1}
-            </span>
-            {st.imageUrl && (
-              <span className="relative h-10 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-200">
-                {/* eslint-disable-next-line @next/next/no-img-element -- 작은 썸네일, 원본 크기 그대로 */}
-                <img src={st.imageUrl} alt="" className="h-full w-full object-cover" />
-              </span>
-            )}
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold text-slate-800">
-                {st.title}
-              </span>
-              <span className="block truncate text-xs text-slate-400">{st.addr}</span>
-            </span>
-            {/* 순서 바꾸기 — 드래그 대신 화살표: 폰에서도 확실하고 접근성도 낫다 */}
-            <span className="flex shrink-0 flex-col">
-              <button
-                type="button"
-                onClick={() => move(i, -1)}
-                disabled={i === 0}
-                aria-label={tc("editMoveUp")}
-                className="rounded-full p-1 text-slate-400 transition enabled:hover:text-daejeon-blue disabled:opacity-30"
-              >
-                <ChevronUp size={14} />
-              </button>
-              <button
-                type="button"
-                onClick={() => move(i, 1)}
-                disabled={i === stops.length - 1}
-                aria-label={tc("editMoveDown")}
-                className="rounded-full p-1 text-slate-400 transition enabled:hover:text-daejeon-blue disabled:opacity-30"
-              >
-                <ChevronDown size={14} />
-              </button>
-            </span>
-            <button
-              type="button"
-              onClick={() => setStops((prev) => prev.filter((x) => x.contentId !== st.contentId))}
-              disabled={stops.length <= 1}
-              aria-label={tc("editRemove")}
-              className="shrink-0 rounded-full p-1.5 text-slate-400 transition enabled:hover:text-rose-500 disabled:opacity-30"
-            >
-              <X size={14} />
-            </button>
-          </li>
-        ))}
-      </ol>
-
-      {/* amber 스케일은 이 테마에서 50~950이 같은 주황이라 배경·글자에 함께
-          쓰면 글자가 묻힌다 */}
-      {edited && (
-        <p className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs leading-relaxed text-slate-500">
-          {tc("editedNote")}
-        </p>
-      )}
-
-      {/* 찜한 장소에서 추가 — 이미지를 누르면 코스 끝에 붙는다 */}
-      <SavedSpots
-        mode="picker"
-        excludeIds={stops.map((st) => st.contentId)}
-        onPick={(sp: NightSpot) =>
-          setStops((prev) => [
-            ...prev,
-            { contentId: sp.contentId, title: sp.title, addr: sp.addr, imageUrl: sp.imageUrl },
-          ])
-        }
-      />
-    </div>
   );
 }
