@@ -210,7 +210,8 @@
     "editTitle": "Fine-tune My Course",
     "editHint": "Remove recommended stops or add from your saved places",
     "editRemove": "Remove from course",
-    "editedNote": "You've edited the stops - double-check order and routes in a map app."
+    "editedNote": "You've edited the stops - double-check order and routes in a map app.",
+    "personaBadge": "For your style"
   },
   "etiquette": {
     "title": "Night Etiquette",

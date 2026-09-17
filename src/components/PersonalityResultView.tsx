@@ -20,7 +20,9 @@ import {
   type PersonalityType,
 } from "@/lib/personality-test";
 import { PERSONA_MASCOT } from "@/lib/persona-mascot";
+import { PERSONA_COURSES, personaCourseId } from "@/lib/persona-courses";
 import PersonalityRadar from "./PersonalityRadar";
+import CourseMap from "./CourseMap";
 
 /**
  * 성향 테스트 결과 화면 (요약 + 상세 분석 + 탭).
@@ -196,12 +198,36 @@ function ResultDetail({
   const traits = t.raw(`types.${primary}.traits`) as string[];
   const tips = t.raw(`types.${primary}.tips`) as string[];
 
+  // 이 성향을 위해 직접 짜 둔 코스 — 명소 목록(spots)으로 경유지를 풀어
+  // 카드로 보여주고, 누르면 코스 페이지에서 그 코스가 선택된 채 열린다
+  const personaCourse = useMemo(() => {
+    const byId = new Map(spots.map((s) => [s.contentId, s]));
+    const stops = PERSONA_COURSES[primary]
+      .map((id) => byId.get(id))
+      .filter((s): s is NightSpot => !!s)
+      .map((s) => ({
+        contentId: s.contentId,
+        title: s.title,
+        addr: s.addr,
+        category: s.category,
+        imageUrl: s.imageUrl,
+        mapX: s.mapX,
+        mapY: s.mapY,
+      }));
+    if (stops.length < 2) return null;
+    return { id: personaCourseId(primary), stops, legs: [], totalM: 0 } as Course;
+  }, [spots, primary]);
+
+  // 이 성향을 위해 짜 둔 코스만 보여준다 — 카테고리로 거른 일반 코스를
+  // 섞으면 "네 성향의 코스"라는 메시지가 흐려진다. 수제 코스를 아직 못
+  // 만든 경우(명소 누락 등)에만 카테고리 매칭으로 대신한다
   const recCourses = useMemo(() => {
+    if (personaCourse) return [personaCourse];
     const match = courses.filter((c) =>
       c.stops.some((s) => categories.includes(s.category)),
     );
     return (match.length ? match : courses).slice(0, 3);
-  }, [courses, categories]);
+  }, [courses, categories, personaCourse]);
 
   const recSpots = useMemo(() => {
     const match = spots.filter((s) => categories.includes(s.category));
@@ -307,8 +333,20 @@ function ResultDetail({
               ) : (
                 <p className="text-sm text-slate-400">{t("noCourses")}</p>
               )}
+
+              {/* 수제 코스의 전체 동선을 지도에서 바로 — 카드만으로는 루트가
+                  머리에 안 그려진다. 실제 경로는 코스 페이지에서, 여기서는
+                  경유지를 직선으로 이어 흐름만 보여준다 */}
+              {personaCourse && (
+                <div className="mt-4 h-72 lg:h-80">
+                  <CourseMap course={personaCourse} mode="straight" />
+                </div>
+              )}
               <Link
-                href="/courses"
+                href={{
+                  pathname: "/courses",
+                  query: { persona: primary, course: personaCourseId(primary) },
+                }}
                 className="mt-6 inline-flex items-center gap-2 rounded-full bg-indigo-500 px-6 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-indigo-400"
               >
                 {t("matchedCourseCta")}
@@ -388,11 +426,18 @@ function CourseCard({
 }) {
   const cover = course.stops.find((s) => s.imageUrl)?.imageUrl ?? null;
   const cats = [...new Set(course.stops.map((s) => s.category))].slice(0, 2);
+  const personaType = course.id.startsWith("persona-") ? course.id.slice(8) : null;
   return (
     <Link
       // 코스 목록이 아니라 이 코스가 골라진 상태로 연다 — "추천 루트 보기"가
-      // 실제 루트(지도·경유지)로 이어지게
-      href={{ pathname: "/courses", query: { course: course.id } }}
+      // 실제 루트(지도·경유지)로 이어지게. 수제 성향 코스는 ?persona=도 실어
+      // 코스 페이지가 그 코스를 목록에 붙일 수 있게 한다
+      href={{
+        pathname: "/courses",
+        query: personaType
+          ? { persona: personaType, course: course.id }
+          : { course: course.id },
+      }}
       className="group overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-indigo-300/40"
     >
       <div className="relative h-32 w-full overflow-hidden bg-slate-200">
@@ -406,6 +451,11 @@ function CourseCard({
           />
         )}
         <div className="absolute left-2.5 top-2.5 flex gap-1.5">
+          {personaType && (
+            <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-extrabold text-slate-950">
+              {labelStops("personaBadge")}
+            </span>
+          )}
           {cats.map((c) => (
             <span
               key={c}

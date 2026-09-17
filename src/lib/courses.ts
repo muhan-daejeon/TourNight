@@ -14,6 +14,8 @@ import { getRelatedRows, normName } from "./kto-stats";
 import { getTransitForSpots, type SpotTransit } from "./transit";
 import { getRoutesForLegs, type SpotRoute } from "./routes";
 import { fetchNearbyStays, type NearbyStay, type NightSpot } from "./kto";
+import { PERSONA_COURSES, personaCourseId } from "./persona-courses";
+import type { PersonalityType } from "./personality-test";
 
 export interface CourseStop {
   contentId: string;
@@ -267,6 +269,53 @@ export async function getCourses(
       err instanceof Error ? err.message : err,
     );
     return [];
+  }
+}
+
+/**
+ * 성향별 수제 코스 — persona-courses.ts에 사람이 짜 둔 동선을
+ * 추천 코스와 같은 파이프라인(구간 거리·together·실제 경로)으로 완성한다.
+ *
+ * 결과 화면의 "추천 코스 보기"가 여기로 이어진다. 명소가 KTO 목록에서
+ * 빠졌으면 그 스팟만 건너뛰고, 2곳 미만으로 줄어든 성향은 코스를 내지
+ * 않는다. 페이지가 1시간 주기로 재생성되고 경로는 spot_route에 캐시돼
+ * 있어 7개를 다 만들어도 재생성 비용은 크지 않다.
+ */
+export async function getPersonaCourses(
+  locale = "ko",
+): Promise<Partial<Record<PersonalityType, Course>>> {
+  try {
+    const spots = await getVerifiedNightSpots(locale);
+    const byId = new Map(spots.map((s) => [s.contentId, s]));
+
+    const out: Partial<Record<PersonalityType, Course>> = {};
+    for (const [type, ids] of Object.entries(PERSONA_COURSES) as [
+      PersonalityType,
+      string[],
+    ][]) {
+      const stops: CourseStop[] = ids
+        .map((id) => byId.get(id))
+        .filter((s): s is NightSpot => !!s)
+        .map((s) => ({
+          contentId: s.contentId,
+          title: s.title,
+          addr: s.addr,
+          category: s.category,
+          imageUrl: s.imageUrl,
+          mapX: s.mapX,
+          mapY: s.mapY,
+        }));
+      if (stops.length < 2) continue;
+      const base = await toCourse(stops, true);
+      out[type] = { id: personaCourseId(type), ...base };
+    }
+    return out;
+  } catch (err) {
+    console.warn(
+      "[courses] 성향 코스 생성 실패 — 빈 목록으로 폴백합니다:",
+      err instanceof Error ? err.message : err,
+    );
+    return {};
   }
 }
 
