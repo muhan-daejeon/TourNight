@@ -12,10 +12,10 @@ const MAX_W: Record<Width, string> = {
 /**
  * 하위 페이지 공통 헤더.
  *
- * 예전엔 상단에 영문 오버라인(CULTURE 등) + 제목 + 그 아래 부제 3단으로
- * 쌓았는데, 오버라인이 장식 이상의 역할이 없어 빼고, 제목을 박스 위쪽으로
- * 올리고, 부제는 제목 오른쪽에 나란히 붙인다(피드백). 내용이 짧아진 만큼
- * 박스 높이도 절반 가까이 줄인다 — 하위 페이지는 사진이 아니라 내용이 주인공.
+ * 예전엔 제목 위에 영문 오버라인(CULTURE 등)이 있었는데, 장식 이상의
+ * 역할이 없어 뺀다. 제목·부제는 다시 원래처럼 위아래로 쌓되(한 줄에
+ * 나란히 두는 실험은 되돌린다), 박스 높이는 오버라인이 빠진 만큼만
+ * 살짝 줄인다.
  */
 export default function PageHero({
   title,
@@ -38,7 +38,7 @@ export default function PageHero({
 }) {
   return (
     <div className={`mx-auto px-4 pt-6 ${MAX_W[width]}`}>
-      <div className="relative flex min-h-[104px] flex-col justify-center overflow-hidden rounded-2xl border border-slate-200 px-7 py-5 sm:min-h-[120px] sm:px-10">
+      <div className="relative flex min-h-[160px] flex-col justify-center overflow-hidden rounded-3xl border border-slate-200 px-7 py-7 sm:min-h-[180px] sm:px-10">
         <Image
           src={image}
           alt=""
@@ -49,20 +49,17 @@ export default function PageHero({
         />
         {/* 글자가 얹히는 왼쪽은 진하게, 오른쪽은 사진이 살아 있게 */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/30" />
-        {/* 사진 위 텍스트 — 본문이 라이트로 바뀌어도 여기는 밝은 색을 명시한다.
-            제목·부제를 한 줄에 나란히 두고, 좁은 화면에서만 줄바꿈한다 */}
+        {/* 사진 위 텍스트 — 본문이 라이트로 바뀌어도 여기는 밝은 색을 명시한다 */}
         <div className="relative text-white">
-          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-            <h1 className="text-2xl font-extrabold tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-3xl">
-              {title}
-            </h1>
-            {subtitle && (
-              <p className="max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
-                {subtitle}
-              </p>
-            )}
-          </div>
-          {children && <div className="mt-4">{children}</div>}
+          <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] sm:text-4xl">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
+              {subtitle}
+            </p>
+          )}
+          {children && <div className="mt-5">{children}</div>}
         </div>
       </div>
     </div>
