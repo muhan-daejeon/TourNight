@@ -511,7 +511,14 @@
       "complete": "Done selecting",
       "needFour": "Please choose 4 places.",
       "alreadyFour": "You've already picked 4. Remove one to pick another.",
-      "alreadyPicked": "Already selected."
+      "alreadyPicked": "Already selected.",
+      "browseTitle": "Browse night spots",
+      "browseLoading": "Loading spots…",
+      "sectionOther": "Other",
+      "sectionBookmarks": "My Saved Spots",
+      "sectionCourses": "My Saved Courses",
+      "sectionBookmarksEmpty": "No saved spots yet.",
+      "sectionCoursesEmpty": "No saved courses yet."
     },
     "road": {
       "stampLabel": "Stamp {n}",

@@ -511,7 +511,14 @@
       "complete": "選択完了",
       "needFour": "4つの場所を選んでください。",
       "alreadyFour": "すでに4か所選んでいます。1つ削除してから選び直してください。",
-      "alreadyPicked": "すでに選択済みの場所です。"
+      "alreadyPicked": "すでに選択済みの場所です。",
+      "browseTitle": "夜景スポットから選ぶ",
+      "browseLoading": "スポットを読み込み中…",
+      "sectionOther": "その他",
+      "sectionBookmarks": "保存したスポット",
+      "sectionCourses": "保存したコース",
+      "sectionBookmarksEmpty": "まだ保存したスポットがありません。",
+      "sectionCoursesEmpty": "まだ保存したコースがありません。"
     },
     "road": {
       "stampLabel": "{n}番目のスタンプ",

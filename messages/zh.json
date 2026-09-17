@@ -511,7 +511,14 @@
       "complete": "选择完成",
       "needFour": "请选择4个地点。",
       "alreadyFour": "已经选满4个地点了，请先移除一个再选。",
-      "alreadyPicked": "已经选过这个地点了。"
+      "alreadyPicked": "已经选过这个地点了。",
+      "browseTitle": "从夜景景点中选择",
+      "browseLoading": "正在加载景点…",
+      "sectionOther": "其他",
+      "sectionBookmarks": "我收藏的地点",
+      "sectionCourses": "我保存的路线",
+      "sectionBookmarksEmpty": "还没有收藏的地点。",
+      "sectionCoursesEmpty": "还没有保存的路线。"
     },
     "road": {
       "stampLabel": "第{n}个印章",

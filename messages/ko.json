@@ -511,7 +511,14 @@
       "complete": "선택 완료",
       "needFour": "4개의 장소를 골라주세요.",
       "alreadyFour": "이미 4곳을 다 골랐어요. 하나를 뺀 뒤 다시 골라주세요.",
-      "alreadyPicked": "이미 고른 장소예요."
+      "alreadyPicked": "이미 고른 장소예요.",
+      "browseTitle": "야간 명소에서 고르기",
+      "browseLoading": "명소 목록을 불러오는 중…",
+      "sectionOther": "기타",
+      "sectionBookmarks": "내가 찜한 장소",
+      "sectionCourses": "내가 만든 코스",
+      "sectionBookmarksEmpty": "아직 찜한 장소가 없어요.",
+      "sectionCoursesEmpty": "아직 만든 코스가 없어요."
     },
     "road": {
       "stampLabel": "{n}번째 도장",
