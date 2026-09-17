@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import {
   ArrowRight,
@@ -20,7 +19,6 @@ import {
   type PersonalityResult,
 } from "@/lib/personality-test";
 import PersonalityResultView from "./PersonalityResultView";
-import { personaCourseId } from "@/lib/persona-courses";
 
 type Phase = "intro" | "quiz" | "analyzing" | "result";
 
@@ -31,13 +29,7 @@ type Phase = "intro" | "quiz" | "analyzing" | "result";
  * 채점은 lib/personality-test, 결과 화면 자체는 PersonalityResultView(마스코트·
  * 추천 코스·스팟 포함) — 프로필의 "내 여행 성향 확인하기"와 같이 쓴다.
  */
-export default function PersonalityTest({
-  onSeeCourses,
-}: {
-  /** 결과 하단 "추천 코스 보기" — 코스 페이지 탭에 심어졌을 땐 AI 탭으로 전환,
-      단독 페이지(/personality)에선 코스 페이지로 이동한다 (피드백 10) */
-  onSeeCourses?: () => void;
-} = {}) {
+export default function PersonalityTest() {
   const t = useTranslations("personality");
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
@@ -177,42 +169,12 @@ export default function PersonalityTest({
   // ── 결과 ───────────────────────────────────────────────────
   if (phase === "result" && result) {
     return (
-      <div>
-        <PersonalityResultView
-          primary={result.primary}
-          secondary={result.secondary}
-          scores={result.scores}
-          onRestart={restart}
-        />
-        {/* 결과 → 맞춤코스로 이어지는 다리 (피드백 10) */}
-        <div className="mt-8 text-center">
-          {onSeeCourses ? (
-            <button
-              type="button"
-              onClick={onSeeCourses}
-              className="inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-9 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,78,162,0.3)] transition hover:bg-indigo-500"
-            >
-              {t("seeCourses")}
-              <ArrowRight size={16} />
-            </button>
-          ) : (
-            <Link
-              // 코스 목록이 아니라 이 성향의 수제 코스가 선택된 채 열린다
-              href={{
-                pathname: "/courses",
-                query: {
-                  persona: result.primary,
-                  course: personaCourseId(result.primary),
-                },
-              }}
-              className="inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-9 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,78,162,0.3)] transition hover:bg-indigo-500"
-            >
-              {t("seeCourses")}
-              <ArrowRight size={16} />
-            </Link>
-          )}
-        </div>
-      </div>
+      <PersonalityResultView
+        primary={result.primary}
+        secondary={result.secondary}
+        scores={result.scores}
+        onRestart={restart}
+      />
     );
   }
 

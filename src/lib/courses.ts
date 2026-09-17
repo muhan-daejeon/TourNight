@@ -289,6 +289,8 @@ export async function getCourses(
  */
 export async function getPersonaCourses(
   locale = "ko",
+  /** 한 성향만 필요할 때 — 성향 결과 화면은 자기 코스 하나만 쓴다 */
+  only?: PersonalityType,
 ): Promise<Partial<Record<PersonalityType, Course>>> {
   try {
     const spots = await getVerifiedNightSpots(locale);
@@ -299,6 +301,7 @@ export async function getPersonaCourses(
       PersonalityType,
       string[],
     ][]) {
+      if (only && type !== only) continue;
       const stops: CourseStop[] = ids
         .map((id) => byId.get(id))
         .filter((s): s is NightSpot => !!s)

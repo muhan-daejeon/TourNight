@@ -89,7 +89,7 @@
     "spotsAllSubtitle": "地図で大田の夜を探して、気に入った場所を選べばそのままコースになります。",
     "newsSection": "TourNight のお知らせ",
     "newsSectionSub": "TourNight の最新情報",
-    "monthlyIssueTitle": "月刊ニュースレター",
+    "monthlyIssueTitle": "いま大田のお祭り",
     "monthlyIssueCta": "今月の祭りを見る",
     "popularSection": "今週の人気投稿",
     "popularSectionSub": "コミュニティ人気投稿 TOP {count}",
@@ -181,7 +181,6 @@
     "aiCategoryPref": "{category}中心",
     "aiNote": "選んだスポットと周辺の夜スポットから Gemini が構成したコース",
     "aiFallbackNote": "AI の応答が得られず、近い順で構成しました",
-    "presetHeading": "その他のおすすめコース",
     "modeBest": "おすすめ",
     "modeStraight": "直線",
     "modeTransit": "公共交通",
@@ -209,12 +208,17 @@
     "tabPersona": "性格診断",
     "tabAi": "AIコース作成",
     "editTitle": "マイコースを仕上げる",
-    "editHint": "おすすめから外したり、お気に入りを足したりできます",
     "editRemove": "コースから外す",
     "editedNote": "経由地を編集しました - 順序と移動は地図アプリでご確認ください。",
-    "personaBadge": "あなた好み",
     "editMoveUp": "上へ",
-    "editMoveDown": "下へ"
+    "editMoveDown": "下へ",
+    "editedBadge": "編集済み",
+    "editHintAll": "スポットを足したり外したり、回りたい順に並べ替えてください。",
+    "editAddTitle": "スポットを追加",
+    "editSearch": "名前や住所で探す",
+    "editNoMatch": "追加できるスポットがありません。",
+    "editReset": "最初のおすすめに戻す",
+    "editSavedNote": "編集した内容はこのブラウザに保存され、更新しても残ります。"
   },
   "etiquette": {
     "title": "ナイトエチケット",
@@ -392,6 +396,8 @@
     "learnTitle": "そろそろ韓国の生活を学んでみる?",
     "learnBody": "この状況を最初から最後まで体験できるK-Lifeガイドがあります。",
     "learnCta": "はじめる",
+    "chooseTransport": "どの交通手段を使いますか？",
+    "photoSoon": "写真は準備中",
     "learnLater": "あとで",
     "backToTopics": "他の場面を見る",
     "backToEtiquette": "エチケットに戻る"
@@ -771,7 +777,6 @@
     "recommendCta": "おすすめコースを見る",
     "seeSpots": "夜の名所を見る",
     "restart": "もう一度",
-    "noCourses": "今おすすめできるコースがありません。コースページで作ってみてください。",
     "questions": {
       "q1": {
         "text": "ついに大田駅に到着！チェックインを済ませると、夜まで3時間ほど。さて、最初は？",
@@ -1070,11 +1075,9 @@
     "keywordsTitle": "タイプのキーワード",
     "strengthsTitle": "あなたの強み",
     "traitsHeading": "こんな方です！",
-    "matchedCourseCta": "ぴったりのコースを見る",
     "noSpots": "今おすすめできる名所がありません。",
     "tabs": {
       "traits": "特徴",
-      "courses": "コース",
       "spots": "スポット",
       "tips": "旅のヒント"
     },
@@ -1086,8 +1089,7 @@
       "culturist": "文化",
       "foodie": "グルメ",
       "trendsetter": "自己表現"
-    },
-    "seeCourses": "おすすめコースを見る"
+    }
   },
   "local": {
     "food": {
@@ -1122,7 +1124,6 @@
     "sortAccess": "夜景アクセス順",
     "withinKm": "1km以内に夜の名所{n}か所",
     "nearestSpot": "最寄りの夜の名所",
-    "planNearby": "この近くでコース",
     "areas": {
       "yuseong": "儒城温泉",
       "dunsan": "屯山・市庁",

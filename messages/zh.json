@@ -89,7 +89,7 @@
     "spotsAllSubtitle": "在地图上探索大田的夜晚，把喜欢的地方收进来，直接生成专属路线。",
     "newsSection": "TourNight 消息",
     "newsSectionSub": "TourNight 的最新动态",
-    "monthlyIssueTitle": "月刊通讯",
+    "monthlyIssueTitle": "近期大田庆典",
     "monthlyIssueCta": "查看本月庆典",
     "popularSection": "本周热门帖",
     "popularSectionSub": "社区热门帖 TOP {count}",
@@ -181,7 +181,6 @@
     "aiCategoryPref": "以{category}为主",
     "aiNote": "由 Gemini 依据所选景点及周边夜间景点规划",
     "aiFallbackNote": "未能获取 AI 结果，已按距离由近到远排列",
-    "presetHeading": "其他推荐路线",
     "modeBest": "推荐",
     "modeStraight": "直线",
     "modeTransit": "公共交通",
@@ -209,12 +208,17 @@
     "tabPersona": "性格测试",
     "tabAi": "AI路线定制",
     "editTitle": "打磨我的路线",
-    "editHint": "可从推荐中移除,或从收藏中添加",
     "editRemove": "从路线移除",
     "editedNote": "你已编辑途经点 - 请在地图App再次确认顺序与路线。",
-    "personaBadge": "专属推荐",
     "editMoveUp": "上移",
-    "editMoveDown": "下移"
+    "editMoveDown": "下移",
+    "editedBadge": "已修改",
+    "editHintAll": "可以添加或删除景点，并按你想去的顺序排列。",
+    "editAddTitle": "添加景点",
+    "editSearch": "按名称或地址查找",
+    "editNoMatch": "没有可添加的景点了。",
+    "editReset": "恢复最初推荐",
+    "editSavedNote": "修改后的路线会保存在此浏览器，刷新后依然在。"
   },
   "etiquette": {
     "title": "夜间礼仪",
@@ -392,6 +396,8 @@
     "learnTitle": "现在开始学习韩国生活吧?",
     "learnBody": "K-Life指南带你从头到尾提前体验这个情境。",
     "learnCta": "开始",
+    "chooseTransport": "你要乘坐哪种交通工具？",
+    "photoSoon": "照片准备中",
     "learnLater": "稍后",
     "backToTopics": "查看其他情境",
     "backToEtiquette": "返回礼仪指南"
@@ -771,7 +777,6 @@
     "recommendCta": "查看推荐路线",
     "seeSpots": "浏览夜间景点",
     "restart": "重新测试",
-    "noCourses": "暂时没有可推荐的路线，请到路线页面自行创建。",
     "questions": {
       "q1": {
         "text": "终于到大田站啦！办完入住，离天黑还有约3小时。第一站去哪？",
@@ -1070,11 +1075,9 @@
     "keywordsTitle": "性格关键词",
     "strengthsTitle": "你的优势",
     "traitsHeading": "你就是这样的人！",
-    "matchedCourseCta": "查看定制路线",
     "noSpots": "暂时没有可推荐的景点。",
     "tabs": {
       "traits": "性格特点",
-      "courses": "推荐路线",
       "spots": "推荐景点",
       "tips": "旅行贴士"
     },
@@ -1086,8 +1089,7 @@
       "culturist": "文化",
       "foodie": "美食",
       "trendsetter": "自我表达"
-    },
-    "seeCourses": "查看推荐路线"
+    }
   },
   "local": {
     "food": {
@@ -1122,7 +1124,6 @@
     "sortAccess": "按夜景可达性",
     "withinKm": "1km内夜间景点{n}处",
     "nearestSpot": "最近的夜间景点",
-    "planNearby": "在附近规划路线",
     "areas": {
       "yuseong": "儒城温泉",
       "dunsan": "屯山 · 市厅",

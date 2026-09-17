@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { MapPin, Phone, Route, ChevronRight, Sparkles } from "lucide-react";
+import { MapPin, Phone, ChevronRight, Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { NightSpot } from "@/lib/kto";
 import type { LocalKind } from "@/lib/kto-live";
@@ -199,16 +199,6 @@ export default function NightLifeExplorer({
                           )}
                         </div>
 
-                        {s.nearest && (
-                          <Link
-                            href={`/courses?from=${s.nearest.contentId}`}
-                            className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-amber-600 transition hover:text-amber-700"
-                          >
-                            <Route size={12} />
-                            {t("planNearby")}
-                            <ChevronRight size={12} />
-                          </Link>
-                        )}
                       </div>
                     </div>
                   </li>
