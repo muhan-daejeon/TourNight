@@ -211,6 +211,7 @@
     "editHint": "可从推荐中移除,或从收藏中添加",
     "editRemove": "从路线移除",
     "editedNote": "你已编辑途经点 - 请在地图App再次确认顺序与路线。",
+    "personaBadge": "专属推荐",
     "editMoveUp": "上移",
     "editMoveDown": "下移"
   },
@@ -705,8 +706,8 @@
     "foodDistance": "距路线{m}米",
     "foodHours": "营业时间",
     "foodRestDay": "休息日",
-    "foodNote": "以上为韩国观光公社登记信息。深夜营业情况可能不同，请在前往前确认。",
-    "foodOnMap": "地图上也以🍴标示"
+    "foodOnMap": "地图上也以🍴标示",
+    "foodNote": "以上为韩国观光公社登记信息。深夜营业情况可能不同，请在前往前确认。"
   },
   "tour": {
     "label": "快速导览",

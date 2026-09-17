@@ -21,6 +21,7 @@ import {
   type PersonalityResult,
 } from "@/lib/personality-test";
 import PersonalityResultView from "./PersonalityResultView";
+import { personaCourseId } from "@/lib/persona-courses";
 
 type Phase = "intro" | "quiz" | "analyzing" | "result";
 
@@ -197,7 +198,14 @@ export default function PersonalityTest({
             </button>
           ) : (
             <Link
-              href="/courses"
+              // 코스 목록이 아니라 이 성향의 수제 코스가 선택된 채 열린다
+              href={{
+                pathname: "/courses",
+                query: {
+                  persona: result.primary,
+                  course: personaCourseId(result.primary),
+                },
+              }}
               className="inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-9 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,78,162,0.3)] transition hover:bg-indigo-500"
             >
               {t("seeCourses")}
