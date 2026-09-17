@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
+  Heart,
   Telescope,
   Trees,
   Sparkles,
@@ -57,6 +58,7 @@ export default function SpotExplorer({
   stay?: LocalSpot[];
 }) {
   const t = useTranslations("home");
+  const ts = useTranslations("saved");
   const router = useRouter();
   const [category, setCategory] = useState<string>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -312,7 +314,8 @@ export default function SpotExplorer({
                     {t(`categories.${spot.category}`)}
                   </span>
 
-                  {/* 찜 — 브라우저에만 저장되고, 위 '찜한 곳' 칩으로 다시 찾는다 */}
+                  {/* 찜 — 브라우저에만 저장되고, 위 '찜한 곳' 칩으로 다시 찾는다.
+                      코스 찜·명소 카드와 같은 로즈 글자 버튼으로 통일 */}
                   <button
                     type="button"
                     onClick={(e) => {
@@ -320,25 +323,21 @@ export default function SpotExplorer({
                       toggleBookmark(spot.contentId);
                     }}
                     aria-pressed={bookmarks.includes(spot.contentId)}
-                    aria-label={
+                    className={`absolute right-3 top-3 flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-sm transition ${
                       bookmarks.includes(spot.contentId)
-                        ? t("bookmarkRemove")
-                        : t("bookmarkAdd")
-                    }
-                    className={`absolute right-3 top-11 rounded-full p-1.5 backdrop-blur transition ${
-                      bookmarks.includes(spot.contentId)
-                        ? "bg-amber-400 text-slate-950"
-                        : "bg-slate-950/70 text-slate-400 hover:bg-white/90 hover:text-amber-600"
+                        ? "bg-rose-500 text-white hover:bg-rose-600"
+                        : "bg-white/95 text-rose-500 hover:bg-white"
                     }`}
                   >
-                    <Bookmark
-                      size={13}
+                    <Heart
+                      size={12}
                       fill={
                         bookmarks.includes(spot.contentId)
                           ? "currentColor"
                           : "none"
                       }
                     />
+                    {bookmarks.includes(spot.contentId) ? ts("saved") : ts("save")}
                   </button>
 
 

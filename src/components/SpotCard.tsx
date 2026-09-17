@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import {
-  Bookmark,
+  Heart,
   Telescope,
   Trees,
   Sparkles,
@@ -53,6 +53,7 @@ export default function SpotCard({ spot }: { spot: NightSpot }) {
   const t = useTranslations("home");
   const Icon = CATEGORY_ICON[spot.category] ?? Building2;
   const { ids, toggle } = useBookmarks();
+  const ts = useTranslations("saved");
   const saved = ids.includes(spot.contentId);
   const gu = district(spot.addrKo ?? spot.addr ?? "");
 
@@ -89,19 +90,20 @@ export default function SpotCard({ spot }: { spot: NightSpot }) {
         </div>
       </Link>
 
-      {/* 찜 — 링크 안에 두면 카드 이동과 겹치므로 형제로 띄운다 */}
+      {/* 찜 — 링크 안에 두면 카드 이동과 겹치므로 형제로 띄운다.
+          아이콘만 두면 사진 위에서 눈에 안 띄어 코스 찜과 같은 글자 버튼으로 */}
       <button
         type="button"
         onClick={() => toggle(spot.contentId)}
         aria-pressed={saved}
-        aria-label={saved ? t("bookmarkRemove") : t("bookmarkAdd")}
-        className={`absolute right-3 top-3 rounded-full p-2 backdrop-blur transition ${
+        className={`absolute right-3 top-3 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold shadow-sm transition ${
           saved
-            ? "bg-amber-400 text-slate-950"
-            : "bg-slate-950/50 text-slate-900 hover:bg-slate-950/80"
+            ? "bg-rose-500 text-white hover:bg-rose-600"
+            : "bg-white/95 text-rose-500 hover:bg-white"
         }`}
       >
-        <Bookmark size={15} fill={saved ? "currentColor" : "none"} />
+        <Heart size={13} fill={saved ? "currentColor" : "none"} />
+        {saved ? ts("saved") : ts("save")}
       </button>
     </article>
   );
