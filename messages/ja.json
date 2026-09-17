@@ -181,7 +181,6 @@
     "aiCategoryPref": "{category}中心",
     "aiNote": "選んだスポットと周辺の夜スポットから Gemini が構成したコース",
     "aiFallbackNote": "AI の応答が得られず、近い順で構成しました",
-    "presetHeading": "その他のおすすめコース",
     "modeBest": "おすすめ",
     "modeStraight": "直線",
     "modeTransit": "公共交通",
@@ -209,12 +208,17 @@
     "tabPersona": "性格診断",
     "tabAi": "AIコース作成",
     "editTitle": "マイコースを仕上げる",
-    "editHint": "おすすめから外したり、お気に入りを足したりできます",
     "editRemove": "コースから外す",
     "editedNote": "経由地を編集しました - 順序と移動は地図アプリでご確認ください。",
-    "personaBadge": "あなた好み",
     "editMoveUp": "上へ",
-    "editMoveDown": "下へ"
+    "editMoveDown": "下へ",
+    "editedBadge": "編集済み",
+    "editHintAll": "スポットを足したり外したり、回りたい順に並べ替えてください。",
+    "editAddTitle": "スポットを追加",
+    "editSearch": "名前や住所で探す",
+    "editNoMatch": "追加できるスポットがありません。",
+    "editReset": "最初のおすすめに戻す",
+    "editSavedNote": "編集した内容はこのブラウザに保存され、更新しても残ります。"
   },
   "etiquette": {
     "title": "ナイトエチケット",
@@ -764,7 +768,6 @@
     "recommendCta": "おすすめコースを見る",
     "seeSpots": "夜の名所を見る",
     "restart": "もう一度",
-    "noCourses": "今おすすめできるコースがありません。コースページで作ってみてください。",
     "questions": {
       "q1": {
         "text": "ついに大田駅に到着！チェックインを済ませると、夜まで3時間ほど。さて、最初は？",
@@ -1063,11 +1066,9 @@
     "keywordsTitle": "タイプのキーワード",
     "strengthsTitle": "あなたの強み",
     "traitsHeading": "こんな方です！",
-    "matchedCourseCta": "ぴったりのコースを見る",
     "noSpots": "今おすすめできる名所がありません。",
     "tabs": {
       "traits": "特徴",
-      "courses": "コース",
       "spots": "スポット",
       "tips": "旅のヒント"
     },
@@ -1079,8 +1080,7 @@
       "culturist": "文化",
       "foodie": "グルメ",
       "trendsetter": "自己表現"
-    },
-    "seeCourses": "おすすめコースを見る"
+    }
   },
   "local": {
     "food": {
@@ -1115,7 +1115,6 @@
     "sortAccess": "夜景アクセス順",
     "withinKm": "1km以内に夜の名所{n}か所",
     "nearestSpot": "最寄りの夜の名所",
-    "planNearby": "この近くでコース",
     "areas": {
       "yuseong": "儒城温泉",
       "dunsan": "屯山・市庁",

@@ -181,7 +181,6 @@
     "aiCategoryPref": "{category}-focused",
     "aiNote": "Planned by Gemini from your spot and nearby night spots",
     "aiFallbackNote": "AI was unavailable, so stops are ordered by distance",
-    "presetHeading": "Other recommended courses",
     "modeBest": "Best",
     "modeStraight": "Straight",
     "modeTransit": "Transit",
@@ -209,12 +208,17 @@
     "tabPersona": "Persona Test",
     "tabAi": "AI Course Builder",
     "editTitle": "Fine-tune My Course",
-    "editHint": "Remove recommended stops or add from your saved places",
     "editRemove": "Remove from course",
     "editedNote": "You've edited the stops - double-check order and routes in a map app.",
-    "personaBadge": "For your style",
     "editMoveUp": "Move up",
-    "editMoveDown": "Move down"
+    "editMoveDown": "Move down",
+    "editedBadge": "Edited",
+    "editHintAll": "Add or drop spots and put them in the order you want to visit.",
+    "editAddTitle": "Add a spot",
+    "editSearch": "Search by name or address",
+    "editNoMatch": "No spots left to add.",
+    "editReset": "Back to the original",
+    "editSavedNote": "Your edits are kept in this browser, so they survive a refresh."
   },
   "etiquette": {
     "title": "Night Etiquette",
@@ -764,7 +768,6 @@
     "recommendCta": "See recommended courses",
     "seeSpots": "Browse night spots",
     "restart": "Retake",
-    "noCourses": "No courses to recommend yet - try building one on the courses page.",
     "questions": {
       "q1": {
         "text": "You've made it to Daejeon Station! Checked in, and about 3 hours left before nightfall. First move?",
@@ -1063,11 +1066,9 @@
     "keywordsTitle": "Persona keywords",
     "strengthsTitle": "Your strengths",
     "traitsHeading": "This is you!",
-    "matchedCourseCta": "See matched courses",
     "noSpots": "No spots to recommend yet.",
     "tabs": {
       "traits": "Traits",
-      "courses": "Courses",
       "spots": "Spots",
       "tips": "Tips"
     },
@@ -1079,8 +1080,7 @@
       "culturist": "Culture",
       "foodie": "Food",
       "trendsetter": "Express"
-    },
-    "seeCourses": "See Recommended Courses"
+    }
   },
   "local": {
     "food": {
@@ -1115,7 +1115,6 @@
     "sortAccess": "Closest to night spots",
     "withinKm": "{n} night spots within 1km",
     "nearestSpot": "Nearest night spot",
-    "planNearby": "Plan a course here",
     "areas": {
       "yuseong": "Yuseong Hot Springs",
       "dunsan": "Dunsan · City Hall",

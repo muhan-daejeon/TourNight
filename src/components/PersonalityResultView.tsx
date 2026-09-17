@@ -5,14 +5,15 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowRight,
-  Compass,
+  Heart,
   MapPin,
   RefreshCw,
+  Route,
   Sparkles,
   UserRound,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import type { Course } from "@/lib/courses";
+import type { Course, CourseStop } from "@/lib/courses";
 import type { NightSpot } from "@/lib/kto";
 import {
   TYPE_CATEGORIES,
@@ -20,9 +21,11 @@ import {
   type PersonalityType,
 } from "@/lib/personality-test";
 import { PERSONA_MASCOT } from "@/lib/persona-mascot";
-import { PERSONA_COURSES, personaCourseId } from "@/lib/persona-courses";
 import PersonalityRadar from "./PersonalityRadar";
 import CourseMap from "./CourseMap";
+import CourseCustomizer from "./CourseCustomizer";
+import { useCourseEdits, applyEdit } from "./useCourseEdits";
+import { useSavedCourses, toSavedCourse } from "./useSavedCourses";
 
 /**
  * 성향 테스트 결과 화면 (요약 + 상세 분석 + 탭).
@@ -52,22 +55,23 @@ export default function PersonalityResultView({
   const th = useTranslations("home"); // 카테고리 라벨 재사용
   const locale = useLocale();
 
-  const [courses, setCourses] = useState<Course[]>([]);
   const [spots, setSpots] = useState<NightSpot[]>([]);
+  // 이 성향을 위해 사람이 짜 둔 코스 — 서버에서 구간 거리·실제 경로까지 붙여 온다
+  const [personaCourse, setPersonaCourse] = useState<Course | null>(null);
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/personality/recos?locale=${locale}`)
+    fetch(`/api/personality/recos?locale=${locale}&persona=${primary}`)
       .then((r) => r.json())
       .then((d) => {
         if (cancelled) return;
-        setCourses(d.courses ?? []);
         setSpots(d.spots ?? []);
+        setPersonaCourse(d.personaCourse ?? null);
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [locale]);
+  }, [locale, primary]);
 
   const [showDetail, setShowDetail] = useState(expanded);
   const categories = TYPE_CATEGORIES[primary];
@@ -154,12 +158,23 @@ export default function PersonalityResultView({
         </div>
       </div>
 
+      {/* 결과 바로 아래에 이 성향의 코스를 펼친다 — 예전에는 탭 안에 있거나
+          코스 페이지로 넘어가야 보여서, 결과를 본 사람의 절반은 코스까지 오지
+          못했다 */}
+      {personaCourse && (
+        <PersonaCourse
+          course={personaCourse}
+          spots={spots}
+          primary={primary}
+          t={t}
+        />
+      )}
+
       {showDetail && (
         <ResultDetail
           primary={primary}
           scores={scores}
           categories={categories}
-          courses={courses}
           spots={spots}
           t={t}
           th={th}
@@ -169,43 +184,34 @@ export default function PersonalityResultView({
   );
 }
 
-// 07 상세 분석(레이더·키워드·강점) + 08 탭
-function ResultDetail({
-  primary,
-  scores,
-  categories,
-  courses,
+const fmtM = (m: number) => (m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`);
+
+/**
+ * 이 성향에 맞춰 짜 둔 코스 — 경유지·지도·다듬기를 결과 화면에서 바로 본다.
+ *
+ * 다듬은 결과는 코스 화면과 같은 저장소(tournight:courseEdits)에 담기므로,
+ * 어디서 고치든 같은 코스로 보인다.
+ */
+function PersonaCourse({
+  course,
   spots,
+  primary,
   t,
-  th,
 }: {
-  primary: PersonalityType;
-  scores: Record<PersonalityType, number>;
-  categories: NightSpot["category"][];
-  courses: Course[];
+  course: Course;
   spots: NightSpot[];
+  primary: PersonalityType;
   t: ReturnType<typeof useTranslations>;
-  th: ReturnType<typeof useTranslations>;
 }) {
-  type TabKey = "traits" | "courses" | "spots" | "tips";
-  const [tab, setTab] = useState<TabKey>("traits");
-  // 'n곳' 표기는 코스 화면과 같은 문구를 쓴다 (personality에는 없는 키다)
   const tc = useTranslations("courses");
-  const values = useMemo(() => radarValues(scores), [scores]);
+  const ts = useTranslations("saved");
+  const locale = useLocale();
+  const { edits, setIds, reset } = useCourseEdits();
+  const { courses: saved, toggle: toggleSaved } = useSavedCourses();
 
-  const keywords = t.raw(`types.${primary}.keywords`) as string[];
-  const strengths = t.raw(`types.${primary}.strengths`) as string[];
-  const traits = t.raw(`types.${primary}.traits`) as string[];
-  const tips = t.raw(`types.${primary}.tips`) as string[];
-
-  // 이 성향을 위해 직접 짜 둔 코스 — 명소 목록(spots)으로 경유지를 풀어
-  // 카드로 보여주고, 누르면 코스 페이지에서 그 코스가 선택된 채 열린다
-  const personaCourse = useMemo(() => {
-    const byId = new Map(spots.map((s) => [s.contentId, s]));
-    const stops = PERSONA_COURSES[primary]
-      .map((id) => byId.get(id))
-      .filter((s): s is NightSpot => !!s)
-      .map((s) => ({
+  const pool: CourseStop[] = useMemo(
+    () =>
+      spots.map((s) => ({
         contentId: s.contentId,
         title: s.title,
         addr: s.addr,
@@ -213,30 +219,137 @@ function ResultDetail({
         imageUrl: s.imageUrl,
         mapX: s.mapX,
         mapY: s.mapY,
-      }));
-    if (stops.length < 2) return null;
-    return { id: personaCourseId(primary), stops, legs: [], totalM: 0 } as Course;
-  }, [spots, primary]);
+      })),
+    [spots],
+  );
 
-  // 이 성향을 위해 짜 둔 코스만 보여준다 — 카테고리로 거른 일반 코스를
-  // 섞으면 "네 성향의 코스"라는 메시지가 흐려진다. 수제 코스를 아직 못
-  // 만든 경우(명소 누락 등)에만 카테고리 매칭으로 대신한다
-  const recCourses = useMemo(() => {
-    if (personaCourse) return [personaCourse];
-    const match = courses.filter((c) =>
-      c.stops.some((s) => categories.includes(s.category)),
-    );
-    return (match.length ? match : courses).slice(0, 3);
-  }, [courses, categories, personaCourse]);
+  const view = applyEdit(course, edits[course.id], pool);
+  const isSaved = saved.some((c) => c.id === course.id);
+
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+            <Sparkles size={17} className="text-indigo-600" />
+            {t("recommendTitle")}
+          </h3>
+          <p className="mt-1 text-sm text-slate-400">
+            {tc("stopsCount", { count: view.stops.length })}
+            {view.totalM > 0 ? ` · ${fmtM(view.totalM)}` : ""}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            // 찜 목록에서는 "야경·분위기 감상형 코스"로 보이게 이름을 달아 둔다
+            toggleSaved(
+              toSavedCourse(view, "persona", locale, t(`types.${primary}.tagline`)),
+            )
+          }
+          aria-pressed={isSaved}
+          className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold transition ${
+            isSaved
+              ? "bg-rose-500 text-white hover:bg-rose-600"
+              : "border border-rose-300 bg-white text-rose-500 hover:bg-rose-50"
+          }`}
+        >
+          <Heart size={15} fill={isSaved ? "currentColor" : "none"} />
+          {isSaved ? ts("saved") : ts("save")}
+        </button>
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <ol className="space-y-2">
+          {view.stops.map((st, i) => (
+            <li
+              key={st.contentId}
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5"
+            >
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-xs font-extrabold text-white">
+                {i + 1}
+              </span>
+              {st.imageUrl && (
+                <span className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-200">
+                  <Image
+                    src={st.imageUrl}
+                    alt=""
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                  />
+                </span>
+              )}
+              <span className="min-w-0 flex-1">
+                <Link
+                  href={`/spots/${st.contentId}`}
+                  className="block truncate text-sm font-bold text-slate-900 hover:text-indigo-600"
+                >
+                  {st.title}
+                </Link>
+                <span className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-400">
+                  <MapPin size={10} className="shrink-0" />
+                  {st.addr}
+                </span>
+              </span>
+              {i > 0 && view.legs[i - 1] && (
+                <span className="flex shrink-0 items-center gap-1 text-[11px] font-semibold text-slate-400">
+                  <Route size={11} />
+                  {fmtM(view.legs[i - 1].distanceM)}
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
+        <div className="h-72 lg:h-full lg:min-h-[320px]">
+          <CourseMap course={view} mode="best" />
+        </div>
+      </div>
+
+      <CourseCustomizer
+        course={view}
+        baseIds={course.stops.map((st) => st.contentId)}
+        pool={pool}
+        onChange={(ids) => setIds(course.id, ids)}
+        onReset={() => reset(course.id)}
+      />
+    </div>
+  );
+}
+
+// 07 상세 분석(레이더·키워드·강점) + 08 탭
+function ResultDetail({
+  primary,
+  scores,
+  categories,
+  spots,
+  t,
+  th,
+}: {
+  primary: PersonalityType;
+  scores: Record<PersonalityType, number>;
+  categories: NightSpot["category"][];
+  spots: NightSpot[];
+  t: ReturnType<typeof useTranslations>;
+  th: ReturnType<typeof useTranslations>;
+}) {
+  // 코스는 결과 바로 아래에서 통째로 보여주므로 탭에서는 뺐다
+  type TabKey = "traits" | "spots" | "tips";
+  const [tab, setTab] = useState<TabKey>("traits");
+  const values = useMemo(() => radarValues(scores), [scores]);
+
+  const keywords = t.raw(`types.${primary}.keywords`) as string[];
+  const strengths = t.raw(`types.${primary}.strengths`) as string[];
+  const traits = t.raw(`types.${primary}.traits`) as string[];
+  const tips = t.raw(`types.${primary}.tips`) as string[];
 
   const recSpots = useMemo(() => {
     const match = spots.filter((s) => categories.includes(s.category));
     return (match.length ? match : spots).filter((s) => s.imageUrl).slice(0, 4);
   }, [spots, categories]);
 
-  const TABS: { key: TabKey; Icon: typeof Compass }[] = [
+  const TABS: { key: TabKey; Icon: typeof MapPin }[] = [
     { key: "traits", Icon: UserRound },
-    { key: "courses", Icon: Compass },
     { key: "spots", Icon: MapPin },
     { key: "tips", Icon: Sparkles },
   ];
@@ -322,39 +435,6 @@ function ResultDetail({
             </div>
           )}
 
-          {tab === "courses" && (
-            <div>
-              {recCourses.length ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {recCourses.map((c) => (
-                    <CourseCard key={c.id} course={c} th={th} labelStops={tc} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">{t("noCourses")}</p>
-              )}
-
-              {/* 수제 코스의 전체 동선을 지도에서 바로 — 카드만으로는 루트가
-                  머리에 안 그려진다. 실제 경로는 코스 페이지에서, 여기서는
-                  경유지를 직선으로 이어 흐름만 보여준다 */}
-              {personaCourse && (
-                <div className="mt-4 h-72 lg:h-80">
-                  <CourseMap course={personaCourse} mode="straight" />
-                </div>
-              )}
-              <Link
-                href={{
-                  pathname: "/courses",
-                  query: { persona: primary, course: personaCourseId(primary) },
-                }}
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-indigo-500 px-6 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-indigo-400"
-              >
-                {t("matchedCourseCta")}
-                <ArrowRight size={15} />
-              </Link>
-            </div>
-          )}
-
           {tab === "spots" && (
             <div>
               {recSpots.length ? (
@@ -411,69 +491,5 @@ function ResultDetail({
         </div>
       </div>
     </div>
-  );
-}
-
-// 추천 코스 카드
-function CourseCard({
-  course,
-  th,
-  labelStops,
-}: {
-  course: Course;
-  th: ReturnType<typeof useTranslations>;
-  labelStops: ReturnType<typeof useTranslations>;
-}) {
-  const cover = course.stops.find((s) => s.imageUrl)?.imageUrl ?? null;
-  const cats = [...new Set(course.stops.map((s) => s.category))].slice(0, 2);
-  const personaType = course.id.startsWith("persona-") ? course.id.slice(8) : null;
-  return (
-    <Link
-      // 코스 목록이 아니라 이 코스가 골라진 상태로 연다 — "추천 루트 보기"가
-      // 실제 루트(지도·경유지)로 이어지게. 수제 성향 코스는 ?persona=도 실어
-      // 코스 페이지가 그 코스를 목록에 붙일 수 있게 한다
-      href={{
-        pathname: "/courses",
-        query: personaType
-          ? { persona: personaType, course: course.id }
-          : { course: course.id },
-      }}
-      className="group overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-indigo-300/40"
-    >
-      <div className="relative h-32 w-full overflow-hidden bg-slate-200">
-        {cover && (
-          <Image
-            src={cover}
-            alt=""
-            fill
-            sizes="(max-width: 640px) 100vw, 33vw"
-            className="object-cover transition duration-500 group-hover:scale-105"
-          />
-        )}
-        <div className="absolute left-2.5 top-2.5 flex gap-1.5">
-          {personaType && (
-            <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-extrabold text-slate-950">
-              {labelStops("personaBadge")}
-            </span>
-          )}
-          {cats.map((c) => (
-            <span
-              key={c}
-              className="rounded-full bg-slate-950/70 px-2 py-0.5 text-[10px] font-bold text-indigo-700 backdrop-blur"
-            >
-              {th(`categories.${c}`)}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div className="p-4">
-        <p className="text-xs font-semibold text-indigo-600">
-          {labelStops("stopsCount", { count: course.stops.length })}
-        </p>
-        <p className="mt-1.5 line-clamp-2 text-sm font-semibold leading-snug text-slate-900">
-          {course.stops.map((s) => s.title).join(" → ")}
-        </p>
-      </div>
-    </Link>
   );
 }
