@@ -2,13 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { MoonStar, Sparkles } from "lucide-react";
+import { MoonStar } from "lucide-react";
 
 interface Guide {
   intro: string;
-  tips: string[];
 }
 
+/**
+ * 투어나잇 야간 가이드 — 한국관광공사 공식 소개문을 그대로 보여준다.
+ * AI가 글을 새로 짓지 않는다 — "불러오는 중" 뿐, 없으면(그 언어로 된
+ * 소개문이 없는 곳) 섹션 자체를 그리지 않는다.
+ */
 export default function SpotGuide({ contentId }: { contentId: string }) {
   const t = useTranslations("spot");
   const locale = useLocale();
@@ -46,10 +50,7 @@ export default function SpotGuide({ contentId }: { contentId: string }) {
       </h2>
       {status === "loading" ? (
         <div className="mt-4">
-          <p className="flex items-center gap-2 text-sm text-amber-600">
-            <Sparkles size={14} className="animate-pulse" />
-            {t("generating")}
-          </p>
+          <p className="text-sm text-slate-400">{t("generating")}</p>
           <div className="mt-3 space-y-2">
             {[0, 1, 2].map((i) => (
               <div
@@ -75,14 +76,6 @@ export default function SpotGuide({ contentId }: { contentId: string }) {
           >
             {expanded ? t("less") : t("more")}
           </button>
-          <ul className="mt-4 space-y-2">
-            {guide?.tips.map((tip, i) => (
-              <li key={i} className="flex gap-2 text-sm text-slate-400">
-                <span className="mt-0.5 shrink-0 text-amber-600">✦</span>
-                {tip}
-              </li>
-            ))}
-          </ul>
         </>
       )}
     </section>
