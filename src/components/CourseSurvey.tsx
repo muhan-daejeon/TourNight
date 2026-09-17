@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ChevronDown,
@@ -75,6 +75,43 @@ interface SurveyCourse extends Course {
   };
 }
 
+/**
+ * 방금 만든 맞춤 코스를 브라우저에 남긴다.
+ *
+ * 새로고침하거나 다른 페이지를 다녀오면 코스가 통째로 사라져, 한도(하루 5회)를
+ * 써 가며 다시 만들어야 했다. AI 코스(CourseExplorer)가 쓰는 방식 그대로
+ * 마지막 결과 하나만 담아 두고, 새로 만들면 교체한다.
+ *
+ * 키에 버전을 붙여 코스 구조가 바뀌면 옛 저장본이 화면을 깨뜨리지 않고 무시된다.
+ * (v1: 야식 후보 foods가 더해진 구조)
+ */
+const SURVEY_COURSE_KEY = "tournight:surveyCourse:v1";
+
+function loadSurveyCourse(locale: string): SurveyCourse | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(SURVEY_COURSE_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as { locale?: string; course?: SurveyCourse };
+    // 언어를 바꾼 뒤 예전 언어로 된 코스를 보여주면 어색하다
+    if (saved.locale !== locale) return null;
+    return saved.course?.stops?.length ? saved.course : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSurveyCourse(locale: string, course: SurveyCourse) {
+  try {
+    window.localStorage.setItem(
+      SURVEY_COURSE_KEY,
+      JSON.stringify({ locale, course }),
+    );
+  } catch {
+    // 용량 초과·프라이빗 모드 — 저장만 실패하고 화면은 그대로 동작한다
+  }
+}
+
 /** 지금 시각을 "HH:MM"으로 (분은 30 단위로 내림 — 고르기 쉽게) */
 function nowRounded(): string {
   const d = new Date();
@@ -120,6 +157,15 @@ export default function CourseSurvey() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [course, setCourse] = useState<SurveyCourse | null>(null);
+
+  // 지난번에 만든 코스 되살리기 — 마운트 후에만 localStorage를 읽어
+  // 서버 렌더와 첫 클라이언트 렌더를 일치시킨다 (hydration 안전)
+  useEffect(() => {
+    const saved = loadSurveyCourse(locale);
+    // 외부 저장소 동기화라 마운트 직후 한 번의 재렌더는 의도된 것
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (saved) setCourse(saved);
+  }, [locale]);
   const [mode, setMode] = useState<MapMode>("best");
 
   /** 브라우저 위치 — 좌표는 코스 계산에만 쓰고 서버에 저장하지 않는다 */
@@ -187,6 +233,7 @@ export default function CourseSurvey() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       setCourse(data.course);
+      saveSurveyCourse(locale, data.course); // 새로 만든 코스로 교체 저장
       // 이동 수단을 고른 대로 지도에도 맞춰 준다
       setMode(transport);
     } catch {
