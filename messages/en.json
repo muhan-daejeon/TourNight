@@ -686,7 +686,12 @@
       "yes": "Yes, please",
       "no": "No, thanks",
       "note": "We set aside 40 minutes to eat, and the tip will say where along the route."
-    }
+    },
+    "foodTitle": "Places for a late-night bite",
+    "foodDistance": "{m}m from the route",
+    "foodHours": "Hours",
+    "foodRestDay": "Closed",
+    "foodNote": "Hours come from Korea Tourism Organization records and may differ late at night — please check before you go."
   },
   "tour": {
     "label": "Quick tour",

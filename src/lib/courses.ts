@@ -13,7 +13,13 @@ import {
 import { getRelatedRows, normName } from "./kto-stats";
 import { getTransitForSpots, type SpotTransit } from "./transit";
 import { getRoutesForLegs, type SpotRoute } from "./routes";
-import { fetchNearbyStays, type NearbyStay, type NightSpot } from "./kto";
+import {
+  fetchNearbyStays,
+  fetchNearbyFoodWithHours,
+  type FoodWithHours,
+  type NearbyStay,
+  type NightSpot,
+} from "./kto";
 
 export interface CourseStop {
   contentId: string;
@@ -530,6 +536,8 @@ export interface SurveyCourse extends Course {
   /** stops와 같은 순서 */
   info: SurveyStopInfo[];
   stays: NearbyStay[];
+  /** 야식을 넣기로 했을 때의 식당 후보 (영업시간 원문 포함). 아니면 빈 배열 */
+  foods: FoodWithHours[];
   source: "ai" | "distance";
   /** 실제로 적용된 조건 — 화면에 "왜 이 코스인지" 근거로 보여준다 */
   applied: {
@@ -648,11 +656,20 @@ export async function getSurveyCourse(
     source: "ai" | "distance",
   ): Promise<SurveyCourse> => {
     const base = await toCourse(stops, true);
-    const stays = await staysNearLastStop(stops);
+    // 야식을 넣기로 했으면 코스 중간쯤 스팟 주변에서 식당을 찾는다 —
+    // 마지막(귀가 직전)보다 중간에서 먹는 편이 동선에 맞다
+    const mid = stops[Math.floor((stops.length - 1) / 2)] ?? stops[0];
+    const [stays, foods] = await Promise.all([
+      staysNearLastStop(stops),
+      input.wantsFood && mid
+        ? fetchNearbyFoodWithHours(mid.mapX, mid.mapY, { radius: 2000, limit: 3 })
+        : Promise.resolve([] as FoodWithHours[]),
+    ]);
     return {
       id: `survey-${stops.map((s) => s.contentId).join("+")}`,
       ...base,
       ...plan,
+      foods,
       transit: stops.map((s) => transitMap.get(s.contentId) ?? null),
       info: stops.map((s) => ({
         congestion: congestionMap.get(s.contentId) ?? null,

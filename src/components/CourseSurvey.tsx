@@ -52,6 +52,15 @@ interface SurveyCourse extends Course {
   notes: string[];
   transit: ({ nodeName: string; lastBus: string | null } | null)[];
   info: { congestion: number | null }[];
+  /** 야식을 넣기로 했을 때의 식당 후보 (영업시간 원문 포함) */
+  foods: {
+    contentId: string;
+    title: string;
+    addr: string;
+    distM: number;
+    hours: string | null;
+    restDay: string | null;
+  }[];
   source: "ai" | "distance";
   applied: {
     startTime: string;
@@ -519,6 +528,43 @@ function SurveyResult({
       <p className="mt-3 text-xs leading-relaxed text-slate-400">
         {t("crowdNote")}
       </p>
+
+      {/* 야식 — 코스 중간 스팟 주변 식당. 영업시간은 공사 원문 그대로 보여주고
+          형식이 제각각이라 "지금 여는지"는 판단하지 않는다 (방문 전 확인 안내) */}
+      {course.foods?.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <p className="flex items-center gap-2 text-sm font-bold text-amber-700">
+            <UtensilsCrossed size={15} />
+            {t("foodTitle")}
+          </p>
+          <ul className="mt-3 space-y-2.5">
+            {course.foods.map((f) => (
+              <li key={f.contentId} className="rounded-xl bg-white px-3.5 py-3">
+                <p className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-sm font-bold text-slate-900">{f.title}</span>
+                  <span className="text-xs text-slate-400">
+                    {t("foodDistance", { m: f.distM })}
+                  </span>
+                </p>
+                <p className="mt-0.5 truncate text-xs text-slate-400">{f.addr}</p>
+                {f.hours && (
+                  <p className="mt-1.5 text-xs font-semibold text-amber-700">
+                    {t("foodHours")} {f.hours}
+                  </p>
+                )}
+                {f.restDay && (
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {t("foodRestDay")} {f.restDay}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11px] leading-relaxed text-amber-700/80">
+            {t("foodNote")}
+          </p>
+        </div>
+      )}
 
       {/* 내 코스 다듬기 — 추천에서 빼거나, 찜한 장소에서 더한다 (피드백 8·10).
           코스가 새로 오면 key로 편집 상태도 처음부터 */}

@@ -789,7 +789,7 @@ const COMPANION_HINT: Record<SurveyBrief["companion"], string> = {
 
 /** 야식 안내 — 시간 차감은 서버가 했으니 AI에게는 동선·팁 반영만 시킨다 */
 const FOOD_BREAK_NOTE =
-  "About 40 minutes are reserved for a late-night food break. Route the course past a lively food street or pojangmacha area, and in the tip say where along the route to take that break.";
+  "About 40 minutes are reserved for a late-night food break, and restaurant suggestions near the middle of the route are shown to the visitor separately. Route the course past a lively food street or pojangmacha area, and in the tip say where along the route to take that break.";
 
 const PACE_HINT: Record<SurveyBrief["pace"], string> = {
   light: "wants to walk as little as possible: pick stops genuinely close to each other, even if it means skipping a famous place farther away",
