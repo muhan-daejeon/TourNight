@@ -77,12 +77,11 @@ export default async function HomePage({
             {t("heroSubtitle")}
           </p>
         </div>
-      </section>
 
-
-      {/* ── 🌙 오늘 밤 브리핑 — 메인 이미지 바로 아래 실시간 정보 한 줄 ── */}
-      <section className="mx-auto max-w-7xl px-6 pt-7">
-        <TonightBriefing />
+        {/* ── 🌙 오늘 밤 브리핑 — 배너 하단에 얹어 첫 화면에서 바로 읽히게 ── */}
+        <div className="absolute inset-x-0 bottom-6 flex justify-center px-6">
+          <TonightBriefing />
+        </div>
       </section>
 
       {/* ── 투어나잇을 즐겨보세요 — 좌 텍스트 + 우 비주얼을 화살표로 넘기는
