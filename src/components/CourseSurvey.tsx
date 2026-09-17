@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   ChevronDown,
   ChevronUp,
+  Heart,
   Clock,
   Footprints,
   Bus,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import type { Course } from "@/lib/courses";
 import CourseMap, { type MapMode } from "./CourseMap";
+import { useSavedCourses, toSavedCourse } from "./useSavedCourses";
 import SavedSpots from "./SavedSpots";
 import type { NightSpot } from "@/lib/kto";
 
@@ -413,13 +415,39 @@ function SurveyResult({
   tc: ReturnType<typeof useTranslations>;
 }) {
   const t = useTranslations("survey");
+  const ts = useTranslations("saved");
+  const locale = useLocale();
   const a = course.applied;
+  // 코스 찜 — 담아 두면 헤더의 하트(찜 모아보기)에서 다시 꺼내 본다.
+  // 설문 코스는 서버에 없어 되살릴 수 없으므로 경유지만 담긴다
+  const { courses: savedCourses, toggle: toggleSaved } = useSavedCourses();
+  const savedNow = savedCourses.some((c) => c.id === course.id);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-slate-100 p-6">
-      {course.title && (
-        <h2 className="text-xl font-bold tracking-tight">{course.title}</h2>
-      )}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          {course.title && (
+            <h2 className="text-xl font-bold tracking-tight">{course.title}</h2>
+          )}
+        </div>
+        {/* 아이콘만 두면 흰 카드 위에서 눈에 띄지 않아 글자를 붙인 색 버튼으로 */}
+        <button
+          type="button"
+          onClick={() =>
+            toggleSaved(toSavedCourse(course, "survey", locale, course.title))
+          }
+          aria-pressed={savedNow}
+          className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold transition ${
+            savedNow
+              ? "bg-rose-500 text-white hover:bg-rose-600"
+              : "border border-rose-300 bg-white text-rose-500 hover:bg-rose-50"
+          }`}
+        >
+          <Heart size={15} fill={savedNow ? "currentColor" : "none"} />
+          {savedNow ? ts("saved") : ts("save")}
+        </button>
+      </div>
       {course.summary && (
         <p className="mt-2 text-sm leading-relaxed text-slate-400">
           {course.summary}

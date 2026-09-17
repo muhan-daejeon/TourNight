@@ -34,7 +34,8 @@
     "groupPlaces": "Places",
     "groupEnjoy": "Enjoy Daejeon",
     "about": "About Daejeon",
-    "notices": "Notices"
+    "notices": "Notices",
+    "saved": "My list"
   },
   "home": {
     "heroTitle": "Unfold Your Dream Tonight",
@@ -1254,6 +1255,19 @@
     "remove": "Remove",
     "pickerTitle": "Add from Saved Places",
     "pickerHint": "Tap an image to add it to your course",
-    "pickerAllAdded": "All your saved places are already in the course!"
+    "pickerAllAdded": "All your saved places are already in the course!",
+    "subtitle": "Your saved courses and places in one place",
+    "coursesTitle": "Saved courses",
+    "coursesEmpty": "No saved courses yet. Build a course and tap the heart to keep it.",
+    "stopsCount": "{count} stops",
+    "save": "Save",
+    "saved": "Saved",
+    "kind": {
+      "recommended": "Recommended",
+      "ai": "AI course",
+      "survey": "Custom",
+      "persona": "For your style"
+    },
+    "pageTitle": "My list"
   }
 }

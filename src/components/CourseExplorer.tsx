@@ -17,8 +17,10 @@ import {
   CarTaxiFront,
   TrainFront,
   BedDouble,
+  Heart,
 } from "lucide-react";
 import CourseMap, { type MapMode } from "./CourseMap";
+import { useSavedCourses, toSavedCourse } from "./useSavedCourses";
 import { TransitLine } from "./TransitInfo";
 import type { AiCourse, Course } from "@/lib/courses";
 import { TAXI_NIGHT_SURCHARGE, pickBestMode } from "@/lib/transit-format";
@@ -373,6 +375,7 @@ const CATEGORY_TEXT: Record<string, string> = {
 export default function CourseExplorer({ courses }: { courses: Course[] }) {
   const t = useTranslations("courses");
   const home = useTranslations("home");
+  const ts = useTranslations("saved");
   const locale = useLocale();
   // 지도의 '코스 짜기'로 넘어오면 ?from=<contentId>(+켜둔 카테고리 필터)가 붙는다
   const searchParams = useSearchParams();
@@ -395,6 +398,8 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
   );
   // 선택 코스 id — null이면 첫 번째 코스
   const [selId, setSelId] = useState<string | null>(null);
+  // 코스 찜 — 브라우저에 담아 두고 헤더의 하트(찜 모아보기)에서 다시 본다
+  const { courses: savedCourses, toggle: toggleSaved } = useSavedCourses();
   // 지도에 그릴 이동수단 — 실제 경로가 붙은 AI 코스에서만 전환할 수 있다
   const [mapMode, setMapMode] = useState<MapMode>("best");
 
@@ -747,15 +752,43 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
           <div className="h-80 lg:h-[500px]">
             <CourseMap course={course} mode={mapMode} />
           </div>
-          <a
-            href={kakaoStart}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 flex items-center justify-center gap-2 rounded-full bg-amber-400 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
-          >
-            <Navigation size={15} />
-            {t("directions")}
-          </a>
+          <div className="mt-3 flex gap-2">
+            <a
+              href={kakaoStart}
+              target="_blank"
+              rel="noreferrer"
+              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-amber-400 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
+            >
+              <Navigation size={15} />
+              {t("directions")}
+            </a>
+            {/* 코스 찜 — 담아 두면 헤더의 하트에서 다시 꺼내 볼 수 있다.
+                AI 코스는 서버에 없어 되살릴 수 없으므로 경유지만 담긴다 */}
+            <button
+              type="button"
+              onClick={() =>
+                toggleSaved(
+                  toSavedCourse(
+                    course,
+                    aiCourse && course.id === aiCourse.id ? "ai" : course.id.startsWith("persona-") ? "persona" : "recommended",
+                    locale,
+                  ),
+                )
+              }
+              aria-pressed={savedCourses.some((c) => c.id === course.id)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold transition ${
+                savedCourses.some((c) => c.id === course.id)
+                  ? "bg-rose-500 text-white hover:bg-rose-600"
+                  : "border border-rose-300 bg-white text-rose-500 hover:bg-rose-50"
+              }`}
+            >
+              <Heart
+                size={15}
+                fill={savedCourses.some((c) => c.id === course.id) ? "currentColor" : "none"}
+              />
+              {savedCourses.some((c) => c.id === course.id) ? ts("saved") : ts("save")}
+            </button>
+          </div>
         </div>
       )}
     </div>
