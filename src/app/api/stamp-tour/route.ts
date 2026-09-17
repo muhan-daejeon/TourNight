@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveSessionUser } from "@/lib/session";
-import { createStampTour, getStampTour, STOP_COUNT } from "@/lib/stamp-tour";
+import { createStampTour, getStampTour, updateStampSlotPlace, STOP_COUNT } from "@/lib/stamp-tour";
 
 /** 내 도장투어 조회 — 아직 장소를 안 골랐으면 tour: null */
 export async function GET() {
@@ -63,4 +63,39 @@ export async function POST(request: NextRequest) {
     );
     return NextResponse.json({ error: "save failed" }, { status: 502 });
   }
+}
+
+/**
+ * 칸 하나(slot)만 다른 장소로 바꾼다 — "(장소 다시 선택)"에서 쓴다. 이미
+ * 인증사진이 올라간 칸은 바꿀 수 없다.
+ */
+export async function PATCH(request: NextRequest) {
+  const session = await getActiveSessionUser();
+  if (!session) {
+    return NextResponse.json({ error: "login_required" }, { status: 401 });
+  }
+
+  let payload: { slot?: unknown; place?: PlaceInput };
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json({ error: "invalid json" }, { status: 400 });
+  }
+
+  const slot = Number(payload.slot);
+  const p = payload.place ?? {};
+  const name = typeof p.name === "string" ? p.name.trim().slice(0, 80) : "";
+  const lat = Number(p.lat);
+  const lng = Number(p.lng);
+  if (!Number.isInteger(slot) || !name || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return NextResponse.json({ error: "invalid_place" }, { status: 400 });
+  }
+
+  const result = await updateStampSlotPlace(session.userId, slot, { name, lat, lng });
+  if (!result.ok) {
+    const status =
+      result.error === "not-found" ? 404 : result.error === "already-photographed" ? 409 : 400;
+    return NextResponse.json({ error: result.error }, { status });
+  }
+  return NextResponse.json({ tour: result.tour });
 }

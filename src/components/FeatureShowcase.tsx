@@ -1,18 +1,24 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 /**
- * 투어나잇을 즐겨보세요 — 대표 기능 3종을 넘겨 보는 쇼케이스.
+ * 투어나잇에서만 즐길 수 있는 기능 — 대표 기능 3종을 넘겨 보는 쇼케이스.
  * 좌측은 그 기능의 제목·설명·바로가기, 우측은 큰 비주얼이 옆으로 밀려
  * 넘어가는 필름스트립. 다음 기능의 조각이 오른쪽에 미리 보이고, 화살표를
  * 누르면 깜빡임 없이 그대로 밀려 온다(네이티브 부드러운 스크롤 — 팀 피드백:
  * 전환이 느껴지면 안 된다). 모바일은 스와이프.
  * 기능마다 대전 CI 색 하나를 포인트로 쓴다 (파랑·초록·주황).
+ *
+ * 세 번째(K-Life 가이드) 다음에 다시 첫 번째로, 첫 번째 이전에 다시 세
+ * 번째로 — 끊기지 않고 계속 이어지도록 돈다. 실제 3장 앞뒤에 마지막·처음
+ * 장을 하나씩 복제해 두고([복제(3) 1 2 3 복제(1)]), 복제 장에 스크롤이
+ * 멎으면 애니메이션 없이 그에 대응하는 진짜 장으로 순간 이동시켜 — 사용자
+ * 눈에는 계속 자연스럽게 넘어가는 것처럼 보인다.
  */
 
 type SlideKey = 1 | 2 | 3;
@@ -22,57 +28,30 @@ const SLIDES: {
   href: string;
   bar: string; // 포인트 색 막대
   cta: string; // 바로가기 글자색
+  image: string; // 슬라이드 대표 이미지
 }[] = [
-  { key: 1, href: "/personality", bar: "bg-daejeon-blue", cta: "text-daejeon-blue" },
-  { key: 2, href: "/stamp-tour", bar: "bg-daejeon-green", cta: "text-daejeon-green" },
-  { key: 3, href: "/klife/restaurant", bar: "bg-daejeon-orange", cta: "text-daejeon-orange" },
+  { key: 1, href: "/personality", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/mystyle.jpg" },
+  { key: 2, href: "/stamp-tour", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/picture.png" },
+  // K-Life 카드는 통합 페이지(/etiquette)로 — 이미지는 팀 디자인 유지
+  { key: 3, href: "/etiquette", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/klife.jpg" },
 ];
 
 const GAP = 12; // gap-3 — 스크롤 한 걸음 계산에 쓴다
+// 끝→처음, 처음→끝이 자연스럽게 이어지도록 실제 슬라이드 앞뒤에 마지막·
+// 처음 슬라이드를 하나씩 복제해 둔다. EXTENDED[1..SLIDES.length]가 진짜다
+const EXTENDED = [SLIDES[SLIDES.length - 1], ...SLIDES, SLIDES[0]];
 
-/** 슬라이드별 비주얼 — 그 기능과 직접 관련된 것만 쓴다 (성향 캐릭터·콜라주 프레임·포장마차) */
-function Visual({ k }: { k: SlideKey }) {
-  if (k === 1) {
-    return (
-      <div className="relative h-full w-full bg-[#0b1026]">
-        <div className="absolute inset-x-0 bottom-6 flex items-end justify-center gap-2">
-          {(["explorer", "foodie", "viewLover", "player"] as const).map((m) => (
-            <Image
-              key={m}
-              src={`/mascots/${m}.png`}
-              alt=""
-              width={130}
-              height={130}
-              className="h-20 w-auto drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)] sm:h-28"
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-  if (k === 2) {
-    return (
-      <div className="relative h-full w-full bg-amber-100">
-        <Image
-          src="/collage-frame.png"
-          alt=""
-          fill
-          sizes="(min-width:1024px) 640px, 100vw"
-          className="object-cover object-top opacity-90"
-        />
-      </div>
-    );
-  }
+/** 슬라이드별 비주얼 — 기능마다 지정된 이미지를 그대로 보여준다 */
+function Visual({ image }: { image: string }) {
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full bg-slate-100">
       <Image
-        src="/etiquette/pojangmacha.jpg"
+        src={image}
         alt=""
         fill
         sizes="(min-width:1024px) 640px, 100vw"
         className="object-cover"
       />
-      <div className="absolute inset-0 bg-slate-950/25" />
     </div>
   );
 }
@@ -80,35 +59,66 @@ function Visual({ k }: { k: SlideKey }) {
 export default function FeatureShowcase() {
   const t = useTranslations("home");
   const track = useRef<HTMLDivElement>(null);
-  const [idx, setIdx] = useState(0);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
+  // 화면에 보이는 위치는 복제분까지 포함한 EXTENDED 기준 — 1~3이 진짜 슬라이드
+  const [pos, setPos] = useState(1);
+
+  const panelWidth = () => {
+    const el = track.current;
+    const panel = el?.firstElementChild as HTMLElement | null;
+    return (panel?.offsetWidth ?? 600) + GAP;
+  };
+
+  // 마운트 시 복제(마지막) 없이 곧장 첫 실제 슬라이드에서 시작 — 애니메이션
+  // 없이(useLayoutEffect + 직접 scrollLeft 대입) 그려야 복제 장이 잠깐이라도
+  // 보이는 깜빡임이 없다
+  useLayoutEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    el.scrollLeft = panelWidth();
+  }, []);
 
   const step = (dir: 1 | -1) => {
     const el = track.current;
     if (!el) return;
-    const panel = el.firstElementChild as HTMLElement | null;
-    el.scrollBy({ left: dir * ((panel?.offsetWidth ?? 600) + GAP), behavior: "smooth" });
+    el.scrollBy({ left: dir * panelWidth(), behavior: "smooth" });
   };
 
+  // 스크롤 도중에는 위치만 계속 갱신(좌측 텍스트가 그 자리에서 바로 바뀌게)
   const onScroll = () => {
     const el = track.current;
     if (!el) return;
-    const panel = el.firstElementChild as HTMLElement | null;
-    const w = (panel?.offsetWidth ?? 600) + GAP;
-    const i = Math.min(SLIDES.length - 1, Math.max(0, Math.round(el.scrollLeft / w)));
-    setIdx(i);
-    setAtStart(el.scrollLeft <= 4);
-    setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 4);
+    setPos(Math.round(el.scrollLeft / panelWidth()));
   };
 
-  const slide = SLIDES[idx];
+  // 스크롤이 완전히 멎는 순간(neutral 이벤트라 임의의 디바운스 대기가 없다)
+  // 복제 장에 도착했는지 확인하고, 도착했으면 대응하는 진짜 장으로 애니메이션
+  // 없이 순간 이동한다 — setTimeout 디바운스로 기다리면 특히 마지막→처음으로
+  // 넘어갈 때 그만큼 더 늦게 반응하는 게 느껴져서, 늦지 않게 곧장 처리한다
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    const onScrollEnd = () => {
+      const w = panelWidth();
+      const i = Math.round(el.scrollLeft / w);
+      if (i === 0) {
+        el.scrollLeft = w * SLIDES.length; // 복제(마지막) → 진짜 마지막
+        setPos(SLIDES.length);
+      } else if (i === EXTENDED.length - 1) {
+        el.scrollLeft = w; // 복제(처음) → 진짜 처음
+        setPos(1);
+      }
+    };
+    el.addEventListener("scrollend", onScrollEnd);
+    return () => el.removeEventListener("scrollend", onScrollEnd);
+  }, []);
+
+  const slide = SLIDES[(pos - 1 + SLIDES.length) % SLIDES.length];
 
   return (
     <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
       {/* ── 좌: 기능 소개 — 스크롤 위치에 맞춰 그대로 바뀐다 (전환 효과 없음) ── */}
       <div>
-        <p className="text-sm font-bold tracking-wide text-slate-400">
+        <p className="tn-enjoy-neon text-[16px] font-light tracking-wide text-daejeon-green">
           {t("enjoyTitle")}
         </p>
         <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl">
@@ -134,40 +144,46 @@ export default function FeatureShowcase() {
           onScroll={onScroll}
           className="tn-scrollbar-none flex snap-x snap-mandatory gap-3 overflow-x-auto"
         >
-          {SLIDES.map((s) => (
+          {EXTENDED.map((s, i) => (
             <Link
-              key={s.key}
+              key={`${s.key}-${i}`}
               href={s.href}
               aria-label={t(`enjoy${s.key}`)}
               className="relative block h-72 w-full shrink-0 snap-start overflow-hidden sm:h-[420px] md:w-[calc(100%-6.75rem)] lg:w-[calc(100%-8.75rem)]"
             >
-              <Visual k={s.key} />
+              <Visual image={s.image} />
             </Link>
           ))}
-          {/* 마지막 슬라이드도 왼쪽에 딱 붙을 수 있게 남기는 빈 칸 */}
-          <div aria-hidden className="hidden w-24 shrink-0 md:block lg:w-32" />
         </div>
         <div className="mt-5 flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={() => step(-1)}
-            disabled={atStart}
             aria-label={t("showcasePrev")}
-            className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200 disabled:text-slate-300 disabled:hover:bg-slate-100"
+            className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200"
           >
             <ArrowLeft size={18} />
           </button>
           <button
             type="button"
             onClick={() => step(1)}
-            disabled={atEnd}
             aria-label={t("showcaseNext")}
-            className="flex size-11 items-center justify-center rounded-full bg-slate-900 text-white transition hover:bg-slate-700 disabled:bg-slate-100 disabled:text-slate-300"
+            className="flex size-11 items-center justify-center rounded-full bg-slate-900 text-white transition hover:bg-slate-700"
           >
             <ArrowRight size={18} />
           </button>
         </div>
       </div>
+
+      <style>{`
+        .tn-enjoy-neon {
+          animation: tn-enjoy-neon-glow 2s ease-in-out infinite;
+        }
+        @keyframes tn-enjoy-neon-glow {
+          0%, 100% { text-shadow: 0 0 4px rgba(53, 181, 151, 0.5), 0 0 10px rgba(53, 181, 151, 0.25); }
+          50% { text-shadow: 0 0 10px rgba(53, 181, 151, 0.9), 0 0 22px rgba(53, 181, 151, 0.55); }
+        }
+      `}</style>
     </div>
   );
 }

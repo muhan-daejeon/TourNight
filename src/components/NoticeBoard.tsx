@@ -68,12 +68,10 @@ export default function NoticeBoard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">공지사항</h1>
-
       {/* 분류선택 · 검색범위 · 검색어 · 검색 */}
       <form
         onSubmit={runSearch}
-        className="mt-6 flex flex-wrap items-center justify-end gap-2 border-b-2 border-slate-800 pb-6"
+        className="flex flex-wrap items-center justify-end gap-2 border-b-2 border-slate-800 pb-6"
       >
         <select
           value={category}
@@ -106,7 +104,7 @@ export default function NoticeBoard() {
         />
         <button
           type="submit"
-          className="flex items-center gap-1.5 rounded-lg bg-daejeon-blue px-6 py-2.5 text-sm font-bold text-white transition hover:bg-blue-800"
+          className="flex items-center gap-1.5 rounded-lg bg-daejeon-green px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
         >
           <Search size={14} />
           검색

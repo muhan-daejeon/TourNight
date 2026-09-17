@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -26,6 +26,26 @@ export default function SpotShowcase({ spots }: { spots: ShowcaseSpot[] }) {
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
+  // "오늘 밤," 부분 — 사용자가 이 제목을 처음 마주하는 순간(화면에 들어오는
+  // 순간)에만 검정 + 큰 네온광에서 노란색 + 무광으로 잦아드는 연출을 한 번 튼다
+  const [tonightPlay, setTonightPlay] = useState(false);
+  const tonightRef = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = tonightRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTonightPlay(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const step = (dir: 1 | -1) => {
     const el = track.current;
     if (!el) return;
@@ -46,8 +66,17 @@ export default function SpotShowcase({ spots }: { spots: ShowcaseSpot[] }) {
       {/* ── 좌: 제목 + 화살표 ── */}
       <div>
         <p className="text-sm font-semibold text-slate-500">{t("spotsSectionSub")}</p>
-        <h2 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight text-daejeon-blue sm:text-4xl">
-          {t("spotsSection")}
+        <h2 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight text-daejeon-orange sm:text-4xl">
+          {t.rich("spotsSection", {
+            hl: (chunks) => (
+              <span
+                ref={tonightRef}
+                className={tonightPlay ? "tn-tonight-reveal" : "tn-tonight-idle"}
+              >
+                {chunks}
+              </span>
+            ),
+          })}
         </h2>
         <div className="mt-8 flex items-center gap-3">
           <button
@@ -109,6 +138,33 @@ export default function SpotShowcase({ spots }: { spots: ShowcaseSpot[] }) {
           </Link>
         ))}
       </div>
+
+      <style>{`
+        .tn-tonight-idle {
+          color: #000;
+          text-shadow: 0 0 12px rgba(0, 0, 0, 0.9), 0 0 28px rgba(0, 0, 0, 0.7), 0 0 52px rgba(0, 0, 0, 0.5);
+        }
+        .tn-tonight-reveal {
+          animation: tn-tonight-reveal 2.4s ease-out forwards;
+        }
+        @keyframes tn-tonight-reveal {
+          0% {
+            color: #000;
+            text-shadow: 0 0 12px rgba(0, 0, 0, 0.9), 0 0 28px rgba(0, 0, 0, 0.7), 0 0 52px rgba(0, 0, 0, 0.5);
+          }
+          /* 검정 네온이 노란빛으로 완전히 옮겨간 지점 — 여기까진 색만 바뀌고
+             (알파를 높게 유지해야 중간에 색이 죽지 않고 실제로 옮겨가 보인다),
+             그 뒤로는 이미 노래진 빛만 옅어지며 사라진다 */
+          55% {
+            color: rgb(243, 152, 1);
+            text-shadow: 0 0 8px rgba(243, 152, 1, 0.85), 0 0 18px rgba(243, 152, 1, 0.6), 0 0 34px rgba(243, 152, 1, 0.4);
+          }
+          100% {
+            color: rgb(243, 152, 1);
+            text-shadow: 0 0 0 rgba(243, 152, 1, 0);
+          }
+        }
+      `}</style>
     </div>
   );
 }

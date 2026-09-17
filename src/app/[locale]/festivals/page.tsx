@@ -1,6 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getVerifiedNightSpots, pickFestivals } from "@/lib/spots";
-import { withPeriods } from "@/lib/festivals";
+import { getUpcomingFestivals } from "@/lib/festivals";
 import FestivalPoster from "@/components/FestivalPoster";
 import PageHero, { PageBody } from "@/components/PageHero";
 
@@ -8,8 +7,8 @@ import PageHero, { PageBody } from "@/components/PageHero";
 export const revalidate = 3600;
 
 /**
- * 축제&행사 탭 — '축제' 카테고리로 등록·검증된 야간 명소를 포스터로 보여준다.
- * 축제 일정은 따로 두지 않는다(출처가 없다). 자세한 내용은 각 명소 상세에서.
+ * 축제&행사 탭 — 공사 축제 목록에서 대전 축제를 받아 포스터로 보여준다.
+ * 이미 끝난 축제는 받아오지 않는다 — 진행 중과 예정만 선다.
  */
 export default async function FestivalsPage({
   params,
@@ -19,7 +18,7 @@ export default async function FestivalsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("festivals");
-  const festivals = await withPeriods(pickFestivals(await getVerifiedNightSpots(locale)));
+  const festivals = await getUpcomingFestivals(locale);
 
   return (
     <>

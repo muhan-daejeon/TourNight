@@ -1,12 +1,9 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import KLifeGuide from "@/components/KLifeGuide";
-import PageHero, { PageBody } from "@/components/PageHero";
-import { RESTAURANT_STEPS, RESTAURANT_QUIZ } from "@/lib/klife-restaurant";
+import { redirect } from "@/i18n/navigation";
 
 /**
- * K-Life 가이드 · 식당편 — 외국인 관광객이 한국 식당에 들어가서 나올 때까지를
- * 미리 경험하는 상황 기반 가이드. 시나리오 데이터만 바꾸면 술집/택시/쇼핑으로
- * 확장한다 (개발정의서 8항).
+ * K-Life 가이드는 나이트 에티켓 페이지에 합쳐졌다 — 에티켓 상황을 고른 뒤
+ * "시작하기"로 이어지는 흐름 안에서 식당편이 그대로 나온다. 북마크·외부
+ * 링크가 남아 있을 수 있어 주소는 지우지 않고 통합 페이지로 보낸다.
  */
 export default async function KLifeRestaurantPage({
   params,
@@ -14,24 +11,5 @@ export default async function KLifeRestaurantPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  setRequestLocale(locale);
-  const t = await getTranslations("klife");
-
-  return (
-    <>
-      <PageHero
-        image="/etiquette/dining.jpg"
-        overline="K-LIFE GUIDE"
-        title={t("restaurantTitle")}
-        subtitle={t("restaurantSubtitle")}
-      />
-      <PageBody>
-        <KLifeGuide
-          scenario="restaurant"
-          steps={RESTAURANT_STEPS}
-          quiz={RESTAURANT_QUIZ}
-        />
-      </PageBody>
-    </>
-  );
+  redirect({ href: "/etiquette", locale });
 }

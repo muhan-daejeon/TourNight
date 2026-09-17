@@ -18,6 +18,7 @@ import {
   QUESTION_TIMES,
   scorePersonality,
   type OptionKey,
+  type PersonalityResult,
 } from "@/lib/personality-test";
 import PersonalityResultView from "./PersonalityResultView";
 
@@ -29,7 +30,6 @@ type Phase = "intro" | "quiz" | "analyzing" | "result";
  * 소개 → 12문항 → 분석 중 → 결과 요약(자세히 보기) 상세 분석·탭.
  * 채점은 lib/personality-test, 결과 화면 자체는 PersonalityResultView(마스코트·
  * 추천 코스·스팟 포함) — 프로필의 "내 여행 성향 확인하기"와 같이 쓴다.
- * 선택지 일러스트가 없는 문항(아직 사진을 안 받은 문항)만 아이콘 자리표시자로 둔다.
  */
 export default function PersonalityTest({
   onSeeCourses,
@@ -42,10 +42,12 @@ export default function PersonalityTest({
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, OptionKey>>({});
+  // 서버에서 되살린 지난 결과 — 새로 푼 답이 아니라 이걸로 결과 화면을 연다
+  const [restored, setRestored] = useState<PersonalityResult | null>(null);
 
   const result = useMemo(
-    () => (phase === "result" ? scorePersonality(answers) : null),
-    [phase, answers],
+    () => (phase === "result" ? (restored ?? scorePersonality(answers)) : null),
+    [phase, answers, restored],
   );
 
   // 결과에 도달할 때마다 서버에 한 건 남긴다 — 프로필의 "내 여행 성향
@@ -68,9 +70,43 @@ export default function PersonalityTest({
     }).catch(() => {});
   }, [result]);
 
+  // 다른 페이지에 다녀와도 결과가 사라지지 않게 — 서버에 저장된 가장 최근
+  // 결과(/api/personality/latest)를 불러와 결과 화면으로 바로 연다.
+  // 사용자가 이미 인트로에서 테스트를 시작했다면 끼어들지 않는다.
+  const startedRef = useRef(false);
+  const restoreRef = useRef(false);
+  useEffect(() => {
+    if (restoreRef.current) return;
+    restoreRef.current = true;
+    fetch("/api/personality/latest")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const r = d?.result;
+        if (!r?.primary || startedRef.current) return;
+        // 저장분에는 primary·secondary·scores만 남아 있어 파생값은 다시 계산한다
+        const scores = r.scores as PersonalityResult["scores"];
+        const maxScore = Math.max(...Object.values(scores));
+        const revived: PersonalityResult = {
+          primary: r.primary,
+          secondary: r.secondary ?? null,
+          scores,
+          maxScore,
+          primaryTypes: (Object.keys(scores) as PersonalityResult["primaryTypes"]).filter(
+            (k) => scores[k] === maxScore,
+          ),
+        };
+        // 되살린 결과를 저장 effect가 또 서버에 남기지 않도록 키를 미리 채운다
+        savedResultRef.current = `${revived.primary}:${revived.secondary}:${JSON.stringify(revived.scores)}`;
+        setRestored(revived);
+        setPhase("result");
+      })
+      .catch(() => {});
+  }, []);
+
   function restart() {
     setAnswers({});
     setIndex(0);
+    setRestored(null);
     setPhase("intro");
   }
 
@@ -99,8 +135,8 @@ export default function PersonalityTest({
 
         <button
           type="button"
-          onClick={() => setPhase("quiz")}
-          className="mt-8 inline-flex items-center gap-2 rounded-full bg-daejeon-blue px-10 py-4 text-base font-bold text-white shadow-[0_8px_28px_rgba(0,78,162,0.35)] transition hover:bg-indigo-500"
+          onClick={() => { startedRef.current = true; setPhase("quiz"); }}
+          className="mt-8 inline-flex items-center gap-2 rounded-full bg-daejeon-orange px-10 py-4 text-base font-bold text-white shadow-[0_8px_28px_rgba(0,78,162,0.35)] transition hover:opacity-90"
         >
           {t("start")}
           <ArrowRight size={17} />
@@ -111,7 +147,7 @@ export default function PersonalityTest({
           <div className="tn-parade flex w-max items-end gap-8 sm:gap-12">
             {marquee.map((ty, i) => (
               <div key={i} className="flex w-32 shrink-0 flex-col items-center gap-2 sm:w-40">
-                <span className="rounded-full bg-daejeon-blue px-3 py-1 text-[11px] font-extrabold text-white shadow">
+                <span className="rounded-full bg-daejeon-orange px-3 py-1 text-[11px] font-extrabold text-white shadow">
                   {t(`axes.${ty}`)}
                 </span>
                 <Image
@@ -223,13 +259,13 @@ export default function PersonalityTest({
                 onClick={() => choose(key)}
                 className={`flex w-full items-center gap-3.5 rounded-2xl border px-5 py-4 text-left transition-all duration-150 ${
                   on
-                    ? "scale-[1.01] border-daejeon-blue bg-indigo-50"
-                    : "border-slate-200 bg-white hover:scale-[1.02] hover:border-indigo-300 hover:shadow-md"
+                    ? "scale-[1.01] border-daejeon-orange bg-daejeon-orange"
+                    : "border-slate-200 bg-white hover:scale-[1.02] hover:border-daejeon-orange/50 hover:shadow-md"
                 }`}
               >
                 <span
                   className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold uppercase ${
-                    on ? "bg-daejeon-blue text-white" : "bg-slate-100 text-slate-500"
+                    on ? "bg-white text-daejeon-orange" : "bg-slate-100 text-slate-500"
                   }`}
                 >
                   {key}

@@ -390,7 +390,9 @@ function CourseCard({
   const cats = [...new Set(course.stops.map((s) => s.category))].slice(0, 2);
   return (
     <Link
-      href="/courses"
+      // 코스 목록이 아니라 이 코스가 골라진 상태로 연다 — "추천 루트 보기"가
+      // 실제 루트(지도·경유지)로 이어지게
+      href={{ pathname: "/courses", query: { course: course.id } }}
       className="group overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-indigo-300/40"
     >
       <div className="relative h-32 w-full overflow-hidden bg-slate-200">

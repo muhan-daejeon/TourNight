@@ -153,7 +153,7 @@ export default async function AboutPage({
       <PageBody>
         {/* ① 대전은 어느 도시인가요? */}
         <section className="mx-auto max-w-3xl py-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight text-daejeon-blue sm:text-3xl">
+          <h2 className="text-2xl font-extrabold tracking-tight text-daejeon-orange sm:text-3xl">
             {t("cityTitle")}
           </h2>
           <p className="mt-5 whitespace-pre-line text-[18px] leading-relaxed text-slate-600">
@@ -169,9 +169,13 @@ export default async function AboutPage({
           </div>
         </section>
 
+        {/* "대전은 어느 도시인가요?"와 "꿈씨패밀리" 사이 구분선 — 위아래 간격을
+            더 넉넉히 띄운다 */}
+        <hr className="mx-auto mt-6 mb-6 w-20 border-t border-slate-200" />
+
         {/* ② 대전의 캐릭터, 꿈씨패밀리 — 제목 색은 "대전은 어느 도시인가요?"와 통일 */}
-        <section className="mx-auto max-w-3xl border-t border-slate-200 py-10 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight text-daejeon-blue sm:text-3xl">
+        <section className="mx-auto max-w-3xl py-10 text-center">
+          <h2 className="text-2xl font-extrabold tracking-tight text-daejeon-orange sm:text-3xl">
             {t("familyTitle")}
           </h2>
           <p className="mx-auto mt-5 max-w-xl whitespace-pre-line text-[18px] leading-relaxed text-slate-600">
@@ -189,10 +193,14 @@ export default async function AboutPage({
           </div>
         </section>
 
+        {/* 꿈씨패밀리 이미지와 "대전의 무료 자전거, 타슈" 사이 구분선 — 위아래
+            간격을 더 넉넉히 띄운다 */}
+        <hr className="mx-auto mt-6 mb-6 w-20 border-t border-slate-200" />
+
         {/* ③ 무료 자전거 타슈 — 제목 색은 "대전은 어느 도시인가요?"와 통일 */}
-        <section id="tashu" className="border-t border-slate-200 py-10">
+        <section id="tashu" className="py-10">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="flex items-center justify-center gap-2 text-2xl font-extrabold tracking-tight text-daejeon-blue sm:text-3xl">
+            <h2 className="flex items-center justify-center gap-2 text-2xl font-extrabold tracking-tight text-daejeon-orange sm:text-3xl">
               <Bike size={26} />
               {t("tashuTitle")}
             </h2>
@@ -205,12 +213,12 @@ export default async function AboutPage({
               박스(원) 안에 넣는다. 다른 글자들과 확실히 떨어지도록 위·아래
               여백을 넉넉하게(60px씩). 원 안 문구는 이전의 0.8배 크기.
               -mx-[calc(50%-50vw)]로 화면 끝까지 완전히 풀어준다 */}
-          <div className="mx-[calc(50%-50vw)] mb-[60px] mt-[60px] grid w-screen grid-cols-1 gap-x-6 gap-y-8 px-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-[calc(50%-50vw)] mb-[60px] mt-[60px] grid w-screen grid-cols-[repeat(1,max-content)] justify-center gap-x-8 gap-y-[0.7rem] px-4 sm:grid-cols-[repeat(2,max-content)] lg:grid-cols-[repeat(4,max-content)]">
             {(["step1Body", "step2Body", "step3Body", "step4Body"] as const).map((k, i) => (
-              <div key={k} className="flex justify-center">
-                <div className="flex h-[324px] w-[324px] shrink-0 flex-col items-center justify-center rounded-full border-2 border-daejeon-green/40 bg-slate-50 px-3 text-center">
+              <div key={k} className="my-3 flex justify-center">
+                <div className="flex h-[316px] w-[316px] shrink-0 flex-col items-center justify-center rounded-full border-2 border-daejeon-green/40 bg-slate-50 px-3 text-center">
                   <p className="text-[1.75rem] font-extrabold text-daejeon-green">{t("step", { n: i + 1 })}</p>
-                  <p className="mt-2 whitespace-pre-line text-[21px] leading-snug text-slate-900">{t(k)}</p>
+                  <p className="mt-2 whitespace-pre-line text-[19px] leading-snug text-slate-900">{t(k)}</p>
                 </div>
               </div>
             ))}
@@ -219,12 +227,12 @@ export default async function AboutPage({
           {/* 이용·요금 안내 — 박스 없이 문자열만, 두 열(이용 안내·요금 안내)을
               화면 가운데 정렬, 두 열 사이 여백을 훨씬 넉넉하게(80px). 라벨
               글자 크기는 원래(text-base=1rem)의 2배 */}
-          <div className="mx-auto flex max-w-3xl flex-wrap items-start justify-center gap-x-[80px] gap-y-8 text-center">
-            <div>
+          <div className="mx-auto flex max-w-3xl flex-wrap items-start justify-center gap-x-[160px] gap-y-16 text-center">
+            <div className="mb-8">
               <p className="text-[2rem] font-extrabold text-daejeon-green">{t("usageInfoTitle")}</p>
               <InfoTable rows={usageRows} />
             </div>
-            <div>
+            <div className="mb-8">
               <p className="text-[2rem] font-extrabold text-daejeon-green">{t("feeInfoTitle")}</p>
               <InfoTable rows={feeRows} />
               <p className="mt-2 text-left text-sm text-slate-600">※ {feeNote}</p>

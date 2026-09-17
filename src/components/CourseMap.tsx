@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import type { Course } from "@/lib/courses";
 import { pickBestMode } from "@/lib/transit-format";
 import type { RouteLeg } from "@/lib/routes";
+import { loadKakaoMaps } from "@/lib/kakaoMaps";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type KakaoNS = any;
@@ -163,9 +164,10 @@ export default function CourseMap({
       map.setBounds(bounds, 48, 48, 48, 48);
     };
 
-    const startInit = () => {
-      const { kakao } = window as KakaoNS;
-      kakao.maps.load(() => {
+    if (kakaoRef.current && mapRef.current) {
+      draw(); // 이미 로드됨 → 코스·모드 변경 시 즉시 갱신
+    } else {
+      loadKakaoMaps().then((kakao) => {
         if (cancelled) return;
         kakaoRef.current = kakao;
         if (!mapRef.current && containerRef.current) {
@@ -184,18 +186,6 @@ export default function CourseMap({
         }
         draw();
       });
-    };
-
-    if (kakaoRef.current && mapRef.current) {
-      draw(); // 이미 로드됨 → 코스·모드 변경 시 즉시 갱신
-    } else if ("kakao" in window) {
-      startInit();
-    } else {
-      const script = document.createElement("script");
-      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY}&autoload=false`;
-      script.async = true;
-      script.onload = startInit;
-      document.head.appendChild(script);
     }
 
     return () => {

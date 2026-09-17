@@ -19,7 +19,7 @@
     "festivals": "庆典·活动",
     "food": "美食",
     "stay": "住宿",
-    "shopping": "夜市 · 购物",
+    "shopping": "市场 · 购物",
     "menu": "全部菜单",
     "groupExplore": "探索",
     "groupGuide": "旅行指南",
@@ -39,7 +39,7 @@
   "home": {
     "heroTitle": "今晚，展开你的梦想",
     "heroSubtitle": "在吉祥物Kkumdori的城市大田，夜景、星空与庆典点亮你的梦",
-    "spotsSection": "今晚去哪儿？",
+    "spotsSection": "<hl>今晚</hl>去哪儿？",
     "searchPlaceholder": "按名称或地区搜索",
     "noResults": "未找到相关景点",
     "viewDetail": "查看详情",
@@ -104,9 +104,7 @@
     "bookmarkRemove": "取消收藏",
     "bookmarkFilter": "已收藏 {count}",
     "howToTitle": "选择喜欢的地点，打造专属路线",
-    "howToStep1": "点击景点照片上的<b>添加</b>，选出想去的地方",
-    "howToStep2": "再点下方出现的<b>生成路线</b>",
-    "howToStep3": "AI 会安排顺序，并给出交通路线和所需时间",
+    "howToNotice": "生成路线时，可以直接调用您在这里保存的地点。",
     "howToClose": "关闭",
     "basketOne": "只选一处也可以 - 我们会串联附近景点生成路线",
     "heroPersonaOverline": "大田之夜，寻找专属你的色彩",
@@ -126,7 +124,7 @@
     "aboutBody": "科学之城,也是面包与刀削面之城;入夜后,甲川的桥梁与韩光塔熠熠生辉。从首尔乘KTX仅1小时,大田就在韩国的正中心。",
     "aboutKkum": "黄色小精灵Kkumdori自1993年大田世博会起就是大田的吉祥物,象征梦想与希望的城市之脸。",
     "aboutCta": "和Kkumdori一起开始旅程吧",
-    "enjoyTitle": "尽情享受TourNight",
+    "enjoyTitle": "只有在TourNight才能体验的功能",
     "enjoy1": "我的旅行性格测试",
     "enjoy1Desc": "回答12个问题,看看你是哪种夜晚旅行者 - 还有与你相似的梦之子角色,以及最适合你的大田夜游路线。",
     "enjoy1Cta": "测测我的旅行类型",
@@ -393,7 +391,8 @@
     "learnBody": "K-Life指南带你从头到尾提前体验这个情境。",
     "learnCta": "开始",
     "learnLater": "稍后",
-    "backToTopics": "查看其他情境"
+    "backToTopics": "查看其他情境",
+    "backToEtiquette": "返回礼仪指南"
   },
   "community": {
     "title": "夜间社区",
@@ -475,7 +474,12 @@
       "guide1": "分享夜游去过的地方的心得和小贴士",
       "guide2": "写上景点名称，就会在这里汇总",
       "guide3": "请只上传自己拍摄的照片"
-    }
+    },
+    "tagAdd": "地点标签",
+    "tagSearch": "搜索您去过的景点名称",
+    "tagNoMatch": "没有匹配的景点",
+    "tagLimit": "最多可添加{max}个标签",
+    "tagRemove": "移除标签"
   },
   "stampTour": {
     "overline": "STAMP TOUR",
@@ -517,6 +521,19 @@
       "uploadError": "照片上传失败，请重试。",
       "photoRejected": "这张照片无法上传，请选择其他照片。",
       "stamped": "已盖章"
+    },
+    "list": {
+      "title": "梦多尔的深夜旅行",
+      "subtitle": "请按顺序拍摄4个拍照地点",
+      "progress": "{done}/4 已完成",
+      "statusDone": "拍摄完成",
+      "statusCurrent": "现在请上传这个地点的照片",
+      "statusLocked": "还未到访",
+      "completeButton": "完成梦多尔四格照",
+      "notice": "请在您选择的地点上传照片！\n如果所在位置不同，将无法上传照片。",
+      "reselectSpot": "（重新选择地点）",
+      "reselectTitle": "更换其他地点",
+      "reselectSaveError": "更换地点失败，请稍后重试。"
     },
     "collage": {
       "title": "梦多尔四格照",
@@ -608,15 +625,12 @@
   },
   "festivals": {
     "title": "庆典 & 活动",
-    "subtitle": "TourNight 收录的大田庆典场地",
+    "subtitle": "大田正在举行或即将举行的庆典",
     "scheduleNote": "举办日期以韩国观光公社登记信息为准，可能因主办方原因变动。",
-    "empty": "暂无已收录的庆典场地。",
+    "empty": "目前没有正在举行的庆典。",
     "ongoing": "进行中",
     "upcoming": "即将举办",
-    "ended": "已结束",
-    "dday": "还有{n}天",
-    "past": "每年举办",
-    "lastYear": "去年"
+    "dday": "还有{n}天"
   },
   "comingSoon": {
     "short": "筹备中",

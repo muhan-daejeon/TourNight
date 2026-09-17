@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
@@ -15,6 +15,7 @@ import {
   Trash2,
   ImagePlus,
   Languages,
+  MapPin,
   X,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -31,6 +32,14 @@ interface Post {
   mediaUrl: string | null;
   mediaType: "image" | "video" | null;
   authorVerified: boolean;
+  /** 방문 명소 태그(content_id들) — 이름은 tagSpots로 푼다 */
+  contentIds?: string[];
+}
+
+/** 태그로 고를 수 있는 명소 한 건 — 서버에서 검증된 목록의 이름과 id만 받는다 */
+export interface TagSpot {
+  contentId: string;
+  title: string;
 }
 
 interface Comment {
@@ -269,7 +278,7 @@ function VerifyPrompt({ mailFrom }: { mailFrom: string | null }) {
           : null;
 
   return (
-    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+    <div className="rounded-xl border border-amber-400 bg-white px-4 py-3.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-start gap-2.5">
           <MailCheck size={16} className="mt-0.5 shrink-0 text-amber-600" />
@@ -284,18 +293,22 @@ function VerifyPrompt({ mailFrom }: { mailFrom: string | null }) {
           {state === "sending" ? t("verifySending") : t("verifyResend")}
         </button>
       </div>
-      {/* 스팸함 안내 + 발신 주소. 일본 캐리어 메일은 기본이 '모르는 도메인 차단'이라
-          이 주소를 수신 허용에 넣지 않으면 아예 도착하지 않는다 */}
-      <p className="mt-2.5 pl-6 text-xs leading-relaxed text-slate-400">
-        {t("verifySpamHint")}
-        {mailFrom && (
-          <>
-            <br />
-            <span className="text-slate-500">{t("verifyFrom")} </span>
-            <span className="font-semibold text-amber-700/90">{mailFrom}</span>
-          </>
-        )}
-      </p>
+      {/* 스팸함 안내 + 발신 주소는 메일을 실제로 찾아볼 때(재발송 직후)만 편다.
+          평소엔 한 줄 배너로 접어 목록 첫 화면을 덜 차지하게 한다.
+          일본 캐리어 메일은 기본이 '모르는 도메인 차단'이라 이 주소를 수신
+          허용에 넣지 않으면 아예 도착하지 않는다 */}
+      {state === "sent" && (
+        <p className="mt-2.5 pl-6 text-xs leading-relaxed text-slate-400">
+          {t("verifySpamHint")}
+          {mailFrom && (
+            <>
+              <br />
+              <span className="text-slate-500">{t("verifyFrom")} </span>
+              <span className="font-semibold text-amber-700/90">{mailFrom}</span>
+            </>
+          )}
+        </p>
+      )}
       {note && <p className="mt-2 pl-6 text-xs text-slate-400">{note}</p>}
     </div>
   );
@@ -355,7 +368,7 @@ function TranslatableBody({
   // 버튼은 괄호 없이 "번역"만 — 둥근 사각형(pill)에 연한 노란 배경을 준 배지로,
   // 문장 옆 텍스트 링크가 아니라 눈에 띄는 하나의 버튼으로 보이게 한다
   const pillClass =
-    "ml-1.5 inline-flex items-center whitespace-nowrap rounded-full bg-amber-200 px-2.5 py-0.5 align-middle text-[11px] font-bold text-amber-900 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60";
+    "ml-1.5 inline-flex items-center whitespace-nowrap rounded-full bg-amber-200 px-2.5 py-0.5 align-middle text-[11px] font-bold text-white transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
     <p className={className}>
@@ -379,6 +392,7 @@ function TranslatableBody({
 /** 글 하나 + 댓글(펼쳐서 지연 로드). me가 없으면 비로그인 */
 function PostItem({
   post,
+  tagList,
   me,
   canAttach,
   commentQuota,
@@ -387,6 +401,8 @@ function PostItem({
   onDeleted,
 }: {
   post: Post;
+  /** 이름까지 풀린 방문 명소 태그 — 못 푼 id(비검증·삭제)는 이미 걸러져 온다 */
+  tagList: { id: string; title: string }[];
   me: Me | null | undefined;
   canAttach: boolean;
   /** 오늘 댓글 사용량 (모르면 null) */
@@ -560,23 +576,41 @@ function PostItem({
       />
         </div>
 
-        {/* 첨부 사진 — 텍스트 중심 리스트라 오른쪽 작은 썸네일로, 누르면 원본 */}
-        {post.mediaUrl && post.mediaType === "image" && (
-          <button
-            type="button"
-            onClick={() => setLightbox(true)}
-            className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl border border-slate-200 transition hover:border-slate-300"
-          >
-            <Image
-              src={post.mediaUrl}
-              alt=""
-              fill
-              sizes="72px"
-              className="object-cover"
-            />
-          </button>
-        )}
       </div>
+
+      {/* 방문 명소 태그 — 누르면 그 명소 상세로 */}
+      {tagList.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {tagList.map((tag) => (
+            <Link
+              key={tag.id}
+              href={`/spots/${tag.id}`}
+              className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 transition hover:bg-indigo-100"
+            >
+              <MapPin size={11} />
+              {tag.title}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* 첨부 사진 — 밤 후기의 주인공이라 옆 썸네일 대신 본문 아래 큰 미리보기로.
+          누르면 원본(라이트박스) */}
+      {post.mediaUrl && post.mediaType === "image" && (
+        <button
+          type="button"
+          onClick={() => setLightbox(true)}
+          className="group relative mt-3 block h-52 w-full overflow-hidden rounded-xl border border-slate-200 transition hover:border-slate-300 sm:h-64"
+        >
+          <Image
+            src={post.mediaUrl}
+            alt=""
+            fill
+            sizes="(min-width: 640px) 640px, 90vw"
+            className="object-cover transition duration-300 group-hover:scale-[1.02]"
+          />
+        </button>
+      )}
 
       {lightbox && post.mediaUrl && (
         <div
@@ -762,6 +796,7 @@ export default function CommunityBoard({
   initialMe,
   canAttach,
   mailFrom,
+  tagSpots,
 }: {
   /** 서버에서 렌더링한 글 목록 — 첫 화면부터 보이도록 초기값으로 쓴다 */
   initialPosts: Post[];
@@ -771,6 +806,8 @@ export default function CommunityBoard({
   canAttach: boolean;
   /** 인증 메일 발신 주소 (미설정이면 null) — 수신 허용 안내에 쓴다 */
   mailFrom: string | null;
+  /** 방문 명소 태그 후보 (검증된 명소의 id·이름) — 비어 있으면 태그 UI를 숨긴다 */
+  tagSpots: TagSpot[];
 }) {
   const t = useTranslations("community");
 
@@ -785,6 +822,22 @@ export default function CommunityBoard({
         : posts;
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // 방문 명소 태그 — 검색해서 칩으로 담는다 (최대 5개, 서버 상한과 동일)
+  const TAG_MAX = 5;
+  const [tags, setTags] = useState<TagSpot[]>([]);
+  const [tagOpen, setTagOpen] = useState(false);
+  const [tagQuery, setTagQuery] = useState("");
+  const titleById = useMemo(
+    () => new Map(tagSpots.map((s) => [s.contentId, s.title])),
+    [tagSpots],
+  );
+  const tagMatches = useMemo(() => {
+    const q = tagQuery.trim().toLowerCase();
+    const picked = new Set(tags.map((t) => t.contentId));
+    const pool = tagSpots.filter((s) => !picked.has(s.contentId));
+    const hit = q ? pool.filter((s) => s.title.toLowerCase().includes(q)) : pool;
+    return hit.slice(0, 8);
+  }, [tagQuery, tagSpots, tags]);
   // undefined = 로딩, null = 비로그인, Me = 로그인
   // 서버가 이미 알려줬으므로 물어볼 필요가 없다 (undefined 상태가 아예 없다).
   // setter는 남겨 둔다 — 글을 올리다 세션이 만료되면(401) 로그인 유도로 바꾼다.
@@ -829,7 +882,10 @@ export default function CommunityBoard({
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/community", photoRequestInit(trimmedBody));
+      const res = await fetch(
+        "/api/community",
+        photoRequestInit(trimmedBody, { contentIds: tags.map((s) => s.contentId) }),
+      );
       if (res.status === 401) {
         setMe(null); // 세션 만료 → 로그인 유도로 전환
         return;
@@ -857,6 +913,9 @@ export default function CommunityBoard({
       setPosts((prev) => [data.post, ...prev]);
       consumeQuota("post");
       setBody("");
+      setTags([]);
+      setTagQuery("");
+      setTagOpen(false);
       clearPhoto();
     } catch {
       alert(t("submitError"));
@@ -911,6 +970,65 @@ export default function CommunityBoard({
             placeholder={t("bodyPlaceholder")}
             className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-300/60 disabled:opacity-60"
           />
+          {/* 고른 태그 칩 */}
+          {tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {tags.map((s) => (
+                <span
+                  key={s.contentId}
+                  className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700"
+                >
+                  <MapPin size={12} />
+                  {s.title}
+                  <button
+                    type="button"
+                    aria-label={t("tagRemove")}
+                    onClick={() => setTags((prev) => prev.filter((x) => x.contentId !== s.contentId))}
+                    className="ml-0.5 rounded-full p-0.5 transition hover:bg-indigo-100"
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* 태그 고르기 패널 — 이름으로 좁혀서 하나씩 담는다 */}
+          {tagOpen && (
+            <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
+              <input
+                value={tagQuery}
+                onChange={(e) => setTagQuery(e.target.value)}
+                placeholder={t("tagSearch")}
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-300"
+              />
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {tagMatches.map((sp) => (
+                  <button
+                    key={sp.contentId}
+                    type="button"
+                    disabled={tags.length >= TAG_MAX}
+                    onClick={() => {
+                      setTags((prev) =>
+                        prev.length >= TAG_MAX ? prev : [...prev, sp],
+                      );
+                      setTagQuery("");
+                    }}
+                    className="rounded-full border border-slate-200 px-2.5 py-1 text-xs text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700 disabled:opacity-40"
+                  >
+                    {sp.title}
+                  </button>
+                ))}
+                {tagMatches.length === 0 && (
+                  <p className="text-xs text-slate-400">{t("tagNoMatch")}</p>
+                )}
+              </div>
+              {tags.length >= TAG_MAX && (
+                <p className="mt-2 text-[11px] text-slate-400">{t("tagLimit", { max: TAG_MAX })}</p>
+              )}
+            </div>
+          )}
+
           {/* 첨부 미리보기 */}
           {photo && (
             <div className="relative mt-3 w-fit">
@@ -953,6 +1071,22 @@ export default function CommunityBoard({
                     {t("photoAdd")}
                   </button>
                 </>
+              )}
+              {tagSpots.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setTagOpen((v) => !v)}
+                  disabled={submitting}
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:opacity-40 ${
+                    tagOpen || tags.length
+                      ? "border-indigo-300 text-indigo-700"
+                      : "border-slate-200 text-slate-400 hover:text-slate-900"
+                  }`}
+                >
+                  <MapPin size={14} />
+                  {t("tagAdd")}
+                  {tags.length > 0 && ` ${tags.length}/${TAG_MAX}`}
+                </button>
               )}
               <span className="text-xs text-slate-500">
                 {body.length}/{BODY_MAX}
@@ -1007,6 +1141,9 @@ export default function CommunityBoard({
             <PostItem
               key={post.id}
               post={post}
+              tagList={(post.contentIds ?? [])
+                .map((id) => ({ id, title: titleById.get(id) }))
+                .filter((x): x is { id: string; title: string } => !!x.title)}
               me={me}
               canAttach={canAttach}
               commentQuota={quota?.comment ?? null}

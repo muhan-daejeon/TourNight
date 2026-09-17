@@ -19,7 +19,7 @@ export default async function NoticesPage({
         title="공지사항"
         subtitle="대전과 투어나잇의 소식을 한 곳에서 확인하세요."
       />
-      <PageBody width="narrow">
+      <PageBody>
         <NoticeBoard />
       </PageBody>
     </>

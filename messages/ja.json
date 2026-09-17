@@ -19,7 +19,7 @@
     "festivals": "祭り・イベント",
     "food": "グルメ",
     "stay": "宿泊",
-    "shopping": "夜市・買い物",
+    "shopping": "市場・買い物",
     "menu": "メニュー一覧",
     "groupExplore": "見どころ",
     "groupGuide": "旅のガイド",
@@ -39,7 +39,7 @@
   "home": {
     "heroTitle": "今夜、君の夢を広げよう",
     "heroSubtitle": "クムドリの街・大田で、夜景と星空と祭りが夢見る夜を",
-    "spotsSection": "今夜、どこへ行きましょう？",
+    "spotsSection": "<hl>今夜、</hl>どこへ行きましょう？",
     "searchPlaceholder": "名前・エリアで検索",
     "noResults": "該当する名所がありません",
     "viewDetail": "詳しく見る",
@@ -104,9 +104,7 @@
     "bookmarkRemove": "保存を解除",
     "bookmarkFilter": "保存した場所 {count}",
     "howToTitle": "気になる場所を選んで自分だけのコースを作りましょう",
-    "howToStep1": "名所の写真にある<b>追加</b>を押して行きたい場所を選び",
-    "howToStep2": "下に出る<b>コースを作る</b>を押すと",
-    "howToStep3": "AIが順番を決め、移動ルートと所要時間まで教えてくれます",
+    "howToNotice": "コースを作るとき、ここで保存した場所を呼び出せます。",
     "howToClose": "閉じる",
     "basketOne": "1か所だけでも大丈夫 - 近くの名所をつないでコースにします",
     "heroPersonaOverline": "大田の夜、あなただけの色を見つけて",
@@ -126,7 +124,7 @@
     "aboutBody": "科学の街であり、パンとカルグクスの街。夜になれば甲川の橋とハンビッ塔が輝く街。ソウルからKTXで1時間、韓国のど真ん中にあるのが大田です。",
     "aboutKkum": "黄色い妖精クムドリは、1993年大田エキスポから大田を守ってきたマスコット。夢と希望を象徴する大田の顔です。",
     "aboutCta": "クムドリと一緒に旅を始めよう",
-    "enjoyTitle": "ツアーナイトを楽しもう",
+    "enjoyTitle": "TourNightだけで楽しめる機能です",
     "enjoy1": "私の旅行タイプ診断",
     "enjoy1Desc": "12の質問で、あなたがどんな夜の旅人かを診断。あなたに似たクムドリのキャラクターと、ぴったりの夜コースまでつながります。",
     "enjoy1Cta": "旅のタイプを診断する",
@@ -393,7 +391,8 @@
     "learnBody": "この状況を最初から最後まで体験できるK-Lifeガイドがあります。",
     "learnCta": "はじめる",
     "learnLater": "あとで",
-    "backToTopics": "他の場面を見る"
+    "backToTopics": "他の場面を見る",
+    "backToEtiquette": "エチケットに戻る"
   },
   "community": {
     "title": "ナイトコミュニティ",
@@ -475,7 +474,12 @@
       "guide1": "夜に訪れた場所の感想やコツを共有しましょう",
       "guide2": "名所の名前を書くとここにまとまります",
       "guide3": "写真は自分で撮ったものだけ投稿してください"
-    }
+    },
+    "tagAdd": "スポットタグ",
+    "tagSearch": "行った場所の名前で検索",
+    "tagNoMatch": "一致するスポットがありません",
+    "tagLimit": "タグは最大{max}個まで",
+    "tagRemove": "タグを外す"
   },
   "stampTour": {
     "overline": "STAMP TOUR",
@@ -517,6 +521,19 @@
       "uploadError": "写真をアップロードできませんでした。もう一度お試しください。",
       "photoRejected": "アップロードできない写真です。別の写真を選んでください。",
       "stamped": "スタンプ完了"
+    },
+    "list": {
+      "title": "クムドリと夜の旅",
+      "subtitle": "4つのフォトスポットを順番に集めましょう",
+      "progress": "{done}/4 完了",
+      "statusDone": "撮影完了",
+      "statusCurrent": "今このスポットの写真を登録してください",
+      "statusLocked": "まだ訪れていません",
+      "completeButton": "クムドル4カットを完成させる",
+      "notice": "選んだスポットで写真を登録してください！\n場所が違うと写真をアップロードできません。",
+      "reselectSpot": "（場所を選び直す）",
+      "reselectTitle": "別の場所に変更する",
+      "reselectSaveError": "場所を変更できませんでした。しばらくしてからもう一度お試しください。"
     },
     "collage": {
       "title": "クムドル4カット",
@@ -608,15 +625,12 @@
   },
   "festivals": {
     "title": "祭り・イベント",
-    "subtitle": "TourNight に登録された大田の祭り会場",
+    "subtitle": "今ひらかれている、またはこれから始まる大田のお祭り",
     "scheduleNote": "開催期間は韓国観光公社の登録情報に基づき、主催者の都合で変わることがあります。",
-    "empty": "登録された祭り会場はまだありません。",
+    "empty": "いま開催中のお祭りはありません。",
     "ongoing": "開催中",
     "upcoming": "開催予定",
-    "ended": "終了",
-    "dday": "あと{n}日",
-    "past": "毎年開催",
-    "lastYear": "昨年"
+    "dday": "あと{n}日"
   },
   "comingSoon": {
     "short": "準備中",

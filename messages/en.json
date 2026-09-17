@@ -19,7 +19,7 @@
     "festivals": "Festivals",
     "food": "Food",
     "stay": "Stay",
-    "shopping": "Night Markets",
+    "shopping": "Markets",
     "menu": "All menu",
     "groupExplore": "Explore",
     "groupGuide": "Travel Guide",
@@ -39,7 +39,7 @@
   "home": {
     "heroTitle": "Unfold Your Dream Tonight",
     "heroSubtitle": "Night views, starlight and festivals in Daejeon - the city of Kkumdori, where dreams come alive",
-    "spotsSection": "Where to tonight?",
+    "spotsSection": "Where to <hl>tonight?</hl>",
     "searchPlaceholder": "Search by name or area",
     "noResults": "No spots found",
     "viewDetail": "View details",
@@ -104,9 +104,7 @@
     "bookmarkRemove": "Remove from saved",
     "bookmarkFilter": "Saved {count}",
     "howToTitle": "Pick the places you like and build your own course",
-    "howToStep1": "Tap <b>Add</b> on a spot photo to pick where you want to go",
-    "howToStep2": "Then tap <b>Plan course</b> in the bar below",
-    "howToStep3": "AI sets the order and shows routes and travel times",
+    "howToNotice": "You can pull in the places you save here when you plan a course.",
     "howToClose": "Close",
     "basketOne": "One place is enough - we'll link nearby spots into a course",
     "heroPersonaOverline": "Daejeon nights - find your own color",
@@ -126,7 +124,7 @@
     "aboutBody": "A city of science, of bread and kalguksu - and at night, of glowing bridges over Gapcheon and the shining Hanbit Tower. Just 1 hour from Seoul by KTX, right at the heart of Korea.",
     "aboutKkum": "Kkumdori, the little yellow fairy, has been Daejeon's mascot since Expo '93 - the face of the city, symbolizing dreams and hope.",
     "aboutCta": "Start your journey with Kkumdori",
-    "enjoyTitle": "Enjoy TourNight",
+    "enjoyTitle": "Features you'll only find on TourNight",
     "enjoy1": "My Travel Persona Test",
     "enjoy1Desc": "Answer 12 quick questions to find out what kind of night traveler you are - and meet the Kkumdori character that matches you, with night courses to follow.",
     "enjoy1Cta": "Find my travel type",
@@ -393,7 +391,8 @@
     "learnBody": "The K-Life Guide walks you through this situation from start to finish.",
     "learnCta": "Start",
     "learnLater": "Later",
-    "backToTopics": "Back to topics"
+    "backToTopics": "Back to topics",
+    "backToEtiquette": "Back to etiquette"
   },
   "community": {
     "title": "Night Community",
@@ -475,7 +474,12 @@
       "guide1": "Share tips and reviews from your night out",
       "guide2": "Mention a spot by name and it shows up here",
       "guide3": "Please post only photos you took yourself"
-    }
+    },
+    "tagAdd": "Tag spots",
+    "tagSearch": "Search the places you visited",
+    "tagNoMatch": "No matching spot",
+    "tagLimit": "Up to {max} tags",
+    "tagRemove": "Remove tag"
   },
   "stampTour": {
     "overline": "STAMP TOUR",
@@ -517,6 +521,19 @@
       "uploadError": "Couldn't upload the photo. Please try again.",
       "photoRejected": "This photo can't be uploaded. Please choose another.",
       "stamped": "Stamped"
+    },
+    "list": {
+      "title": "Ggumdol's Night Trip",
+      "subtitle": "Capture the 4 photo spots in order",
+      "progress": "{done}/4 done",
+      "statusDone": "Photo captured",
+      "statusCurrent": "Upload a photo for this spot now",
+      "statusLocked": "Not visited yet",
+      "completeButton": "Complete my four-cut",
+      "notice": "Upload a photo at the spot you selected!\nYou can't upload if you're in a different location.",
+      "reselectSpot": "(Change place)",
+      "reselectTitle": "Pick a different place",
+      "reselectSaveError": "Couldn't change the place. Please try again in a moment."
     },
     "collage": {
       "title": "Ggumdol Four-Cut",
@@ -608,15 +625,12 @@
   },
   "festivals": {
     "title": "Festivals & events",
-    "subtitle": "Festival venues registered on TourNight",
+    "subtitle": "Festivals happening now or coming up in Daejeon",
     "scheduleNote": "Dates come from Korea Tourism Organization records and may change by the organizer.",
-    "empty": "No festival venues registered yet.",
+    "empty": "No festivals are running right now.",
     "ongoing": "On now",
     "upcoming": "Upcoming",
-    "ended": "Ended",
-    "dday": "D-{n}",
-    "past": "Annual",
-    "lastYear": "Last year"
+    "dday": "D-{n}"
   },
   "comingSoon": {
     "short": "Coming soon",
