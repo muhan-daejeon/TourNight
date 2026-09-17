@@ -1,31 +1,63 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { MapPin, Phone, ChevronRight, Sparkles } from "lucide-react";
+import {
+  Sparkles,
+  UtensilsCrossed,
+  BedDouble,
+  ShoppingBag,
+  type LucideIcon,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { NightSpot } from "@/lib/kto";
 import type { LocalKind } from "@/lib/kto-live";
 import type { LocalSpotWithContext } from "@/lib/local-spots";
 import { areaOf, NIGHT_AREAS, type NightAreaId } from "@/lib/night-areas";
+import PlaceCard, { PlaceChip } from "./PlaceCard";
 
 const fmt = (m: number) => (m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`);
 
-/** 탭별 포인트 색 — 명소(앰버)와 다른 네온 계열 */
-const ACCENT: Record<LocalKind, { text: string; ring: string; chip: string; glow: string }> = {
-  food: { text: "text-rose-600", ring: "hover:border-rose-400/50", chip: "bg-rose-400/15 text-rose-700", glow: "from-rose-500/20" },
-  stay: { text: "text-violet-300", ring: "hover:border-violet-400/50", chip: "bg-violet-400/15 text-violet-700", glow: "from-violet-500/20" },
-  shopping: { text: "text-emerald-600", ring: "hover:border-emerald-400/50", chip: "bg-emerald-400/15 text-emerald-700", glow: "from-emerald-500/20" },
+/** 탭별 포인트 색 — 명소(앰버)와 다른 계열.
+ *  badge는 사진 위 어두운 배지에 얹는 글자색이라 밝은 톤을 쓴다 */
+const ACCENT: Record<
+  LocalKind,
+  { text: string; badge: string; chip: string; glow: string; scene: string; Icon: LucideIcon }
+> = {
+  food: {
+    text: "text-rose-600",
+    badge: "text-rose-300",
+    chip: "bg-rose-500 text-white",
+    glow: "from-rose-500/20",
+    scene: "from-rose-950 via-slate-900 to-orange-950",
+    Icon: UtensilsCrossed,
+  },
+  stay: {
+    text: "text-violet-500",
+    badge: "text-violet-300",
+    chip: "bg-violet-500 text-white",
+    glow: "from-violet-500/20",
+    scene: "from-violet-950 via-slate-900 to-indigo-950",
+    Icon: BedDouble,
+  },
+  shopping: {
+    text: "text-emerald-600",
+    badge: "text-emerald-300",
+    chip: "bg-emerald-500 text-white",
+    glow: "from-emerald-500/20",
+    scene: "from-emerald-950 via-slate-900 to-teal-950",
+    Icon: ShoppingBag,
+  },
 };
 
 const AREA_ORDER: NightAreaId[] = ["yuseong", "dunsan", "expo", "downtown", "other"];
 
 /**
- * 나이트 라이프 탐색 — 명소 탭(사진 격자 + 지도)과 일부러 다르게 간다.
- * 밤에 어디서 노는지는 동네 단위로 정해지므로, 밤 동네별로 묶어 매거진처럼
- * 세로로 흐르게 하고 동네 헤더에 그 동네 야경 명소를 붙인다.
- * 카드는 번호 붙은 가로형 행 — 훑어 내려가며 고르는 화면이다.
+ * 나이트 라이프 탐색 — 맛집·숙소·쇼핑 탭의 본체.
+ *
+ * 밤에 어디서 노는지는 동네 단위로 정해지므로 밤 동네별로 묶고, 동네 헤더에
+ * 그 동네 야경 명소를 붙인다. 카드는 야경명소 탭과 같은 사진 카드(PlaceCard)다
+ * — 전에는 번호 붙은 가로 줄 목록이라 탭을 옮기면 다른 사이트처럼 보였다.
  */
 export default function NightLifeExplorer({
   kind,
@@ -37,6 +69,7 @@ export default function NightLifeExplorer({
   nightSpots: NightSpot[];
 }) {
   const t = useTranslations("local");
+  const th = useTranslations("home"); // 분류 배지는 명소 탭과 같은 라벨을 쓴다
   const [area, setArea] = useState<NightAreaId | "all">("all");
   const accent = ACCENT[kind];
 
@@ -78,10 +111,10 @@ export default function NightLifeExplorer({
             <button
               key={id}
               onClick={() => setArea(id)}
-              className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+              className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
                 area === id
-                  ? "border-white bg-white text-slate-950"
-                  : "border-slate-200 bg-slate-100 text-slate-400 hover:border-white/30 hover:text-slate-900"
+                  ? "border-amber-400 bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.3)]"
+                  : "border-slate-200 bg-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-900"
               }`}
             >
               {id === "all" ? t("filterAll") : t(`areas.${id}`)}
@@ -140,70 +173,42 @@ export default function NightLifeExplorer({
                 </div>
               </div>
 
-              {/* 가로형 행 목록 */}
-              <ol className="mt-4 divide-y divide-slate-200">
-                {list.map((s, i) => (
-                  <li key={s.contentId}>
-                    <div className={`group flex gap-4 rounded-2xl border border-transparent px-2 py-4 transition ${accent.ring} hover:bg-slate-100`}>
-                      <span className={`w-7 shrink-0 pt-1 text-right text-lg font-black tabular-nums ${accent.text}`}>
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <Link
-                        href={`/${kind}/${s.contentId}`}
-                        className="relative h-24 w-32 shrink-0 overflow-hidden rounded-xl bg-white sm:h-28 sm:w-44"
-                      >
-                        <Image
-                          src={s.imageUrl!}
-                          alt={s.title}
-                          fill
-                          sizes="176px"
-                          className="object-cover transition duration-500 group-hover:scale-105"
-                        />
-                      </Link>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <Link href={`/${kind}/${s.contentId}`} className="block truncate text-base font-bold text-slate-900 group-hover:underline sm:text-lg">
-                              {s.title}
-                            </Link>
-                            <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-slate-400">
-                              <MapPin size={11} className="shrink-0" />
-                              {s.addr}
-                            </p>
-                          </div>
-                          <Link
-                            href={`/${kind}/${s.contentId}`}
-                            aria-label={s.title}
-                            className="hidden shrink-0 rounded-full border border-slate-200 p-2 text-slate-400 transition hover:bg-white hover:text-slate-950 sm:block"
-                          >
-                            <ChevronRight size={15} />
-                          </Link>
-                        </div>
-
-                        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
+              {/* 사진 카드 격자 — 야경명소 탭과 같은 카드 */}
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {list.map((s) => (
+                  <PlaceCard
+                    key={s.contentId}
+                    href={`/${kind}/${s.contentId}`}
+                    imageUrl={s.imageUrl}
+                    title={s.title}
+                    subtitle={s.addr}
+                    badge={{
+                      label: th(`categories.${kind}`),
+                      Icon: accent.Icon,
+                      className: accent.badge,
+                    }}
+                    scene={accent.scene}
+                    fallbackIcon={accent.Icon}
+                    chips={
+                      s.nearbyCount > 0 || s.nearest ? (
+                        <>
                           {s.nearbyCount > 0 && (
-                            <span className={`rounded-md px-2 py-0.5 font-bold ${accent.chip}`}>
+                            <PlaceChip className={accent.chip}>
                               {t("withinKm", { n: s.nearbyCount })}
-                            </span>
+                            </PlaceChip>
                           )}
+                          {/* 밤에 이 근처에서 뭘 볼 수 있는지 — 이 탭의 존재 이유다 */}
                           {s.nearest && (
-                            <span className="text-slate-400">
-                              <b className="text-amber-600">{fmt(s.nearest.distanceM)}</b> {s.nearest.title}
-                            </span>
+                            <PlaceChip>
+                              {fmt(s.nearest.distanceM)} {s.nearest.title}
+                            </PlaceChip>
                           )}
-                          {s.tel && (
-                            <span className="flex items-center gap-1 text-slate-500">
-                              <Phone size={10} />
-                              {s.tel}
-                            </span>
-                          )}
-                        </div>
-
-                      </div>
-                    </div>
-                  </li>
+                        </>
+                      ) : undefined
+                    }
+                  />
                 ))}
-              </ol>
+              </div>
             </section>
           );
         })}
