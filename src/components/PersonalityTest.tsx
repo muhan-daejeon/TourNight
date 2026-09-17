@@ -15,7 +15,6 @@ import {
   OPTION_KEYS,
   PERSONALITY_TYPES,
   QUESTIONS,
-  QUESTION_TIMES,
   scorePersonality,
   type OptionKey,
   type PersonalityResult,
@@ -233,15 +232,11 @@ export default function PersonalityTest({
 
   return (
     <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
-      {/* 진행바 + 시간 배지 */}
+      {/* 진행바 */}
       <div className="border-b border-slate-200 px-6 py-5 sm:px-9">
-        <div className="mb-2 flex items-center justify-between text-xs font-semibold">
+        <div className="mb-2 text-xs font-semibold">
           <span className="tabular-nums text-slate-400">
             {String(index + 1).padStart(2, "0")} / {QUESTIONS.length}
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/15 px-2.5 py-1 text-indigo-700">
-            <Clock size={12} />
-            {QUESTION_TIMES[index]}
           </span>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">

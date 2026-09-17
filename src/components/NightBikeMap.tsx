@@ -87,7 +87,7 @@ export default function NightBikeMap() {
   const mapRef = useRef<KakaoNS>(null);
   const clustererRef = useRef<KakaoNS>(null);
   // 코스 카드를 누르면 그리는 경로 — 새 코스를 고르면 이전 것부터 지운다
-  const routeLineRef = useRef<KakaoNS>(null);
+  const routeLineRef = useRef<KakaoNS[]>([]);
   const routeMarkersRef = useRef<KakaoNS[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [stations, setStations] = useState<TashuStation[] | null>(null);
@@ -154,37 +154,62 @@ export default function NightBikeMap() {
     );
   }
 
-  /** 추천 코스 카드를 누르면 출발지→경유지를 잇는 선을 지도에 그리고,
-   * 코스 전체가 한눈에 들어오게 지도 범위를 맞춘다 (피드백: 코스를
-   * 누르면 그 코스가 지도에 뜨게). 이전에 그려 둔 경로가 있으면 먼저 지운다 */
-  function showCourseRoute(course: TashuCourse) {
+  /** 추천 코스 카드를 누르면 출발지→경유지를 실제 보행로를 따라 잇는다
+   * (피드백: 직선 말고 카카오맵 API로 실제 자전거·보행도로처럼 짜달라).
+   * 카카오맵 SDK 자체엔 길찾기가 없어, 코스 화면에서 이미 쓰는 TMap
+   * 보행자 경로(/api/tashu/course-route)를 대신 쓴다 — 인도·차도를 따라
+   * 가므로 좌표를 일직선으로 잇는 것보다 실제 라이딩 동선에 가깝다.
+   * 구간별로 서버에 캐시되어 있어 같은 코스를 다시 누르면 즉시 온다.
+   * 이전에 그려 둔 경로가 있으면 먼저 지운다 */
+  async function showCourseRoute(course: TashuCourse) {
     const { kakao } = window as KakaoNS;
     const map = mapRef.current;
     if (!kakao?.maps || !map) return;
 
-    routeLineRef.current?.setMap(null);
+    routeLineRef.current.forEach((line: KakaoNS) => line.setMap(null));
+    routeLineRef.current = [];
     routeMarkersRef.current.forEach((m) => m.setMap(null));
     routeMarkersRef.current = [];
 
-    const points = [course.start, ...course.stops];
-    const path = points.map((p) => new kakao.maps.LatLng(p.lat, p.lng));
+    setSelectedCourseId(course.id);
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
 
-    const line = new kakao.maps.Polyline({
-      path,
-      strokeWeight: 5,
-      strokeColor: "#35b597",
-      strokeOpacity: 0.9,
-      strokeStyle: "solid",
-    });
-    line.setMap(map);
-    routeLineRef.current = line;
+    const points = [course.start, ...course.stops];
+    let legs: ([number, number][] | null)[] = points.slice(0, -1).map(() => null);
+    try {
+      const res = await fetch(`/api/tashu/course-route?courseId=${course.id}`);
+      if (res.ok) legs = (await res.json()).legs ?? legs;
+    } catch {
+      // 실패하면 아래에서 직선으로 대신 잇는다
+    }
 
     const bounds = new kakao.maps.LatLngBounds();
-    path.forEach((pos, i) => {
+    const lines: KakaoNS[] = [];
+    legs.forEach((leg, i) => {
+      // 실제 경로가 있으면 그 좌표열([경도, 위도])을, 없으면 두 지점을 직선으로
+      const path = leg?.length
+        ? leg.map(([lng, lat]) => new kakao.maps.LatLng(lat, lng))
+        : [points[i], points[i + 1]].map((p) => new kakao.maps.LatLng(p.lat, p.lng));
+      path.forEach((p: KakaoNS) => bounds.extend(p));
+      const pl = new kakao.maps.Polyline({
+        path,
+        strokeWeight: 5,
+        strokeColor: "#35b597",
+        strokeOpacity: 0.9,
+        strokeStyle: leg?.length ? "solid" : "shortdash",
+      });
+      pl.setMap(map);
+      lines.push(pl);
+    });
+    routeLineRef.current = lines;
+
+    points.forEach((p, i) => {
+      const pos = new kakao.maps.LatLng(p.lat, p.lng);
       bounds.extend(pos);
       const overlay = new kakao.maps.CustomOverlay({
         position: pos,
         yAnchor: 0.5,
+        zIndex: 10,
         content: `<div style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:9999px;background:${
           i === 0 ? "#f39800" : "#35b597"
         };color:#fff;font-size:11px;font-weight:800;border:2px solid #fff;box-shadow:0 2px 6px rgba(15,23,42,.35);">${
@@ -196,8 +221,6 @@ export default function NightBikeMap() {
     });
 
     map.setBounds(bounds, 60);
-    setSelectedCourseId(course.id);
-    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   function refresh() {
