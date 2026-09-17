@@ -775,18 +775,18 @@ export default function CourseExplorer({ courses }: { courses: Course[] }) {
                   ),
                 )
               }
-              aria-label={savedCourses.some((c) => c.id === course.id) ? ts("remove") : ts("save")}
               aria-pressed={savedCourses.some((c) => c.id === course.id)}
-              className={`flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border transition ${
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold transition ${
                 savedCourses.some((c) => c.id === course.id)
-                  ? "border-rose-300 bg-rose-50 text-rose-500"
-                  : "border-slate-200 text-slate-400 hover:border-rose-300 hover:text-rose-500"
+                  ? "bg-rose-500 text-white hover:bg-rose-600"
+                  : "border border-rose-300 bg-white text-rose-500 hover:bg-rose-50"
               }`}
             >
               <Heart
-                size={17}
+                size={15}
                 fill={savedCourses.some((c) => c.id === course.id) ? "currentColor" : "none"}
               />
+              {savedCourses.some((c) => c.id === course.id) ? ts("saved") : ts("save")}
             </button>
           </div>
         </div>

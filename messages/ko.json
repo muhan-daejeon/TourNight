@@ -1252,8 +1252,8 @@
     "coursesTitle": "찜한 코스",
     "coursesEmpty": "아직 찜한 코스가 없어요. 코스를 만들고 하트를 눌러 담아보세요.",
     "stopsCount": "{count}곳",
-    "save": "코스 찜하기",
-    "saved": "찜한 코스",
+    "save": "찜하기",
+    "saved": "찜했어요",
     "kind": {
       "recommended": "추천 코스",
       "ai": "AI 코스",

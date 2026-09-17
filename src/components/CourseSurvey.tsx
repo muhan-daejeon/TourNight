@@ -418,20 +418,21 @@ function SurveyResult({
             <h2 className="text-xl font-bold tracking-tight">{course.title}</h2>
           )}
         </div>
+        {/* 아이콘만 두면 흰 카드 위에서 눈에 띄지 않아 글자를 붙인 색 버튼으로 */}
         <button
           type="button"
           onClick={() =>
             toggleSaved(toSavedCourse(course, "survey", locale, course.title))
           }
-          aria-label={savedNow ? ts("remove") : ts("save")}
           aria-pressed={savedNow}
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition ${
+          className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold transition ${
             savedNow
-              ? "border-rose-300 bg-rose-50 text-rose-500"
-              : "border-slate-200 bg-white text-slate-400 hover:border-rose-300 hover:text-rose-500"
+              ? "bg-rose-500 text-white hover:bg-rose-600"
+              : "border border-rose-300 bg-white text-rose-500 hover:bg-rose-50"
           }`}
         >
-          <Heart size={16} fill={savedNow ? "currentColor" : "none"} />
+          <Heart size={15} fill={savedNow ? "currentColor" : "none"} />
+          {savedNow ? ts("saved") : ts("save")}
         </button>
       </div>
       {course.summary && (
