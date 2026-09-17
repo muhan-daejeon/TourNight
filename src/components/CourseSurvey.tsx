@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  ChevronDown,
+  ChevronUp,
   Clock,
   Footprints,
   Bus,
@@ -50,6 +52,17 @@ interface SurveyCourse extends Course {
   notes: string[];
   transit: ({ nodeName: string; lastBus: string | null } | null)[];
   info: { congestion: number | null }[];
+  /** 야식을 넣기로 했을 때의 식당 후보 (영업시간 원문 포함) */
+  foods: {
+    contentId: string;
+    title: string;
+    addr: string;
+    distM: number;
+    mapX: number;
+    mapY: number;
+    hours: string | null;
+    restDay: string | null;
+  }[];
   source: "ai" | "distance";
   applied: {
     startTime: string;
@@ -432,7 +445,7 @@ function SurveyResult({
       </div>
 
       <div className="mt-5 h-80 sm:h-[420px]">
-        <CourseMap course={course} mode={mode} />
+        <CourseMap course={course} mode={mode} foods={course.foods} />
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
@@ -518,6 +531,44 @@ function SurveyResult({
         {t("crowdNote")}
       </p>
 
+      {/* 야식 — 코스 중간 스팟 주변 식당. 영업시간은 공사 원문 그대로 보여주고
+          형식이 제각각이라 "지금 여는지"는 판단하지 않는다 (방문 전 확인 안내) */}
+      {course.foods?.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <p className="flex items-center gap-2 text-sm font-bold text-amber-700">
+            <UtensilsCrossed size={15} />
+            {t("foodTitle")}
+          </p>
+          <p className="mt-1 text-xs text-amber-700/80">{t("foodOnMap")}</p>
+          <ul className="mt-3 space-y-2.5">
+            {course.foods.map((f) => (
+              <li key={f.contentId} className="rounded-xl bg-white px-3.5 py-3">
+                <p className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-sm font-bold text-slate-900">{f.title}</span>
+                  <span className="text-xs text-slate-400">
+                    {t("foodDistance", { m: f.distM })}
+                  </span>
+                </p>
+                <p className="mt-0.5 truncate text-xs text-slate-400">{f.addr}</p>
+                {f.hours && (
+                  <p className="mt-1.5 text-xs font-semibold text-amber-700">
+                    {t("foodHours")} {f.hours}
+                  </p>
+                )}
+                {f.restDay && (
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {t("foodRestDay")} {f.restDay}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11px] leading-relaxed text-amber-700/80">
+            {t("foodNote")}
+          </p>
+        </div>
+      )}
+
       {/* 내 코스 다듬기 — 추천에서 빼거나, 찜한 장소에서 더한다 (피드백 8·10).
           코스가 새로 오면 key로 편집 상태도 처음부터 */}
       <CourseEditor
@@ -556,6 +607,16 @@ function CourseEditor({
     stops.length !== course.stops.length ||
     stops.some((st, i) => course.stops[i]?.contentId !== st.contentId);
 
+  // 순서 바꾸기 — i번째를 위/아래로 한 칸씩
+  const move = (i: number, dir: -1 | 1) =>
+    setStops((prev) => {
+      const j = i + dir;
+      if (j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+
   return (
     <div className="mt-8 border-t border-slate-200 pt-6">
       <p className="text-base font-bold text-slate-900">{tc("editTitle")}</p>
@@ -581,6 +642,27 @@ function CourseEditor({
                 {st.title}
               </span>
               <span className="block truncate text-xs text-slate-400">{st.addr}</span>
+            </span>
+            {/* 순서 바꾸기 — 드래그 대신 화살표: 폰에서도 확실하고 접근성도 낫다 */}
+            <span className="flex shrink-0 flex-col">
+              <button
+                type="button"
+                onClick={() => move(i, -1)}
+                disabled={i === 0}
+                aria-label={tc("editMoveUp")}
+                className="rounded-full p-1 text-slate-400 transition enabled:hover:text-daejeon-blue disabled:opacity-30"
+              >
+                <ChevronUp size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => move(i, 1)}
+                disabled={i === stops.length - 1}
+                aria-label={tc("editMoveDown")}
+                className="rounded-full p-1 text-slate-400 transition enabled:hover:text-daejeon-blue disabled:opacity-30"
+              >
+                <ChevronDown size={14} />
+              </button>
             </span>
             <button
               type="button"

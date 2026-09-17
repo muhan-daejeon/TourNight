@@ -29,12 +29,23 @@ const MODE_COLOR: Record<string, string> = {
  * TMap이 주는 좌표는 [경도, 위도] WGS84라 kakao.maps.LatLng(위도, 경도)로 뒤집어 넣는다.
  * 도보 구간은 회색 점선, 탈것 구간은 수단별 색 실선으로 구분한다.
  */
+/** 지도에 함께 찍을 야식 후보 (코스 경유지는 아니다) */
+export interface FoodPin {
+  contentId: string;
+  title: string;
+  mapX: number;
+  mapY: number;
+}
+
 export default function CourseMap({
   course,
   mode = "straight",
+  foods,
 }: {
   course: Course;
   mode?: MapMode;
+  /** 야식 후보 — 코스 번호와 헷갈리지 않게 다른 모양으로 찍는다 */
+  foods?: FoodPin[];
 }) {
   const locale = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -161,6 +172,33 @@ export default function CourseMap({
         overlaysRef.current.push(ov);
       });
 
+      // 야식 후보 — 코스 경유지가 아니므로 번호 대신 수저 아이콘의 주황 핀으로.
+      // 지도 범위(bounds)에도 넣어 화면 밖으로 잘리지 않게 한다
+      (foods ?? []).forEach((f) => {
+        if (!Number.isFinite(f.mapX) || !Number.isFinite(f.mapY)) return;
+        const pos = new kakao.maps.LatLng(f.mapY, f.mapX);
+        bounds.extend(pos);
+        const el = document.createElement("div");
+        el.innerHTML = `<div title="${f.title.replace(/"/g, "&quot;")}" style="width:24px;height:24px;border-radius:50%;background:#fb923c;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;border:2px solid #7c2d12;box-shadow:0 2px 8px rgba(0,0,0,.45);cursor:pointer">🍴</div>`;
+        // SDK가 오버레이 클릭을 지도 이벤트로 삼키지 않게 끊는다 (번호 마커와 같은 처리)
+        ["mousedown", "touchstart"].forEach((type) =>
+          el.addEventListener(type, (e) => e.stopPropagation()),
+        );
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          window.location.href = `/${locale}/food/${encodeURIComponent(f.contentId)}`;
+        });
+        const ov = new kakao.maps.CustomOverlay({
+          position: pos,
+          xAnchor: 0.5,
+          yAnchor: 0.5,
+          zIndex: 9, // 코스 번호(10)보다 아래 — 겹치면 번호가 우선
+          content: el,
+        });
+        ov.setMap(map);
+        overlaysRef.current.push(ov);
+      });
+
       map.setBounds(bounds, 48, 48, 48, 48);
     };
 
@@ -191,7 +229,7 @@ export default function CourseMap({
     return () => {
       cancelled = true;
     };
-  }, [course, mode, locale]);
+  }, [course, mode, locale, foods]);
 
   // 컨테이너 크기 변화(반응형 h-80↔500px, 사이드바 접힘 등)를 지도에 반영.
   // relayout 없이 크기만 바뀌면 상호작용 좌표가 어긋난다

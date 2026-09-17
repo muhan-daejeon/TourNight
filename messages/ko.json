@@ -211,7 +211,9 @@
     "editHint": "추천에서 빼거나, 찜한 장소를 더할 수 있어요",
     "editRemove": "코스에서 빼기",
     "editedNote": "경유지를 수정했어요 - 순서와 이동은 지도 앱에서 한 번 더 확인해 주세요.",
-    "personaBadge": "성향 맞춤"
+    "personaBadge": "성향 맞춤",
+    "editMoveUp": "위로",
+    "editMoveDown": "아래로"
   },
   "etiquette": {
     "title": "나이트 에티켓",
@@ -724,7 +726,13 @@
       "yes": "네, 넣어주세요",
       "no": "괜찮아요",
       "note": "먹는 시간 40분을 비워 두고 코스를 짜요. 어디서 먹으면 좋을지 팁으로 알려드려요."
-    }
+    },
+    "foodTitle": "야식 들를 만한 곳",
+    "foodDistance": "코스에서 {m}m",
+    "foodHours": "영업시간",
+    "foodRestDay": "휴무",
+    "foodOnMap": "지도에 🍴로 함께 표시했어요",
+    "foodNote": "한국관광공사에 등록된 정보입니다. 심야에는 영업이 달라질 수 있으니 방문 전 확인해 주세요."
   },
   "tour": {
     "label": "둘러보기",
