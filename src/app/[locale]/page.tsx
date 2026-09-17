@@ -121,7 +121,10 @@ export default async function HomePage({
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-950/55 to-slate-950/80" />
-                <div className="relative flex-1 p-5">
+                {/* 연월 줄을 뺀 뒤 위쪽이 허전해져, 글 묶음을 아래로 밀어
+                    내린다 — 가운데 정렬이 아니라 위 여백을 더 크게 잡는 방식
+                    (글자는 그대로 왼쪽 정렬, CTA도 제자리) */}
+                <div className="relative flex flex-1 flex-col justify-end p-5 pb-6">
                   <p className="text-[15px] font-extrabold leading-tight text-white">
                     Tour<span className="text-amber-300">Night</span>
                   </p>
