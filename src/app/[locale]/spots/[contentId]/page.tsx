@@ -78,14 +78,14 @@ function NearbyCard({ spot }: { spot: NearbySpot }) {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="truncate text-[15px] font-semibold text-slate-100 group-hover:text-amber-300">
+        <h3 className="truncate text-[15px] font-semibold text-slate-900 group-hover:text-amber-600">
           {spot.title}
         </h3>
         <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-slate-500">
-          <span className="font-semibold text-amber-300/90">
+          <span className="font-semibold text-amber-600">
             {formatDistance(spot.distanceM)}
           </span>
-          <span className="text-slate-700">·</span>
+          <span className="text-slate-300">·</span>
           <span className="truncate">{spot.addr}</span>
         </p>
       </div>
@@ -169,7 +169,7 @@ export default async function SpotPage({
               <Icon size={14} strokeWidth={2.2} />
               {home(`categories.${spot.category}`)}
             </p>
-            <h1 className="mt-1 text-3xl font-extrabold tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:text-4xl">
+            <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:text-4xl">
               {spot.title}
             </h1>
             <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-300">
@@ -298,7 +298,7 @@ export default async function SpotPage({
             {stays.length > 0 && (
               <section>
                 <h2 className="mb-3 flex items-center gap-2 text-lg font-bold">
-                  <BedDouble size={17} className="text-amber-300" />
+                  <BedDouble size={17} className="text-daejeon-orange" />
                   {t("nearbyStay")}
                 </h2>
                 <div className="flex flex-col gap-2.5">
@@ -310,7 +310,7 @@ export default async function SpotPage({
                       rel="noreferrer"
                       className="glass-card group flex items-center gap-3 rounded-xl p-2.5"
                     >
-                      <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-slate-800">
+                      <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-slate-200">
                         <Image
                           src={stay.imageUrl}
                           alt={stay.title}
@@ -320,14 +320,14 @@ export default async function SpotPage({
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-[15px] font-semibold text-slate-100 group-hover:text-amber-300">
+                        <h3 className="truncate text-[15px] font-semibold text-slate-900 group-hover:text-daejeon-orange">
                           {stay.title}
                         </h3>
                         <p className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-slate-500">
-                          <span className="font-semibold text-amber-300/90">
+                          <span className="font-semibold text-amber-600">
                             {formatDistance(stay.distM)}
                           </span>
-                          <span className="text-slate-700">·</span>
+                          <span className="text-slate-300">·</span>
                           <span className="truncate">{stay.addr}</span>
                         </p>
                       </div>

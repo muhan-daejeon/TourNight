@@ -59,7 +59,17 @@ export async function GET(request: NextRequest) {
       tips: guide.tips,
       source: official ? "kto" : "ai",
     });
-  } catch {
+  } catch (err) {
+    // Gemini가 막혀도(429 등) 공식 소개문은 이미 받아 뒀으면 그거라도 보여준다.
+    // 처음 보는 곳(축제 등, 캐시가 없는 곳)일수록 이 문제가 먼저 드러난다 —
+    // 팁 3개는 못 만들어도 소개문 하나는 있는 편이 완전히 비는 것보다 낫다
+    console.warn(
+      "[spot-guide] AI 팁 생성 실패 — 공식 소개문만 반환합니다:",
+      err instanceof Error ? err.message : err,
+    );
+    if (official) {
+      return NextResponse.json({ intro: official, tips: [], source: "kto" });
+    }
     return NextResponse.json({ error: "generation failed" }, { status: 502 });
   }
 }
