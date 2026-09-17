@@ -4,8 +4,8 @@ import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Menu, Search, X } from "lucide-react";
-import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { Heart, Menu, X } from "lucide-react";
+import { Link, usePathname } from "@/i18n/navigation";
 import { markAppCommitted } from "@/lib/app-boot";
 import LocaleSwitcher from "./LocaleSwitcher";
 import AuthNav from "./AuthNav";
@@ -114,7 +114,6 @@ function TourMenuSync({ onChange }: { onChange: (target: TourTarget | null) => v
 export default function Header() {
   const t = useTranslations();
   const pathname = usePathname();
-  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [tourTarget, setTourTarget] = useState<TourTarget | null>(null);
   // 마우스가 있는 기기(hover 가능)에서는 카테고리에 포인터만 올려도 메뉴가
@@ -128,12 +127,9 @@ export default function Header() {
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
-  const [searchOpen, setSearchOpen] = useState(false);
   // lg 미만에서는 가로로 늘어놓던 4개 카테고리 대신 햄버거 버튼 하나만 두고,
   // 누르면 4개 그룹을 큰제목+작은글씨 목록으로 세로로 펼친다
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
   // 버튼이 아니라 그 바깥(호버 밀림의 영향을 안 받는) div를 담는다 — 아래 렌더 참고
   const btnRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -224,7 +220,6 @@ export default function Header() {
   if (seenPath !== pathname) {
     setSeenPath(pathname);
     setMenuOpen(false);
-    setSearchOpen(false);
     setMobileMenuOpen(false);
   }
 
@@ -236,11 +231,6 @@ export default function Header() {
   // "/"는 startsWith로 보면 모든 경로에 걸리므로 정확히 일치할 때만 현재 탭이다
   const isActive = (href: string) => isActiveHref(pathname, href);
 
-  const submitSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // 검색 UI는 야경명소 탐색기가 갖고 있으므로 질의를 넘겨 그쪽에서 이어 받는다
-    router.push(query.trim() ? `/spots?q=${encodeURIComponent(query.trim())}` : "/spots");
-  };
 
   return (
     // 온보딩 투어의 흐림막(z-[55])보다 위에 둔다 — 안 그러면 투어 중 헤더 전체가
@@ -373,19 +363,15 @@ export default function Header() {
               옮겼다 — 자유 업로드 대신 도장 4개를 다 찍은 사진으로 채우는
               방식으로 바뀌었다. 여기 있던 카메라 버튼은 그래서 없앤다 */}
           <AuthNav />
-          <button
-            type="button"
-            onClick={() => {
-              setSearchOpen((v) => !v);
-              // 열릴 때 바로 입력할 수 있게 — 렌더 다음 틱에 포커스
-              requestAnimationFrame(() => searchRef.current?.focus());
-            }}
-            aria-label={t("home.searchPlaceholder")}
-            aria-expanded={searchOpen}
-            className="rounded-full p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+          {/* 찜 모아보기 — 명소·코스·표현을 한 곳에서. 검색은 야간 명소 화면에
+              같은 입력이 있어 헤더에서는 뺐다 (로그아웃은 프로필로 옮김) */}
+          <Link
+            href="/saved"
+            aria-label={t("saved.pageTitle")}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:border-rose-300 hover:text-rose-500"
           >
-            <Search size={18} />
-          </button>
+            <Heart size={16} />
+          </Link>
           <LocaleSwitcher />
           {/* lg 미만 전용 — 위 4개 카테고리 nav 대신 이 버튼 하나로 메뉴 전체를 연다 */}
           <button
@@ -481,38 +467,6 @@ export default function Header() {
         </div>
       )}
 
-      {searchOpen && (
-        <form
-          onSubmit={submitSearch}
-          className="border-t border-slate-200 bg-white"
-        >
-          <div className="flex w-full items-center gap-2 px-6 py-3">
-            <Search size={16} className="shrink-0 text-slate-500" />
-            <input
-              ref={searchRef}
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t("home.searchPlaceholder")}
-              className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="shrink-0 rounded-full bg-amber-400 px-4 py-1.5 text-xs font-bold text-slate-950 transition hover:bg-amber-300"
-            >
-              {t("etiquette.searchButton")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearchOpen(false)}
-              aria-label={t("community.photoClose")}
-              className="shrink-0 rounded-full p-1.5 text-slate-400 transition hover:text-slate-900"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </form>
-      )}
 
     </header>
   );

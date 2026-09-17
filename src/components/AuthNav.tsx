@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 
 interface Me {
@@ -12,7 +11,6 @@ interface Me {
 
 export default function AuthNav() {
   const t = useTranslations("auth");
-  const locale = useLocale();
   const pathname = usePathname();
   // undefined = 로딩(아직 모름), null = 비로그인, Me = 로그인
   const [user, setUser] = useState<Me | null | undefined>(undefined);
@@ -32,15 +30,6 @@ export default function AuthNav() {
       cancelled = true;
     };
   }, [pathname]);
-
-  async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    // 로그인과 같은 이유로 전체 이동. 클라이언트 캐시에는 로그인 상태로 받아둔
-    // 페이지들이 남아 있어, router.push로 옮기면 로그아웃했는데도 이전 화면이
-    // 그대로 보일 수 있다. ?skipIntro=1 — 로그아웃 직후에도 인트로가 다시 뜨지
-    // 않아야 한다 (IntroSequence 참고)
-    window.location.assign(`/${locale}?skipIntro=1`);
-  }
 
   if (user === undefined) {
     return <div className="h-5 w-16" aria-hidden />; // 로딩 자리(레이아웃 흔들림 방지)
@@ -64,14 +53,6 @@ export default function AuthNav() {
         >
           {user.nickname}
         </Link>
-        <button
-          type="button"
-          onClick={logout}
-          className="flex items-center gap-1 text-slate-400 transition hover:text-slate-900"
-          aria-label={t("logout")}
-        >
-          <LogOut size={15} />
-        </button>
       </div>
     );
   }

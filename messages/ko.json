@@ -34,7 +34,8 @@
     "groupPlaces": "장소 소개",
     "groupEnjoy": "대전을 즐기기",
     "about": "About 대전",
-    "notices": "공지사항"
+    "notices": "공지사항",
+    "saved": "찜 모아보기"
   },
   "home": {
     "heroTitle": "오늘 밤, 너의 꿈을 펼쳐 봐",
@@ -1246,6 +1247,19 @@
     "remove": "찜 해제",
     "pickerTitle": "찜한 장소에서 추가하기",
     "pickerHint": "이미지를 누르면 코스에 추가돼요",
-    "pickerAllAdded": "찜한 장소가 모두 코스에 들어있어요!"
+    "pickerAllAdded": "찜한 장소가 모두 코스에 들어있어요!",
+    "subtitle": "찜해 둔 코스·장소·표현을 한곳에서 확인하세요",
+    "coursesTitle": "찜한 코스",
+    "coursesEmpty": "아직 찜한 코스가 없어요. 코스를 만들고 하트를 눌러 담아보세요.",
+    "stopsCount": "{count}곳",
+    "save": "코스 찜하기",
+    "saved": "찜한 코스",
+    "kind": {
+      "recommended": "추천 코스",
+      "ai": "AI 코스",
+      "survey": "맞춤 코스",
+      "persona": "성향 맞춤"
+    },
+    "pageTitle": "찜 모아보기"
   }
 }

@@ -34,7 +34,8 @@
     "groupPlaces": "地点介绍",
     "groupEnjoy": "玩转大田",
     "about": "关于大田",
-    "notices": "公告"
+    "notices": "公告",
+    "saved": "我的收藏"
   },
   "home": {
     "heroTitle": "今晚，展开你的梦想",
@@ -1246,6 +1247,19 @@
     "remove": "取消收藏",
     "pickerTitle": "从收藏中添加",
     "pickerHint": "点击图片即可加入路线",
-    "pickerAllAdded": "收藏的地点都已在路线中!"
+    "pickerAllAdded": "收藏的地点都已在路线中!",
+    "subtitle": "在一处查看收藏的路线、地点和表达",
+    "coursesTitle": "收藏的路线",
+    "coursesEmpty": "还没有收藏的路线。创建路线后点击爱心即可收藏。",
+    "stopsCount": "{count}处",
+    "save": "收藏路线",
+    "saved": "已收藏",
+    "kind": {
+      "recommended": "推荐路线",
+      "ai": "AI路线",
+      "survey": "定制路线",
+      "persona": "专属推荐"
+    },
+    "pageTitle": "我的收藏"
   }
 }

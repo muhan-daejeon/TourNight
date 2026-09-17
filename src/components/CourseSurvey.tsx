@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  Heart,
   Clock,
   Footprints,
   Bus,
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 import type { Course } from "@/lib/courses";
 import CourseMap, { type MapMode } from "./CourseMap";
+import { useSavedCourses, toSavedCourse } from "./useSavedCourses";
 import SavedSpots from "./SavedSpots";
 import type { NightSpot } from "@/lib/kto";
 
@@ -400,13 +402,38 @@ function SurveyResult({
   tc: ReturnType<typeof useTranslations>;
 }) {
   const t = useTranslations("survey");
+  const ts = useTranslations("saved");
+  const locale = useLocale();
   const a = course.applied;
+  // 코스 찜 — 담아 두면 헤더의 하트(찜 모아보기)에서 다시 꺼내 본다.
+  // 설문 코스는 서버에 없어 되살릴 수 없으므로 경유지만 담긴다
+  const { courses: savedCourses, toggle: toggleSaved } = useSavedCourses();
+  const savedNow = savedCourses.some((c) => c.id === course.id);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-slate-100 p-6">
-      {course.title && (
-        <h2 className="text-xl font-bold tracking-tight">{course.title}</h2>
-      )}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          {course.title && (
+            <h2 className="text-xl font-bold tracking-tight">{course.title}</h2>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            toggleSaved(toSavedCourse(course, "survey", locale, course.title))
+          }
+          aria-label={savedNow ? ts("remove") : ts("save")}
+          aria-pressed={savedNow}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition ${
+            savedNow
+              ? "border-rose-300 bg-rose-50 text-rose-500"
+              : "border-slate-200 bg-white text-slate-400 hover:border-rose-300 hover:text-rose-500"
+          }`}
+        >
+          <Heart size={16} fill={savedNow ? "currentColor" : "none"} />
+        </button>
+      </div>
       {course.summary && (
         <p className="mt-2 text-sm leading-relaxed text-slate-400">
           {course.summary}
