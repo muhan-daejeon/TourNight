@@ -1185,7 +1185,8 @@
     "coursesSub": "ステーションからすぐ出発できるナイトライド",
     "nearestBadge": "今いる場所から一番近いコース!",
     "courseMeta": "{km}km · 約{min}分",
-    "courseStart": "出発 {name}"
+    "courseStart": "出発 {name}",
+    "selectCourseHint": "コースを選ぶと、ここに実際のルートが表示されます"
   },
   "klife": {
     "restaurantTitle": "K-Lifeガイド · 食堂編",

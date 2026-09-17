@@ -582,7 +582,8 @@
     "coursesSub": "대여소에서 바로 출발하는 야간 라이딩",
     "nearestBadge": "지금 위치와 가장 가까운 코스예요!",
     "courseMeta": "{km}km · 약 {min}분",
-    "courseStart": "출발 {name}"
+    "courseStart": "출발 {name}",
+    "selectCourseHint": "코스를 고르면 여기에 실제 이동 경로가 뜹니다"
   },
   "spot": {
     "back": "목록으로",

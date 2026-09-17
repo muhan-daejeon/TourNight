@@ -1185,7 +1185,8 @@
     "coursesSub": "Night rides starting right at a station",
     "nearestBadge": "Closest course to you right now!",
     "courseMeta": "{km}km · about {min} min",
-    "courseStart": "Start at {name}"
+    "courseStart": "Start at {name}",
+    "selectCourseHint": "Pick a course to see its real route here"
   },
   "klife": {
     "restaurantTitle": "K-Life Guide · Restaurant",

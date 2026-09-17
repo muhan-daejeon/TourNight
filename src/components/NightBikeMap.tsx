@@ -7,6 +7,9 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { TASHU_COURSES, distanceM, type BikeLocale, type TashuCourse } from "@/lib/tashu-courses";
 import { loadKakaoMaps } from "@/lib/kakaoMaps";
+import CourseMap, { type MapMode } from "./CourseMap";
+import RoutePanel, { hasRealRoute } from "./RoutePanel";
+import type { Course } from "@/lib/courses";
 
 /** Google Play 로고 — 대각선 그라데이션(파랑→초록→노랑→빨강)을 준 재생 버튼
  * 모양으로, 실제 로고의 4색 구성을 간략화해 작은 크기에서도 알아볼 수 있게 했다 */
@@ -86,10 +89,6 @@ export default function NightBikeMap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<KakaoNS>(null);
   const clustererRef = useRef<KakaoNS>(null);
-  // 코스 카드를 누르면 그리는 경로 — 새 코스를 고르면 이전 것부터 지운다
-  const routeLineRef = useRef<KakaoNS[]>([]);
-  const routeMarkersRef = useRef<KakaoNS[]>([]);
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [stations, setStations] = useState<TashuStation[] | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -154,73 +153,27 @@ export default function NightBikeMap() {
     );
   }
 
-  /** 추천 코스 카드를 누르면 출발지→경유지를 실제 보행로를 따라 잇는다
-   * (피드백: 직선 말고 카카오맵 API로 실제 자전거·보행도로처럼 짜달라).
-   * 카카오맵 SDK 자체엔 길찾기가 없어, 코스 화면에서 이미 쓰는 TMap
-   * 보행자 경로(/api/tashu/course-route)를 대신 쓴다 — 인도·차도를 따라
-   * 가므로 좌표를 일직선으로 잇는 것보다 실제 라이딩 동선에 가깝다.
-   * 구간별로 서버에 캐시되어 있어 같은 코스를 다시 누르면 즉시 온다.
-   * 이전에 그려 둔 경로가 있으면 먼저 지운다 */
-  async function showCourseRoute(course: TashuCourse) {
-    const { kakao } = window as KakaoNS;
-    const map = mapRef.current;
-    if (!kakao?.maps || !map) return;
+  // 추천 코스 — 코스 만들기와 완전히 같은 방식으로 짠다 (피드백: 코스
+  // 만들기와 똑같이 해달라). /api/tashu/course가 코스 만들기와 같은 Course
+  // 형태(실제 도보·대중교통·택시 경로 포함)로 돌려주면, 그걸 코스 만들기와
+  // 같은 지도(CourseMap)·이동수단 패널(RoutePanel)에 그대로 꽂는다.
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [courseLoading, setCourseLoading] = useState(false);
+  const [mapMode, setMapMode] = useState<MapMode>("best");
+  const courseSectionRef = useRef<HTMLDivElement>(null);
 
-    routeLineRef.current.forEach((line: KakaoNS) => line.setMap(null));
-    routeLineRef.current = [];
-    routeMarkersRef.current.forEach((m) => m.setMap(null));
-    routeMarkersRef.current = [];
-
-    setSelectedCourseId(course.id);
-    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-
-    const points = [course.start, ...course.stops];
-    let legs: ([number, number][] | null)[] = points.slice(0, -1).map(() => null);
-    try {
-      const res = await fetch(`/api/tashu/course-route?courseId=${course.id}`);
-      if (res.ok) legs = (await res.json()).legs ?? legs;
-    } catch {
-      // 실패하면 아래에서 직선으로 대신 잇는다
-    }
-
-    const bounds = new kakao.maps.LatLngBounds();
-    const lines: KakaoNS[] = [];
-    legs.forEach((leg, i) => {
-      // 실제 경로가 있으면 그 좌표열([경도, 위도])을, 없으면 두 지점을 직선으로
-      const path = leg?.length
-        ? leg.map(([lng, lat]) => new kakao.maps.LatLng(lat, lng))
-        : [points[i], points[i + 1]].map((p) => new kakao.maps.LatLng(p.lat, p.lng));
-      path.forEach((p: KakaoNS) => bounds.extend(p));
-      const pl = new kakao.maps.Polyline({
-        path,
-        strokeWeight: 5,
-        strokeColor: "#35b597",
-        strokeOpacity: 0.9,
-        strokeStyle: leg?.length ? "solid" : "shortdash",
-      });
-      pl.setMap(map);
-      lines.push(pl);
-    });
-    routeLineRef.current = lines;
-
-    points.forEach((p, i) => {
-      const pos = new kakao.maps.LatLng(p.lat, p.lng);
-      bounds.extend(pos);
-      const overlay = new kakao.maps.CustomOverlay({
-        position: pos,
-        yAnchor: 0.5,
-        zIndex: 10,
-        content: `<div style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:9999px;background:${
-          i === 0 ? "#f39800" : "#35b597"
-        };color:#fff;font-size:11px;font-weight:800;border:2px solid #fff;box-shadow:0 2px 6px rgba(15,23,42,.35);">${
-          i === 0 ? "S" : i
-        }</div>`,
-        map,
-      });
-      routeMarkersRef.current.push(overlay);
-    });
-
-    map.setBounds(bounds, 60);
+  function selectCourse(c: TashuCourse) {
+    setSelectedCourseId(c.id);
+    setCourse(null);
+    setMapMode("best");
+    setCourseLoading(true);
+    courseSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    fetch(`/api/tashu/course?courseId=${c.id}&locale=${bikeLocale}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => setCourse(data.course ?? null))
+      .catch(() => setCourse(null))
+      .finally(() => setCourseLoading(false));
   }
 
   function refresh() {
@@ -375,59 +328,91 @@ export default function NightBikeMap() {
       <hr className="mx-auto mt-[25px] w-20 border-t border-slate-200" />
 
       {/* ── 추천 타슈 코스 — 대여소 밀집 지점과 야간 명소를 조합해 미리 설계.
-          현위치가 잡히면 가장 가까운 코스가 맨 앞으로 오고 네온 테두리로 빛난다 ── */}
-      <section className="mt-[30px]">
+          현위치가 잡히면 가장 가까운 코스가 맨 앞으로 오고 네온 테두리로 빛난다.
+          코스를 고르면 코스 만들기와 똑같은 지도(CourseMap)·이동수단 패널
+          (RoutePanel)이 오른쪽에 뜬다 — 코스 만들기와 같은 화면·같은 방식 ── */}
+      <section ref={courseSectionRef} className="mt-[30px] scroll-mt-20">
         <div className="mb-5 text-center">
           <p className="text-sm font-semibold text-slate-500">{t("coursesSub")}</p>
           <h2 className="mt-1.5 text-2xl font-extrabold tracking-tight text-daejeon-green sm:text-3xl">
             {t("coursesTitle")}
           </h2>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {orderedCourses.map((c, i) => {
-            const nearest = i === 0 && !!userPos;
-            const selected = selectedCourseId === c.id;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => showCourseRoute(c)}
-                className={`group relative overflow-hidden rounded-2xl border bg-white text-left transition hover:-translate-y-0.5 hover:shadow-lg ${
-                  nearest ? "tn-neon border-emerald-400" : selected ? "border-daejeon-blue ring-2 ring-daejeon-blue/30" : "border-slate-200"
-                }`}
-              >
-                {nearest && (
-                  <span className="absolute inset-x-0 top-0 z-10 bg-emerald-500 py-1 text-center text-[11px] font-extrabold text-white">
-                    {t("nearestBadge")}
-                  </span>
-                )}
-                <div className={`relative h-28 w-full overflow-hidden bg-slate-200 ${nearest ? "mt-6" : ""}`}>
-                  <Image
-                    src={c.image}
-                    alt=""
-                    fill
-                    sizes="(min-width:1024px) 25vw, 50vw"
-                    className="object-cover transition duration-500 group-hover:scale-105"
-                  />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_460px]">
+          <div className="space-y-3">
+            {orderedCourses.map((c, i) => {
+              const nearest = i === 0 && !!userPos;
+              const selected = selectedCourseId === c.id;
+              return (
+                <div key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => selectCourse(c)}
+                    className={`group relative flex w-full gap-3.5 overflow-hidden rounded-2xl border bg-white p-3 text-left transition hover:shadow-md ${
+                      nearest
+                        ? "tn-neon border-emerald-400"
+                        : selected
+                          ? "border-daejeon-blue bg-daejeon-blue/[0.04] ring-1 ring-daejeon-blue/30"
+                          : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-200 sm:h-24 sm:w-32">
+                      <Image
+                        src={c.image}
+                        alt=""
+                        fill
+                        sizes="128px"
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                      />
+                      {nearest && (
+                        <span className="absolute inset-x-0 bottom-0 bg-emerald-500 py-0.5 text-center text-[10px] font-extrabold text-white">
+                          {t("nearestBadge")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-[15px] font-bold text-slate-900">
+                        {c.name[bikeLocale]}
+                      </h3>
+                      <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-daejeon-green">
+                        <Route size={12} />
+                        {t("courseMeta", { km: c.distanceKm, min: c.durationMin })}
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">
+                        {c.desc[bikeLocale]}
+                      </p>
+                    </div>
+                  </button>
+
+                  {/* 선택한 코스의 이동 정보 — 코스 카드 바로 아래(코스 만들기와 같은 자리) */}
+                  {selected && courseLoading && (
+                    <div className="mt-2 h-24 animate-pulse rounded-2xl bg-slate-100" />
+                  )}
+                  {selected && !courseLoading && course && hasRealRoute(course) && (
+                    <div className="mt-2">
+                      <RoutePanel course={course} mode={mapMode} setMode={setMapMode} />
+                    </div>
+                  )}
                 </div>
-                <div className="p-4">
-                  <h3 className="text-[15px] font-bold text-slate-900">{c.name[bikeLocale]}</h3>
-                  <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-daejeon-green">
-                    <Route size={12} />
-                    {t("courseMeta", { km: c.distanceKm, min: c.durationMin })}
-                  </p>
-                  <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-500">
-                    {c.desc[bikeLocale]}
-                  </p>
-                  <p className="mt-2 flex items-start gap-1 text-[11px] leading-snug text-slate-400">
-                    <MapPin size={11} className="mt-0.5 shrink-0 text-daejeon-orange" />
-                    {t("courseStart", { name: c.startName[bikeLocale] })} ·{" "}
-                    {c.stops.map((st) => st[bikeLocale]).join(" → ")}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          {/* 코스 지도 — 고른 코스가 없으면 자리만 비워 둔다(레이아웃 유지) */}
+          <div className="lg:sticky lg:top-20 lg:self-start">
+            {course ? (
+              <div className="h-72 lg:h-[560px]">
+                <CourseMap course={course} mode={mapMode} />
+              </div>
+            ) : (
+              <div className="flex h-72 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center text-sm text-slate-400 lg:h-[560px]">
+                <p className="flex flex-col items-center gap-2">
+                  <MapPin size={22} strokeWidth={1.5} className="text-slate-300" />
+                  {t("selectCourseHint")}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
         <style>{`
           .tn-neon { animation: tn-neon 1.8s ease-in-out infinite; }
