@@ -122,10 +122,7 @@ export default async function HomePage({
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-950/55 to-slate-950/80" />
                 <div className="relative flex-1 p-5">
-                  <p className="text-[11px] font-bold tracking-wide text-indigo-200">
-                    {monthLabel(locale)}
-                  </p>
-                  <p className="mt-2.5 text-[15px] font-extrabold leading-tight text-white">
+                  <p className="text-[15px] font-extrabold leading-tight text-white">
                     Tour<span className="text-amber-300">Night</span>
                   </p>
                   <h3 className="text-lg font-extrabold leading-tight text-white">
@@ -280,9 +277,3 @@ function hashtags(post: CommunityPost): string[] {
 }
 
 /** 월간 소식 카드에 쓰는 "2026년 9월" / "September 2026" */
-function monthLabel(locale: string) {
-  return new Intl.DateTimeFormat(locale, {
-    year: "numeric",
-    month: "long",
-  }).format(new Date());
-}
