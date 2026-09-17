@@ -155,6 +155,68 @@ export async function fetchNearbyStays(
  * contentTypeId만 음식점(39)으로 바꾼 것. 야간 명소 상세에서 "이 근처에서
  * 뭘 먹지"에 답한다 (피드백 7). 실패는 빈 배열 — 부가 정보라 상세를 막지 않는다.
  */
+/** 야식 후보 — 인근 음식점에 KTO 원문 영업시간을 덧붙인 것 */
+export interface FoodWithHours extends NearbyStay {
+  /** 원문 그대로 (형식이 제각각이라 파싱하지 않는다). 없으면 null */
+  hours: string | null;
+  restDay: string | null;
+}
+
+/**
+ * 인근 음식점 + 영업시간.
+ *
+ * 목록(locationBasedList2)에는 영업시간이 없어 고른 몇 곳만 상세를
+ * 추가로 묻는다. 대전 음식점이 101건뿐이고 상세는 2~3건만 부르므로
+ * 호출 비용이 작다.
+ *
+ * 영업시간 문자열은 "11:00~21:00 (준비 시간 15:00~16:00)"처럼 제각각이다.
+ * 파싱해서 "지금 여는 곳"만 남기려다 멀쩡한 가게를 빼는 것보다, 원문을
+ * 그대로 보여주고 방문 전 확인을 권하는 편이 안전하다.
+ */
+export async function fetchNearbyFoodWithHours(
+  mapX: number,
+  mapY: number,
+  { radius = 2000, limit = 3 }: { radius?: number; limit?: number } = {},
+): Promise<FoodWithHours[]> {
+  const apiKey = process.env.KTO_API_KEY;
+  if (!apiKey) return [];
+  const near = await fetchNearbyFood(mapX, mapY, { radius, limit }).catch(() => []);
+  if (near.length === 0) return [];
+
+  const clean = (v?: string) =>
+    String(v ?? "")
+      .replace(/<br[^>]*>/gi, " · ")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim() || null;
+
+  return Promise.all(
+    near.map(async (f) => {
+      try {
+        const p = new URLSearchParams({
+          serviceKey: apiKey,
+          MobileOS: "ETC",
+          MobileApp: SERVICE_NAME,
+          _type: "json",
+          contentId: f.contentId,
+          contentTypeId: "39",
+        });
+        const r = await fetch(`${BASE_URL}/detailIntro2?${p}`, {
+          next: { revalidate: 86400 }, // 영업시간은 하루에 바뀌지 않는다
+          signal: AbortSignal.timeout(KTO_TIMEOUT_MS),
+        });
+        if (!r.ok) return { ...f, hours: null, restDay: null };
+        const d = await r.json();
+        const row = (d?.response?.body?.items?.item?.[0] ?? {}) as Record<string, string>;
+        return { ...f, hours: clean(row.opentimefood), restDay: clean(row.restdatefood) };
+      } catch {
+        // 영업시간은 부가 정보 — 못 받아도 가게는 남긴다
+        return { ...f, hours: null, restDay: null };
+      }
+    }),
+  );
+}
+
 export async function fetchNearbyFood(
   mapX: number,
   mapY: number,
