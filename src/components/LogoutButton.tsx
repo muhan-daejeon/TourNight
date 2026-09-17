@@ -29,7 +29,7 @@ export default function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={pending}
-      className="flex items-center gap-1.5 text-sm font-semibold text-slate-400 transition hover:text-rose-500 disabled:opacity-50"
+      className="flex items-center gap-1.5 text-sm font-semibold text-rose-500 transition hover:text-rose-600 disabled:opacity-50"
     >
       <LogOut size={14} />
       {t("logout")}

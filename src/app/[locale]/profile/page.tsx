@@ -1,8 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import ProfileForm from "@/components/ProfileForm";
-import MyPhrases from "@/components/MyPhrases";
 import LogoutButton from "@/components/LogoutButton";
-import { RESTAURANT_STEPS } from "@/lib/klife-restaurant";
 
 export default async function ProfilePage({
   params,
@@ -19,25 +17,24 @@ export default async function ProfilePage({
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="overline-label">Account</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            {welcome ? t("welcomeTitle") : t("profileTitle")}
-          </h1>
-        </div>
-        {/* 새로 가입한 직후(welcome)엔 로그아웃할 이유가 없다 */}
-        {!welcome && <LogoutButton />}
-      </div>
+      <p className="overline-label">Account</p>
+      <h1 className="mt-2 text-3xl font-bold tracking-tight">
+        {welcome ? t("welcomeTitle") : t("profileTitle")}
+      </h1>
       <p className="mt-3 mb-8 text-slate-400">
         {welcome ? t("welcomeSubtitle") : t("profileSubtitle")}
       </p>
       <ProfileForm welcome={welcome} />
 
-      {/* 찜한 장소·코스는 헤더 하트 아이콘 → /saved로 옮겼다 (중복 제거) */}
+      {/* 찜한 장소·코스는 헤더 하트 아이콘 → /saved로 옮겼다 (중복 제거).
+          내가 저장한 표현(MyPhrases)은 K-Life 가이드에만 남기고 여기선 뺀다 */}
 
-      {/* K-Life 가이드 하단과 같은 내용 — 시나리오가 늘면 이 배열에 추가한다 */}
-      <MyPhrases scenarios={[{ scenario: "restaurant", steps: RESTAURANT_STEPS }]} />
+      {/* 새로 가입한 직후(welcome)엔 로그아웃할 이유가 없다 */}
+      {!welcome && (
+        <div className="mt-10 border-t border-slate-200 pt-6">
+          <LogoutButton />
+        </div>
+      )}
     </div>
   );
 }
