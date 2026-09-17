@@ -43,7 +43,7 @@ export default function LastTrainCountdown() {
   // 새벽(막차 지남~첫차 전)에는 굳이 셈하지 않는다 — 지나갔다는 사실만
   if (diffMin <= 0) {
     return (
-      <span className="flex items-center gap-1.5 text-slate-500">
+      <span className="flex items-center gap-1.5 text-white/70">
         <TrainFront size={14} />
         {t("lastTrainGone")}
       </span>
@@ -55,11 +55,11 @@ export default function LastTrainCountdown() {
   const soon = diffMin <= 40;
   return (
     <span
-      className={`flex items-center gap-1.5 ${soon ? "font-semibold text-rose-600" : ""}`}
+      className={`flex items-center gap-1.5 ${soon ? "font-semibold text-rose-300" : ""}`}
     >
-      <TrainFront size={14} className={soon ? "text-rose-600" : "text-emerald-600"} />
+      <TrainFront size={14} className={soon ? "text-rose-300" : "text-emerald-300"} />
       {t("lastTrainIn")}{" "}
-      <b className={soon ? "text-rose-700" : "text-slate-900"}>
+      <b className={soon ? "text-rose-200" : "text-white"}>
         {h > 0 ? t("hourMin", { h, m }) : t("minOnly", { m })}
       </b>
     </span>
