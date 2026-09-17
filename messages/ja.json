@@ -1248,7 +1248,7 @@
     "pickerTitle": "お気に入りから追加",
     "pickerHint": "画像を押すとコースに追加されます",
     "pickerAllAdded": "お気に入りは全てコースに入っています!",
-    "subtitle": "保存したコース・場所・フレーズをまとめて確認できます",
+    "subtitle": "保存したコースと場所をまとめて確認できます",
     "coursesTitle": "保存したコース",
     "coursesEmpty": "保存したコースはまだありません。コースを作ってハートを押してみてください。",
     "stopsCount": "{count}カ所",

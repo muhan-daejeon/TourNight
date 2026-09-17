@@ -1248,7 +1248,7 @@
     "pickerTitle": "从收藏中添加",
     "pickerHint": "点击图片即可加入路线",
     "pickerAllAdded": "收藏的地点都已在路线中!",
-    "subtitle": "在一处查看收藏的路线、地点和表达",
+    "subtitle": "在一处查看收藏的路线和地点",
     "coursesTitle": "收藏的路线",
     "coursesEmpty": "还没有收藏的路线。创建路线后点击爱心即可收藏。",
     "stopsCount": "{count}处",
