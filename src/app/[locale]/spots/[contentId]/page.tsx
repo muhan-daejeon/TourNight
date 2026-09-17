@@ -260,11 +260,9 @@ export default async function SpotPage({
                 </h2>
                 <div className="flex flex-col gap-2.5">
                   {food.map((f) => (
-                    <a
+                    <Link
                       key={f.contentId}
-                      href={`https://map.kakao.com/link/map/${encodeURIComponent(f.title)},${f.mapY},${f.mapX}`}
-                      target="_blank"
-                      rel="noreferrer"
+                      href={`/food/${f.contentId}`}
                       className="glass-card group flex items-center gap-3 rounded-xl p-2.5"
                     >
                       <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-slate-200">
@@ -288,7 +286,7 @@ export default async function SpotPage({
                           <span className="truncate">{f.addr}</span>
                         </p>
                       </div>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </section>
@@ -303,11 +301,9 @@ export default async function SpotPage({
                 </h2>
                 <div className="flex flex-col gap-2.5">
                   {stays.map((stay) => (
-                    <a
+                    <Link
                       key={stay.contentId}
-                      href={`https://map.kakao.com/link/map/${encodeURIComponent(stay.title)},${stay.mapY},${stay.mapX}`}
-                      target="_blank"
-                      rel="noreferrer"
+                      href={`/stay/${stay.contentId}`}
                       className="glass-card group flex items-center gap-3 rounded-xl p-2.5"
                     >
                       <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-slate-200">
@@ -331,7 +327,7 @@ export default async function SpotPage({
                           <span className="truncate">{stay.addr}</span>
                         </p>
                       </div>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </section>
