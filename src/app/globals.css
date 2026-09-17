@@ -16,33 +16,36 @@
   --color-daejeon-orange: rgb(243, 152, 1);
   --color-daejeon-purple: #a64089;
 
-  /* indigo → 로고 "Night" 색이자 사이트 전반의 강조색이었던 남색 스케일.
-     전부 rgb(243,152,1) 하나로 통일한다(요청: "그 색이 거의 모든 페이지에서
-     쓰이니 전부 바꿔달라", 배경·테두리 포함 전체 범위로 확인받음) */
-  --color-indigo-50: rgb(243, 152, 1);
-  --color-indigo-100: rgb(243, 152, 1);
-  --color-indigo-200: rgb(243, 152, 1);
-  --color-indigo-300: rgb(243, 152, 1);
+  /* indigo·amber → 로고 "Night" 색이자 사이트 전반의 강조색이었던 남색과
+     노란색 스케일을 전부 대전 오렌지(PANTONE 2012C, rgb(243,152,1)) 색조로
+     통일한다(요청: "그 색이 거의 모든 페이지에서 쓰이니 전부 바꿔달라").
+     단, 두 스케일 모두 모든 단계를 똑같은 값 하나로 밀어버리면(전에 그랬다)
+     "옅은 배경(50) + 진한 글자(600/700)" 짝으로 쓰던 곳(뱃지·카드·칩)에서
+     배경과 글자가 같은 색이 돼 글자가 안 보이게 된다 — 톤 차이는 살리고
+     색상(hue)만 오렌지로 맞춘 등급표로 바꾼다. 400이 브랜드 원색이다. */
+  --color-indigo-50: #fef4e5;
+  --color-indigo-100: #fde5c2;
+  --color-indigo-200: #fbd090;
+  --color-indigo-300: #f7ae33;
   --color-indigo-400: rgb(243, 152, 1);
-  --color-indigo-500: rgb(243, 152, 1);
-  --color-indigo-600: rgb(243, 152, 1);
-  --color-indigo-700: rgb(243, 152, 1);
-  --color-indigo-800: rgb(243, 152, 1);
-  --color-indigo-900: rgb(243, 152, 1);
-  --color-indigo-950: rgb(243, 152, 1);
+  --color-indigo-500: #dd8900;
+  --color-indigo-600: #c97c00;
+  --color-indigo-700: #a56300;
+  --color-indigo-800: #7d4c00;
+  --color-indigo-900: #6b3f00;
+  --color-indigo-950: #3d2400;
 
-  /* amber → 로그인 아이디·페이지 상단 오버라인 등에 쓰이던 노란색 스케일.
-     마찬가지로 전부 rgb(243,152,1) 하나로 통일한다 */
-  --color-amber-50: rgb(243, 152, 1);
-  --color-amber-100: rgb(243, 152, 1);
-  --color-amber-200: rgb(243, 152, 1);
-  --color-amber-300: rgb(243, 152, 1);
+  --color-amber-50: #fef4e5;
+  --color-amber-100: #fde5c2;
+  --color-amber-200: #fbd090;
+  --color-amber-300: #f7ae33;
   --color-amber-400: rgb(243, 152, 1);
-  --color-amber-500: rgb(243, 152, 1);
-  --color-amber-600: rgb(243, 152, 1);
-  --color-amber-700: rgb(243, 152, 1);
-  --color-amber-900: rgb(243, 152, 1);
-  --color-amber-950: rgb(243, 152, 1);
+  --color-amber-500: #dd8900;
+  --color-amber-600: #c97c00;
+  --color-amber-700: #a56300;
+  --color-amber-800: #7d4c00;
+  --color-amber-900: #6b3f00;
+  --color-amber-950: #3d2400;
 }
 
 :root {
