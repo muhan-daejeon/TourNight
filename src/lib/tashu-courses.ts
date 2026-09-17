@@ -17,8 +17,8 @@ export interface TashuCourse {
   /** 출발 지점(대여소 밀집 지역) — 현위치와의 거리 계산 기준 */
   start: { lat: number; lng: number };
   startName: BText;
-  /** 경유지 체인 (표시용) */
-  stops: BText[];
+  /** 경유지 체인 — 이름(표시용) + 좌표(클릭 시 지도에 경로를 그리는 데 쓴다) */
+  stops: (BText & { lat: number; lng: number })[];
   distanceKm: number;
   durationMin: number;
   /** 카드 대표 사진 (public 경로) */
@@ -48,10 +48,10 @@ export const TASHU_COURSES: TashuCourse[] = [
       zh: "世博科学公园前",
     },
     stops: [
-      { ko: "엑스포다리", en: "Expo Bridge", ja: "エキスポ橋", zh: "世博桥" },
-      { ko: "갑천 자전거길", en: "Gapcheon Bike Path", ja: "甲川自転車道", zh: "甲川自行车道" },
-      { ko: "한빛탑", en: "Hanbit Tower", ja: "ハンビッ塔", zh: "韩光塔" },
-      { ko: "엑스포시민광장", en: "Expo Citizen Plaza", ja: "エキスポ市民広場", zh: "世博市民广场" },
+      { ko: "엑스포다리", en: "Expo Bridge", ja: "エキスポ橋", zh: "世博桥", lat: 36.3703, lng: 127.3875 },
+      { ko: "갑천 자전거길", en: "Gapcheon Bike Path", ja: "甲川自転車道", zh: "甲川自行车道", lat: 36.3655, lng: 127.3845 },
+      { ko: "한빛탑", en: "Hanbit Tower", ja: "ハンビッ塔", zh: "韩光塔", lat: 36.3723, lng: 127.3905 },
+      { ko: "엑스포시민광장", en: "Expo Citizen Plaza", ja: "エキスポ市民広場", zh: "世博市民广场", lat: 36.3739, lng: 127.3868 },
     ],
     distanceKm: 5.2,
     durationMin: 35,
@@ -79,10 +79,10 @@ export const TASHU_COURSES: TashuCourse[] = [
       zh: "大田市厅前",
     },
     stops: [
-      { ko: "보라매공원", en: "Boramae Park", ja: "ポラメ公園", zh: "波拉梅公园" },
-      { ko: "한밭수목원", en: "Hanbat Arboretum", ja: "ハンバッ樹木園", zh: "韩田树木园" },
-      { ko: "예술의전당", en: "Daejeon Arts Center", ja: "芸術の殿堂", zh: "艺术殿堂" },
-      { ko: "엑스포시민광장", en: "Expo Citizen Plaza", ja: "エキスポ市民広場", zh: "世博市民广场" },
+      { ko: "보라매공원", en: "Boramae Park", ja: "ポラメ公園", zh: "波拉梅公园", lat: 36.3475, lng: 127.38 },
+      { ko: "한밭수목원", en: "Hanbat Arboretum", ja: "ハンバッ樹木園", zh: "韩田树木园", lat: 36.3595, lng: 127.3825 },
+      { ko: "예술의전당", en: "Daejeon Arts Center", ja: "芸術の殿堂", zh: "艺术殿堂", lat: 36.363, lng: 127.3798 },
+      { ko: "엑스포시민광장", en: "Expo Citizen Plaza", ja: "エキスポ市民広場", zh: "世博市民广场", lat: 36.3739, lng: 127.3868 },
     ],
     distanceKm: 3.8,
     durationMin: 25,
@@ -110,10 +110,10 @@ export const TASHU_COURSES: TashuCourse[] = [
       zh: "儒城温泉站前",
     },
     stops: [
-      { ko: "유성온천거리", en: "Hot Spring Street", ja: "温泉通り", zh: "温泉街" },
-      { ko: "유림공원", en: "Yurim Park", ja: "儒林公園", zh: "儒林公园" },
-      { ko: "갑천 상류길", en: "Upper Gapcheon Path", ja: "甲川上流の道", zh: "甲川上游路" },
-      { ko: "족욕체험장", en: "Foot Bath", ja: "足湯体験場", zh: "足浴体验区" },
+      { ko: "유성온천거리", en: "Hot Spring Street", ja: "温泉通り", zh: "温泉街", lat: 36.3545, lng: 127.345 },
+      { ko: "유림공원", en: "Yurim Park", ja: "儒林公園", zh: "儒林公园", lat: 36.3605, lng: 127.348 },
+      { ko: "갑천 상류길", en: "Upper Gapcheon Path", ja: "甲川上流の道", zh: "甲川上游路", lat: 36.365, lng: 127.352 },
+      { ko: "족욕체험장", en: "Foot Bath", ja: "足湯体験場", zh: "足浴体验区", lat: 36.3575, lng: 127.345 },
     ],
     distanceKm: 4.4,
     durationMin: 30,
@@ -141,10 +141,10 @@ export const TASHU_COURSES: TashuCourse[] = [
       zh: "大田站前",
     },
     stops: [
-      { ko: "대전천 자전거길", en: "Daejeoncheon Path", ja: "大田川自転車道", zh: "大田川自行车道" },
-      { ko: "목척교", en: "Mokcheok Bridge", ja: "木尺橋", zh: "木尺桥" },
-      { ko: "으능정이 스카이로드", en: "Skyroad", ja: "スカイロード", zh: "Skyroad天空之路" },
-      { ko: "중앙시장", en: "Jungang Market", ja: "中央市場", zh: "中央市场" },
+      { ko: "대전천 자전거길", en: "Daejeoncheon Path", ja: "大田川自転車道", zh: "大田川自行车道", lat: 36.33, lng: 127.432 },
+      { ko: "목척교", en: "Mokcheok Bridge", ja: "木尺橋", zh: "木尺桥", lat: 36.3283, lng: 127.4288 },
+      { ko: "으능정이 스카이로드", en: "Skyroad", ja: "スカイロード", zh: "Skyroad天空之路", lat: 36.3287, lng: 127.4272 },
+      { ko: "중앙시장", en: "Jungang Market", ja: "中央市場", zh: "中央市场", lat: 36.331, lng: 127.43 },
     ],
     distanceKm: 3.2,
     durationMin: 22,

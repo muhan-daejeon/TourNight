@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight, Check, Copy, MapPin, RefreshCw, Route } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { TASHU_COURSES, distanceM, type BikeLocale } from "@/lib/tashu-courses";
+import { TASHU_COURSES, distanceM, type BikeLocale, type TashuCourse } from "@/lib/tashu-courses";
 import { loadKakaoMaps } from "@/lib/kakaoMaps";
 
 /** Google Play 로고 — 대각선 그라데이션(파랑→초록→노랑→빨강)을 준 재생 버튼
@@ -86,6 +86,10 @@ export default function NightBikeMap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<KakaoNS>(null);
   const clustererRef = useRef<KakaoNS>(null);
+  // 코스 카드를 누르면 그리는 경로 — 새 코스를 고르면 이전 것부터 지운다
+  const routeLineRef = useRef<KakaoNS>(null);
+  const routeMarkersRef = useRef<KakaoNS[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [stations, setStations] = useState<TashuStation[] | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -148,6 +152,52 @@ export default function NightBikeMap() {
       () => {}, // 거부·실패 시 조용히 기본 화면 유지
       { enableHighAccuracy: true, timeout: 8000 },
     );
+  }
+
+  /** 추천 코스 카드를 누르면 출발지→경유지를 잇는 선을 지도에 그리고,
+   * 코스 전체가 한눈에 들어오게 지도 범위를 맞춘다 (피드백: 코스를
+   * 누르면 그 코스가 지도에 뜨게). 이전에 그려 둔 경로가 있으면 먼저 지운다 */
+  function showCourseRoute(course: TashuCourse) {
+    const { kakao } = window as KakaoNS;
+    const map = mapRef.current;
+    if (!kakao?.maps || !map) return;
+
+    routeLineRef.current?.setMap(null);
+    routeMarkersRef.current.forEach((m) => m.setMap(null));
+    routeMarkersRef.current = [];
+
+    const points = [course.start, ...course.stops];
+    const path = points.map((p) => new kakao.maps.LatLng(p.lat, p.lng));
+
+    const line = new kakao.maps.Polyline({
+      path,
+      strokeWeight: 5,
+      strokeColor: "#35b597",
+      strokeOpacity: 0.9,
+      strokeStyle: "solid",
+    });
+    line.setMap(map);
+    routeLineRef.current = line;
+
+    const bounds = new kakao.maps.LatLngBounds();
+    path.forEach((pos, i) => {
+      bounds.extend(pos);
+      const overlay = new kakao.maps.CustomOverlay({
+        position: pos,
+        yAnchor: 0.5,
+        content: `<div style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:9999px;background:${
+          i === 0 ? "#f39800" : "#35b597"
+        };color:#fff;font-size:11px;font-weight:800;border:2px solid #fff;box-shadow:0 2px 6px rgba(15,23,42,.35);">${
+          i === 0 ? "S" : i
+        }</div>`,
+        map,
+      });
+      routeMarkersRef.current.push(overlay);
+    });
+
+    map.setBounds(bounds, 60);
+    setSelectedCourseId(course.id);
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   function refresh() {
@@ -313,21 +363,14 @@ export default function NightBikeMap() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {orderedCourses.map((c, i) => {
             const nearest = i === 0 && !!userPos;
+            const selected = selectedCourseId === c.id;
             return (
               <button
                 key={c.id}
                 type="button"
-                onClick={() => {
-                  const { kakao } = window as KakaoNS;
-                  const map = mapRef.current;
-                  if (kakao?.maps && map) {
-                    map.setCenter(new kakao.maps.LatLng(c.start.lat, c.start.lng));
-                    map.setLevel(5);
-                    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  }
-                }}
+                onClick={() => showCourseRoute(c)}
                 className={`group relative overflow-hidden rounded-2xl border bg-white text-left transition hover:-translate-y-0.5 hover:shadow-lg ${
-                  nearest ? "tn-neon border-emerald-400" : "border-slate-200"
+                  nearest ? "tn-neon border-emerald-400" : selected ? "border-daejeon-blue ring-2 ring-daejeon-blue/30" : "border-slate-200"
                 }`}
               >
                 {nearest && (
