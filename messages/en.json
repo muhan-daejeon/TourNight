@@ -1219,6 +1219,9 @@
     "nightBike": "Tashu, Daejeon's public bike! I'll show you available bikes in real time.",
     "default": "Pick anything from the menu - I'll be right here with you!"
   },
+  "ggumsunGuide": {
+    "bubble": "Translate whatever you want to say!"
+  },
   "about": {
     "title": "About Daejeon",
     "subtitle": "A first-timer's guide to Daejeon",
