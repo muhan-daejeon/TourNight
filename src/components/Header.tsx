@@ -264,7 +264,7 @@ export default function Header() {
         <Link href="/" className="flex shrink-0 flex-col leading-none xl:ml-10">
           <span
             data-header-logo
-            className="text-[26px] font-extrabold tracking-tight text-slate-900 lg:text-[34px]"
+            className="text-[44.2px] font-extrabold tracking-tight text-slate-900 lg:text-[57.8px]"
           >
             Tour<span className="text-indigo-600">Night</span>
           </span>

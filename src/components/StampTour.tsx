@@ -16,14 +16,14 @@ import { useSavedCourses } from "./useSavedCourses";
 /**
  * 도장투어 with 꿈돌이 → 꿈돌네컷.
  *
- * 흐름: (아직 안 골랐다면) 위치 정보 동의 → 갈 곳 4곳 검색·선택 → 저장 →
- * 스팟 리스트 카드(순서대로 4곳). 지금 차례인 스팟만 누를 수 있고, GPS로
- * 그 장소 근처인지 확인한 뒤에만 사진을 올릴 수 있다. 올린 사진은 우측
- * "꿈돌이와 심야여행" 네컷 프레임의 그 칸을 채우고, 4칸이 다 차면
- * 카드 안의 버튼으로 완성한 네컷을 내려받을 수 있다.
+ * 흐름: (아직 안 골랐다면) 갈 곳 4곳 검색·선택 → 저장 → 스팟 리스트 카드
+ * (순서대로 4곳). 지금 차례인 스팟만 누를 수 있고, 위치 확인 없이 사진을
+ * 바로 올릴 수 있다. 올린 사진은 우측 "꿈돌이와 심야여행" 네컷 프레임의
+ * 그 칸을 채우고, 4칸이 다 차면 카드 안의 버튼으로 완성한 네컷을 내려받을
+ * 수 있다.
  *
- * 이미 골라 둔 계정은 /api/stamp-tour가 바로 그 결과를 주므로 동의·선택
- * 단계를 건너뛰고 곧장 스팟 리스트로 간다.
+ * 이미 골라 둔 계정은 /api/stamp-tour가 바로 그 결과를 주므로 선택 단계를
+ * 건너뛰고 곧장 스팟 리스트로 간다.
  */
 
 interface StampStop {
@@ -44,86 +44,10 @@ interface PickedPlace {
 }
 
 const DAEJEON_CENTER = { lat: 36.3504, lng: 127.3845 };
-/** 이 반경(m) 안이면 "그 장소에 있다"고 본다 — 명소 하나가 꽤 넓을 수 있어 넉넉히 잡는다 */
-const STAMP_RADIUS_M = 300;
-
-function haversineMeters(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-) {
-  const R = 6371000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const s =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(s));
-}
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type KakaoNS = any;
 /* eslint-enable @typescript-eslint/no-explicit-any */
-
-/** 위치 정보 동의 안내 팝업 — 이 페이지에 처음 온 사람에게만 뜬다 */
-function ConsentModal({
-  onAgree,
-  onClose,
-  denied,
-  checking,
-}: {
-  onAgree: () => void;
-  onClose: () => void;
-  denied: boolean;
-  checking: boolean;
-}) {
-  const t = useTranslations("stampTour.consent");
-  if (typeof document === "undefined") return null;
-
-  return createPortal(
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={t("title")}
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-white/90 p-4 backdrop-blur-sm"
-    >
-      <div className="relative w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 text-center">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="닫기"
-          className="absolute right-4 top-4 text-slate-500 transition hover:text-slate-900"
-        >
-          <X size={16} />
-        </button>
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-          <MapPin size={22} />
-        </span>
-        <h2 className="mt-4 text-lg font-bold text-slate-900">{t("title")}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-slate-400">{t("body")}</p>
-        {denied && <p className="mt-3 text-xs text-rose-400">{t("denied")}</p>}
-        <div className="mt-6 flex gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-full border border-slate-200 py-2.5 text-sm font-semibold text-slate-400 transition hover:border-white/30"
-          >
-            {t("cancel")}
-          </button>
-          <button
-            type="button"
-            onClick={onAgree}
-            disabled={checking}
-            className="flex-1 rounded-full bg-amber-400 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {t("agree")}
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body,
-  );
-}
 
 /** 갈 곳 4곳 검색·선택 팝업 — 카카오 장소 검색으로 대전 인근을 찾는다 */
 function PlacePickerModal({
@@ -645,7 +569,6 @@ function StampList({
   const t = useTranslations("stampTour");
   const tList = useTranslations("stampTour.list");
   const tRoad = useTranslations("stampTour.road");
-  const [checkingSlot, setCheckingSlot] = useState<number | null>(null);
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const [reselectSlot, setReselectSlot] = useState<number | null>(null);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -654,45 +577,13 @@ function StampList({
   // 아직 못 찍은 것 중 가장 앞 순서 — "순서대로" 담으므로 그 자리만 지금 누를 수 있다
   const nextIndex = tour.stops.findIndex((s) => !s.photoUrl);
 
-  // 파일 선택창은 탭한 그 순간(동기적으로) 열어야 한다 — GPS 확인처럼 비동기
-  // 콜백 안에서 뒤늦게 .click()을 부르면, 모바일 브라우저(특히 iOS/일부
-  // 안드로이드)가 "사용자가 직접 누른 게 아니다"로 보고 조용히 막아버린다.
-  // 그래서 사진 선택창은 즉시 열고, 위치 확인은 사진을 고른 "뒤"(handleFile)
-  // 에서 한다. GPS가 안 맞으면 그때 업로드를 취소한다
   function handleSpotClick(slot: number) {
-    if (slot !== nextIndex || checkingSlot !== null || uploadingSlot !== null) return;
+    if (slot !== nextIndex || uploadingSlot !== null) return;
     fileInputRefs.current[slot]?.click();
   }
 
   async function handleFile(slot: number, file: File | null) {
     if (!file) return;
-    const stop = tour.stops[slot];
-
-    if (!("geolocation" in navigator)) {
-      alert(tRoad("gpsError"));
-      return;
-    }
-    setCheckingSlot(slot);
-    const pos = await new Promise<GeolocationPosition | null>((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (p) => resolve(p),
-        () => resolve(null),
-        { enableHighAccuracy: true, timeout: 12000 },
-      );
-    });
-    setCheckingSlot(null);
-    if (!pos) {
-      alert(tRoad("gpsError"));
-      return;
-    }
-    const dist = haversineMeters(
-      { lat: pos.coords.latitude, lng: pos.coords.longitude },
-      { lat: stop.lat, lng: stop.lng },
-    );
-    if (dist > STAMP_RADIUS_M) {
-      alert(tRoad("tooFar", { name: stop.name }));
-      return;
-    }
 
     setUploadingSlot(slot);
     try {
@@ -749,7 +640,7 @@ function StampList({
         {tour.stops.map((stop, i) => {
           const done = !!stop.photoUrl;
           const isNext = i === nextIndex;
-          const busy = checkingSlot === i || uploadingSlot === i;
+          const busy = uploadingSlot === i;
           const status = done
             ? tList("statusDone")
             : isNext
@@ -859,10 +750,8 @@ export default function StampTour() {
   const t = useTranslations("stampTour");
   const tList = useTranslations("stampTour.list");
   const router = useRouter();
-  const [phase, setPhase] = useState<"loading" | "consent" | "picker" | "main">("loading");
+  const [phase, setPhase] = useState<"loading" | "picker" | "main">("loading");
   const [tour, setTour] = useState<StampTourData | null>(null);
-  const [consentDenied, setConsentDenied] = useState(false);
-  const [consentChecking, setConsentChecking] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [rendering, setRendering] = useState(false);
 
@@ -874,10 +763,10 @@ export default function StampTour() {
           setTour(data.tour);
           setPhase("main");
         } else {
-          setPhase("consent");
+          setPhase("picker");
         }
       })
-      .catch(() => setPhase("consent"));
+      .catch(() => setPhase("picker"));
   }, []);
 
   const photoUrls: (string | null)[] = tour
@@ -903,26 +792,6 @@ export default function StampTour() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- photoUrls는 매 렌더 새 배열이라 photoKey(내용)로 비교한다
   }, [tour, photoKey]);
-
-  function handleAgree() {
-    if (!("geolocation" in navigator)) {
-      setConsentDenied(true);
-      return;
-    }
-    setConsentChecking(true);
-    navigator.geolocation.getCurrentPosition(
-      () => {
-        setConsentChecking(false);
-        setConsentDenied(false);
-        setPhase("picker");
-      },
-      () => {
-        setConsentChecking(false);
-        setConsentDenied(true);
-      },
-      { enableHighAccuracy: true, timeout: 12000 },
-    );
-  }
 
   async function handlePickerComplete(places: PickedPlace[]) {
     // 이미 tour가 있는 상태에서 다시 이 화면으로 왔다면 "관광지 다시 선택하기"
@@ -1017,14 +886,6 @@ export default function StampTour() {
         </div>
       )}
 
-      {phase === "consent" && (
-        <ConsentModal
-          onAgree={handleAgree}
-          onClose={() => router.push("/")}
-          denied={consentDenied}
-          checking={consentChecking}
-        />
-      )}
       {phase === "picker" && (
         <PlacePickerModal
           onComplete={handlePickerComplete}
