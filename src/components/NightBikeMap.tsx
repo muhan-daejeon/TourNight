@@ -342,7 +342,10 @@ export default function NightBikeMap() {
           그만큼을 음수 마진으로 상쇄한 뒤 20px만 남긴다 — calc라 루트 글자
           크기(1.2배)가 바뀌어도 항상 "2rem을 상쇄하고 20px만" 유지된다.
           안드로이드는 플레이스토어 검색으로 바로, 아이폰은 이름 복사로 안내한다 */}
-      <div className="flex flex-wrap items-center justify-center gap-2 [margin-top:calc(20px-2rem)]">
+      <p className="text-center text-sm font-light text-slate-400 [margin-top:calc(20px-2rem)]">
+        {t("copyHint")}
+      </p>
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
         <a
           href="https://play.google.com/store/search?q=%ED%83%80%EC%8A%88&c=apps"
           target="_blank"
@@ -374,7 +377,7 @@ export default function NightBikeMap() {
       <p className="mt-12 mb-8 text-center">
         <Link
           href="/about#tashu"
-          className="inline-flex items-center gap-1.5 text-2xl font-extrabold tracking-tight text-slate-900 hover:text-daejeon-blue sm:text-3xl"
+          className="inline-flex items-center gap-1.5 text-2xl font-extrabold tracking-tight text-slate-900 hover:text-daejeon-orange sm:text-3xl"
         >
           {t("learnMore")}
           <ArrowRight size={22} />

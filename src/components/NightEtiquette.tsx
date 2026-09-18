@@ -75,13 +75,16 @@ export default function NightEtiquette({
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         {KLIFE_SITUATIONS.map((s) => {
           const Icon = TOPIC_ICONS[s.topic];
-          const image = topicImages[s.topic];
+          // 교통·식당은 팀이 지정한 사진으로 고정 — 실시간 명소 사진(교통) ·
+          // 기본 사진(식당)을 덮어써 항상 이 사진이 뜨게 한다
+          const image =
+            s.topic === "transport" ? "/bus.jpg" : s.topic === "dining" ? "/food.jpg" : topicImages[s.topic];
           return (
             <button
               key={s.topic}
               type="button"
               onClick={() => pick(s)}
-              className="group relative h-40 overflow-hidden rounded-2xl border border-slate-200 text-left shadow-sm transition duration-300 ease-out hover:z-10 hover:scale-[1.06] hover:border-amber-400 hover:shadow-[0_16px_40px_rgba(15,23,42,0.18)] focus-visible:z-10 focus-visible:scale-[1.06] focus-visible:border-amber-400 focus-visible:outline-none sm:h-52"
+              className="group relative h-60 overflow-hidden rounded-2xl border border-slate-200 text-left shadow-sm transition duration-300 ease-out hover:z-10 hover:scale-[1.06] hover:border-amber-400 hover:shadow-[0_16px_40px_rgba(15,23,42,0.18)] focus-visible:z-10 focus-visible:scale-[1.06] focus-visible:border-amber-400 focus-visible:outline-none sm:h-[19.5rem]"
             >
               {image ? (
                 <Image
