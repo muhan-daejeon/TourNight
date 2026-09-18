@@ -494,13 +494,6 @@
     "introTitle": "네컷 사진 with 꿈돌이",
     "introSubtitle": "添加4张照片，完成专属于你的梦多尔四格照吧。",
     "reselect": "重新选择景点",
-    "consent": {
-      "title": "是否同意收集位置信息？",
-      "body": "盖章时，我们会使用您的位置信息确认您是否真的在该地点--仅在确认的那一刻使用，不会随照片保存，也不会存储在服务器上。",
-      "agree": "同意并开始",
-      "cancel": "取消",
-      "denied": "位置权限被拒绝。请在浏览器设置中允许位置访问后重试。"
-    },
     "picker": {
       "title": "挑选4个你想去的地方吧！",
       "selectedCount": "已选 {count}/4",
@@ -527,15 +520,8 @@
       "sectionCoursesEmpty": "还没有保存的路线。"
     },
     "road": {
-      "stampLabel": "第{n}个印章",
-      "tapToStamp": "点击盖章",
-      "verifying": "正在确认位置…",
-      "tooFar": "您似乎离「{name}」有点远，到达后再试一次吧。",
-      "gpsError": "无法获取您的位置，请重试。",
-      "uploading": "上传中…",
       "uploadError": "照片上传失败，请重试。",
-      "photoRejected": "这张照片无法上传，请选择其他照片。",
-      "stamped": "已盖章"
+      "photoRejected": "这张照片无法上传，请选择其他照片。"
     },
     "list": {
       "title": "梦多尔的深夜旅行",
@@ -545,7 +531,7 @@
       "statusCurrent": "现在请上传这个地点的照片",
       "statusLocked": "还未到访",
       "completeButton": "完成梦多尔四格照",
-      "notice": "请在您选择的地点上传照片！\n如果所在位置不同，将无法上传照片。",
+      "notice": "请在您选择的地点上传照片！",
       "reselectSpot": "（重新选择地点）",
       "reselectTitle": "更换其他地点",
       "reselectSaveError": "更换地点失败，请稍后重试。"
@@ -589,6 +575,7 @@
     "login": "登录",
     "signup": "注册",
     "logout": "退出登录",
+    "greeting": "你好，{name}。",
     "email": "邮箱",
     "password": "密码",
     "nickname": "昵称",
@@ -746,10 +733,6 @@
       "etiquette": {
         "title": "第一次来也不会尴尬",
         "body": "路边摊、练歌房、深夜食堂--只有夜里才有的礼节，按场景为你整理好了。"
-      },
-      "phrases": {
-        "title": "说不出口时，把屏幕给对方看",
-        "body": "输入想说的话，就为你转成韩语，还带发音。可以照着念，也可以直接把屏幕给对方看。"
       },
       "community": {
         "title": "先行者们的夜晚",
@@ -1178,7 +1161,7 @@
     "myLocation": "当前位置",
     "copyName": "复制“타슈”",
     "copied": "已复制!",
-    "appStoreHint": "iPhone请在App Store搜索“타슈”(Tashu) - 可用上方按钮复制名称。",
+    "copyHint": "复制“타슈”后到应用商店搜索一下吧。",
     "installBtn": "在Google Play安装",
     "learnMore": "想了解一下Tashu吗?",
     "coursesTitle": "推荐Tashu路线",

@@ -11,9 +11,8 @@ import {
 import { logActivity } from "@/lib/activity";
 
 /**
- * 도장 인증사진 업로드 — GPS로 그 장소에 있는지는 브라우저에서 이미 확인한
- * 뒤에만 이 엔드포인트를 부른다(navigator.geolocation은 서버에서 다시 잴 수
- * 없다). 여기서는 로그인·소유·형식만 지킨다.
+ * 도장 인증사진 업로드 — 위치 확인 없이, 고른 슬롯에 바로 올린다.
+ * 여기서는 로그인·소유·형식만 지킨다.
  */
 export async function POST(request: NextRequest) {
   const session = await getActiveSessionUser();

@@ -32,7 +32,7 @@
     "nightBike": "자전거 여행 with 타슈",
     "groupCourse": "코스 만들기",
     "groupPlaces": "장소 소개",
-    "groupEnjoy": "대전을 즐기기",
+    "groupEnjoy": "대전을 즐겨봐요",
     "about": "About 대전",
     "notices": "공지사항",
     "saved": "찜 모아보기"
@@ -494,13 +494,6 @@
     "introTitle": "네컷 사진 with 꿈돌이",
     "introSubtitle": "사진 4장을 채워 나만의 꿈돌네컷을 완성해보세요.",
     "reselect": "관광지 다시 선택하기",
-    "consent": {
-      "title": "위치 정보 수집에 동의하십니까?",
-      "body": "도장을 찍을 때 실제로 그 장소에 계신지 확인하기 위해 위치 정보를 써요. 확인하는 그 순간에만 쓰이고 사진에 남거나 서버에 저장되지 않아요.",
-      "agree": "동의하고 시작하기",
-      "cancel": "취소",
-      "denied": "위치 정보 접근이 거부됐어요. 브라우저 설정에서 위치 권한을 허용한 뒤 다시 시도해주세요."
-    },
     "picker": {
       "title": "가고 싶은 네 가지 장소를 골라보세요!",
       "selectedCount": "{count}/4 선택됨",
@@ -527,15 +520,8 @@
       "sectionCoursesEmpty": "아직 만든 코스가 없어요."
     },
     "road": {
-      "stampLabel": "{n}번째 도장",
-      "tapToStamp": "눌러서 도장 찍기",
-      "verifying": "위치 확인 중…",
-      "tooFar": "\"{name}\"에서 좀 떨어져 있어요. 장소에 도착한 뒤 다시 시도해주세요.",
-      "gpsError": "위치 정보를 가져오지 못했어요. 다시 시도해주세요.",
-      "uploading": "올리는 중…",
       "uploadError": "사진을 올리지 못했어요. 다시 시도해주세요.",
-      "photoRejected": "올릴 수 없는 사진이에요. 다른 사진을 선택해주세요.",
-      "stamped": "도장 완료"
+      "photoRejected": "올릴 수 없는 사진이에요. 다른 사진을 선택해주세요."
     },
     "list": {
       "title": "꿈돌이와 심야 여행",
@@ -545,7 +531,7 @@
       "statusCurrent": "지금 이 스팟 사진을 등록해주세요",
       "statusLocked": "아직 방문 전이에요",
       "completeButton": "꿈돌네컷 완성하기",
-      "notice": "선택한 스팟에서 사진을 등록해주세요!\n위치가 다르면 사진을 올릴 수 없어요.",
+      "notice": "선택한 스팟에서 사진을 등록해주세요!",
       "reselectSpot": "(장소 다시 선택)",
       "reselectTitle": "다른 장소로 바꿔보세요",
       "reselectSaveError": "장소를 바꾸지 못했어요. 잠시 후 다시 시도해주세요."
@@ -575,7 +561,7 @@
     "myLocation": "현위치",
     "copyName": "'타슈' 복사",
     "copied": "복사됨!",
-    "appStoreHint": "iPhone은 App Store에서 '타슈'를 검색하세요 - 위 버튼으로 이름을 복사할 수 있어요.",
+    "copyHint": "'타슈'를 복사해서 앱스토어에 검색해보세요.",
     "installBtn": "Google Play에서 설치",
     "learnMore": "타슈에 대해 알아볼까요?",
     "coursesTitle": "추천 타슈 코스",
@@ -615,6 +601,7 @@
     "login": "로그인",
     "signup": "회원가입",
     "logout": "로그아웃",
+    "greeting": "안녕하세요, {name}님.",
     "email": "이메일",
     "password": "비밀번호",
     "nickname": "닉네임",
@@ -772,10 +759,6 @@
       "etiquette": {
         "title": "처음이라도 어색하지 않게",
         "body": "포장마차, 노래방, 심야식당 - 밤에만 통하는 매너를 상황별로 모았어요. 몰라서 머뭇거리는 일은 없도록."
-      },
-      "phrases": {
-        "title": "말이 막히면 화면을 보여주세요",
-        "body": "하고 싶은 말을 적으면 한국어로 바꿔 드려요. 발음까지 함께 나오니 그대로 읽어도 되고, 화면을 보여줘도 통합니다."
       },
       "community": {
         "title": "먼저 다녀온 사람들의 밤",

@@ -115,6 +115,9 @@ export default function Header() {
   const t = useTranslations();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  // AuthNav가 로그인 여부를 확인한 뒤 알려준다 — 로그인 중이면 찜 버튼
+  // 바로 위에 "안녕하세요, ○○님." 인사말을 그리는 데 쓴다
+  const [me, setMe] = useState<{ nickname: string } | null>(null);
   const [tourTarget, setTourTarget] = useState<TourTarget | null>(null);
   // 마우스가 있는 기기(hover 가능)에서는 카테고리에 포인터만 올려도 메뉴가
   // 열린다 — 클릭해야만 열리는 건 탐색이 번거롭다는 피드백. 터치 기기는
@@ -373,16 +376,29 @@ export default function Header() {
           {/* 콜라주 만들기(꿈돌이와 한컷)는 도장투어 with 꿈돌이 페이지 하단으로
               옮겼다 — 자유 업로드 대신 도장 4개를 다 찍은 사진으로 채우는
               방식으로 바뀌었다. 여기 있던 카메라 버튼은 그래서 없앤다 */}
-          <AuthNav />
+          <AuthNav onUser={setMe} />
           {/* 찜 모아보기 — 명소·코스·표현을 한 곳에서. 검색은 야간 명소 화면에
-              같은 입력이 있어 헤더에서는 뺐다 (로그아웃은 프로필로 옮김) */}
-          <Link
-            href="/saved"
-            aria-label={t("saved.pageTitle")}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:border-rose-300 hover:text-rose-500"
-          >
-            <Heart size={16} />
-          </Link>
+              같은 입력이 있어 헤더에서는 뺐다 (로그아웃은 프로필로 옮김).
+              로그인 중이면 그 바로 위에 "안녕하세요, ○○님." 인사말을 얹고,
+              누르면 마이페이지(프로필)로 간다 — 찜 버튼 자체의 동작(→ /saved)은
+              그대로 둔다 */}
+          <div className="flex flex-col items-center gap-1">
+            {me && (
+              <Link
+                href="/profile"
+                className="whitespace-nowrap text-xs font-semibold text-slate-500 transition hover:text-amber-600"
+              >
+                {t("auth.greeting", { name: me.nickname })}
+              </Link>
+            )}
+            <Link
+              href="/saved"
+              aria-label={t("saved.pageTitle")}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:border-rose-300 hover:text-rose-500"
+            >
+              <Heart size={16} />
+            </Link>
+          </div>
           <LocaleSwitcher />
           {/* lg 미만 전용 — 위 4개 카테고리 nav 대신 이 버튼 하나로 메뉴 전체를 연다 */}
           <button
