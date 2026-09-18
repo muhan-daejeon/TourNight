@@ -41,7 +41,11 @@ const GAP = 12; // gap-3 — 스크롤 한 걸음 계산에 쓴다
 // 처음 슬라이드를 하나씩 복제해 둔다. EXTENDED[1..SLIDES.length]가 진짜다
 const EXTENDED = [SLIDES[SLIDES.length - 1], ...SLIDES, SLIDES[0]];
 
-/** 슬라이드별 비주얼 — 기능마다 지정된 이미지를 그대로 보여준다 */
+/** 슬라이드별 비주얼 — 기능마다 지정된 이미지를 그대로 보여준다.
+ * priority로 항상 즉시 불러온다 — 끝단 복제 장(마지막→처음 루프용)이 지연
+ * 로딩으로 아직 안 떠 있으면, 거기로 순간 이동하는 순간 로딩 중이던 그림이
+ * 뒤늦게 팝업하듯 나타나며 끊기는 것처럼 보인다. 실제 파일은 3장뿐이라
+ * 5칸(복제 2 + 진짜 3) 전부 즉시 불러와도 비용이 크지 않다 */
 function Visual({ image }: { image: string }) {
   return (
     <div className="relative h-full w-full bg-slate-100">
@@ -49,6 +53,7 @@ function Visual({ image }: { image: string }) {
         src={image}
         alt=""
         fill
+        priority
         sizes="(min-width:1024px) 640px, 100vw"
         className="object-cover"
       />
@@ -83,34 +88,77 @@ export default function FeatureShowcase() {
     el.scrollBy({ left: dir * panelWidth(), behavior: "smooth" });
   };
 
-  // 스크롤 도중에는 위치만 계속 갱신(좌측 텍스트가 그 자리에서 바로 바뀌게)
+  // 복제 장(맨 끝)에 도착했으면 대응하는 진짜 장으로 애니메이션 없이 순간
+  // 이동한다. 실행이 두 번 겹쳐도(예: scrollend와 겹칠 때) i가 이미 진짜
+  // 장이라 두 번째 호출은 아무 일도 안 해 안전하다
+  const correctIfClone = () => {
+    const el = track.current;
+    if (!el) return;
+    const w = panelWidth();
+    const cur = el.scrollLeft;
+    const i = Math.round(cur / w);
+    if (i === 0) {
+      el.scrollLeft = w * SLIDES.length; // 복제(마지막) → 진짜 마지막
+      setPos(SLIDES.length);
+    } else if (i === EXTENDED.length - 1) {
+      el.scrollLeft = w; // 복제(처음) → 진짜 처음
+      setPos(1);
+    }
+  };
+
+  // 브라우저 'scrollend'가 오면 확실히 다 멎은 뒤이니 그대로 보정한다(주
+  // 경로 — 진행 중인 네이티브 스크롤 애니메이션과 겹쳐 다투지 않는다).
+  // 일부 구형 브라우저는 scrollend가 없을 수 있어, 몇 프레임 연속 같은
+  // 위치일 때도 같은 보정을 걸어 둔다(보조 경로) — 두 경로가 겹쳐 불려도
+  // 위 correctIfClone이 이미 보정된 뒤엔 아무 일도 안 하니 안전하다
+  const settleRafRef = useRef<number | null>(null);
+  const startSettleWatch = () => {
+    if (settleRafRef.current !== null) return;
+    const el = track.current;
+    if (!el) return;
+    let lastLeft = el.scrollLeft;
+    let stableFrames = 0;
+
+    const tick = () => {
+      const cur = el.scrollLeft;
+      if (cur === lastLeft) {
+        stableFrames++;
+        // 5프레임(~80ms) 연속 같은 위치 — 이징 꼬리에서의 미세한 정지와
+        // 헷갈리지 않을 만큼 넉넉히 잡아, 아직 움직이는 중인 네이티브 스크롤을
+        // 우리가 임의로 끊어버리는 일이 없게 한다
+        if (stableFrames >= 5) {
+          settleRafRef.current = null;
+          correctIfClone();
+          return;
+        }
+      } else {
+        stableFrames = 0;
+        lastLeft = cur;
+      }
+      settleRafRef.current = requestAnimationFrame(tick);
+    };
+    settleRafRef.current = requestAnimationFrame(tick);
+  };
+
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    el.addEventListener("scrollend", correctIfClone);
+    return () => {
+      el.removeEventListener("scrollend", correctIfClone);
+      if (settleRafRef.current !== null) cancelAnimationFrame(settleRafRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- correctIfClone은 매 렌더 새로 만들어지지만 el당 한 번만 붙이면 된다
+  }, []);
+
+  // 스크롤 도중에는 위치만 계속 갱신(좌측 텍스트가 그 자리에서 바로 바뀌게)하고,
+  // 혹시 scrollend를 놓칠 경우를 대비해 보조 감시도 시작한다
   const onScroll = () => {
     const el = track.current;
     if (!el) return;
     setPos(Math.round(el.scrollLeft / panelWidth()));
+    startSettleWatch();
   };
-
-  // 스크롤이 완전히 멎는 순간(neutral 이벤트라 임의의 디바운스 대기가 없다)
-  // 복제 장에 도착했는지 확인하고, 도착했으면 대응하는 진짜 장으로 애니메이션
-  // 없이 순간 이동한다 — setTimeout 디바운스로 기다리면 특히 마지막→처음으로
-  // 넘어갈 때 그만큼 더 늦게 반응하는 게 느껴져서, 늦지 않게 곧장 처리한다
-  useEffect(() => {
-    const el = track.current;
-    if (!el) return;
-    const onScrollEnd = () => {
-      const w = panelWidth();
-      const i = Math.round(el.scrollLeft / w);
-      if (i === 0) {
-        el.scrollLeft = w * SLIDES.length; // 복제(마지막) → 진짜 마지막
-        setPos(SLIDES.length);
-      } else if (i === EXTENDED.length - 1) {
-        el.scrollLeft = w; // 복제(처음) → 진짜 처음
-        setPos(1);
-      }
-    };
-    el.addEventListener("scrollend", onScrollEnd);
-    return () => el.removeEventListener("scrollend", onScrollEnd);
-  }, []);
 
   const slide = SLIDES[(pos - 1 + SLIDES.length) % SLIDES.length];
 

@@ -1219,6 +1219,9 @@
     "nightBike": "大田公共自行车Tashu!实时告诉你哪里有空车。",
     "default": "需要什么就在菜单里选吧,我一直在这里!"
   },
+  "ggumsunGuide": {
+    "bubble": "翻译一下你想说的话吧!"
+  },
   "about": {
     "title": "关于大田",
     "subtitle": "写给初访者的大田指南",
