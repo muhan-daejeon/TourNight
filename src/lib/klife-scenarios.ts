@@ -23,9 +23,21 @@ export interface KScenarioStep {
   image?: string;
 }
 
+/** 첫 화면의 "이렇게 하세요 / 피하세요" 한 쌍 — 시나리오 전용 사진과 한 줄 문구 */
+export interface KDoDont {
+  do: { image: string; text: LText };
+  dont: { image: string; text: LText };
+}
+
 export interface KScenario {
   id: string;
   title: LText;
+  /**
+   * 첫 화면 Do/Don't. 있으면 이걸 쓰고, 없으면 주제(topic) 공용 에티켓
+   * 사진·문구(ETIQUETTE_ITEMS)로 대신한다 — 교통처럼 시나리오가 여럿인
+   * 상황은 버스·지하철·택시가 각자 다른 예절을 보여줘야 해서 따로 둔다
+   */
+  dodont?: KDoDont;
   /** 정확히 셋 — 화면 ②③④ */
   steps: [KScenarioStep, KScenarioStep, KScenarioStep];
   quiz: KQuiz[];
@@ -41,9 +53,14 @@ export interface KSituation {
 
 const SUBWAY: KScenario = {
   id: "subway",
+  dodont: {
+    do: { image: "/klife/subway-do.jpg", text: { ko: "임산부 배려석은 비어 있어도 필요한 사람을 위해 남겨두는 문화가 있어요.", en: "Priority seats for pregnant women are left empty even when free — it is the custom to keep them for those who need them.", ja: "妊婦優先席は空いていても、必要な人のために空けておく文化があります。", zh: "孕妇优先座即使空着，也习惯留给需要的人。" } },
+    dont: { image: "/klife/subway-dont.jpg", text: { ko: "사람들이 내리기 전에 먼저 지하철에 타려고 들어가지 마세요.", en: "Do not push in before people have gotten off the train.", ja: "降りる人が降り終わる前に乗り込まないでください。", zh: "请等乘客下车后再上车，不要抢先挤进去。" } },
+  },
   title: { ko: "지하철", en: "Subway", ja: "地下鉄", zh: "地铁" },
   steps: [
     {
+      image: "/klife/subway-step-1.jpg",
       title: {
         ko: "개찰구 통과 및 승차권 태그",
         en: "Tap in at the gate",
@@ -58,6 +75,7 @@ const SUBWAY: KScenario = {
       },
     },
     {
+      image: "/klife/subway-step-2.jpg",
       title: {
         ko: "에스컬레이터와 이동 방향 확인",
         en: "Check the direction before going down",
@@ -72,6 +90,7 @@ const SUBWAY: KScenario = {
       },
     },
     {
+      image: "/klife/subway-step-3.jpg",
       title: {
         ko: "교통약자 배려석 구분 (핑크/보라 의자)",
         en: "Priority seats: pink and purple",
@@ -142,9 +161,14 @@ const SUBWAY: KScenario = {
 
 const BUS: KScenario = {
   id: "bus",
+  dodont: {
+    do: { image: "/klife/bus-do.jpg", text: { ko: "교통카드는 내릴 때도 꼭 태그해주세요. 한국에서는 환승요금 계산에 필요해요.", en: "Tap your transit card when getting off too — Korea needs it to calculate transfer discounts.", ja: "降りるときも交通カードを必ずタッチしてください。韓国では乗り換え料金の計算に必要です。", zh: "下车时也一定要刷交通卡，韩国的换乘优惠需要它来计算。" } },
+    dont: { image: "/klife/bus-dont.jpg", text: { ko: "버스 안에서는 큰 소리로 통화하거나 영상을 소리 내어 보지 마세요.", en: "Do not talk loudly on the phone or play videos out loud on the bus.", ja: "バスの中で大声で通話したり、音を出して動画を見たりしないでください。", zh: "请勿在公交车上大声通话或外放视频。" } },
+  },
   title: { ko: "버스", en: "Bus", ja: "バス", zh: "公交车" },
   steps: [
     {
+      image: "/klife/bus-step-1.jpg",
       title: {
         ko: "탑승 시 요금 지불 및 승차 호선 확인",
         en: "Check the route and tap in",
@@ -159,6 +183,7 @@ const BUS: KScenario = {
       },
     },
     {
+      image: "/klife/bus-step-2.jpg",
       title: {
         ko: "교통약자 배려석 구분과 자리 양보",
         en: "Priority seats and giving up your seat",
@@ -173,6 +198,7 @@ const BUS: KScenario = {
       },
     },
     {
+      image: "/klife/bus-step-3.jpg",
       title: {
         ko: "하차 준비 및 벨 누르기",
         en: "Press the bell before your stop",
@@ -236,9 +262,14 @@ const BUS: KScenario = {
 
 const TAXI: KScenario = {
   id: "taxi",
+  dodont: {
+    do: { image: "/klife/taxi-do.jpg", text: { ko: "택시기사를 부를 때는 '기사님'이라는 호칭을 많이 사용해요. 이렇게 말해보세요 — \"안녕하세요, 기사님!\"", en: "Drivers are usually addressed as \"gisanim\" (기사님). Try saying: \"Annyeonghaseyo, gisanim!\"", ja: "運転手さんには「기사님（キサニム）」と呼びかけるのが一般的です。「안녕하세요, 기사님!」と言ってみましょう。", zh: "称呼司机时常用\"기사님\"（gisanim）。试着说：\"안녕하세요, 기사님!\"" } },
+    dont: { image: "/klife/taxi-dont.jpg", text: { ko: "한국에서는 택시요금 외에 별도의 팁을 주지 않아도 돼요.", en: "No tipping in Korea — you only pay the fare on the meter.", ja: "韓国ではタクシー料金のほかにチップを渡す必要はありません。", zh: "在韩国，除车费外不需要另付小费。" } },
+  },
   title: { ko: "택시", en: "Taxi", ja: "タクシー", zh: "出租车" },
   steps: [
     {
+      image: "/klife/taxi-step-1.jpg",
       title: {
         ko: "합법적인 영업용 택시 확인하기 (번호판 체크)",
         en: "Spot a licensed taxi by its plate",
@@ -253,6 +284,7 @@ const TAXI: KScenario = {
       },
     },
     {
+      image: "/klife/taxi-step-2.jpg",
       title: {
         ko: "탑승 및 목적지 전달 (결제 방식)",
         en: "Tell the driver where to go — and how you'll pay",
@@ -267,6 +299,7 @@ const TAXI: KScenario = {
       },
     },
     {
+      image: "/klife/taxi-step-3.jpg",
       title: {
         ko: "하차 시 소지품 확인",
         en: "Check your belongings before getting out",
@@ -340,9 +373,14 @@ const TAXI: KScenario = {
 
 const CONVENIENCE: KScenario = {
   id: "convenience",
+  dodont: {
+    do: { image: "/klife/convenience-do.jpg", text: { ko: "컵라면을 먹은 뒤 남은 국물은 전용 수거함에 버리고 용기는 분리해서 정리해주세요.", en: "After cup noodles, pour leftover soup into the designated bin and sort the container for recycling.", ja: "カップ麺を食べたあとの残り汁は専用の回収容器へ、容器は分別して片付けてください。", zh: "吃完杯面后，剩汤请倒入专用回收桶，容器分类整理。" } },
+    dont: { image: "/klife/convenience-dont.jpg", text: { ko: "외부 쓰레기를 편의점 쓰레기통에 버리지 마세요.", en: "Do not bring outside trash to throw away in the convenience store bin.", ja: "外から持ち込んだゴミをコンビニのゴミ箱に捨てないでください。", zh: "请勿把外面的垃圾丢进便利店的垃圾桶。" } },
+  },
   title: { ko: "편의점", en: "Convenience store", ja: "コンビニ", zh: "便利店" },
   steps: [
     {
+      image: "/klife/convenience-step-1.jpg",
       title: {
         ko: "24시간 연중무휴 이용",
         en: "Open 24/7, all year",
@@ -357,6 +395,7 @@ const CONVENIENCE: KScenario = {
       },
     },
     {
+      image: "/klife/convenience-step-2.jpg",
       title: {
         ko: "무인 계산대(키오스크) 이용 방법",
         en: "Using the self-checkout kiosk",
@@ -371,6 +410,7 @@ const CONVENIENCE: KScenario = {
       },
     },
     {
+      image: "/klife/convenience-step-3.jpg",
       title: {
         ko: "간편결제(네이버페이·카카오페이) 및 카드로 결제하기",
         en: "Pay by card or Naver Pay / Kakao Pay",
@@ -459,9 +499,14 @@ const CONVENIENCE: KScenario = {
 
 const RESTAURANT: KScenario = {
   id: "restaurant",
+  dodont: {
+    do: { image: "/klife/restaurant-do.jpg", text: { ko: "밑반찬은 무료로 더 주는 식당이 많으니, 부족하면 먹을 만큼만 추가로 요청해보세요.", en: "Side dishes (banchan) are usually refilled for free — ask for more, but only as much as you will eat.", ja: "おかず（パンチャン）は無料でおかわりできる店が多いので、足りなければ食べる分だけ頼んでみましょう。", zh: "很多餐厅的小菜可以免费续，不够时可以按能吃完的量再要。" } },
+    dont: { image: "/klife/restaurant-dont.jpg", text: { ko: "밥그릇에 젓가락이나 숟가락을 세워 꽂지 마세요. 한국에서는 제사상을 떠올리게 하는 행동이에요.", en: "Never stand chopsticks or a spoon upright in your rice bowl — in Korea it evokes a memorial rite for the dead.", ja: "ご飯にお箸やスプーンを立てないでください。韓国では法事（チェサ）を連想させる行為です。", zh: "请勿把筷子或勺子直插在饭碗里，在韩国这会让人联想到祭祀。" } },
+  },
   title: { ko: "식당", en: "Restaurant", ja: "食堂", zh: "餐厅" },
   steps: [
     {
+      image: "/klife/restaurant-step-1.jpg",
       title: {
         ko: "착석 및 메뉴 고르기 (테이블 주문 또는 메뉴판)",
         en: "Sit down and pick from the menu",
@@ -476,6 +521,7 @@ const RESTAURANT: KScenario = {
       },
     },
     {
+      image: "/klife/restaurant-step-2.jpg",
       title: {
         ko: "직원 부르기 (벨 누르기)",
         en: "Call the staff with the bell",
@@ -490,6 +536,7 @@ const RESTAURANT: KScenario = {
       },
     },
     {
+      image: "/klife/restaurant-step-3.jpg",
       title: {
         ko: "메뉴 주문 및 손가락으로 가리키기",
         en: "Order by pointing at the menu",
@@ -563,9 +610,14 @@ const RESTAURANT: KScenario = {
 
 const ONCHEON: KScenario = {
   id: "oncheon",
+  dodont: {
+    do: { image: "/klife/oncheon-do.jpg", text: { ko: "공용 족욕탕에 발을 담그기 전에는 발을 깨끗이 씻어주세요.", en: "Wash your feet thoroughly before putting them in a shared foot bath.", ja: "共用の足湯に足を入れる前に、足をきれいに洗ってください。", zh: "进入公共足浴池前，请先把脚洗干净。" } },
+    dont: { image: "/klife/oncheon-dont.jpg", text: { ko: "족욕탕 안에서 발을 씻거나 비누를 사용하는 행동은 피해주세요.", en: "Do not wash your feet or use soap inside the foot bath itself.", ja: "足湯の中で足を洗ったり、石けんを使ったりしないでください。", zh: "请勿在足浴池内洗脚或使用肥皂。" } },
+  },
   title: { ko: "온천·족욕", en: "Hot springs & foot baths", ja: "温泉・足湯", zh: "温泉·足浴" },
   steps: [
     {
+      image: "/klife/oncheon-step-1.jpg",
       title: {
         ko: "입장 전 탈의 및 철저한 샤워",
         en: "Undress and shower thoroughly first",
@@ -580,6 +632,7 @@ const ONCHEON: KScenario = {
       },
     },
     {
+      image: "/klife/oncheon-step-2.jpg",
       title: {
         ko: "탕 이용 예절 지키기",
         en: "Bath etiquette in the tub",
@@ -594,6 +647,7 @@ const ONCHEON: KScenario = {
       },
     },
     {
+      image: "/klife/oncheon-step-3.jpg",
       title: {
         ko: "족욕탕 이용 시 사전 세정 필수",
         en: "Wash your feet before the foot bath",
