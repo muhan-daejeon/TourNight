@@ -54,7 +54,8 @@ const MENU_GROUPS = [
   // 팀 피드백 구성: 코스 만들기(성향·AI·나만의) / 장소 소개 / 대전을 즐기기.
   // 인생네컷(콜라주)은 도장투어 페이지 하단으로 옮겨져 도장투어 항목이 겸한다
   { id: "course", labelKey: "groupCourse", items: ["personality", "courses"] },
-  { id: "places", labelKey: "groupPlaces", items: ["spots", "festivals", "food", "stay", "shopping"] },
+  // 시장·쇼핑은 '장소 소개'에서 뺐다 (팀 피드백). 주소(/shopping)는 살아 있다
+  { id: "places", labelKey: "groupPlaces", items: ["spots", "festivals", "food", "stay"] },
   { id: "enjoy", labelKey: "groupEnjoy", items: ["klife", "nightBike", "stampTour"] },
   // 소식 — About 대전을 맨 위로 (팀 피드백)
   { id: "community", labelKey: "groupCommunity", items: ["about", "community", "notices"] },

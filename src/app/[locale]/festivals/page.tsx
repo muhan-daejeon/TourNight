@@ -34,11 +34,12 @@ export default async function FestivalsPage({
         </p>
 
         {festivals.length === 0 ? (
-          <p className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-12 text-center text-sm text-slate-500">
+          <p className="mt-10 rounded-2xl border border-slate-200 bg-slate-100 px-4 py-12 text-center text-sm text-slate-500">
             {t("empty")}
           </p>
         ) : (
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          // 카드가 명소 탭과 같은 크기라 4열은 사진이 눌린다 — 3열까지만
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {festivals.map((f) => (
               <FestivalPoster key={f.contentId} spot={f} />
             ))}
