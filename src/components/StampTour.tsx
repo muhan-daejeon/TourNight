@@ -297,7 +297,8 @@ function PlacePickerModal({
             <p className="mt-3 text-xs text-slate-400">{t("browseLoading")}</p>
           ) : (
             <div className="mt-2 flex gap-2">
-              <div className="flex shrink-0 flex-col items-center gap-0.5">
+              {/* 색인은 목록이 길어 스크롤돼도 제자리에 붙어 있게 sticky */}
+              <div className="sticky top-2 flex shrink-0 flex-col items-center gap-0.5 self-start">
                 {sections.map((s) => (
                   <button
                     key={s.key}
@@ -316,10 +317,9 @@ function PlacePickerModal({
                   </button>
                 ))}
               </div>
-              <div
-                ref={listRef}
-                className="max-h-64 min-w-0 flex-1 overflow-y-auto rounded-xl border border-slate-200"
-              >
+              {/* 예전엔 테두리 친 상자 안에서 따로 스크롤했는데, 상자가 답답하다는
+                  피드백으로 뺐다 — 팝업 자체가 스크롤되니 그냥 나열한다 */}
+              <div ref={listRef} className="min-w-0 flex-1">
                 {sections.map((s) => (
                   <div
                     key={s.key}

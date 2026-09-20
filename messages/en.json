@@ -708,7 +708,9 @@
     "foodHours": "Hours",
     "foodRestDay": "Closed",
     "foodOnMap": "Also shown on the map with 🍴",
-    "foodNote": "Hours come from Korea Tourism Organization records and may differ late at night — please check before you go."
+    "foodNote": "Hours come from Korea Tourism Organization records and may differ late at night — please check before you go.",
+    "savedBanner": "You have a custom course from last time.",
+    "savedShow": "View again"
   },
   "tour": {
     "label": "Quick tour",
