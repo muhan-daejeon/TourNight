@@ -343,7 +343,7 @@ export default function Header() {
                         : dimmedByTour
                           ? "font-light text-slate-300"
                           : groupActive
-                            ? "font-light text-indigo-600"
+                            ? "font-display text-indigo-600"
                             : "font-light text-slate-700 hover:text-indigo-600"
                     }`}
                   >
