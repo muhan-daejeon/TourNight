@@ -65,8 +65,17 @@ export default function KLifeScenario({
     };
   }, [onClose]);
 
-  const images = ETIQUETTE_ITEMS[situation.topic];
-  const captions = t.raw(`items.${situation.topic}`) as { dos: string[]; donts: string[] };
+  // 첫 화면 Do/Don't — 시나리오 전용(dodont)이 있으면 그걸, 없으면 주제 공용
+  // 에티켓 사진·문구로. 교통은 버스·지하철·택시가 각자 다른 예절을 보여준다
+  const topicImages = ETIQUETTE_ITEMS[situation.topic];
+  const topicCaptions = t.raw(`items.${situation.topic}`) as { dos: string[]; donts: string[] };
+  const dd = scenario.dodont;
+  const dos = dd
+    ? { images: [{ image: dd.do.image, caption: dd.do.text[locale] }], captions: [dd.do.text[locale]] }
+    : { images: topicImages?.dos ?? [], captions: topicCaptions?.dos ?? [] };
+  const donts = dd
+    ? { images: [{ image: dd.dont.image, caption: dd.dont.text[locale] }], captions: [dd.dont.text[locale]] }
+    : { images: topicImages?.donts ?? [], captions: topicCaptions?.donts ?? [] };
   // 교통처럼 한 상황에 시나리오가 여럿이면 "교통 · 지하철"로, 아니면 이름 하나만
   const multi = situation.scenarios.length > 1;
   const stepIndex = screen - 1; // 화면 1~3 → steps[0..2]
@@ -101,20 +110,20 @@ export default function KLifeScenario({
         <div className="w-full max-w-5xl">
           {screen === 0 && (
             <div key="intro">
-              {/* 이렇게 하세요 / 피하세요 — 에티켓 사진·문구 그대로. 제목은 두지
+              {/* 이렇게 하세요 / 피하세요 — 시나리오 사진·문구. 제목은 두지
                   않는다(상단 바에 이미 있고, 작은 창에서 잘려 보였다) */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <DoDontSlider
                   title={t("dos")}
-                  images={images?.dos ?? []}
-                  captions={captions?.dos ?? []}
+                  images={dos.images}
+                  captions={dos.captions}
                   tone="emerald"
                   Icon={Check}
                 />
                 <DoDontSlider
                   title={t("donts")}
-                  images={images?.donts ?? []}
-                  captions={captions?.donts ?? []}
+                  images={donts.images}
+                  captions={donts.captions}
                   tone="rose"
                   Icon={X}
                 />
