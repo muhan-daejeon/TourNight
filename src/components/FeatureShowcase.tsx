@@ -14,7 +14,7 @@ import { Link } from "@/i18n/navigation";
  * 전환이 느껴지면 안 된다). 모바일은 스와이프.
  * 기능마다 대전 CI 색 하나를 포인트로 쓴다 (파랑·초록·주황).
  *
- * 세 번째(K-Life 가이드) 다음에 다시 첫 번째로, 첫 번째 이전에 다시 세
+ * 세 번째(네컷사진) 다음에 다시 첫 번째로, 첫 번째 이전에 다시 세
  * 번째로 — 끊기지 않고 계속 이어지도록 돈다. 실제 3장 앞뒤에 마지막·처음
  * 장을 하나씩 복제해 두고([복제(3) 1 2 3 복제(1)]), 복제 장에 스크롤이
  * 멎으면 애니메이션 없이 그에 대응하는 진짜 장으로 순간 이동시켜 — 사용자
@@ -30,10 +30,12 @@ const SLIDES: {
   cta: string; // 바로가기 글자색
   image: string; // 슬라이드 대표 이미지
 }[] = [
-  { key: 1, href: "/personality", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/test3.png" },
-  { key: 2, href: "/stamp-tour", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/picture.png" },
+  // K-Life 가이드가 첫 장 — 홈에 들어오면 이 기능부터 보이게 (팀 피드백).
+  // key는 문구(enjoy1·2·3)를 찾는 번호라 순서를 바꿔도 그대로 둔다.
   // K-Life 카드는 통합 페이지(/etiquette)로 — 이미지는 팀 디자인 유지
   { key: 3, href: "/etiquette", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/klife.jpg" },
+  { key: 1, href: "/personality", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/test3.png" },
+  { key: 2, href: "/stamp-tour", bar: "bg-daejeon-orange", cta: "text-daejeon-orange", image: "/picture.png" },
 ];
 
 const GAP = 12; // gap-3 — 스크롤 한 걸음 계산에 쓴다
