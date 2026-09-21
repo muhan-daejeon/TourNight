@@ -613,7 +613,8 @@
       "invalid_credentials": "メールアドレスまたはパスワードが正しくありません。",
       "oauth": "Googleログインに失敗しました。もう一度お試しください。",
       "generic": "しばらくしてからもう一度お試しください。"
-    }
+    },
+    "loginRequiredNotice": "ログイン後にご利用ください。"
   },
   "nightInfo": {
     "sunset": "今日の日没",

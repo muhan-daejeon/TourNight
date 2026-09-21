@@ -613,7 +613,8 @@
       "invalid_credentials": "Incorrect email or password.",
       "oauth": "Google sign-in failed. Please try again.",
       "generic": "Please try again later."
-    }
+    },
+    "loginRequiredNotice": "Please log in to use this feature."
   },
   "nightInfo": {
     "sunset": "Sunset today",

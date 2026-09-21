@@ -31,7 +31,11 @@ export default async function middleware(request: NextRequest) {
     const token = request.cookies.get(SESSION_COOKIE)?.value;
     const session = await verifySession(token);
     if (!session) {
-      return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
+      // 어디서 왔는지 넘긴다 — 로그인 화면이 "로그인 후 이용해 주세요" 안내를 띄우고,
+      // 로그인이 끝나면 홈이 아니라 원래 가려던 화면으로 돌려보낸다
+      const login = new URL(`/${locale}/login`, request.url);
+      login.searchParams.set("next", rest + request.nextUrl.search);
+      return NextResponse.redirect(login);
     }
   }
 

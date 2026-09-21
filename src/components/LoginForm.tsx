@@ -10,8 +10,11 @@ const fieldClass =
 
 export default function LoginForm({
   oauthError = false,
+  next = null,
 }: {
   oauthError?: boolean;
+  /** 로그인 필요 화면에서 튕겨 왔을 때 돌아갈 경로 (로케일 없이, 예: "/stamp-tour") */
+  next?: string | null;
 }) {
   const t = useTranslations("auth");
   const locale = useLocale();
@@ -52,7 +55,7 @@ export default function LoginForm({
       // router.refresh()는 "현재 라우트"의 캐시만 지우므로 이동 대상에는 소용없다.
       // 전체 이동으로 미들웨어를 새로 태우고 캐시를 우회한다.
       // ?skipIntro=1 — 로그인 직후엔 인트로가 다시 뜨지 않아야 한다 (IntroSequence 참고)
-      window.location.assign(`/${locale}?skipIntro=1`);
+      window.location.assign(next ? `/${locale}${next}` : `/${locale}?skipIntro=1`);
     } catch {
       setError(errorText("generic"));
     } finally {
