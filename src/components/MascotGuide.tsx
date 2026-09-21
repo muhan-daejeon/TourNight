@@ -117,33 +117,18 @@ export default function MascotGuide() {
 
   return (
     <>
-      {/* 도킹된 모습 — 우측 하단, 말풍선 + 우주선 탄 모습 */}
-      {(!ggumsunMinimized || !ggumdolMinimized) && (
-        <div className="pointer-events-none fixed bottom-5 right-5 z-[60] flex flex-row items-end gap-3">
-          {/* 꿈순이 — 꿈돌이보다 0.7배 작게, 같은 바닥(아래쪽 기준 정렬)에 떠 있다.
-              말풍선은 페이지와 상관없이 항상 같은 문구 */}
-          {!ggumsunMinimized && (
-            <div className="flex flex-col items-end gap-2">
-              {!ggumsunLeaving && (
-                <div className="tn-bubble pointer-events-auto relative max-w-[200px] rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-[12px] leading-relaxed text-slate-700 shadow-[0_8px_28px_rgba(15,23,42,0.14)]">
-                  {tGgumsun("bubble")}
-                  <button
-                    type="button"
-                    onClick={minimizeGgumsun}
-                    aria-label="close"
-                    className="absolute -right-1.5 -top-1.5 rounded-full border border-slate-200 bg-white p-1 text-slate-400 shadow transition hover:text-slate-700"
-                  >
-                    <X size={10} />
-                  </button>
-                  <span className="absolute -bottom-1.5 right-6 h-2.5 w-2.5 rotate-45 border-b border-r border-slate-200 bg-white" />
-                </div>
-              )}
-
+      {/* 꿈순이 — 화면 왼쪽 하단에 따로 뜬다(꿈돌이 옆에 붙여 두면 둘이
+          겹쳐 보인다는 피드백). 말풍선은 페이지와 상관없이 항상 같은 문구 */}
+      {!ggumsunMinimized && (
+        <div className="pointer-events-none fixed bottom-5 left-5 z-[60] flex flex-col items-start gap-2">
+          {!ggumsunLeaving && (
+            <div className="tn-bubble pointer-events-auto relative max-w-[200px] rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-[12px] leading-relaxed text-slate-700 shadow-[0_8px_28px_rgba(15,23,42,0.14)]">
+              {tGgumsun("bubble")}
               <button
                 type="button"
-                onClick={() => setPopupOpen(true)}
-                className={`pointer-events-auto cursor-pointer ${ggumsunLeaving ? "tn-fly-out" : "tn-float"}`}
-                aria-label="꿈순이"
+                onClick={minimizeGgumsun}
+                aria-label="close"
+                className="absolute -right-1.5 -top-1.5 rounded-full border border-slate-200 bg-white p-1 text-slate-400 shadow transition hover:text-slate-700"
               >
                 <Image
                   src="/menu-panel/ggumsun-space1.png"
@@ -153,94 +138,113 @@ export default function MascotGuide() {
                   priority
                   className="h-auto w-[4.2rem] drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-[4.9rem]"
                 />
+                <X size={10} />
               </button>
+              <span className="absolute -bottom-1.5 left-6 h-2.5 w-2.5 rotate-45 border-b border-r border-slate-200 bg-white" />
             </div>
           )}
 
-          {/* 꿈돌이 — 페이지마다 문구가 바뀐다 */}
-          {!ggumdolMinimized && (
-            <div className="flex flex-col items-end gap-2">
-              {!ggumdolLeaving && (
-                <div
-                  key={guideKey(pathname)}
-                  className="tn-bubble pointer-events-auto relative max-w-[240px] rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] leading-relaxed text-slate-700 shadow-[0_8px_28px_rgba(15,23,42,0.14)]"
-                >
-                  {t(guideKey(pathname))}
-                  <button
-                    type="button"
-                    onClick={minimizeGgumdol}
-                    aria-label="close"
-                    className="absolute -right-1.5 -top-1.5 rounded-full border border-slate-200 bg-white p-1 text-slate-400 shadow transition hover:text-slate-700"
-                  >
-                    <X size={11} />
-                  </button>
-                  {/* 꼬리 */}
-                  <span className="absolute -bottom-1.5 right-8 h-3 w-3 rotate-45 border-b border-r border-slate-200 bg-white" />
-                </div>
-              )}
-
-              {/* 홈에서는 꿈돌이를 누르면 온보딩 둘러보기가 재생된다 (마이페이지
-                  '둘러보기 다시 보기'와 동일 동작 - ?tour=start) */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (guideKey(pathname) === "home") router.push("/?tour=start");
-                }}
-                className={`pointer-events-auto ${ggumdolLeaving ? "tn-fly-out" : "tn-float"} ${guideKey(pathname) === "home" ? "cursor-pointer" : "cursor-default"}`}
-                aria-label="꿈돌이"
-              >
-                <Image
-                  src="/menu-panel/ggumdol-space.png"
-                  alt="꿈돌이"
-                  width={560}
-                  height={418}
-                  priority
-                  className="h-auto w-24 drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-28"
-                />
-              </button>
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={() => setPopupOpen(true)}
+            className={`pointer-events-auto cursor-pointer ${ggumsunLeaving ? "tn-fly-out-left" : "tn-float"}`}
+            aria-label="꿈순이"
+          >
+            <Image
+              src="/menu-panel/ggumsun-space.png"
+              alt="꿈순이"
+              width={584}
+              height={486}
+              priority
+              className="h-auto w-[4.2rem] drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-[4.9rem]"
+            />
+          </button>
         </div>
       )}
 
-      {/* 접힌 모습 — 화면 세로 중앙, 오른쪽 끝. 꿈순이가 위, 꿈돌이가 그 바로
-          아래로 겹치지 않게 쌓인다. 눌러서 원래 자리로 되돌릴 수 있다 */}
-      {(ggumsunMinimized || ggumdolMinimized) && (
-        <div className="pointer-events-none fixed right-0 top-1/2 z-[60] flex -translate-y-1/2 flex-col items-end gap-2">
-          {ggumsunMinimized && (
-            <button
-              type="button"
-              onClick={() => setGgumsunMinimized(false)}
-              aria-label="꿈순이"
-              className="tn-fly-in pointer-events-auto"
+      {/* 꿈돌이 — 우측 하단, 페이지마다 문구가 바뀐다 */}
+      {!ggumdolMinimized && (
+        <div className="pointer-events-none fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-2">
+          {!ggumdolLeaving && (
+            <div
+              key={guideKey(pathname)}
+              className="tn-bubble pointer-events-auto relative max-w-[240px] rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[13px] leading-relaxed text-slate-700 shadow-[0_8px_28px_rgba(15,23,42,0.14)]"
             >
-              <Image
-                src="/menu-panel/ggumsun-mini.png"
-                alt="꿈순이"
-                width={385}
-                height={437}
-                priority
-                className="h-auto w-14 drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-16"
-              />
-            </button>
+              {t(guideKey(pathname))}
+              <button
+                type="button"
+                onClick={minimizeGgumdol}
+                aria-label="close"
+                className="absolute -right-1.5 -top-1.5 rounded-full border border-slate-200 bg-white p-1 text-slate-400 shadow transition hover:text-slate-700"
+              >
+                <X size={11} />
+              </button>
+              {/* 꼬리 */}
+              <span className="absolute -bottom-1.5 right-8 h-3 w-3 rotate-45 border-b border-r border-slate-200 bg-white" />
+            </div>
           )}
-          {ggumdolMinimized && (
-            <button
-              type="button"
-              onClick={() => setGgumdolMinimized(false)}
-              aria-label="꿈돌이"
-              className="tn-fly-in pointer-events-auto"
-            >
-              <Image
-                src="/menu-panel/ggumdol-mini.png"
-                alt="꿈돌이"
-                width={405}
-                height={464}
-                priority
-                className="h-auto w-14 drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-16"
-              />
-            </button>
-          )}
+
+          {/* 홈에서는 꿈돌이를 누르면 온보딩 둘러보기가 재생된다 (마이페이지
+              '둘러보기 다시 보기'와 동일 동작 - ?tour=start) */}
+          <button
+            type="button"
+            onClick={() => {
+              if (guideKey(pathname) === "home") router.push("/?tour=start");
+            }}
+            className={`pointer-events-auto ${ggumdolLeaving ? "tn-fly-out" : "tn-float"} ${guideKey(pathname) === "home" ? "cursor-pointer" : "cursor-default"}`}
+            aria-label="꿈돌이"
+          >
+            <Image
+              src="/menu-panel/ggumdol-space.png"
+              alt="꿈돌이"
+              width={560}
+              height={418}
+              priority
+              className="h-auto w-24 drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-28"
+            />
+          </button>
+        </div>
+      )}
+
+      {/* 접힌 모습 — 꿈순이는 화면 왼쪽, 꿈돌이는 오른쪽 끝(둘 다 세로 중앙)
+          으로 각자 접힌다 — 도킹된 자리와 같은 쪽으로 접혀야 자연스럽다.
+          눌러서 원래 자리로 되돌릴 수 있다 */}
+      {ggumsunMinimized && (
+        <div className="pointer-events-none fixed left-0 top-1/2 z-[60] -translate-y-1/2">
+          <button
+            type="button"
+            onClick={() => setGgumsunMinimized(false)}
+            aria-label="꿈순이"
+            className="tn-fly-in-left pointer-events-auto"
+          >
+            <Image
+              src="/menu-panel/ggumsun-mini.png"
+              alt="꿈순이"
+              width={385}
+              height={437}
+              priority
+              className="h-auto w-14 drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-16"
+            />
+          </button>
+        </div>
+      )}
+      {ggumdolMinimized && (
+        <div className="pointer-events-none fixed right-0 top-1/2 z-[60] -translate-y-1/2">
+          <button
+            type="button"
+            onClick={() => setGgumdolMinimized(false)}
+            aria-label="꿈돌이"
+            className="tn-fly-in pointer-events-auto"
+          >
+            <Image
+              src="/menu-panel/ggumdol-mini.png"
+              alt="꿈돌이"
+              width={405}
+              height={464}
+              priority
+              className="h-auto w-14 drop-shadow-[0_10px_20px_rgba(15,23,42,0.25)] sm:w-16"
+            />
+          </button>
         </div>
       )}
 
@@ -264,6 +268,16 @@ export default function MascotGuide() {
         .tn-fly-in { animation: tn-fly-in ${FLY_MS}ms ease-out; }
         @keyframes tn-fly-in {
           from { transform: translateX(30px) scale(0.7); opacity: 0; }
+          to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        /* 꿈순이는 왼쪽에 떠 있으니, 접히고 펴지는 방향도 왼쪽 기준으로 뒤집는다 */
+        .tn-fly-out-left { animation: tn-fly-out-left ${FLY_MS}ms ease-in forwards; }
+        @keyframes tn-fly-out-left {
+          to { transform: translate(-60px, -140px) scale(0.35); opacity: 0; }
+        }
+        .tn-fly-in-left { animation: tn-fly-in-left ${FLY_MS}ms ease-out; }
+        @keyframes tn-fly-in-left {
+          from { transform: translateX(-30px) scale(0.7); opacity: 0; }
           to { transform: translateX(0) scale(1); opacity: 1; }
         }
       `}</style>

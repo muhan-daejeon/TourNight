@@ -243,3 +243,16 @@ body {
   text-transform: uppercase;
   color: rgb(38 142 117); /* 대전 그린(2413C)의 대비 보정 톤 */
 }
+
+/* ── 제목 서체: Gmarket Sans Bold (layout.tsx의 --font-display) ──
+   서울의 밤 포털처럼 제목만 굵고 꽉 차게, 본문·메뉴는 Pretendard 그대로.
+   굵기가 700 하나뿐이라 font-black 같은 유틸리티가 얹혀도 합성 볼드가
+   생기지 않게 700으로 고정한다 */
+.font-display,
+h1,
+h2 {
+  font-family: var(--font-display), "Pretendard Variable", Pretendard, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-synthesis: none;
+}

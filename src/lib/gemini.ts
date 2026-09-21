@@ -13,14 +13,33 @@ const BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
  * 내부 추론(thinking)을 낮춘다.
  *
  * 여기서 시키는 일은 주어진 후보 목록에서 고르고 정해진 형식으로 문장을 쓰는
- * 수준이라 깊은 추론이 필요 없다. 2.5 계열까지는 thinkingBudget(토큰 수)으로
- * 껐는데(budget: 0), Gemini 3 계열(현재 모델)은 이 필드를 거부한다(400
- * INVALID_ARGUMENT) — 대신 thinkingLevel(minimal/low/…) 열거값을 쓴다.
+ * 수준이라 깊은 추론이 필요 없다. 어떤 필드로 끄는지는 모델 세대마다 다르다 —
+ * 2.5 계열과 flash-latest 는 thinkingBudget(토큰 수, 0), Gemini 3 계열은
+ * thinkingLevel(minimal/low/…) 열거값. 맞지 않는 쪽을 보내면 400
+ * INVALID_ARGUMENT("Thinking level is not supported")로 호출 전체가 죽는다 —
+ * 실제로 모델을 2.5로 되돌린 뒤 thinkingLevel 이 남아 있어 서바이벌 한국어·
+ * AI 코스·스팟 가이드가 캐시 없는 요청마다 전부 실패했다. 그래서 모델 이름으로
+ * 고르고, 그래도 400 이 나면 geminiFetch 가 이 옵션을 빼고 한 번 더 부른다.
  *
  * 실측(2.5-flash 기준, 코스 설계 프롬프트, 3회): 켬 9.7~13.0초 → 끔 2.4~3.0초.
  * 같은 후보·같은 순서·환각 없음으로 결과 품질 차이는 없었다.
  */
-const NO_THINKING = { thinkingConfig: { thinkingLevel: "minimal" } };
+const NO_THINKING = /^gemini-3/.test(MODEL)
+  ? { thinkingConfig: { thinkingLevel: "minimal" } }
+  : { thinkingConfig: { thinkingBudget: 0 } };
+
+/** 400 응답이 thinking 옵션 때문이면 그 옵션만 뺀 요청 본문을 돌려준다 (아니면 null) */
+function withoutThinking(init: RequestInit, errorBody: string): RequestInit | null {
+  if (!/thinking/i.test(errorBody) || typeof init.body !== "string") return null;
+  try {
+    const body = JSON.parse(init.body);
+    if (!body?.generationConfig?.thinkingConfig) return null;
+    delete body.generationConfig.thinkingConfig;
+    return { ...init, body: JSON.stringify(body) };
+  } catch {
+    return null;
+  }
+}
 
 /** 응답이 없을 때 무한정 기다리지 않도록 하는 상한 */
 const GEMINI_TIMEOUT_MS = 20_000;
@@ -49,6 +68,16 @@ async function geminiFetch(
     if ((res.status === 429 || res.status >= 500) && attempt === 1) {
       await new Promise((r) => setTimeout(r, 800));
       return geminiFetch(url, init, 2);
+    }
+    // 모델이 thinking 옵션을 거부하면(세대가 안 맞음) 옵션 없이 한 번 더 —
+    // 느려질 뿐 결과는 같으므로 통째로 실패하는 것보다 낫다
+    if (res.status === 400 && attempt === 1) {
+      const text = await res.clone().text();
+      const retry = withoutThinking(init, text);
+      if (retry) {
+        console.warn("[gemini] thinking 옵션 거부됨 → 옵션 없이 재시도:", text.slice(0, 120));
+        return geminiFetch(url, retry, 2);
+      }
     }
     return res;
   } catch (err) {

@@ -54,7 +54,8 @@ const MENU_GROUPS = [
   // 팀 피드백 구성: 코스 만들기(성향·AI·나만의) / 장소 소개 / 대전을 즐기기.
   // 인생네컷(콜라주)은 도장투어 페이지 하단으로 옮겨져 도장투어 항목이 겸한다
   { id: "course", labelKey: "groupCourse", items: ["personality", "courses"] },
-  { id: "places", labelKey: "groupPlaces", items: ["spots", "festivals", "food", "stay", "shopping"] },
+  // 시장·쇼핑은 '장소 소개'에서 뺐다 (팀 피드백). 주소(/shopping)는 살아 있다
+  { id: "places", labelKey: "groupPlaces", items: ["spots", "festivals", "food", "stay"] },
   { id: "enjoy", labelKey: "groupEnjoy", items: ["klife", "nightBike", "stampTour"] },
   // 소식 — About 대전을 맨 위로 (팀 피드백)
   { id: "community", labelKey: "groupCommunity", items: ["about", "community", "notices"] },
@@ -283,7 +284,12 @@ export default function Header() {
         <nav
           onMouseEnter={openMenu}
           onMouseLeave={scheduleCloseMenu}
-          className="hidden xl:absolute xl:left-1/2 xl:top-1/2 xl:flex xl:-translate-x-1/2 xl:-translate-y-1/2 xl:flex-nowrap xl:gap-x-24 2xl:gap-x-40"
+          // 예전엔 absolute + left-1/2 로 화면 정중앙에 고정했는데, 1536px 부근
+          // (2xl 간격이 켜지는 폭)에서 메뉴 전체 폭이 로고 자리까지 번져 "코스
+          // 만들기"가 로고 위에 겹쳤다. 로고와 우측 버튼 사이 남는 자리(flex-1)
+          // 안에서 가운데 정렬하면 폭이 얼마든 서로 침범할 수 없다 — 정확한
+          // 화면 중앙에서 몇 px 벗어나는 대신 절대 겹치지 않는 쪽을 택했다
+          className="hidden min-w-0 xl:flex xl:flex-1 xl:flex-nowrap xl:items-center xl:justify-center xl:gap-x-12 xl:px-4 2xl:gap-x-20"
         >
           {MENU_GROUPS.map((group, i) => {
             const groupActive = group.items.some((key) => isActive(findNavItem(key).href));
@@ -343,7 +349,7 @@ export default function Header() {
                         : dimmedByTour
                           ? "font-light text-slate-300"
                           : groupActive
-                            ? "font-light text-indigo-600"
+                            ? "font-display text-indigo-600"
                             : "font-light text-slate-700 hover:text-indigo-600"
                     }`}
                   >
@@ -368,10 +374,9 @@ export default function Header() {
           })}
         </nav>
 
-        {/* nav는 absolute + left-1/2로 화면 중앙에 스스로 고정되지, 이 그룹의
-            폭과는 무관하다 — 그러니 ml-auto는 모든 폭에서 그대로 둬야
-            이 그룹이 계속 오른쪽 끝에 붙는다. xl 이상에서 ml-auto를 껐더니
-            이 그룹 전체가 로고 바로 옆(왼쪽)으로 붙어버리는 회귀가 있었다 */}
+        {/* xl 미만(nav 숨김)에서는 ml-auto 가 이 그룹을 오른쪽 끝에 붙인다.
+            xl 이상에서는 nav 가 flex-1 로 가운데 남는 폭을 다 차지하므로
+            ml-auto 는 있으나 없으나 같다 */}
         <div className="ml-auto flex shrink-0 items-center gap-3 xl:mr-6 2xl:mr-10">
           {/* 콜라주 만들기(꿈돌이와 한컷)는 도장투어 with 꿈돌이 페이지 하단으로
               옮겼다 — 자유 업로드 대신 도장 4개를 다 찍은 사진으로 채우는

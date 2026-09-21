@@ -221,8 +221,8 @@
     "editSavedNote": "修改后的路线会保存在此浏览器，刷新后依然在。"
   },
   "etiquette": {
-    "title": "夜间礼仪",
-    "subtitle": "正确畅享大田之夜 - 请选择场景",
+    "title": "K-Life指南",
+    "subtitle": "提前体验韩国日常场景的礼仪与使用指南 - 请选择场景",
     "error": "请稍后再试。",
     "phrasesTitle": "生存韩语",
     "phrasesSubtitle": "搜索你想说的话，我们告诉你对应的韩语表达",
@@ -708,7 +708,9 @@
     "foodHours": "营业时间",
     "foodRestDay": "休息日",
     "foodOnMap": "地图上也以🍴标示",
-    "foodNote": "以上为韩国观光公社登记信息。深夜营业情况可能不同，请在前往前确认。"
+    "foodNote": "以上为韩国观光公社登记信息。深夜营业情况可能不同，请在前往前确认。",
+    "savedBanner": "您上次创建的定制路线还在。",
+    "savedShow": "再次查看"
   },
   "tour": {
     "label": "快速导览",

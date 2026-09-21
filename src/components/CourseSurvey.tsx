@@ -84,12 +84,22 @@ interface SurveyCourse extends Course {
  */
 const SURVEY_COURSE_KEY = "tournight:surveyCourse:v1";
 
-function loadSurveyCourse(locale: string): SurveyCourse | null {
+/**
+ * localStorage는 브라우저 단위라 계정과 무관하게 남는다 — 다른 계정으로
+ * 로그인했거나 로그아웃한 상태에서 남의(또는 예전) 코스가 "지난번에 만든
+ * 코스"로 뜨는 문제가 있어, 만든 사람의 userId를 같이 적고 같은 사람일 때만 꺼낸다.
+ */
+function loadSurveyCourse(locale: string, userId: number): SurveyCourse | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(SURVEY_COURSE_KEY);
     if (!raw) return null;
-    const saved = JSON.parse(raw) as { locale?: string; course?: SurveyCourse };
+    const saved = JSON.parse(raw) as {
+      locale?: string;
+      userId?: number;
+      course?: SurveyCourse;
+    };
+    if (saved.userId !== userId) return null;
     // 언어를 바꾼 뒤 예전 언어로 된 코스를 보여주면 어색하다
     if (saved.locale !== locale) return null;
     return saved.course?.stops?.length ? saved.course : null;
@@ -98,11 +108,13 @@ function loadSurveyCourse(locale: string): SurveyCourse | null {
   }
 }
 
-function saveSurveyCourse(locale: string, course: SurveyCourse) {
+function saveSurveyCourse(locale: string, userId: number | null, course: SurveyCourse) {
+  // 누가 만들었는지 모르면 남기지 않는다 — 다음에 누구에게 보여줄지 정할 수 없다
+  if (userId === null) return;
   try {
     window.localStorage.setItem(
       SURVEY_COURSE_KEY,
-      JSON.stringify({ locale, course }),
+      JSON.stringify({ locale, userId, course }),
     );
   } catch {
     // 용량 초과·프라이빗 모드 — 저장만 실패하고 화면은 그대로 동작한다
@@ -159,14 +171,33 @@ export default function CourseSurvey({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [course, setCourse] = useState<SurveyCourse | null>(null);
+  // 지난번에 만든 코스 — 자동으로 펼치지 않고 "다시 보기" 버튼 뒤에 둔다.
+  // 설문을 건드리기도 전에 결과가 떠 있으면 기본 코스처럼 오해된다는 피드백
+  const [savedCourse, setSavedCourse] = useState<SurveyCourse | null>(null);
 
-  // 지난번에 만든 코스 되살리기 — 마운트 후에만 localStorage를 읽어
-  // 서버 렌더와 첫 클라이언트 렌더를 일치시킨다 (hydration 안전)
+  // 현재 로그인 사용자 id — 저장한 코스를 누구에게 보여줄지 가르는 기준.
+  // 코스 생성 자체가 로그인 필수라, 없으면 저장도 복원도 하지 않는다
+  const [meId, setMeId] = useState<number | null>(null);
+
+  // 마운트 후 로그인 사용자를 확인한 뒤에야 localStorage를 읽는다 — 서버
+  // 렌더와 첫 클라이언트 렌더를 일치시키고(hydration 안전), 남의 코스를
+  // 꺼내지 않는다
   useEffect(() => {
-    const saved = loadSurveyCourse(locale);
-    // 외부 저장소 동기화라 마운트 직후 한 번의 재렌더는 의도된 것
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (saved) setCourse(saved);
+    let cancelled = false;
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d: { user?: { id: number } | null }) => {
+        if (cancelled) return;
+        const id = d.user?.id ?? null;
+        setMeId(id);
+        setSavedCourse(id === null ? null : loadSurveyCourse(locale, id));
+      })
+      .catch(() => {
+        if (!cancelled) setSavedCourse(null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [locale]);
   const [mode, setMode] = useState<MapMode>("best");
 
@@ -235,7 +266,8 @@ export default function CourseSurvey({
       if (!res.ok) throw new Error();
       const data = await res.json();
       setCourse(data.course);
-      saveSurveyCourse(locale, data.course); // 새로 만든 코스로 교체 저장
+      setSavedCourse(null); // 새 결과가 떠 있으니 "다시 보기" 안내는 접는다
+      saveSurveyCourse(locale, meId, data.course); // 새로 만든 코스로 교체 저장
       // 이동 수단을 고른 대로 지도에도 맞춰 준다
       setMode(transport);
     } catch {
@@ -445,6 +477,22 @@ export default function CourseSurvey({
           </p>
         )}
       </div>
+
+      {savedCourse && !course && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/50 bg-amber-50 px-5 py-4">
+          <p className="text-sm text-slate-700">{t("savedBanner")}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setCourse(savedCourse);
+              setSavedCourse(null);
+            }}
+            className="rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-amber-600"
+          >
+            {t("savedShow")}
+          </button>
+        </div>
+      )}
 
       {course && (
         <SurveyResult
