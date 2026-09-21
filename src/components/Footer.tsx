@@ -87,7 +87,13 @@ export default function Footer() {
           {/* 공모전 FAQ 지정 형식의 관광데이터 출처 표기 (텍스트만 허용, 로고 사용 금지) */}
           <p className="mt-1.5 text-[11px] text-slate-400">
             관광정보 출처: ⓒ한국관광공사 · 대중교통: 국토교통부 · 천문:
-            한국천문연구원·ODsay Lab·SK Tmap·Kakao 지도·대전교통공사·기상청·대전관광공사
+            한국천문연구원 · 날씨: 기상청
+          </p>
+          {/* 그 밖의 데이터·API 제공처 — 각 이용약관과 공공누리 출처표시 의무 */}
+          <p className="mt-1 text-[11px] text-slate-400">
+            지도: Kakao · 경로: SK open API TMAP · ODsay LAB · 공공자전거:
+            대전교통공사(타슈) · 캐릭터: 대전관광공사(꿈씨패밀리) · AI: Google
+            Gemini
           </p>
           {/* 공공누리 1유형 출처표시 의무 이행 */}
           <p className="mt-1 text-[11px] text-slate-400">
