@@ -35,7 +35,8 @@
     "groupEnjoy": "대전을 즐겨봐요",
     "about": "About 대전",
     "notices": "공지사항",
-    "saved": "찜 모아보기"
+    "saved": "찜 모아보기",
+    "savedShort": "찜"
   },
   "home": {
     "heroTitle": "오늘 밤, TourNight",
