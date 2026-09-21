@@ -210,7 +210,7 @@ export default function MascotGuide() {
             className="tn-fly-in-left pointer-events-auto"
           >
             <Image
-              src="/menu-panel/ggumsun-mini.png"
+              src="/menu-panel/ggumsun-mini1.png"
               alt="꿈순이"
               width={385}
               height={437}
