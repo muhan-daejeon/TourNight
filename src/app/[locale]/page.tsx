@@ -197,7 +197,7 @@ export default async function HomePage({
                       href="/community"
                       className="group flex items-start gap-3 rounded-xl p-1.5 transition hover:bg-slate-50"
                     >
-                      <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-[11px] font-extrabold text-white">
+                      <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md bg-daejeon-orange text-[11px] font-extrabold text-white">
                         {i + 1}
                       </span>
                       <div className="min-w-0 flex-1">
