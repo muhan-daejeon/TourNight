@@ -11,11 +11,11 @@ const intlMiddleware = createMiddleware(routing);
 // 사람이든 아무 메뉴나 눌렀는데 로그인부터 요구받는 건 서비스를 보기도 전에
 // 문을 닫는 셈이었다. 명소·맛집·축제·K-Life·성향 테스트·타슈는 계정 데이터를
 // 쓰지 않으니 연다. 커뮤니티는 읽기는 공개, 글쓰기만 API 가 401 로 막는다.
-// AI 코스도 화면은 열고 "만들기"를 누를 때 401 → 로그인 안내가 뜬다.
 //
 // 네컷 사진은 고른 장소·도장 사진이 계정에 남아 로그인 없이는 시작할 수 없고,
-// 찜 모아보기·프로필·관리자는 계정 그 자체다 — 이 넷만 잠근다.
-const PROTECTED_PATHS = ["/stamp-tour", "/saved", "/profile", "/admin"];
+// AI 코스는 생성 한도(하루 5회)가 계정 기준이라 로그인 없이는 만들 수 없다.
+// 찜 모아보기·프로필·관리자는 계정 그 자체다 — 이 다섯만 잠근다.
+const PROTECTED_PATHS = ["/stamp-tour", "/courses", "/saved", "/profile", "/admin"];
 
 function stripLocale(pathname: string): { locale: string | null; rest: string } {
   const segments = pathname.split("/"); // "/ko/login" → ["", "ko", "login"]
