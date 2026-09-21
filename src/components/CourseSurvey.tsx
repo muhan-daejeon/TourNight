@@ -23,12 +23,47 @@ import { useSavedCourses, toSavedCourse } from "./useSavedCourses";
 import { useCourseEdits, applyEdit } from "./useCourseEdits";
 
 /** 출발지를 직접 고를 때 쓰는 대전 주요 거점 — GPS를 못 쓰거나 거부했을 때 */
+/** 화면에 칩으로 뜨는 출발지 4곳 */
 const ANCHORS = [
   { key: "daejeon", mapX: 127.4344, mapY: 36.3324 },
   { key: "yuseong", mapX: 127.3435, mapY: 36.3546 },
   { key: "dunsan", mapX: 127.3789, mapY: 36.3515 },
   { key: "expo", mapX: 127.3888, mapY: 36.3745 },
 ] as const;
+
+/**
+ * "현재 위치"를 눌렀을 때 GPS 좌표를 바꿔 넣을 거점.
+ *
+ * 이용자의 실제 좌표를 서버로 보내면 위치정보법상 위치기반서비스사업자 신고
+ * 대상이 된다(저장 여부와 무관하게 전송 자체가 기준). 그래서 좌표는 기기 안에서만
+ * 쓰고, 서버에는 가장 가까운 거점의 좌표만 보낸다 — 거점은 대전 곳곳에 두어
+ * 코스 품질은 유지하되, 특정 개인의 위치는 알 수 없게(익명 처리) 한다.
+ * 칩 4곳에 자치구·주요 역을 더해 대전 시내 어디서든 2~3km 안에 거점이 있다.
+ */
+const GPS_ANCHORS = [
+  ...ANCHORS,
+  { key: "seodaejeon", mapX: 127.4029, mapY: 36.3215 }, // 서대전역
+  { key: "daedeok", mapX: 127.4155, mapY: 36.3466 }, // 대덕구 (한밭대교·송촌)
+  { key: "sintanjin", mapX: 127.4315, mapY: 36.4413 }, // 신탄진역
+  { key: "gwanjeo", mapX: 127.3389, mapY: 36.3050 }, // 관저·도안
+  { key: "jungang", mapX: 127.4250, mapY: 36.3270 }, // 중앙로·은행동
+  { key: "kaist", mapX: 127.3623, mapY: 36.3720 }, // 궁동·KAIST
+] as const;
+
+/** 좌표 → 가장 가까운 거점 (위도 1도 ≈ 111km, 경도는 대전 위도에서 cos 보정) */
+function nearestAnchor(lng: number, lat: number): { mapX: number; mapY: number } {
+  const kx = Math.cos((lat * Math.PI) / 180);
+  let best: { mapX: number; mapY: number } = GPS_ANCHORS[0];
+  let bestD = Infinity;
+  for (const a of GPS_ANCHORS) {
+    const d = ((a.mapX - lng) * kx) ** 2 + (a.mapY - lat) ** 2;
+    if (d < bestD) {
+      bestD = d;
+      best = a;
+    }
+  }
+  return best;
+}
 
 const DURATIONS = [60, 120, 180, 240] as const;
 
@@ -201,7 +236,11 @@ export default function CourseSurvey({
   }, [locale]);
   const [mode, setMode] = useState<MapMode>("best");
 
-  /** 브라우저 위치 — 좌표는 코스 계산에만 쓰고 서버에 저장하지 않는다 */
+  /**
+   * 브라우저 위치 — 좌표는 기기 안에서 가장 가까운 거점을 고르는 데만 쓰고,
+   * 서버에는 그 거점 좌표만 간다(GPS_ANCHORS 주석 참고). 실제 좌표는 어디에도
+   * 남기지 않는다.
+   */
   function useMyLocation() {
     if (!navigator.geolocation) {
       setError(t("gpsUnsupported"));
@@ -211,9 +250,10 @@ export default function CourseSurvey({
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLocating(false);
+        const near = nearestAnchor(pos.coords.longitude, pos.coords.latitude);
         setOrigin({
-          mapX: pos.coords.longitude,
-          mapY: pos.coords.latitude,
+          mapX: near.mapX,
+          mapY: near.mapY,
           label: t("myLocation"),
         });
         setError(null);

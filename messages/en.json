@@ -653,7 +653,7 @@
     "q8": "Save time for a late-night bite?",
     "myLocation": "My location",
     "locating": "Locating…",
-    "gpsNote": "Your location is used only to plan the course and is not stored.",
+    "gpsNote": "Your location is used only on your device to pick the nearest starting point; the exact coordinates are never sent to our server.",
     "gpsDenied": "Could not get your location. Please pick a starting point below.",
     "gpsUnsupported": "This browser does not support location.",
     "places": {
