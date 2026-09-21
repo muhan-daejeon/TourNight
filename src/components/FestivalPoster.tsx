@@ -27,8 +27,13 @@ const STATUS_STYLE: Record<string, string> = {
 
 export default function FestivalPoster({
   spot,
+  onClick,
+  active,
 }: {
   spot: NightSpot | FestivalWithPeriod;
+  /** 목록↔지도 연동용 — 있으면 카드 클릭이 지도 핀을 고른다 */
+  onClick?: () => void;
+  active?: boolean;
 }) {
   const t = useTranslations("home");
   const tf = useTranslations("festivals");
@@ -67,6 +72,8 @@ export default function FestivalPoster({
       }
       scene="from-fuchsia-950 via-slate-900 to-rose-950"
       fallbackIcon={Sparkles}
+      onClick={onClick}
+      active={active}
     />
   );
 }

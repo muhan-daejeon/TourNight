@@ -639,7 +639,8 @@
       "invalid_credentials": "이메일 또는 비밀번호가 올바르지 않습니다.",
       "oauth": "Google 로그인에 실패했어요. 다시 시도해주세요.",
       "generic": "잠시 후 다시 시도해주세요."
-    }
+    },
+    "loginRequiredNotice": "로그인 후 이용해 주세요."
   },
   "nightInfo": {
     "sunset": "오늘 일몰",
