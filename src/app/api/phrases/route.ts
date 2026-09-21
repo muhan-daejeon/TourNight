@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "invalid params" }, { status: 400 });
   }
 
-  logActivity((await getSessionUser())?.userId ?? null, "phrases", { locale });
+  const session = await getSessionUser();
+  logActivity(session?.userId ?? null, "phrases", { locale });
 
   const cached = await sql<{ category: string; phrases: Phrase[] }[]>`
     select category, phrases from phrase_book where locale = ${locale}
@@ -24,9 +25,10 @@ export async function GET(request: NextRequest) {
   const book: Record<string, Phrase[]> = {};
   for (const row of cached) book[row.category] = row.phrases;
 
-  // 미생성 카테고리는 그 자리에서 생성해 캐시 (사전생성이 정상이라면 발동 안 함)
+  // 미생성 카테고리는 그 자리에서 생성해 캐시 (사전생성이 정상이라면 발동 안 함).
+  // 생성은 AI 호출이라 로그인한 사람에게만 — 비로그인은 캐시된 것만 본다
   for (const categoryId of Object.keys(PHRASE_CATEGORIES)) {
-    if (book[categoryId]) continue;
+    if (book[categoryId] || !session) continue;
     try {
       const phrases = await generatePhraseCategory(categoryId, locale);
       await sql`

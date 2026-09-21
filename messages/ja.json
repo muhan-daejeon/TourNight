@@ -400,7 +400,8 @@
     "photoSoon": "写真は準備中",
     "learnLater": "あとで",
     "backToTopics": "他の場面を見る",
-    "backToEtiquette": "エチケットに戻る"
+    "backToEtiquette": "エチケットに戻る",
+    "searchLoginRequired": "AI翻訳はログイン後にご利用いただけます。"
   },
   "community": {
     "title": "ナイトコミュニティ",
@@ -487,7 +488,8 @@
     "tagSearch": "行った場所の名前で検索",
     "tagNoMatch": "一致するスポットがありません",
     "tagLimit": "タグは最大{max}個まで",
-    "tagRemove": "タグを外す"
+    "tagRemove": "タグを外す",
+    "translateLoginRequired": "翻訳はログイン後にご利用ください"
   },
   "stampTour": {
     "overline": "STAMP TOUR",

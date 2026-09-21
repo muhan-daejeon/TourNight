@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import {
   Soup,
   Beer,
@@ -47,6 +48,7 @@ function PhraseRow({ p }: { p: Phrase }) {
  */
 export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: boolean }) {
   const t = useTranslations("etiquette");
+  const ta = useTranslations("auth");
   const locale = useLocale();
   const effectiveLocale = locale === "ko" ? "en" : locale;
 
@@ -56,7 +58,7 @@ export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: b
 
   const [query, setQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<
-    "idle" | "loading" | "error" | "done"
+    "idle" | "loading" | "error" | "login" | "done"
   >("idle");
   const [searchResult, setSearchResult] = useState<{
     main: Phrase;
@@ -94,6 +96,11 @@ export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: b
       const res = await fetch(
         `/api/phrases/search?q=${encodeURIComponent(q)}&locale=${effectiveLocale}`,
       );
+      // AI 번역은 회원에게만 — 오류가 아니라 로그인 안내를 보여준다
+      if (res.status === 401) {
+        setSearchStatus("login");
+        return;
+      }
       if (!res.ok) throw new Error();
       setSearchResult(await res.json());
       setSearchStatus("done");
@@ -134,6 +141,14 @@ export default function SurvivalPhrases({ searchOnly = false }: { searchOnly?: b
       )}
       {searchStatus === "error" && (
         <p className="mt-3 text-sm text-red-400">{t("error")}</p>
+      )}
+      {searchStatus === "login" && (
+        <p className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {t("searchLoginRequired")}{" "}
+          <Link href="/login" className="font-bold underline underline-offset-2">
+            {ta("login")}
+          </Link>
+        </p>
       )}
       {searchStatus === "done" && searchResult && (
         <div className="mt-3 overflow-hidden rounded-2xl border border-amber-300">

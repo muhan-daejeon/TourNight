@@ -400,7 +400,8 @@
     "photoSoon": "照片准备中",
     "learnLater": "稍后",
     "backToTopics": "查看其他情境",
-    "backToEtiquette": "返回礼仪指南"
+    "backToEtiquette": "返回礼仪指南",
+    "searchLoginRequired": "AI 翻译需登录后使用。"
   },
   "community": {
     "title": "夜间社区",
@@ -487,7 +488,8 @@
     "tagSearch": "搜索您去过的景点名称",
     "tagNoMatch": "没有匹配的景点",
     "tagLimit": "最多可添加{max}个标签",
-    "tagRemove": "移除标签"
+    "tagRemove": "移除标签",
+    "translateLoginRequired": "登录后可使用翻译"
   },
   "stampTour": {
     "overline": "STAMP TOUR",

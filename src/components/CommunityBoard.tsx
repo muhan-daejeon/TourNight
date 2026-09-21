@@ -338,7 +338,7 @@ function TranslatableBody({
   const locale = useLocale();
   const [translated, setTranslated] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<false | "generic" | "login">(false);
   const [showOriginal, setShowOriginal] = useState(false);
 
   const needsTranslate = detectTextLocale(text) !== locale;
@@ -351,11 +351,16 @@ function TranslatableBody({
       const res = await fetch(
         `/api/community/translate?targetType=${targetType}&targetId=${targetId}&locale=${locale}`,
       );
+      // AI 번역은 회원에게만 — 오류가 아니라 로그인 안내
+      if (res.status === 401) {
+        setError("login");
+        return;
+      }
       if (!res.ok) throw new Error();
       const data = await res.json();
       setTranslated(data.text);
     } catch {
-      setError(true);
+      setError("generic");
     } finally {
       setLoading(false);
     }
@@ -382,8 +387,11 @@ function TranslatableBody({
           {loading ? t("translating") : t("translate")}
         </button>
       )}
-      {error && (
+      {error === "generic" && (
         <span className="ml-1.5 text-[11px] text-rose-400">{t("translateError")}</span>
+      )}
+      {error === "login" && (
+        <span className="ml-1.5 text-[11px] text-amber-700">{t("translateLoginRequired")}</span>
       )}
     </p>
   );
