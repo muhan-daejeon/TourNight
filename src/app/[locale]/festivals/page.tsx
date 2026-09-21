@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getUpcomingFestivals } from "@/lib/festivals";
-import FestivalPoster from "@/components/FestivalPoster";
+import FestivalExplorer from "@/components/FestivalExplorer";
 import PageHero, { PageBody } from "@/components/PageHero";
 
 // 야간 검증 스팟 기준, 1시간 주기로 재생성
@@ -38,11 +38,8 @@ export default async function FestivalsPage({
             {t("empty")}
           </p>
         ) : (
-          // 카드가 명소 탭과 같은 크기라 4열은 사진이 눌린다 — 3열까지만
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {festivals.map((f) => (
-              <FestivalPoster key={f.contentId} spot={f} />
-            ))}
+          <div className="mt-6">
+            <FestivalExplorer festivals={festivals} />
           </div>
         )}
       </PageBody>
