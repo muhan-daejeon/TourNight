@@ -146,7 +146,7 @@ export default function MascotGuide() {
                 aria-label="꿈순이"
               >
                 <Image
-                  src="/menu-panel/ggumsun-space.png"
+                  src="/menu-panel/ggumsun-space1.png"
                   alt="꿈순이"
                   width={584}
                   height={486}
