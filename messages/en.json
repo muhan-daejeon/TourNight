@@ -400,7 +400,8 @@
     "photoSoon": "Photo coming soon",
     "learnLater": "Later",
     "backToTopics": "Back to topics",
-    "backToEtiquette": "Back to etiquette"
+    "backToEtiquette": "Back to etiquette",
+    "searchLoginRequired": "AI translation is available after you log in."
   },
   "community": {
     "title": "Night Community",
@@ -487,7 +488,8 @@
     "tagSearch": "Search the places you visited",
     "tagNoMatch": "No matching spot",
     "tagLimit": "Up to {max} tags",
-    "tagRemove": "Remove tag"
+    "tagRemove": "Remove tag",
+    "translateLoginRequired": "Log in to translate"
   },
   "stampTour": {
     "overline": "STAMP TOUR",

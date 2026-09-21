@@ -400,7 +400,8 @@
     "photoSoon": "사진 준비 중",
     "learnLater": "나중에",
     "backToTopics": "다른 상황 보기",
-    "backToEtiquette": "에티켓으로 돌아가기"
+    "backToEtiquette": "에티켓으로 돌아가기",
+    "searchLoginRequired": "AI 번역은 로그인 후 이용할 수 있어요."
   },
   "community": {
     "title": "야간 커뮤니티",
@@ -487,7 +488,8 @@
     "tagSearch": "다녀온 명소 이름을 검색해보세요",
     "tagNoMatch": "맞는 명소가 없어요",
     "tagLimit": "태그는 최대 {max}개까지예요",
-    "tagRemove": "태그 빼기"
+    "tagRemove": "태그 빼기",
+    "translateLoginRequired": "번역은 로그인 후 이용할 수 있어요"
   },
   "stampTour": {
     "overline": "STAMP TOUR",

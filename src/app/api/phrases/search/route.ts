@@ -14,7 +14,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "invalid params" }, { status: 400 });
   }
 
-  logActivity((await getSessionUser())?.userId ?? null, "phrase_search", {
+  // AI 를 쓰는 기능은 로그인이 있어야 한다 — 번역 한 건마다 Gemini 호출이라
+  // 아무나 무한히 돌리게 둘 수 없고, 팀 방침이 "AI 요소는 회원에게만"이다
+  const session = await getSessionUser();
+  if (!session) {
+    return NextResponse.json({ error: "login_required" }, { status: 401 });
+  }
+
+  logActivity(session.userId, "phrase_search", {
     query: q.slice(0, 60),
     locale,
   });

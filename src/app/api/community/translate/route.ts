@@ -19,6 +19,12 @@ import { logActivity } from "@/lib/activity";
  * DB 캐시에서 바로 돌려준다.
  */
 export async function GET(request: NextRequest) {
+  // 번역은 AI 호출 — 회원에게만
+  const session = await getSessionUser();
+  if (!session) {
+    return NextResponse.json({ error: "login_required" }, { status: 401 });
+  }
+
   const targetType = request.nextUrl.searchParams.get("targetType");
   const targetId = Number(request.nextUrl.searchParams.get("targetId"));
   const locale = request.nextUrl.searchParams.get("locale") ?? "";
@@ -46,7 +52,7 @@ export async function GET(request: NextRequest) {
   try {
     const translated = await translateCommunityText(original, locale);
     await setCachedTranslation(targetType, targetId, locale, translated);
-    logActivity((await getSessionUser())?.userId ?? null, "community_translate", {
+    logActivity(session.userId, "community_translate", {
       targetType,
       targetId,
       locale,

@@ -60,6 +60,12 @@ async function relatedSpots(topicId: string, locale: string): Promise<RelatedSpo
 }
 
 export async function GET(request: NextRequest) {
+  // 가이드 생성은 AI 호출 — 회원에게만
+  const session = await getSessionUser();
+  if (!session) {
+    return NextResponse.json({ error: "login_required" }, { status: 401 });
+  }
+
   const topicId = request.nextUrl.searchParams.get("topic") ?? "";
   const locale = request.nextUrl.searchParams.get("locale") ?? "en";
 
@@ -67,7 +73,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "invalid params" }, { status: 400 });
   }
 
-  logActivity((await getSessionUser())?.userId ?? null, "etiquette", {
+  logActivity(session.userId, "etiquette", {
     topic: topicId,
     locale,
   });
